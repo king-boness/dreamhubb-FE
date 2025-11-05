@@ -1,0 +1,109 @@
+// $text-max-length: 10; // set the maximum length of the text
+
+// .postComponent {
+
+//   height: 19rem;
+//   border-radius: 1rem;
+//   width: 22rem;
+//   color: $white;
+
+//   .componentBackground {
+//     display: flex;
+//     padding: 01rem;
+//     background-repeat: no-repeat;
+//     background-size: auto;
+//     border-top-left-radius: 1rem;
+//     border-top-right-radius: 1rem;
+//     height: 12.5rem;
+//     .profileSection {
+//       background: linear-gradient(
+//         108.46deg,
+//         rgba(0, 0, 0, 0.441) 1%,
+//         rgba(23, 23, 23, 0.599) 100%
+//       );
+//       border-radius: 1.1rem;
+//       width: 9.2rem;
+//       height: 2.8rem;
+//       padding: 0.2rem;
+//       display: flex;
+//       align-items: center;
+//       .profileImg {
+//         height: 2.2rem;
+//         width: 2.2rem;
+//         border-radius: 1.5rem;
+//         margin-left: 0.2rem;
+//       }
+//       .badgeImg {
+//         height: 1rem;
+//         width: 1rem;
+//         margin-left: 0.6rem;
+//         margin-right: 0.4rem;
+//       }
+//       .profileText {
+//         margin-right: 0.7rem;
+//         color: $white;
+//         font-weight: bold;
+//         font-size: 0.9rem;
+//         white-space: nowrap; // prevent line breaks
+//         overflow: hidden; // hide the text that exceeds the maximum length
+//         text-overflow: ellipsis; // add an ellipsis to indicate truncated text
+//         max-width: #{$text-max-length}ch; // set the maximum width based on the maximum length
+//       }
+//     }
+//     .goal {
+//       margin-top: 8rem;
+//       margin-left: -9rem;
+//       background: linear-gradient(
+//         108.46deg,
+//         rgba(0, 0, 0, 0.801) 1%,
+//         rgba(23, 23, 23, 0.487) 100%
+//       );
+//       padding: 0.7rem;
+//       border-radius: 0.7rem;
+//       width: 10rem;
+//       height: 2.8rem;
+//       display: flex;
+//       align-items: center;
+//       .goalImg {
+//         height: 1rem;
+//         width: 1rem;
+//         margin-right: 0.4rem;
+//       }
+//       .goalText {
+//         font-weight: bold;
+//         font-size: 1rem;
+//       }
+//     }
+//     .karma {
+//       margin-top: 8rem;
+//       margin-left: 5rem;
+//       padding: 0.7rem;
+//       border-radius: 0.7rem;
+//       width: 80%;
+//       height: 2.8rem;
+//       display: flex;
+//       align-items: center;
+//       background: linear-gradient(
+//         108.46deg,
+//         rgba(0, 0, 0, 0.801) 1%,
+//         rgba(23, 23, 23, 0.487) 100%
+//       );
+//       .karmaImg {
+//         height: 1.5rem;
+//         width: 1.5rem;
+//         margin-right: 0.4rem;
+//       }
+//       .karmaText {
+//         font-weight: bolder;
+//         font-size: 1rem;
+//         color: $primary;
+//       }
+//     }
+//   }
+//   .descriptionSection {
+//     font-size: 1rem;
+//     text-align: start;
+//     padding: 0.9rem;
+//     padding-left: 2rem;
+//   }
+// }

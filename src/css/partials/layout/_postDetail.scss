@@ -1,0 +1,95 @@
+.postDetail {
+
+  .detailIconDiv {
+    width: 100%;
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: space-evenly;
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    .detailIconDivRight {
+      margin-left: 12rem;
+    }
+  }
+  .postDetailBg {
+    position: relative;
+    height: 37rem;
+    .postDetail-img {
+      width: 100%;
+      height: 100%;
+    }
+    .postDetailInformations {
+
+    position: absolute;
+    top: 85.5%;
+    z-index: 11;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 1.2rem;
+
+      .postGoal {
+        display: flex;
+        align-items: center;
+
+        .postGoalText {
+          margin-left: 0.8rem;
+          font-size: 1.4rem;
+          color: white;
+        }
+        .postGoalImg {
+          height: 1.2rem;
+
+        }
+      }
+    }
+  }
+  .postDetails {
+
+    width: 100%;
+    padding: 0.7rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.3rem;
+
+    color: white;
+    .postCloserInfo {
+      display: flex;
+      align-items: center;
+      // justify-content: space-between;
+      .postDatas {
+        font-size: 1rem;
+        margin-left: 0.4rem;
+      }
+    }
+  }
+  .aboutPost {
+
+
+    padding: 1.5rem;
+
+    color: white;
+    .reportProblem {
+      margin-top: 1.2rem;
+      display: flex;
+      align-items: center;
+    }
+    .aboutDonne {
+      margin-top: 2rem;
+      .doneeProfile {
+        display: flex;
+        align-items: center;
+        .doneeProfilePicture {
+          height: 3rem;
+          border-radius: 2rem;
+          margin-right: 0.7rem;
+        }
+        margin-top: -1rem;
+        margin-bottom: 1rem;
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+@import '../base/typography';
+
+button{
+  font-family: montseraat;
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-weight: 600;
+  
+}
+.centerDiv{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.q-btn {
+    width: 100%;
+  }
+  .register-btn,.sign-button{
+    background-color: rgba(182, 0, 67, 1);
+    height: 2.5rem;
+    border-radius: .3rem;
+  }
+  .register-btn{
+    background-color: rgba(189, 0, 67, 0.2);
+    color: rgba(182, 0, 67, 1)
+  }
+.arrowBtn-back{
+@include arrowButtton(135deg,none,$white);
+}
+
+.arrowBtn-next{
+@include arrowButtton(312deg,$primary,$primary);
+a{
+  padding-right: .7rem;
+;
+}
+}
+
+.buttonRegister{
+  width: 21rem;
+  height: 2.5rem;
+  border-radius: .3rem;
+  margin-bottom: 1rem;
+}
+.filterBtnDiv{
+  padding: 1rem .5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  .filterBtn{
+    color: white;
+    background: linear-gradient(108.46deg, rgba(255, 255, 255, 0.264) 0%, rgba(255, 255, 255, 0.16) 100%);
+    border-radius: .5rem;
+    width:100% !important;
+  }
+}
+
+.applyBtnDiv{
+  padding: 1.6rem;
+  button{
+    background-color: rgba(182, 0, 67, 1);
+    color: white;
+    border: none;
+    font-size: 1rem;
+    height: 3.4rem;
+  }
+}
+.postDetailButton{
+  @extend .applyBtnDiv;
+  display: flex;
+  align-items: center;
+  border-radius: .5rem;
+  width: 15.9rem;
+  height: 3.7rem !important;
+  margin-right:.5rem;
+
+  img{
+    margin-right: .4rem;
+  }
+}
+.giftButton{
+background: linear-gradient(90deg, rgb(30, 30, 30) 0%, rgba(47, 47, 47, 0.992) 100%);
+background-color: transparent !important;
+padding: 1rem;
+border-radius: 0.5rem;
+width: 4rem;
+height: 3.7rem !important;
+}

@@ -1,0 +1,439 @@
+## Capacitor Plugins
+
+### @capacitor
+- **app@5.0.6**
+- **haptics@5.0.6**
+- **keyboard@5.0.6**
+- **status-bar@5.0.6**
+## Cordova Plugins
+
+## Dependencies
+
+### @capacitor
+- **android@5.2.3** - (Latest 5.3.0)
+- **cli@5.2.3** - (Latest 5.3.0)
+- **core@5.2.3** - (Latest 5.3.0)
+- **ios@5.2.3** - (Latest 5.3.0)
+### @egjs
+- **flicking-plugins@4.7.0** - (Latest 4.7.1)
+- **vue3-flicking@4.10.7** - (Latest 4.11.0)
+### @fortawesome
+- **fontawesome-svg-core@6.4.0** - (Latest 6.4.2)
+### @intlify
+- **vite-plugin-vue-i18n@3.4.0** - (Latest 7.0.0)
+### @quasar
+- **app-vite@1.2.1** - (Latest 1.5.1)
+- **extras@1.16.2** - (Latest 1.16.6)
+### @types
+- **node@12.20.55** - (Latest 20.6.0)
+### @typescript-eslint
+- **eslint-plugin@5.57.0** - (Latest 6.6.0)
+- **parser@5.57.0** - (Latest 6.6.0)
+### @vue
+- **devtools@6.5.0**
+### @vueuse
+- **core@10.1.2** - (Latest 10.4.1)
+- **integrations@10.1.2** - (Latest 10.4.1)
+### Other Dependencies
+- **add@2.0.6**
+- **animejs@3.2.1**
+- **autoprefixer@10.4.14** - (Latest 10.4.15)
+- **axios@1.3.4** - (Latest 1.5.0)
+- **cordova@12.0.0**
+- **eslint@8.36.0** - (Latest 8.49.0)
+- **eslint-config-standard@17.0.0** - (Latest 17.1.0)
+- **eslint-plugin-import@2.27.5** - (Latest 2.28.1)
+- **eslint-plugin-n@15.6.1** - (Latest 16.0.2)
+- **eslint-plugin-promise@6.1.1**
+- **eslint-plugin-vue@9.10.0** - (Latest 9.17.0)
+- **hammerjs@2.0.8**
+- **jwt-decode@3.1.2**
+- **lottie-web@5.12.2**
+- **pinia@2.0.33** - (Latest 2.1.6)
+- **plugin@0.0.15** - (Latest 0.3.3)
+- **quasar@2.11.10** - (Latest 2.12.6)
+- **swiper@9.4.1** - (Latest 10.2.0)
+- **typescript@4.9.5** - (Latest 5.2.2)
+- **vue@3.2.47** - (Latest 3.3.4)
+- **vue-i18n@9.2.2** - (Latest 9.3.0)
+- **vue-router@4.1.6** - (Latest 4.2.4)
+- **vue3-insta-stories@0.1.0**
+
+
+## Nonstandard naming
+The following files and folders do not follow the standard naming convention:
+
+- /App.vue
+- /assets/Auth/Hand-tokens.png
+- /assets/Auth/Hands-Exchange.png
+- /assets/Auth/Hands-Give.png
+- /assets/Auth/Hands-Grip.png
+- /assets/Auth/Hands-Point.png
+- /assets/Auth/Hands-Show.png
+- /assets/Auth/Hands-star.png
+- /assets/Auth/PostDetailBg.png
+- /assets/Auth/Splash Screen.png
+- /assets/Auth/WhiteHands-Show.png
+- /assets/Auth/bg-explain.png
+- /assets/Auth/bg-login.png
+- /assets/Auth/body-light.png
+- /assets/Auth/effect-explain.png
+- /assets/Auth/events.png
+- /assets/Auth/footer-light.png
+- /assets/Auth/goalPicture.png
+- /assets/Auth/handShow-image.svg
+- /assets/Auth/handsExchange-image.svg
+- /assets/Auth/handsGive-image.svg
+- /assets/Auth/handsGrip-image.svg
+- /assets/Auth/handsPoint-image.svg
+- /assets/Auth/header-light.png
+- /assets/Auth/inspirationImg.jpg
+- /assets/Auth/islandImg.png
+- /assets/Auth/login-background.jpg
+- /assets/Auth/map-image.svg
+- /assets/Auth/map.png
+- /assets/Auth/plus-solid.svg
+- /assets/Auth/possesions.png
+- /assets/Auth/postBackground.png
+- /assets/Auth/profession.png
+- /assets/Auth/profilePicture.jpeg
+- /assets/Auth/question-icon.svg
+- /assets/Auth/registerMap.png
+- /assets/Auth/splash-dark.json
+- /assets/Auth/surgeryImg.png
+- /assets/Auth/swipingIcon.svg
+- /assets/Auth/teslaImg.png
+- /assets/Auth/tokenButton.png
+- /assets/Auth/uploadImg-icon.svg
+- /assets/Icons/AddDreamIcon.svg
+- /assets/Icons/AddImageIcon.png
+- /assets/Icons/Badges/dreamer.svg
+- /assets/Icons/Badges/guard.svg
+- /assets/Icons/Badges/safeguard.svg
+- /assets/Icons/Badges/verified.svg
+- /assets/Icons/CategoryIcons/Donee.png
+- /assets/Icons/CategoryIcons/donees.png
+- /assets/Icons/CategoryIcons/donor.png
+- /assets/Icons/CategoryIcons/dream.png
+- /assets/Icons/CategoryIcons/dreamPost-icon.svg
+- /assets/Icons/CategoryIcons/idea.png
+- /assets/Icons/CategoryIcons/learning.png
+- /assets/Icons/CategoryIcons/possesions.png
+- /assets/Icons/CategoryIcons/problem.png
+- /assets/Icons/CategoryIcons/relationships.png
+- /assets/Icons/CategoryIcons/traveling.png
+- /assets/Icons/CategoryIcons/travellingPost-icon.svg
+- /assets/Icons/DonorSwitchIcon.svg
+- /assets/Icons/ExploreIcon.svg
+- /assets/Icons/KarmaIcon.png
+- /assets/Icons/NotificationIcon.svg
+- /assets/Icons/SearchIcon.png
+- /assets/Icons/SearchIcon.svg
+- /assets/Icons/WhiteKarmaIcon.svg
+- /assets/Icons/aboutIcon.svg
+- /assets/Icons/accomplishIcon.svg
+- /assets/Icons/accomplishedButton-icon.svg
+- /assets/Icons/accomplishedDream-image.png
+- /assets/Icons/accomplishedIcon.svg
+- /assets/Icons/addBadge-icon.svg
+- /assets/Icons/addImg-icon.svg
+- /assets/Icons/arrowBack-icon.svg
+- /assets/Icons/arrowButton-icon.svg
+- /assets/Icons/arrowIcon.svg
+- /assets/Icons/arrowLeft-icon.svg
+- /assets/Icons/arrowRightIcon.svg
+- /assets/Icons/arrowUpIcon.svg
+- /assets/Icons/arrowUpWhite-icon.svg
+- /assets/Icons/banIcon.svg
+- /assets/Icons/bioIcon.svg
+- /assets/Icons/byHelp-icon.svg
+- /assets/Icons/byHelpHeart-icon.svg
+- /assets/Icons/byPay-icon.svg
+- /assets/Icons/byTop-icon.svg
+- /assets/Icons/calendarIcon.svg
+- /assets/Icons/carousel-bg.png
+- /assets/Icons/carouselNav-activeIcon.png
+- /assets/Icons/carouselNav-icon.png
+- /assets/Icons/china.png
+- /assets/Icons/closeIcon.svg
+- /assets/Icons/cloudIcon.svg
+- /assets/Icons/complitedTask.svg
+- /assets/Icons/crownBadge-icon.svg
+- /assets/Icons/czech-republic.png
+- /assets/Icons/darkMode-icon.svg
+- /assets/Icons/date-icon.svg
+- /assets/Icons/deleteImg-icon.svg
+- /assets/Icons/denmark.png
+- /assets/Icons/diamondBadge-icon.svg
+- /assets/Icons/doneeLogo 2.svg
+- /assets/Icons/doneeLogo.svg
+- /assets/Icons/dreamerBadge-icon.svg
+- /assets/Icons/earnIcon.svg
+- /assets/Icons/emailIcon.svg
+- /assets/Icons/emeraldBadge-icon.svg
+- /assets/Icons/events-icon.svg
+- /assets/Icons/exploreIcon.png
+- /assets/Icons/favouriteIcon.svg
+- /assets/Icons/filterHelp-icon.svg
+- /assets/Icons/filterIcon.png
+- /assets/Icons/finland.png
+- /assets/Icons/france.png
+- /assets/Icons/fundsIcon.svg
+- /assets/Icons/germany.png
+- /assets/Icons/giftIcon-red.svg
+- /assets/Icons/giftIcon.svg
+- /assets/Icons/grabIcon.svg
+- /assets/Icons/guardBadge-icon.svg
+- /assets/Icons/health-icon.svg
+- /assets/Icons/health.png
+- /assets/Icons/heartIcon.svg
+- /assets/Icons/helpComments-icon.svg
+- /assets/Icons/helpIcon.svg
+- /assets/Icons/history-icon.svg
+- /assets/Icons/homeIcon.png
+- /assets/Icons/homeIcon.svg
+- /assets/Icons/ideaIcon.svg
+- /assets/Icons/india.png
+- /assets/Icons/italy.png
+- /assets/Icons/japan-flag.png
+- /assets/Icons/karma-icon.svg
+- /assets/Icons/karmaIcon-1000.svg
+- /assets/Icons/karmaIcon-10000.svg
+- /assets/Icons/karmaIcon-2000.svg
+- /assets/Icons/karmaIcon-500.svg
+- /assets/Icons/karmaIcon-5000.svg
+- /assets/Icons/keyIcon.svg
+- /assets/Icons/langIcon.svg
+- /assets/Icons/languageIconSK.png
+- /assets/Icons/languageIconUK.png
+- /assets/Icons/languageIconUS.png
+- /assets/Icons/learning-icon.svg
+- /assets/Icons/lightMode-icon.svg
+- /assets/Icons/location-icon.svg
+- /assets/Icons/locationIcon.svg
+- /assets/Icons/logo.svg
+- /assets/Icons/messageIcon.svg
+- /assets/Icons/navigation-icon.svg
+- /assets/Icons/navigationActive-icon.svg
+- /assets/Icons/norway.png
+- /assets/Icons/notificationIcon.png
+- /assets/Icons/onBoarding-img.png
+- /assets/Icons/onGoingIcon.svg
+- /assets/Icons/optionIcon.png
+- /assets/Icons/others-icon.svg
+- /assets/Icons/patronBadge-icon.svg
+- /assets/Icons/pay-icon.svg
+- /assets/Icons/photoSettingIcon.svg
+- /assets/Icons/possesion-icon.svg
+- /assets/Icons/privacyIcon.svg
+- /assets/Icons/privateConnect-icon.svg
+- /assets/Icons/problemIcon.svg
+- /assets/Icons/proffesion-icon.svg
+- /assets/Icons/question-icon.svg
+- /assets/Icons/questionIcon.svg
+- /assets/Icons/redCloudIcon.svg
+- /assets/Icons/redGiftIcon.svg
+- /assets/Icons/redHelpIcon.svg
+- /assets/Icons/redPlus-icon.svg
+- /assets/Icons/redStart-icon.svg
+- /assets/Icons/relationship-icon.svg
+- /assets/Icons/reportIcon.svg
+- /assets/Icons/russia-2.png
+- /assets/Icons/send-icon.svg
+- /assets/Icons/settingsIcon.svg
+- /assets/Icons/shareIcon.svg
+- /assets/Icons/sliderHand.png
+- /assets/Icons/sliderHand.svg
+- /assets/Icons/spain.png
+- /assets/Icons/starIcon.svg
+- /assets/Icons/statsIcon.svg
+- /assets/Icons/submitQuestion-icon.svg
+- /assets/Icons/supportIcon.svg
+- /assets/Icons/sweden.png
+- /assets/Icons/taskTrophy.svg
+- /assets/Icons/top-icon.svg
+- /assets/Icons/topIcon-red.svg
+- /assets/Icons/topUpDream-birdImg 2.png
+- /assets/Icons/topUpDream-birdImg.png
+- /assets/Icons/topUpDream-gradientBg.png
+- /assets/Icons/topUpDream-icon.svg
+- /assets/Icons/travelling-icon.svg
+- /assets/Icons/ukraine.png
+- /assets/Icons/uploadImg-icon.svg
+- /assets/Icons/viewIcon.svg
+- /assets/Icons/wheelIcon.png
+- /assets/Icons/wheelIcon.svg
+- /assets/fonts/Inter/Inter-VariableFont_slnt,wght.ttf
+- /assets/fonts/Inter/OFL.txt
+- /assets/fonts/Inter/README.txt
+- /assets/fonts/Inter/static/Inter-Black.ttf
+- /assets/fonts/Inter/static/Inter-Bold.ttf
+- /assets/fonts/Inter/static/Inter-ExtraBold.ttf
+- /assets/fonts/Inter/static/Inter-ExtraLight.ttf
+- /assets/fonts/Inter/static/Inter-Light.ttf
+- /assets/fonts/Inter/static/Inter-Medium.ttf
+- /assets/fonts/Inter/static/Inter-SemiBold.ttf
+- /assets/fonts/Inter/static/Inter-Thin.ttf
+- /assets/fonts/Inter-Regular.ttf
+- /assets/fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf
+- /assets/fonts/Montserrat/Montserrat-VariableFont_wght.ttf
+- /assets/fonts/Montserrat/OFL.txt
+- /assets/fonts/Montserrat/static/Montserrat-Black.ttf
+- /assets/fonts/Montserrat/static/Montserrat-BlackItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-BoldItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-ExtraBold.ttf
+- /assets/fonts/Montserrat/static/Montserrat-ExtraBoldItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-ExtraLight.ttf
+- /assets/fonts/Montserrat/static/Montserrat-ExtraLightItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-Italic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-Light.ttf
+- /assets/fonts/Montserrat/static/Montserrat-LightItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-Medium.ttf
+- /assets/fonts/Montserrat/static/Montserrat-MediumItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-SemiBoldItalic.ttf
+- /assets/fonts/Montserrat/static/Montserrat-Thin.ttf
+- /assets/fonts/Montserrat/static/Montserrat-ThinItalic.ttf
+- /assets/fonts/Montserrat-Bold 2.ttf
+- /assets/fonts/Montserrat-Bold.ttf
+- /assets/fonts/Montserrat-Regular.ttf
+- /assets/fonts/Montserrat-SemiBold.ttf
+- /assets/fonts/Poppins/OFL.txt
+- /assets/fonts/Poppins/Poppins-Black.ttf
+- /assets/fonts/Poppins/Poppins-BlackItalic.ttf
+- /assets/fonts/Poppins/Poppins-BoldItalic.ttf
+- /assets/fonts/Poppins/Poppins-ExtraBold.ttf
+- /assets/fonts/Poppins/Poppins-ExtraBoldItalic.ttf
+- /assets/fonts/Poppins/Poppins-ExtraLight.ttf
+- /assets/fonts/Poppins/Poppins-ExtraLightItalic.ttf
+- /assets/fonts/Poppins/Poppins-Italic.ttf
+- /assets/fonts/Poppins/Poppins-Light.ttf
+- /assets/fonts/Poppins/Poppins-LightItalic.ttf
+- /assets/fonts/Poppins/Poppins-MediumItalic.ttf
+- /assets/fonts/Poppins/Poppins-SemiBoldItalic.ttf
+- /assets/fonts/Poppins/Poppins-Thin.ttf
+- /assets/fonts/Poppins/Poppins-ThinItalic.ttf
+- /assets/fonts/Poppins-Bold.ttf
+- /assets/fonts/Poppins-Medium.ttf
+- /assets/fonts/Poppins-Regular.ttf
+- /assets/fonts/Poppins-SemiBold.ttf
+- /components/EssentialLink.vue
+- /components/ExampleComponent.vue
+- /components/doneeComponents/FooterDoneeComponent.vue
+- /components/doneeComponents/HeaderDoneeComponent.vue
+- /components/doneeComponents/MyProfileFilterComponent.vue
+- /components/doneeComponents/PostComponent.vue
+- /components/doneeComponents/UserProfileHeaderComponent.vue
+- /components/partials/BadgeSwiperComponent.vue
+- /components/partials/CommentComponent.vue
+- /components/partials/CommentsFilterCcomponent.vue
+- /components/partials/CustomThumb.vue
+- /components/partials/DonationComponent.vue
+- /components/partials/DreamsComponent.vue
+- /components/partials/ExplainerComponent.vue
+- /components/partials/FilterComponent.vue
+- /components/partials/FilterSearchComponent.vue
+- /components/partials/FooterComponent.vue
+- /components/partials/FunctionsComponent.vue
+- /components/partials/HeaderComponent.vue
+- /components/partials/ImageIndexSlider.vue
+- /components/partials/InspirationComponent.vue
+- /components/partials/MyProfileHeaderComponent.vue
+- /components/partials/NotificationComponent.vue
+- /components/partials/PostComponent.vue
+- /components/partials/PostFilterComponent.vue
+- /components/partials/ProfileDonationsComponent.vue
+- /components/partials/ProfileDreamsComponent.vue
+- /components/partials/ProfileReviewsComponent.vue
+- /components/partials/ReviewComponent.vue
+- /components/partials/SearchHistoryComponent.vue
+- /components/partials/SearchTopicComponent.vue
+- /components/partials/SettingsHeaderComponent.vue
+- /components/partials/StatsFilterComponent.vue
+- /components/partials/StorieShowComponent.vue
+- /components/partials/StoriesSliderComponent.vue
+- /components/partials/SwipeDrawerComponent.vue
+- /components/partials/SwiperComponent.vue
+- /components/partials/UploadImgComponent.vue
+- /components/partials/UploadPostImgComponent.vue
+- /components/partials/UserProfileDetailsComponent.vue
+- /components/partials/UserProfileHeaderComponent.vue
+- /css/partials/components/_filterComponent.scss
+- /css/partials/components/_navbarMain.scss
+- /css/partials/components/_registrationAvatar.scss
+- /css/partials/layout/_explainerPage.scss
+- /css/partials/layout/_postDetail.scss
+- /css/partials/layout/_registerPage.scss
+- /i18n/en-US/auth.ts
+- /i18n/en-US/index.ts
+- /layouts/Auth/ExplainersLayout.vue
+- /layouts/Auth/LandingLayout.vue
+- /layouts/Auth/RegisterLayout.vue
+- /layouts/Donee/DoneeMainLayout.vue
+- /layouts/Donee/SubmitLayout.vue
+- /layouts/Donor/DonorMainLayout.vue
+- /layouts/OnBoarding/OnBoardingLayout.vue
+- /pages/Auth/Explainers/ExplainersPage1.vue
+- /pages/Auth/Explainers/ExplainersPage2.vue
+- /pages/Auth/Explainers/ExplainersPage3.vue
+- /pages/Auth/Explainers/ExplainersPage4.vue
+- /pages/Auth/Explainers/ExplainersPage5.vue
+- /pages/Auth/LandingPage.vue
+- /pages/Auth/LoginPage.vue
+- /pages/Auth/OnBoarding/OnBoardingPage1.vue
+- /pages/Auth/OnBoarding/OnBoardingPage2.vue
+- /pages/Auth/OnBoarding/OnBoardingPage3.vue
+- /pages/Auth/OnBoarding/OnBoardingPage4.vue
+- /pages/Auth/Registration/RegistrationPage1.vue
+- /pages/Auth/Registration/RegistrationPage2.vue
+- /pages/Auth/Registration/RegistrationPage3.vue
+- /pages/Auth/Registration/RegistrationPage4.vue
+- /pages/Auth/Registration/RegistrationPage5.vue
+- /pages/Auth/SplashScreenPage.vue
+- /pages/DoneePages/AccomplishedDreamPage.vue
+- /pages/DoneePages/DonatorReviewPage.vue
+- /pages/DoneePages/DreamDetailPage.vue
+- /pages/DoneePages/MyProfilePage.vue
+- /pages/DoneePages/PostCreationPage.vue
+- /pages/DoneePages/PostPage.vue
+- /pages/DoneePages/SearchPage.vue
+- /pages/DoneePages/TopDreamPage.vue
+- /pages/DoneePages/UserProfilePage.vue
+- /pages/DonorPages/AppSettingsPage.vue
+- /pages/DonorPages/EarnPage.vue
+- /pages/DonorPages/HelpPage.vue
+- /pages/DonorPages/InspirationsPage.vue
+- /pages/DonorPages/MyProfileDonationsPage.vue
+- /pages/DonorPages/MyProfileDreamsPage.vue
+- /pages/DonorPages/MyProfileIdeasPage.vue
+- /pages/DonorPages/MyProfilePage.vue
+- /pages/DonorPages/MyProfileProblemsPage.vue
+- /pages/DonorPages/MyProfileReviewsPage.vue
+- /pages/DonorPages/NotificationsPage.vue
+- /pages/DonorPages/PostDetailPage.vue
+- /pages/DonorPages/PostsPage.vue
+- /pages/DonorPages/ResetEmailPage.vue
+- /pages/DonorPages/ResetPasswordPage.vue
+- /pages/DonorPages/SearchPage.vue
+- /pages/DonorPages/SettingsAboutPage.vue
+- /pages/DonorPages/SettingsBanPage.vue
+- /pages/DonorPages/SettingsBioPage.vue
+- /pages/DonorPages/SettingsEmailPage.vue
+- /pages/DonorPages/SettingsFaqPage.vue
+- /pages/DonorPages/SettingsLanguagePage.vue
+- /pages/DonorPages/SettingsPasswordPage.vue
+- /pages/DonorPages/SettingsPrivacyPage.vue
+- /pages/DonorPages/SettingsReportPage.vue
+- /pages/DonorPages/SettingsSupportPage.vue
+- /pages/DonorPages/StatsPage.vue
+- /pages/DonorPages/TokenShopPage.vue
+- /pages/DonorPages/TokensOnboardingPage.vue
+- /pages/DonorPages/TokensPage.vue
+- /pages/DonorPages/UserProfileDonationsPage.vue
+- /pages/DonorPages/UserProfileDreamsPage.vue
+- /pages/DonorPages/UserProfileIdeasPage.vue
+- /pages/DonorPages/UserProfilePage.vue
+- /pages/DonorPages/UserProfileProblemsPage.vue
+- /pages/DonorPages/UserProfileReviewsPage.vue
+- /pages/ErrorNotFound.vue
+- /pages/SubmitProcess/SubmitPage1.vue
+- /pages/SubmitProcess/SubmitPage2.vue

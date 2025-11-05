@@ -1,0 +1,593 @@
+.body--light {
+  // Donor Layout
+  .LayoutBackground {
+    background-image: url("/images/Auth/body-light.png") !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+
+    .navbar {
+      background-color: rgb(238, 238, 238);
+      background-image: none !important;
+    }
+  }
+  span,
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: black !important;
+  }
+  .passwordPage-input,
+  .emailPage-input,
+  .bioPage-input {
+    border: 0.08rem solid rgba(49, 49, 49, 0.661) !important;
+    * {
+      color: #0f0026 !important;
+    }
+  }
+  .q-btn:before {
+    box-shadow: none !important;
+  }
+  .passwordPage-forgotPasswordLink {
+    color: #0f0026;
+  }
+  .settingsPrivacy {
+    border-bottom: 0.1rem solid rgba(0, 0, 0, 0.348) !important;
+  }
+  .arrowBtn {
+    * {
+      fill: #0f0026;
+    }
+  }
+  .myProfile-nameDiv {
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(200, 200, 200, 0.4) 100%
+    ) !important;
+  }
+  .userProfile-settingShareBtn {
+    background: linear-gradient(
+      108deg,
+      rgba(219, 219, 219, 0.464) 0%,
+      rgba(200, 200, 200, 0.768) 100%
+    ) !important;
+    img {
+      filter: invert(100%);
+    }
+  }
+  .user-closerDetail {
+    img {
+      filter: invert(100%);
+    }
+  }
+  .userProfile-settingSettingsBtn {
+    * {
+      color: $primary !important;
+    }
+  }
+  .onBoarding-description,
+  .reportDreamLink,
+  .postReward {
+    color: #0f0026 !important;
+  }
+  .buy-btn {
+    * {
+      color: white !important;
+    }
+  }
+  .tutorial-btn {
+    * {
+      color: $primary !important;
+    }
+  }
+  .tokenShop-card {
+    background: none !important;
+    border: 0.1rem solid #0f0026;
+  }
+  .karmaAvailable-stats {
+    background: none !important;
+  }
+  .karmaGainedCard {
+    background: rgba(15, 0, 38, 0.05) !important;
+  }
+  .usedOnStats {
+    background: rgba(15, 0, 38, 0.05) !important;
+  }
+  .usedOnStats-spendingSelect {
+    border: 0.1rem solid #0f0026 !important;
+  }
+  .task-earn {
+    background: rgba(15, 0, 38, 0.05) !important;
+  }
+  .q-tab {
+    * {
+      fill: black;
+      color: black;
+    }
+  }
+  .storiesComponent {
+    border-bottom: 0.05rem solid rgb(0, 0, 0);
+  }
+  .usedOnStats-spendingIcon,
+  .usedOnStats-dropdownSpendingIcon {
+    * {
+      filter: invert(100%) !important;
+    }
+  }
+  .myProfile-imgBtn,
+  .dreamDetail-buttonBack {
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.56) 0%,
+      rgba(255, 255, 255, 0.7) 100%
+    ) !important;
+    img {
+      filter: invert(100%);
+    }
+  }
+  .myProfile-nameDiv {
+    img {
+      filter: invert(100%);
+    }
+  }
+  .onGoingTab {
+    svg {
+      * {
+        stroke: #0f0026;
+      }
+    }
+  }
+  .myProfile-headerBtn,
+  .userProfile-headerBtn {
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.56) 0%,
+      rgba(255, 255, 255, 0.7) 100%
+    ) !important;
+    img {
+      filter: invert(100%);
+    }
+  }
+  .PostDetail-btn {
+    * {
+      fill: #0f0026;
+    }
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(221, 221, 221, 0.7) 100%,
+      rgba(200, 200, 200, 0.7) 100%
+    ) !important;
+  }
+  .applyBtnDiv,
+  .confirmButton {
+    * {
+      color: white !important;
+    }
+  }
+  .input-fields {
+    .registerDatas {
+      background: rgba(15, 0, 38, 0.1);
+      * {
+        color: black !important;
+      }
+    }
+  }
+  .filter {
+    .categoryTitle {
+      color: $primary;
+    }
+  }
+  .appSettings-deleteButton{
+    *{
+      color: $primary !important;
+    }
+    background-color: rgba(170, 27, 77, 0.233) !important;
+  }
+  .inputSearch {
+    background: rgba(15, 0, 38, 0.1) !important;
+    * {
+      color: black !important;
+    }
+  }
+  .searchbar-Btn {
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(200, 200, 200, 0.7) 100%
+    ) !important;
+    img {
+      filter: invert(100);
+    }
+  }
+  .searchHistory-component,
+  .PostDetail-closeBtn,
+  .PostDetail-messageButton,
+  .postCloserInfo,
+  .helpPage-datas,
+  .helpPage-privateButtonDiv,
+  .helpPage-privateQuestionDiv,
+  .comment-privateContainer,
+  .reviewHeader-button {
+    img {
+      filter: invert(100);
+    }
+  }
+  .searchFilter {
+    .filterBtn {
+      background: rgba(15, 0, 38, 0.1);
+      img {
+        filter: invert(100);
+      }
+    }
+  }
+  .componentProfileContainer,
+  .component-postNameContainer,
+  .component-karmaContainer,
+  .postGoal,
+  .topDream-titleContainer,
+  .dreamDetail-titleContainer,
+  .postComponent-categoryContainer,
+  .postComponent-valueContainer,
+  .donationComponent-valueContainer,
+  .donationComponent-donatedPostContainer,
+  .donationComponent-donateContent,
+  .donatorReview-userDetails {
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.838) 0%,
+      rgba(200, 200, 200, 0.7) 100%
+    ) !important;
+  }
+  .component-descriptionContainer {
+    background: linear-gradient(
+      108deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(200, 200, 200, 0.7) 100%
+    ) !important;
+    border-bottom: 0.5px solid rgba(252, 252, 252, 0.1);
+  }
+  .postDetailFooter {
+      background: linear-gradient(
+    108.46deg,
+    rgb(226, 226, 226) 1%,
+    rgb(220, 220, 220) 100%
+  ) !important; 
+
+
+  }
+  .drawerTitle{
+    color: #0f0026 !important;
+  }
+  .swiperDrawer-btn{
+    *{
+      color: $primary !important;
+    }
+  }
+  .help-button{
+    *{
+      color: white !important;
+    }
+  }
+  .giftButton {
+    background: rgba(15, 0, 38, 0.1) !important;
+    img {
+      filter: invert(100);
+    }
+  }
+  .postRewardDiv {
+    * {
+      color: #0f0026 !important;
+    }
+  }
+  .messageInput,
+  .badgeSwiper-inspirationMessage {
+    background: none !important;
+    * {
+      .q-field__label {
+        color: #0f0026 !important;
+      }
+      color: #0f0026 !important;
+    }
+    border: 1px solid var(--Black-Sapphire, #0f0026) !important;
+  }
+  .uploadImgConponent {
+    background: rgba(15, 0, 38, 0.1) !important;
+    .uploadImg-icon {
+      filter: invert(100);
+    }
+    .mainMessage {
+      color: #0f0026 !important;
+    }
+  }
+  .topDream-topUpButton,
+  .verifyContent-button,
+  .submit-nextButton {
+    * {
+      color: #fcfcfc !important;
+    }
+  }
+  .comments-filter {
+    background-image: url("/images/Auth/body-light.png") !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+  }
+  .comment-component {
+    background: linear-gradient(
+      108deg,
+      rgba(201, 201, 201, 0.4) 0%,
+      rgba(212, 212, 212, 0.4) 100%
+    ) !important;
+  }
+  .comment-userInput {
+    * {
+      color: #0f0026 !important;
+    }
+  }
+  .wheelIcon,
+  .helpButton {
+    filter: invert(100%) !important;
+  }
+  .slide-drawer__handler--horizontal{
+
+    .cursor-pointer{
+    background-color: #0f0026 !important;
+    }
+  }
+  .slide-drawer::before {
+    border-radius: 20px;
+      background: linear-gradient(
+    108.46deg,
+    rgb(226, 226, 226) 1%,
+    rgb(220, 220, 220) 100%
+  ) !important; 
+  }
+  .submitPage-description,.submitPage1-title{
+    color: #0f0026 !important;
+  }
+  .postPage-carousel {
+    background-color: transparent !important;
+  }
+  .navbarButton {
+    background: rgba(0, 0, 0, 0.1) !important;
+    .buttonIcon {
+      * {
+        fill: rgba(0, 0, 0, 0.712);
+      }
+    }
+  }
+  .settingsHeader-button {
+    background: #9f9f9f !important;
+  }
+  .displayKarma {
+    background-color: transparent !important;
+    border: 0.1rem solid black;
+  }
+  .searchIcon {
+    * {
+      stroke: black !important;
+    }
+  }
+  .badgeGuard,
+  .arrowButtonBack {
+    filter: invert(100%) !important;
+  }
+  .swiper-pagination-bullet {
+    background-color: black !important;
+  }
+  .swiper-pagination-bullet-active {
+    background-color: $primary !important;
+  }
+  .searchPage-sortingComponent {
+    border: 0.1rem solid #0f0026;
+    * {
+      color: black !important;
+    }
+  }
+
+  // Login Register Layout
+  .login {
+    background-image: url("/images/Auth/body-light.png") !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+  }
+  .textLanding {
+    color: #0f0026 !important;
+  }
+  .LandingPage-loginButton {
+    * {
+      color: #fcfcfc !important;
+    }
+  }
+  .LandingPage-questiobButton {
+    svg {
+      * {
+        fill: #0f0026 !important;
+      }
+    }
+  }
+  .loginPage-input,
+  .registerLocation,
+  .reviewInput {
+    border: 0.1rem solid #645b73 !important;
+    background-color: transparent !important;
+    background: transparent !important;
+    * {
+      color: #0f0026 !important;
+    }
+  }
+  .LoginPage-rememberInput {
+    color: #0f0026 !important;
+    .q-checkbox__bg {
+      border: 0.1rem solid #0f0026;
+    }
+    .q-checkbox__inner--truthy {
+      * {
+        border: none;
+      }
+    }
+  }
+  .LoginPage-loginButton,
+  .button,
+  .postCreation-submitButton,
+  .postDetail-editDreamButton,
+  .accomplishedDream-reviewButton,
+  .donatorReview-reviewButton {
+    * {
+      color: #fcfcfc !important;
+    }
+  }
+  .q-linear-progress__track--dark {
+    background-color: black;
+  }
+  .registrationTitle,
+  .swiperText,
+  .horizText,
+  .explainTitle,
+  .registerText,
+  .registerLabel,
+  .explainLogo {
+    color: #0f0026 !important;
+  }
+  .explainDescription,
+  .explainText {
+    color: #0f0026a0 !important;
+  }
+  .swipingIcon,
+  .register-questionButton {
+    filter: invert(100) !important;
+  }
+
+  // Donee Layout
+  .q-carousel__navigation-icon--inactive {
+    filter: invert(100%);
+  }
+  .submit-buttonPrevious {
+    border: 0.15rem solid #0f0026 !important;
+    img {
+      filter: invert(100%);
+    }
+  }
+  .postCreation-btn {
+    background: linear-gradient(
+      108deg,
+      rgba(144, 144, 144, 0.7) 0%,
+      rgba(130, 130, 130, 0.7) 100%
+    ) !important;
+  }
+  .postCreation-detailContainer {
+    background: linear-gradient(265deg, rgba(181, 180, 180, 0.738) 1.16%, rgba(255, 255, 255, 0.70) 99.62%) !important;
+  }
+  .postCreation-changeTypeButton {
+    * {
+      color: $primary !important;
+    }
+  }
+  .postCreation-postTitleInput {
+    border: none !important;
+    background: rgba(16, 15, 18, 0.086) !important;
+  }
+  .postCreation-addInfoButton {
+    * {
+      color: #0f0026 !important;
+      text-decoration: underline #0f0026 !important;
+    }
+    img {
+      filter: invert(100%);
+    }
+  }
+  .postCreation-addFeatureButton {
+    * {
+      color: $primary !important;
+    }
+  }
+  .postCreation-separator {
+    background-color: #0f0026 !important;
+  }
+  .postDetail-doneeFooter {
+    background: rgb(200, 200, 200) !important;
+    background-image: none !important;
+  }
+  .postDetail-topUpDreamButton *:not(circle) {
+    fill: #0f0026;
+  }
+  .postDetail-topUpDreamButton {
+    background: rgba(15, 0, 38, 0.1) !important;
+  }
+  .lightModeDescription {
+    background-image: url("/images/Auth/body-light.png") !important;
+  }
+  .topDream-questionImg {
+    filter: invert(100%);
+  }
+  .userProfile-progressValue {
+    color: $primary !important;
+  }
+  .userProfile-progressContainer {
+    .q-linear-progress__track--light {
+      background-color: #5a0e29 !important;
+    }
+    .q-linear-progress__track {
+      opacity: 1;
+    }
+  }
+  .comment-accomplishedButton {
+    img {
+      filter: invert(100%);
+    }
+    background: rgba(15, 0, 38, 0.1) !important;
+  }
+  .reviewInput {
+    .q-field__label {
+      color: black !important;
+    }
+  }
+  .onBoarding-buttonPrevious,
+  .onBoarding-closeBtn {
+    border: 0.15rem solid black !important;
+    img {
+      filter: invert(100%);
+    }
+  }
+  .settingsFaq-card{
+  border:0.1rem solid #0f0026 !important;
+  .q-item__label{
+    color: #0f0026;
+  }
+}
+.myStoryComponent{  
+  .container,.overlay{
+    background-color: #fcfcfc !important;
+  }
+  .user{
+    background-color: #9f9f9f;
+    color:#0f0026
+  }
+  .publishButton{
+    background: #9f9f9f !important;
+  }
+  .close-slide{
+    .icon-background{
+    background: #9f9f9f !important;
+    }
+    z-index: 111 !important;
+    *{
+      z-index: 111 !important;
+    }
+    }
+  }
+  .taskReward,.FinishedtaskReward{
+    border-left: 0.07rem solid #0f002659 !important;
+  }
+}
+
+
+.arrowBtn {
+  * {
+    width: 1.3rem;
+  }
+}

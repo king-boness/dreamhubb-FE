@@ -1,0 +1,1378 @@
+@font-face {
+  font-family: xillian;
+  src: url(assets/fonts/xillian-regular.otf);
+}
+@font-face {
+  font-family: poppins;
+  src: url(assets/fonts/Poppins-Regular.ttf);
+}
+@font-face {
+  font-family: poppinsSemiBold;
+  src: url(assets/fonts/Poppins-SemiBold.ttf);
+}
+@font-face {
+  font-family: poppinsBold;
+  src: url(assets/fonts/Poppins-Bold.ttf);
+}
+@font-face {
+  font-family: poppinsMedium;
+  src: url(assets/fonts/Poppins-Medium.ttf);
+}
+@font-face {
+  font-family: montseraat;
+  src: url(assets/fonts/Montserrat-Regular.ttf);
+}
+@font-face {
+  font-family: montseraatSemiBold;
+  src: url(assets/fonts/Montserrat-SemiBold.ttf);
+}
+@font-face {
+  font-family: montseraatBold;
+  src: url(assets/fonts/Montserrat-Bold.ttf);
+}
+@font-face {
+  font-family: inter;
+  src: url(assets/fonts/Inter-Regular.ttf);
+}
+p {
+  color: #D0DCD8;
+}
+
+.textLanding {
+  text-align: center;
+  width: 12rem;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+  margin-top: -1rem;
+}
+
+.explain-title {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #BD0043;
+  font-family: xilian;
+  width: 5.5rem;
+  margin: auto;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.logo {
+  font-size: 64px;
+  font-family: xillian;
+  color: #BD0043;
+  text-align: center;
+  margin: 0;
+  margin-top: -1rem;
+}
+
+.registrationTitle {
+  margin-top: 2rem !important;
+  font-size: 1.4rem !important;
+}
+
+.explainTitle {
+  font-family: poppinsSemiBold;
+  margin-top: 1rem;
+  font-size: 20px;
+  width: 100%;
+}
+
+.explainText {
+  font-size: 1rem;
+  width: 100%;
+  font-family: inter;
+  font-weight: bold;
+  margin-top: 0.6rem;
+}
+
+.registerLabel {
+  font-size: 1.15rem;
+  width: 100%;
+  font-family: inter;
+  font-weight: bold;
+}
+
+.registerDescription {
+  font-family: poppins;
+  font-size: 20px;
+  text-align: center;
+  color: #1D1D1D;
+}
+
+.registerTitle {
+  font-family: poppins;
+  font-size: 30px;
+  font-weight: bolder;
+  text-align: center;
+  color: #1D1D1D;
+}
+
+.registerText {
+  font-size: 1.2rem;
+  font-family: poppins;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+
+.category, .sub-category {
+  text-align: center;
+}
+.category .categoryTitle, .sub-category .categoryTitle {
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  font-family: poppinsSemiBold;
+}
+
+.postGoalText {
+  font-family: poppinsSemiBold;
+}
+
+.postDatas {
+  font-family: poppins;
+}
+
+.postDetailHeading {
+  font-size: 1.5rem;
+  font-family: poppinsSemiBold;
+  margin: 0;
+  margin-bottom: 0.8rem;
+}
+
+.aboutPostDescription, .doneeProfileDescription {
+  font-family: poppins;
+  line-height: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.postReward {
+  font-family: poppinsSemiBold;
+  font-size: 0.9rem;
+  margin-right: 1.5rem;
+}
+
+.reportDreamLink {
+  text-decoration: underline;
+  color: white;
+  font-family: poppins;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.aboutDoneeHeading {
+  font-size: 1.4rem;
+  font-family: poppinsSemiBold;
+}
+
+.doneeProfileName {
+  font-size: 1rem;
+  font-family: poppinsSemiBold;
+}
+
+.registerLocationTitle {
+  margin-top: 0 !important;
+}
+
+button {
+  font-family: montseraat;
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.centerDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.q-btn {
+  width: 100%;
+}
+
+.register-btn, .sign-button {
+  background-color: rgb(182, 0, 67);
+  height: 2.5rem;
+  border-radius: 0.3rem;
+}
+
+.register-btn {
+  background-color: rgba(189, 0, 67, 0.2);
+  color: rgb(182, 0, 67);
+}
+
+.arrowBtn-back {
+  border: 0.1rem solid #FFFFFF;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  padding-top: 0.1rem;
+  padding-left: 0.231rem;
+  align-items: center;
+  text-align: center;
+  background-color: none;
+}
+.arrowBtn-back a {
+  text-decoration: none;
+  height: 2rem;
+  width: 1.9rem;
+  display: block;
+  padding: 0.4rem;
+  padding-left: 0.6rem;
+}
+.arrowBtn-back a span {
+  border: 0.1rem solid white;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-width: 0 0.1rem 0.1rem 0;
+  display: inline-block;
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+}
+
+.arrowBtn-next {
+  border: 0.1rem solid #BD0043;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  padding-top: 0.1rem;
+  padding-left: 0.231rem;
+  align-items: center;
+  text-align: center;
+  background-color: #BD0043;
+}
+.arrowBtn-next a {
+  text-decoration: none;
+  height: 2rem;
+  width: 1.9rem;
+  display: block;
+  padding: 0.4rem;
+  padding-left: 0.6rem;
+}
+.arrowBtn-next a span {
+  border: 0.1rem solid white;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-width: 0 0.1rem 0.1rem 0;
+  display: inline-block;
+  transform: rotate(312deg);
+  -webkit-transform: rotate(312deg);
+}
+.arrowBtn-next a {
+  padding-right: 0.7rem;
+}
+
+.buttonRegister {
+  width: 21rem;
+  height: 2.5rem;
+  border-radius: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.filterBtnDiv {
+  padding: 1rem 0.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.filterBtnDiv .filterBtn {
+  color: white;
+  background: linear-gradient(108.46deg, rgba(255, 255, 255, 0.264) 0%, rgba(255, 255, 255, 0.16) 100%);
+  border-radius: 0.5rem;
+  width: 100% !important;
+}
+
+.applyBtnDiv, .postDetailButton {
+  padding: 1.6rem;
+}
+.applyBtnDiv button, .postDetailButton button {
+  background-color: rgb(182, 0, 67);
+  color: white;
+  border: none;
+  font-size: 1rem;
+  height: 3.4rem;
+}
+
+.postDetailButton {
+  display: flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  width: 15.9rem;
+  height: 3.7rem !important;
+  margin-right: 0.5rem;
+}
+.postDetailButton img {
+  margin-right: 0.4rem;
+}
+
+.giftButton {
+  background: linear-gradient(90deg, rgb(30, 30, 30) 0%, rgba(47, 47, 47, 0.992) 100%);
+  background-color: transparent !important;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  width: 4rem;
+  height: 3.7rem !important;
+}
+
+.order-tabs {
+  padding-top: 0.6rem;
+  border: none;
+}
+
+.filter {
+  border: none;
+}
+
+.q-tab-panels {
+  background: none;
+}
+
+.dreamImgs {
+  image-rendering: smooth;
+}
+.dreamImgs .imgMain {
+  height: 6rem;
+  width: 5rem;
+}
+.dreamImgs .imgMain1 {
+  position: absolute;
+  left: 193.5px;
+  top: 20px;
+}
+.dreamImgs .imgMain2 {
+  position: absolute;
+  left: 75%;
+  top: 130px;
+}
+.dreamImgs .imgMain3 {
+  position: absolute;
+  left: 25px;
+  top: 145px;
+}
+
+.filterBtnImg {
+  margin-right: 0.5rem;
+}
+
+.posDetailKarma {
+  height: 1.2rem;
+  margin-left: 0.5rem;
+  margin-right: 0.2rem;
+}
+
+.registerInput, .registerSecrete, .registerDatas {
+  width: 20rem;
+  margin: 1rem auto;
+  font-family: poppins;
+}
+
+.registerDatas {
+  height: 3.7rem;
+}
+
+.registerSecrete {
+  margin-bottom: 2rem;
+}
+
+.registerLocation, .registerDatas, .registerSecrete {
+  border-radius: 1rem;
+  border: 0.08rem solid rgba(252, 252, 252, 0.2);
+  padding-left: 1.2rem;
+  margin: 1rem 0;
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  margin-bottom: 2.9rem;
+}
+
+.q-field__control {
+  padding-right: 1rem;
+}
+
+.q-linear-progress__track--light {
+  background-color: rgba(222, 11, 11, 0.78) !important;
+}
+
+.flicking-viewport {
+  position: relative;
+  overflow: hidden;
+}
+.flicking-viewport:not(.vertical) {
+  width: 100%;
+  height: 100%;
+}
+.flicking-viewport.vertical, .flicking-viewport.vertical > .flicking-camera {
+  display: inline-block;
+}
+.flicking-viewport.vertical.middle > .flicking-camera > * {
+  vertical-align: middle;
+}
+.flicking-viewport.vertical.bottom > .flicking-camera > * {
+  vertical-align: bottom;
+}
+.flicking-viewport.vertical > .flicking-camera > * {
+  display: block;
+}
+.flicking-viewport.flicking-hidden > .flicking-camera > * {
+  visibility: hidden;
+}
+
+.flicking-camera {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  will-change: transform;
+}
+.flicking-camera > * {
+  display: inline-block;
+  white-space: normal;
+  vertical-align: top;
+}
+
+.flicking-panel {
+  position: relative;
+}
+
+.postDetail-parallaxImg {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+.postDetail-img::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgb(0, 0, 0));
+  pointer-events: none;
+}
+
+.postDetail-blurContainer {
+  position: absolute;
+  top: 20rem;
+  z-index: 1;
+  -webkit-backdrop-filter: blur(1px);
+          backdrop-filter: blur(1px);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.998));
+  height: 17rem;
+  width: 100%;
+  pointer-events: none;
+}
+
+.LayoutBackground {
+  min-height: 70vh;
+}
+
+.iphoneDevice {
+  padding-top: 2.8rem !important;
+}
+
+.iphoneDevice-large {
+  padding-top: 3rem !important;
+}
+
+.iphoneDevice-small {
+  padding-top: 1.8rem !important;
+}
+
+.iphoneDevice-footer {
+  height: 5.7rem !important;
+  padding-bottom: 1rem !important;
+}
+
+.postDetail .detailIconDiv {
+  width: 100%;
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: space-evenly;
+  position: absolute;
+  top: 0;
+  z-index: 2;
+}
+.postDetail .detailIconDiv .detailIconDivRight {
+  margin-left: 12rem;
+}
+.postDetail .postDetailBg {
+  position: relative;
+  height: 37rem;
+}
+.postDetail .postDetailBg .postDetail-img {
+  width: 100%;
+  height: 100%;
+}
+.postDetail .postDetailBg .postDetailInformations {
+  position: absolute;
+  top: 85.5%;
+  z-index: 11;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 1.2rem;
+}
+.postDetail .postDetailBg .postDetailInformations .postGoal {
+  display: flex;
+  align-items: center;
+}
+.postDetail .postDetailBg .postDetailInformations .postGoal .postGoalText {
+  margin-left: 0.8rem;
+  font-size: 1.4rem;
+  color: white;
+}
+.postDetail .postDetailBg .postDetailInformations .postGoal .postGoalImg {
+  height: 1.2rem;
+}
+.postDetail .postDetails {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  color: white;
+}
+.postDetail .postDetails .postCloserInfo {
+  display: flex;
+  align-items: center;
+}
+.postDetail .postDetails .postCloserInfo .postDatas {
+  font-size: 1rem;
+  margin-left: 0.4rem;
+}
+.postDetail .aboutPost {
+  padding: 1.5rem;
+  color: white;
+}
+.postDetail .aboutPost .reportProblem {
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+.postDetail .aboutPost .aboutDonne {
+  margin-top: 2rem;
+}
+.postDetail .aboutPost .aboutDonne .doneeProfile {
+  display: flex;
+  align-items: center;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+}
+.postDetail .aboutPost .aboutDonne .doneeProfile .doneeProfilePicture {
+  height: 3rem;
+  border-radius: 2rem;
+  margin-right: 0.7rem;
+}
+
+.footer, .postDetailFooter {
+  position: fixed;
+  bottom: 0;
+  padding: 0.2rem 1.5rem;
+  border-top-left-radius: 1.2rem;
+  border-top-right-radius: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 4.5rem;
+  border-top: 0.05rem solid rgba(255, 255, 255, 0.202);
+  border-bottom: 0;
+}
+.footer .exploreIcon, .postDetailFooter .exploreIcon {
+  opacity: 0.4;
+}
+.footer .profileIcon, .postDetailFooter .profileIcon {
+  display: flex;
+  margin-top: 0.2rem;
+}
+.footer .profileIcon .wheelIcon, .postDetailFooter .profileIcon .wheelIcon {
+  border-radius: 100%;
+  padding: 0.23rem;
+  height: 1.2rem;
+  width: 1.2rem;
+  margin-top: -0.3rem;
+  margin-left: 2rem;
+  background-color: rgb(17, 14, 25);
+  z-index: 111;
+  position: absolute;
+}
+.footer .profileIcon .profileImg, .postDetailFooter .profileIcon .profileImg {
+  height: 1.8rem;
+  border-radius: 100%;
+  border: 0.1rem solid #bd0043;
+  padding: 0.1rem;
+  margin-bottom: 0.02rem;
+}
+.footer .button-footer, .postDetailFooter .button-footer {
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.postDetailFooter {
+  z-index: 111;
+  display: flex;
+  justify-content: center;
+  border-top: 0.05rem solid rgba(255, 255, 255, 0.202);
+  border-radius: 1.125rem 1.125rem 0rem 0rem;
+  padding: 1.5rem 0;
+  left: 0;
+  height: 8.6rem;
+  background-image: url("/images/Auth/bg-explain.png") !important;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.postDetailFooter .postReward {
+  margin-top: 0.4rem;
+  display: flex;
+}
+.postDetailFooter .postDetailButton {
+  padding: 1rem;
+}
+.postDetailFooter .giftButton {
+  width: 4rem;
+}
+.postDetailFooter .giftWindow {
+  background-color: black;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 30rem;
+  height: 10rem;
+}
+
+.textWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 1rem 0.3rem;
+  width: 100%;
+}
+.header .headerIcon {
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  height: 2.6rem;
+  width: 2.6rem;
+}
+
+.tokens {
+  display: flex;
+  align-items: center;
+}
+
+.tokens .displayKarma {
+  background-color: rgba(86, 79, 79, 0.6);
+  border: 0.09rem solid #5A0E29;
+  border-radius: 8px;
+  color: rgba(243, 243, 243, 0.5215686275);
+  font-size: 1.1rem;
+  font-weight: 600;
+  width: 8.5rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 1.2rem 0;
+}
+.tokens .displayKarma .navbarKarmaIcon {
+  height: 1.1rem;
+  margin-right: 0.2rem;
+}
+.tokens .displayKarma .navbarButtonDiv {
+  border-radius: 0.3rem;
+  background-color: rgba(90, 14, 41, 0.5411764706);
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  margin-left: 0.2rem;
+}
+.tokens .displayKarma .navbarButtonDiv .addTokenButton {
+  height: 0.7rem;
+  width: 0.7rem;
+}
+
+.navbarIcon {
+  height: 2rem;
+}
+
+.addImageIcon {
+  margin-left: 0.2rem;
+}
+
+.imgPlus {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.imageUpload {
+  padding: 0.25rem;
+}
+
+.bg-showing {
+  padding: 5vw;
+  background-color: black;
+  height: 100%;
+  width: 100%;
+}
+
+.bgExplain {
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
+@font-face {
+  font-family: xillian;
+  src: url(assets/fonts/xillian-regular.otf);
+}
+@font-face {
+  font-family: poppins;
+  src: url(assets/fonts/Poppins-Regular.ttf);
+}
+@font-face {
+  font-family: poppinsSemiBold;
+  src: url(assets/fonts/Poppins-SemiBold.ttf);
+}
+@font-face {
+  font-family: poppinsBold;
+  src: url(assets/fonts/Poppins-Bold.ttf);
+}
+@font-face {
+  font-family: poppinsMedium;
+  src: url(assets/fonts/Poppins-Medium.ttf);
+}
+@font-face {
+  font-family: montseraat;
+  src: url(assets/fonts/Montserrat-Regular.ttf);
+}
+@font-face {
+  font-family: montseraatSemiBold;
+  src: url(assets/fonts/Montserrat-SemiBold.ttf);
+}
+@font-face {
+  font-family: montseraatBold;
+  src: url(assets/fonts/Montserrat-Bold.ttf);
+}
+@font-face {
+  font-family: inter;
+  src: url(assets/fonts/Inter-Regular.ttf);
+}
+p {
+  color: #D0DCD8;
+}
+
+.textLanding {
+  text-align: center;
+  width: 12rem;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+  margin-top: -1rem;
+}
+
+.explain-title {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #BD0043;
+  font-family: xilian;
+  width: 5.5rem;
+  margin: auto;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.logo {
+  font-size: 64px;
+  font-family: xillian;
+  color: #BD0043;
+  text-align: center;
+  margin: 0;
+  margin-top: -1rem;
+}
+
+.registrationTitle {
+  margin-top: 2rem !important;
+  font-size: 1.4rem !important;
+}
+
+.explainTitle {
+  font-family: poppinsSemiBold;
+  margin-top: 1rem;
+  font-size: 20px;
+  width: 100%;
+}
+
+.explainText {
+  font-size: 1rem;
+  width: 100%;
+  font-family: inter;
+  font-weight: bold;
+  margin-top: 0.6rem;
+}
+
+.registerLabel {
+  font-size: 1.15rem;
+  width: 100%;
+  font-family: inter;
+  font-weight: bold;
+}
+
+.registerDescription {
+  font-family: poppins;
+  font-size: 20px;
+  text-align: center;
+  color: #1D1D1D;
+}
+
+.registerTitle {
+  font-family: poppins;
+  font-size: 30px;
+  font-weight: bolder;
+  text-align: center;
+  color: #1D1D1D;
+}
+
+.registerText {
+  font-size: 1.2rem;
+  font-family: poppins;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+
+.category, .sub-category {
+  text-align: center;
+}
+.category .categoryTitle, .sub-category .categoryTitle {
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  font-family: poppinsSemiBold;
+}
+
+.postGoalText {
+  font-family: poppinsSemiBold;
+}
+
+.postDatas {
+  font-family: poppins;
+}
+
+.postDetailHeading {
+  font-size: 1.5rem;
+  font-family: poppinsSemiBold;
+  margin: 0;
+  margin-bottom: 0.8rem;
+}
+
+.aboutPostDescription, .doneeProfileDescription {
+  font-family: poppins;
+  line-height: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.postReward {
+  font-family: poppinsSemiBold;
+  font-size: 0.9rem;
+  margin-right: 1.5rem;
+}
+
+.reportDreamLink {
+  text-decoration: underline;
+  color: white;
+  font-family: poppins;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.aboutDoneeHeading {
+  font-size: 1.4rem;
+  font-family: poppinsSemiBold;
+}
+
+.doneeProfileName {
+  font-size: 1rem;
+  font-family: poppinsSemiBold;
+}
+
+.registerLocationTitle {
+  margin-top: 0 !important;
+}
+
+.body--light .LayoutBackground {
+  background-image: url("/images/Auth/body-light.png") !important;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top;
+}
+.body--light .LayoutBackground .navbar {
+  background-color: rgb(238, 238, 238);
+  background-image: none !important;
+}
+.body--light span,
+.body--light h1,
+.body--light h2,
+.body--light h3,
+.body--light h4 {
+  color: black !important;
+}
+.body--light .passwordPage-input,
+.body--light .emailPage-input,
+.body--light .bioPage-input {
+  border: 0.08rem solid rgba(49, 49, 49, 0.661) !important;
+}
+.body--light .passwordPage-input *,
+.body--light .emailPage-input *,
+.body--light .bioPage-input * {
+  color: black !important;
+}
+.body--light .q-btn:before {
+  box-shadow: none !important;
+}
+.body--light .passwordPage-forgotPasswordLink {
+  color: #0f0026;
+}
+.body--light .settingsPrivacy {
+  border-bottom: 0.1rem solid rgba(0, 0, 0, 0.348) !important;
+}
+.body--light .arrowBtn * {
+  fill: #0f0026;
+}
+.body--light .myProfile-nameDiv {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.4) 0%, rgba(200, 200, 200, 0.4) 100%) !important;
+}
+.body--light .userProfile-settingShareBtn {
+  background: linear-gradient(108deg, rgba(219, 219, 219, 0.464) 0%, rgba(200, 200, 200, 0.768) 100%) !important;
+}
+.body--light .userProfile-settingShareBtn img {
+  filter: invert(100%);
+}
+.body--light .user-closerDetail img {
+  filter: invert(100%);
+}
+.body--light .userProfile-settingSettingsBtn * {
+  color: #BD0043 !important;
+}
+.body--light .onBoarding-description,
+.body--light .reportDreamLink,
+.body--light .postReward {
+  color: #0f0026 !important;
+}
+.body--light .buy-btn * {
+  color: white !important;
+}
+.body--light .tutorial-btn * {
+  color: #BD0043 !important;
+}
+.body--light .tokenShop-card {
+  background: none !important;
+  border: 0.1rem solid #0f0026;
+}
+.body--light .karmaAvailable-stats {
+  background: none !important;
+}
+.body--light .karmaGainedCard {
+  background: rgba(15, 0, 38, 0.05) !important;
+}
+.body--light .usedOnStats {
+  background: rgba(15, 0, 38, 0.05) !important;
+}
+.body--light .usedOnStats-spendingSelect {
+  border: 0.1rem solid #0f0026 !important;
+}
+.body--light .task-earn {
+  background: rgba(15, 0, 38, 0.05) !important;
+}
+.body--light .q-tab * {
+  fill: black;
+  color: black;
+}
+.body--light .storiesComponent {
+  border-bottom: 0.05rem solid rgb(0, 0, 0);
+}
+.body--light .usedOnStats-spendingIcon *,
+.body--light .usedOnStats-dropdownSpendingIcon * {
+  filter: invert(100%) !important;
+}
+.body--light .myProfile-imgBtn,
+.body--light .dreamDetail-buttonBack {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.56) 0%, rgba(255, 255, 255, 0.7) 100%) !important;
+}
+.body--light .myProfile-imgBtn img,
+.body--light .dreamDetail-buttonBack img {
+  filter: invert(100%);
+}
+.body--light .myProfile-nameDiv img {
+  filter: invert(100%);
+}
+.body--light .onGoingTab svg * {
+  stroke: #0f0026;
+}
+.body--light .myProfile-headerBtn,
+.body--light .userProfile-headerBtn {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.56) 0%, rgba(255, 255, 255, 0.7) 100%) !important;
+}
+.body--light .myProfile-headerBtn img,
+.body--light .userProfile-headerBtn img {
+  filter: invert(100%);
+}
+.body--light .PostDetail-btn {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.7) 0%, rgba(221, 221, 221, 0.7) 100%, rgba(200, 200, 200, 0.7) 100%) !important;
+}
+.body--light .PostDetail-btn * {
+  fill: #0f0026;
+}
+.body--light .applyBtnDiv *, .body--light .postDetailButton *,
+.body--light .confirmButton * {
+  color: white !important;
+}
+.body--light .input-fields .registerDatas {
+  background: rgba(15, 0, 38, 0.1);
+}
+.body--light .input-fields .registerDatas * {
+  color: black !important;
+}
+.body--light .filter .categoryTitle {
+  color: #BD0043;
+}
+.body--light .appSettings-deleteButton {
+  background-color: rgba(170, 27, 77, 0.233) !important;
+}
+.body--light .appSettings-deleteButton * {
+  color: #BD0043 !important;
+}
+.body--light .inputSearch {
+  background: rgba(15, 0, 38, 0.1) !important;
+}
+.body--light .inputSearch * {
+  color: black !important;
+}
+.body--light .searchbar-Btn {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.7) 0%, rgba(200, 200, 200, 0.7) 100%) !important;
+}
+.body--light .searchbar-Btn img {
+  filter: invert(100);
+}
+.body--light .searchHistory-component img,
+.body--light .PostDetail-closeBtn img,
+.body--light .PostDetail-messageButton img,
+.body--light .postCloserInfo img,
+.body--light .helpPage-datas img,
+.body--light .helpPage-privateButtonDiv img,
+.body--light .helpPage-privateQuestionDiv img,
+.body--light .comment-privateContainer img,
+.body--light .reviewHeader-button img {
+  filter: invert(100);
+}
+.body--light .searchFilter .filterBtn {
+  background: rgba(15, 0, 38, 0.1);
+}
+.body--light .searchFilter .filterBtn img {
+  filter: invert(100);
+}
+.body--light .componentProfileContainer,
+.body--light .component-postNameContainer,
+.body--light .component-karmaContainer,
+.body--light .postGoal,
+.body--light .topDream-titleContainer,
+.body--light .dreamDetail-titleContainer,
+.body--light .postComponent-categoryContainer,
+.body--light .postComponent-valueContainer,
+.body--light .donationComponent-valueContainer,
+.body--light .donationComponent-donatedPostContainer,
+.body--light .donationComponent-donateContent,
+.body--light .donatorReview-userDetails {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.838) 0%, rgba(200, 200, 200, 0.7) 100%) !important;
+}
+.body--light .component-descriptionContainer {
+  background: linear-gradient(108deg, rgba(255, 255, 255, 0.7) 0%, rgba(200, 200, 200, 0.7) 100%) !important;
+  border-bottom: 0.5px solid rgba(252, 252, 252, 0.1);
+}
+.body--light .postDetailFooter {
+  background: rgb(200, 200, 200) !important;
+}
+.body--light .giftButton {
+  background: rgba(15, 0, 38, 0.1) !important;
+}
+.body--light .giftButton img {
+  filter: invert(100);
+}
+.body--light .postRewardDiv * {
+  color: #0f0026 !important;
+}
+.body--light .messageInput,
+.body--light .badgeSwiper-inspirationMessage {
+  background: none !important;
+  border: 1px solid var(--Black-Sapphire, #0f0026) !important;
+}
+.body--light .messageInput *,
+.body--light .badgeSwiper-inspirationMessage * {
+  color: #0f0026 !important;
+}
+.body--light .messageInput * .q-field__label,
+.body--light .badgeSwiper-inspirationMessage * .q-field__label {
+  color: #0f0026 !important;
+}
+.body--light .uploadImgConponent {
+  background: rgba(15, 0, 38, 0.1) !important;
+}
+.body--light .uploadImgConponent .uploadImg-icon {
+  filter: invert(100);
+}
+.body--light .uploadImgConponent .mainMessage {
+  color: #0f0026 !important;
+}
+.body--light .topDream-topUpButton *,
+.body--light .verifyContent-button *,
+.body--light .submit-nextButton * {
+  color: #fcfcfc !important;
+}
+.body--light .comments-filter {
+  background-image: url("/images/Auth/body-light.png") !important;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top;
+}
+.body--light .comment-component {
+  background: linear-gradient(108deg, rgba(201, 201, 201, 0.4) 0%, rgba(212, 212, 212, 0.4) 100%) !important;
+}
+.body--light .comment-userInput * {
+  color: #0f0026 !important;
+}
+.body--light .wheelIcon,
+.body--light .helpButton {
+  filter: invert(100%) !important;
+}
+.body--light .slide-drawer::before {
+  background: var(--Soft-White, #fcfcfc) !important;
+}
+.body--light .postPage-carousel {
+  background-color: transparent !important;
+}
+.body--light .navbarButton {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+.body--light .navbarButton .buttonIcon * {
+  fill: rgba(0, 0, 0, 0.712);
+}
+.body--light .settingsHeader-button {
+  background: #9f9f9f !important;
+}
+.body--light .displayKarma {
+  background-color: transparent !important;
+  border: 0.1rem solid black;
+}
+.body--light .searchIcon * {
+  stroke: black !important;
+}
+.body--light .badgeGuard,
+.body--light .arrowButtonBack {
+  filter: invert(100%) !important;
+}
+.body--light .swiper-pagination-bullet {
+  background-color: black !important;
+}
+.body--light .swiper-pagination-bullet-active {
+  background-color: #BD0043 !important;
+}
+.body--light .searchPage-sortingComponent {
+  border: 0.1rem solid #0f0026;
+}
+.body--light .searchPage-sortingComponent * {
+  color: black !important;
+}
+.body--light .login {
+  background-image: url("/images/Auth/body-light.png") !important;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top;
+}
+.body--light .textLanding {
+  color: #0f0026 !important;
+}
+.body--light .LandingPage-loginButton * {
+  color: #fcfcfc !important;
+}
+.body--light .LandingPage-questiobButton svg * {
+  fill: #0f0026 !important;
+}
+.body--light .loginPage-input,
+.body--light .registerLocation,
+.body--light .registerDatas,
+.body--light .registerSecrete,
+.body--light .reviewInput {
+  border: 0.1rem solid #645b73 !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+.body--light .loginPage-input *,
+.body--light .registerLocation *,
+.body--light .registerDatas *,
+.body--light .registerSecrete *,
+.body--light .reviewInput * {
+  color: #0f0026 !important;
+}
+.body--light .LoginPage-rememberInput {
+  color: #0f0026 !important;
+}
+.body--light .LoginPage-rememberInput .q-checkbox__bg {
+  border: 0.1rem solid #0f0026;
+}
+.body--light .LoginPage-rememberInput .q-checkbox__inner--truthy * {
+  border: none;
+}
+.body--light .LoginPage-loginButton *,
+.body--light .button *,
+.body--light .postCreation-submitButton *,
+.body--light .postDetail-editDreamButton *,
+.body--light .accomplishedDream-reviewButton *,
+.body--light .donatorReview-reviewButton * {
+  color: #fcfcfc !important;
+}
+.body--light .q-linear-progress__track--dark {
+  background-color: black;
+}
+.body--light .registrationTitle,
+.body--light .swiperText,
+.body--light .horizText,
+.body--light .explainTitle,
+.body--light .registerText,
+.body--light .registerLabel,
+.body--light .explainLogo {
+  color: #0f0026 !important;
+}
+.body--light .explainDescription,
+.body--light .explainText {
+  color: rgba(15, 0, 38, 0.6274509804) !important;
+}
+.body--light .swipingIcon,
+.body--light .register-questionButton {
+  filter: invert(100) !important;
+}
+.body--light .q-carousel__navigation-icon--inactive {
+  filter: invert(100%);
+}
+.body--light .submit-buttonPrevious {
+  border: 0.15rem solid #0f0026 !important;
+}
+.body--light .submit-buttonPrevious img {
+  filter: invert(100%);
+}
+.body--light .postCreation-btn {
+  background: linear-gradient(108deg, rgba(144, 144, 144, 0.7) 0%, rgba(130, 130, 130, 0.7) 100%) !important;
+}
+.body--light .postCreation-detailContainer {
+  background: linear-gradient(265deg, rgba(181, 180, 180, 0.738) 1.16%, rgba(255, 255, 255, 0.7) 99.62%) !important;
+}
+.body--light .postCreation-changeTypeButton * {
+  color: #BD0043 !important;
+}
+.body--light .postCreation-postTitleInput {
+  border: none !important;
+  background: rgba(16, 15, 18, 0.086) !important;
+}
+.body--light .postCreation-addInfoButton * {
+  color: #0f0026 !important;
+  -webkit-text-decoration: underline #0f0026 !important;
+          text-decoration: underline #0f0026 !important;
+}
+.body--light .postCreation-addInfoButton img {
+  filter: invert(100%);
+}
+.body--light .postCreation-addFeatureButton * {
+  color: #BD0043 !important;
+}
+.body--light .postCreation-separator {
+  background-color: #0f0026 !important;
+}
+.body--light .postDetail-doneeFooter {
+  background: rgb(200, 200, 200) !important;
+  background-image: none !important;
+}
+.body--light .postDetail-topUpDreamButton *:not(circle) {
+  fill: #0f0026;
+}
+.body--light .postDetail-topUpDreamButton {
+  background: rgba(15, 0, 38, 0.1) !important;
+}
+.body--light .lightModeDescription {
+  background-image: url("/images/Auth/body-light.png") !important;
+}
+.body--light .topDream-questionImg {
+  filter: invert(100%);
+}
+.body--light .userProfile-progressValue {
+  color: #BD0043 !important;
+}
+.body--light .userProfile-progressContainer .q-linear-progress__track--light {
+  background-color: #5a0e29 !important;
+}
+.body--light .userProfile-progressContainer .q-linear-progress__track {
+  opacity: 1;
+}
+.body--light .comment-accomplishedButton {
+  background: rgba(15, 0, 38, 0.1) !important;
+}
+.body--light .comment-accomplishedButton img {
+  filter: invert(100%);
+}
+.body--light .reviewInput .q-field__label {
+  color: black !important;
+}
+.body--light .onBoarding-buttonPrevious,
+.body--light .onBoarding-closeBtn {
+  border: 0.15rem solid black !important;
+}
+.body--light .onBoarding-buttonPrevious img,
+.body--light .onBoarding-closeBtn img {
+  filter: invert(100%);
+}
+
+.arrowBtn * {
+  width: 1.3rem;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.explainBody {
+  margin: 0 auto;
+  text-align: center;
+}
+.explainBody img {
+  margin: auto;
+}
+.explainBody .registerImg {
+  height: 13rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  margin-top: 3rem;
+}/*# sourceMappingURL=main.css.map */

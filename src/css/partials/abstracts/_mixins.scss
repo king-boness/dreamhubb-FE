@@ -1,0 +1,39 @@
+
+@mixin arrowButtton($rotate,$bgcolor,$border) {
+    border: .1rem solid $border;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    padding-top: .1rem;
+    padding-left: 0.231rem;
+    align-items: center;
+    text-align: center;
+    background-color: $bgcolor;
+
+    a{
+      text-decoration: none;
+      height: 2rem;
+      width: 1.9rem;
+      display:block;
+      padding: .4rem;
+      padding-left: .6rem;
+      span{
+        border: .1rem solid white;
+        width: .5rem;
+        height: .5rem;
+        border-width: 0 .1rem .1rem 0;
+        display: inline-block;
+        transform: rotate($rotate);
+        -webkit-transform: rotate($rotate);
+      }
+    }
+}
+
+// Background gradient of register page
+@mixin registerBackground() {
+background: linear-gradient(108.46deg, rgba(0, 0, 0, 0.66) 0%, rgba(23, 23, 23, 0.66) 100%);}
+// Background gradient of inputs in register page
+@mixin registerInputBackground() {
+  background: linear-gradient(108.46deg, rgba(0, 0, 0, 0.66) 0%, rgba(23, 23, 23, 0.66) 100%);
+border: 0.5px solid rgba(252, 252, 252, 0.2);
+}

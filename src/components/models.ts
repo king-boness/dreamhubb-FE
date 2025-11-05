@@ -1,0 +1,192 @@
+export interface Todo {
+  id: number;
+  content: string;
+}
+
+export interface Meta {
+  totalCount: number;
+}
+
+export interface RegistrationOptions {
+  id: number;
+  title: string;
+}
+export interface Category{
+  id: number,
+  title: string,
+  description: string
+}
+
+export interface Post{
+  description: string,
+  goalName: string,
+  goalImage: string,
+  karma: number,
+  image: string,
+  user: {
+    userName: string,
+    userPicture: string,
+    badge: string,
+  },
+  postInfo:{
+    dateCreated:string,
+    location:string,
+    viewed:number
+  }
+}
+export interface PostDetail{
+  name: string,
+  goalImage: string,
+  images: Array<string>,
+  date: string,
+  location: string,
+  views: number,
+  description:string,
+  aboutDonee:string,
+  doneeName: string,
+  karmaValue: number
+}
+export interface Notification{
+  user:{
+    userName:string,
+    userPicture:string,
+  }
+  description:string
+  goalName:string
+  type:string
+}
+export interface Inspiration{
+  user:{
+    userName:string,
+    userPicture:string,
+  }
+  description:string
+  inspirationInfo:{
+    dateCreated:string
+    likes:number
+    inspirationImage: string,
+  }
+}
+
+export interface PriceCards{
+  description:string
+  tokens:{
+    amount:string,
+    price:number,
+    img:string
+  }
+}
+export interface Stats{
+  usedKarma:{
+    [key: string]: number;
+    onDream:number
+    onProblem:number,
+    onIdea:number
+    onDonation:number
+  },
+  overview:{
+    title:string
+    comesFrom:string
+    comesFromImg:string
+    comesFromValue:number
+  },
+}
+export interface specificSpending{
+
+  label:string
+  value:string
+  icon:string
+  tokens:number
+}
+
+export interface UserProfile{
+  user:{
+    userName:string,
+    userPicture:string,
+    userBackground:string,
+    dateCreated:string,
+    location:string,
+    views:number
+  }
+  reviews:{
+    description:string
+    userReviewed:string
+    userReviewedPicture:string
+    dateReviewed:string
+  }
+  categories:{
+    name:string,
+    amount:number,
+    img:string,
+    destination:string
+  }
+  donations:{
+    donatedValue:number
+    postDonatedName:string
+    postDonatedBackground:string
+    postDonatedCategoryImg:string
+    postOwner:string
+    postOwnerPicture:string
+    description:string
+  }
+  dreams: {
+    category:string
+    type:string
+    donatedValue:number
+    postDreamName:string
+    postDreamBackground:string
+    postDreamCategoryImg:string
+    postOwner:string
+    postOwnerPicture:string
+    description:string
+  }
+  comments:{
+    donatedValue:number
+    donatedImage:string
+    donationOwnerName:string
+    donationOwnerPicture:string
+    description:string
+    private:boolean
+    type:string
+    typeOfHelp:string
+    amountOfHelp:number
+  }
+
+}
+export interface UserDatas{
+  email:string,
+}
+export interface History{
+  historyTitle:string
+}
+export interface Topic{
+  topicTitle:string
+}
+export interface OnGoingTask{
+  description:string
+  amount:number
+}
+export interface FinishedTask{
+  description:string
+  amount:number
+}
+export interface CarouselPost{
+  value:string
+  title:string
+  text:string
+  img:string
+}
+export interface PostCategories{
+  goalImg:string
+  specificGoalImg:string
+}
+export interface tokensOption{
+  img:string
+  text:string
+}
+export interface donorDescription{
+  text:string
+}
+export interface doneeDescription{
+  text:string
+}

@@ -1,0 +1,77 @@
+$breakpoint-samsung: 375px;
+@media (max-width: $breakpoint-samsung) {
+  .FinishedtaskReward{
+    padding-left: 1.45rem !important;
+    margin-left: 1.2rem !important;
+  }
+   .taskReward-bold,.taskDescription{
+      font-size: .7rem !important;
+    }
+    .taskRewars-amount{
+      font-size: 0.8rem !important;
+    }
+  .taskReward{
+    padding-left: 0.7rem !important;
+    margin-left: 1rem !important;
+  }
+  .verifyContent-button{
+    font-size: 0.7rem !important;
+  }
+  .tokenShop-card{
+    width: 10.5rem !important;
+    height: 10.5rem !important;
+  }
+ .tutorial-btn {
+  margin-bottom: 2rem !important;
+ }
+ .submitPage1-title{
+  font-size: 1.2rem !important;
+ }
+ .swiper{
+   width: 13rem !important;
+  }
+  .submitPage1{
+    margin-bottom: 8% !important;
+    
+    .horizontalSwiper {
+      margin: 0 auto !important;
+      height: 12rem !important;
+      * {
+        height: 8rem !important;
+        width: 100% !important;
+      }
+    }
+  }
+  .submitPage2{
+   margin-bottom: 8.5% !important;
+   .swiper{
+     width: 15rem !important;
+   }
+  }
+ .submit-layout{
+  .submit-description{
+    font-size: 1rem !important;
+  }
+  .submitPage-description{
+    font-size: 0.9rem !important;
+    margin-bottom: 6.2rem !important;
+  }
+  .submit-nextButton{
+    margin-bottom: 0 !important;
+  }
+ }
+.postDetail .detailIconDiv .detailIconDivRight {
+  margin-left: 11rem;
+}
+.dreamDetail-page{
+  .detailIconDivRight{
+    margin-left: 11rem !important;
+  }
+  .dreamDetail-postInformation{
+  padding: 0 .5rem !important;
+}
+}
+.postDetailInformations{
+  padding: 0 .5rem !important;
+}
+}

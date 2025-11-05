@@ -1,0 +1,61 @@
+.textWrapper {
+  display: flex;
+  align-items: center;
+
+}
+.header{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 1rem 0.3rem ;
+
+  width: 100%;
+  .headerIcon{
+    display: flex;
+    align-items: center;
+
+  }
+}
+.searchIcon{
+  height: 2.6rem;
+  width: 2.6rem;
+}
+.tokens{
+  display: flex;
+  align-items: center;
+}
+.tokens .displayKarma {
+  background-color: rgba(86, 79, 79, 0.6);
+  border: 0.09rem solid #5A0E29;
+  border-radius: 8px;
+  color: #f3f3f385;
+  font-size: 1.1rem;
+  font-weight: 600;
+  width: 8.5rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 1.2rem 0;
+  .navbarKarmaIcon{
+    height: 1.1rem;
+    margin-right: 0.2rem;
+
+}
+.navbarButtonDiv{
+    border-radius: .3rem;
+    background-color: #5a0e298a;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    margin-left: .2rem;
+    .addTokenButton{
+        height: .7rem;
+        width: .7rem;
+    }
+}
+}
+.navbarIcon{
+    height: 2rem;
+}

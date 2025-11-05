@@ -1,0 +1,1 @@
+import{E as t}from"./ExplainerComponent.43b1dbd6.js";import{x as a,k as r}from"./index.7a90dd99.js";import"./plugin-vue_export-helper.21dcd24c.js";const s={__name:"ExplainersPage5",setup(i){return(e,n)=>(r(),a(t,{title:e.$t("explainerTitle5"),text:e.$t("explainerText5"),image:"/images/Auth/handsGrip-image.svg"},null,8,["title","text"]))}};export{s as default};

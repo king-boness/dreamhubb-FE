@@ -1,0 +1,34 @@
+
+
+.dreamImgs{
+    image-rendering: smooth;
+    .imgMain{
+        height: 6rem;
+        width: 5rem;
+    }
+    .imgMain1{
+    position: absolute;
+    left: 193.5px;
+    top: 20px;
+    }
+    .imgMain2{
+    position: absolute;
+    left: 75%;
+    top: 130px;
+    }
+    .imgMain3{
+    position: absolute;
+    left: 25px;
+    top: 145px;
+    }
+}
+.filterBtnImg{
+    margin-right: 0.5rem;
+}
+
+
+.posDetailKarma{
+    height: 1.2rem;
+    margin-left: .5rem;
+    margin-right: 0.2rem;
+}
