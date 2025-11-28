@@ -166,7 +166,7 @@ const handleIndex = (index: number) => {
 };
 watch(imgIndex, () => {
   if (process.env.NODE_ENV === "development") {
-  console.log(imgIndex.value);
+    console.log(imgIndex.value);
   }
 });
 const openFileInput = () => {
@@ -187,7 +187,7 @@ const handleFileChange = (event: Event) => {
       reader.onload = () => {
         uploadedImages.value.images.push(reader.result as string);
         if (process.env.NODE_ENV === "development") {
-        console.log(uploadedImages.value.images.length);
+          console.log(uploadedImages.value.images.length);
         }
       };
 

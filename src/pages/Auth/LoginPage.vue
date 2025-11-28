@@ -1,7 +1,7 @@
 <template>
   <div class="col-12 LoginPage-form">
     <q-input
-      v-model="state.email"
+      v-model="email"
       placeholder="Email"
       :rules="[(val) => !!val || 'Email is required']"
       borderless
@@ -10,15 +10,23 @@
       class="loginPage-email loginPage-input registerDatas registerSecrete"
     />
     <q-input
-      type="password"
-      v-model="state.password"
+      :type="showPassword ? 'text' : 'password'"
+      v-model="password"
       placeholder="Password"
       :rules="[(val) => !!val || 'Password is required']"
       borderless
       hide-bottom-space
       bottom-slots
       class="loginPage-password loginPage-input registerDatas registerSecrete"
-    />
+    >
+      <template v-slot:append>
+        <q-icon
+          :name="showPassword ? 'visibility' : 'visibility_off'"
+          class="cursor-pointer"
+          @click="showPassword = !showPassword"
+        />
+      </template>
+    </q-input>
     <div class="LoginPage-rememberContainer">
       <q-checkbox
         v-model="remember"
@@ -32,40 +40,63 @@
       color="primary"
       text-color="white"
       class="LoginPage-loginButton"
+      :loading="loading"
     />
     <q-btn class="LoginPage-forgotPswButton">Forgot Password?</q-btn>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { useApiCallStore } from "src/stores/api-calls-store";
+import { ref } from "vue";
 import { useQuasar } from "quasar";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { useApiCallStore } from "src/stores/api-calls-store";
 
-const remember = ref(false);
 const $q = useQuasar();
 const router = useRouter();
+const route = useRoute();
 const apiCall = useApiCallStore();
 
-const state = reactive({
-  email: "",
-  password: ""
-});
+const email = ref("");
+const password = ref("");
+const remember = ref(false); // momentálne ho BE nepoužíva, ale nechávame pre UI
+const loading = ref(false);
+const showPassword = ref(false);
 
 const onSubmit = async () => {
+  if (!email.value || !password.value) {
+    $q.notify({
+      message: "Please fill in both email and password.",
+      color: "negative",
+      icon: "error"
+    });
+    return;
+  }
+
+  loading.value = true;
+
   try {
-    const res = await apiCall.login(state);
-    if (res.data && res.data.status === "success") {
+    // apiCall.login vracia Axios response
+    const res = await apiCall.login({
+      email: email.value,
+      password: password.value
+    });
+
+    const data = res?.data;
+
+    if (data && data.status === "success") {
       $q.notify({
         message: "Login successful!",
         color: "positive",
         icon: "check"
       });
-      router.push({ name: "donor-posts" });
+
+      // ak máme v URL ?redirect=..., použi ho; inak choď na donor-posts
+      const redirect = (route.query.redirect as string) || { name: "donor-posts" };
+      router.push(redirect);
     } else {
       $q.notify({
-        message: "Invalid credentials",
+        message: data?.message || "Invalid credentials",
         color: "negative",
         icon: "error"
       });
@@ -74,17 +105,28 @@ const onSubmit = async () => {
     if (process.env.NODE_ENV === "development") {
       console.error("Login error:", err);
     }
-    // Nový BE error formát: {status: "error", message: "..."}
-    const error = err as { response?: { data?: { message?: string; error?: string } } };
+
+    const error = err as {
+      response?: {
+        data?: {
+          message?: string;
+          error?: string;
+        };
+      };
+    };
+
     const message =
       error.response?.data?.message ||
       error.response?.data?.error ||
       "Login failed. Please try again.";
+
     $q.notify({
       message,
       color: "negative",
       icon: "error"
     });
+  } finally {
+    loading.value = false;
   }
 };
 </script>

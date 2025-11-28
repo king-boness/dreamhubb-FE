@@ -183,10 +183,8 @@ onBeforeUnmount(() => {
 });
 
 const logout = async () => {
-  // Volať logout action z user store
+  // Volať logout action z user store (už robí redirect na auth-welcome)
   await userStore.logout();
-  // Presmerovať na login
-  router.push({ name: "login" });
 };
 function changeTheme() {
   $q.dark.toggle();
@@ -246,7 +244,7 @@ const routesName = route.name?.toString() || "";
 
 const routeCheck = (name: string) => {
   if (process.env.NODE_ENV === "development") {
-  console.log(routesName);
+    console.log(routesName);
   }
   routesName.startsWith("donee")
     ? router.push({ name: `donee-${name}` })

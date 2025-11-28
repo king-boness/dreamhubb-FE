@@ -34,17 +34,22 @@ export interface Post{
     viewed:number
   }
 }
-export interface PostDetail{
-  name: string,
-  goalImage: string,
-  images: Array<string>,
-  date: string,
-  location: string,
-  views: number,
-  description:string,
-  aboutDonee:string,
-  doneeName: string,
-  karmaValue: number
+export interface PostDetail {
+  post_id: number;
+  title: string;
+  description: string;
+  date_created: string;
+  date_deadline: string | null;
+  tokens: number;
+  views: number;
+  category_name: string;
+  category_image?: string | null;
+
+  author_id?: number;
+  author_name: string;
+  author_picture?: string | null;
+
+  images: string[];
 }
 export interface Notification{
   user:{

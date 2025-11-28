@@ -228,7 +228,7 @@ const onFileChange = (event: Event) => {
   data.imageSrc = src;
   data.image = file as File;
   if (process.env.NODE_ENV === "development") {
-  console.log(src);
+    console.log(src);
   }
 };
 fetch("/images/Auth/default-avatar-male.jpg").then((response) =>

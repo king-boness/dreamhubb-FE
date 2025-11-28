@@ -15,7 +15,7 @@
             </q-banner>
           </div>
           <div v-if="route.name == 'login'" class="buttonDiv">
-            <q-btn class="arrowButtonBack" @click="$router.go(-1)">
+            <q-btn class="arrowButtonBack" @click="handleBack">
               <img
                 class="arrowButtonBack-icon"
                 src="/icons/arrowIcon.svg"
@@ -51,8 +51,13 @@
 <script setup lang="ts">
 const isInternet = navigator.onLine;
 
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
+const router = useRouter();
+
+const handleBack = () => {
+  router.push({ name: "auth-welcome" });
+};
 </script>
 <style lang="scss" scoped>
 .landingPage-mapImage {

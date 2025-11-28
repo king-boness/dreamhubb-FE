@@ -1,3 +1,4 @@
+// src/router/index.ts
 import { route } from "quasar/wrappers";
 import {
   createMemoryHistory,
@@ -5,63 +6,112 @@ import {
   createWebHashHistory,
   createWebHistory
 } from "vue-router";
-import { useUserStore } from "src/stores/user-store";
 
 import routes from "./routes";
+import { useUserStore } from "src/stores/user-store";
 
-/*
- * If not building with SSR mode, you can
- * directly export the Router instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Router instance.
- */
-
-export default route(function (/* { store, ssrContext } */) {
+export default route(function ({ store }) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === "history" ? createWebHistory : createWebHashHistory);
+    : (process.env.VUE_ROUTER_MODE === "history"
+        ? createWebHistory
+        : createWebHashHistory);
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
-
-    // Leave this as is and make changes in quasar.conf.js instead!
-    // quasar.conf.js -> build -> vueRouterMode
-    // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
   });
+
   Router.beforeEach((to, from, next) => {
-    const userStore = useUserStore();
-    const token = userStore.token || localStorage.getItem("jwtToken") || "";
+    // Pri prvotnom načítaní (from je undefined) - použiť len localStorage
+    const isInitialNavigation = !from || from.name === undefined;
 
-    // Splash screen - vždy umožniť, nechá sa na komponente rozhodnúť
-    if (to.name === "splash") {
+    try {
+      // Použiť userStore.isAuthenticated primárne, fallback na localStorage
+      // Na prvotnom načítaní môže byť store ešte nie je pripravený, takže použijeme fallback
+      let isAuthenticated = false;
+      const hasToken = !!localStorage.getItem("jwtToken");
+
+      if (isInitialNavigation) {
+        // Pri prvotnom načítaní používame len localStorage
+        isAuthenticated = hasToken;
+      } else {
+        // Pri ďalších navigáciách môžeme použiť store
+        try {
+          if (store) {
+            const userStore = useUserStore(store);
+            isAuthenticated = userStore.isAuthenticated || hasToken;
+          } else {
+            isAuthenticated = hasToken;
+          }
+        } catch (storeError) {
+          // Ak store nie je pripravený, použij len localStorage
+          isAuthenticated = hasToken;
+        }
+      }
+
+      // 🌀 Splash screen – vždy povolený
+      if (to.name === "splash") {
+        next();
+        return;
+      }
+
+      // 🚪 guestOnly routes - len pre neprihlásených
+      if (to.meta.guestOnly && isAuthenticated) {
+        next({ name: "donor-posts" });
+        return;
+      }
+
+      // 🔐 requiresAuth routes - len pre prihlásených
+      if (to.meta.requiresAuth && !isAuthenticated) {
+        next({ name: "auth-welcome-page" });
+        return;
+      }
+
+      // 🏠 Root path redirect
+      if (to.path === "/" && to.name !== "splash") {
+        if (isAuthenticated) {
+          next({ name: "donor-posts" });
+        } else {
+          next({ name: "auth-welcome-page" });
+        }
+        return;
+      }
+
+      // Ak navigujeme na auth-welcome parent route, presmerovať na child route
+      if (to.name === "auth-welcome" && to.path === "/auth" && !to.matched.some(record => record.name === "auth-welcome-page")) {
+        // Presmerovať na child route, aby sa komponent načítal
+        next({ name: "auth-welcome-page" });
+        return;
+      }
+
+      // 🔁 Legacy: Prihlásený používateľ na login / landing → rovno na feed
+      if (
+        isAuthenticated &&
+        (to.name === "login" ||
+          to.name === "landing" ||
+          to.name === "registration" ||
+          to.name === "explainers")
+      ) {
+        next({ name: "donor-posts" });
+        return;
+      }
+
+      // Vždy zavolaj next() - aj keď nie je žiadna špeciálna logika
       next();
-      return;
+    } catch (error) {
+      // Fallback: ak je problém s store, použij len localStorage
+      const hasToken = !!localStorage.getItem("jwtToken");
+      if (to.meta.requiresAuth && !hasToken) {
+        next({ name: "auth-welcome-page" });
+      } else if (to.meta.guestOnly && hasToken) {
+        next({ name: "donor-posts" });
+      } else {
+        // Vždy zavolaj next() aj v catch bloku
+        next();
+      }
     }
-
-    // Pôvodná logika pre requiresAuth
-    if (to.meta.requiresAuth && !token) {
-      next({ name: "login" });
-      return;
-    }
-
-    // Ak má token a je na auth stránkach, presmerovať na home
-    if (token !== "" && (to.name === "landing" || to.name === "login" || to.name === "registration" || to.name === "explainers")) {
-      next({ name: "donor-posts" });
-      return;
-    }
-
-    // Fallback guard: ak route neexistuje (404) a používateľ nie je prihlásený, redirect na login
-    if (!to.matched.length && !token) {
-      next({ name: "login" });
-      return;
-    }
-
-    // Ak route neexistuje, ale má token, možno nechať Vue router riešiť 404
-    next();
   });
 
   return Router;

@@ -179,22 +179,22 @@ const dragOver = () => {
 };
 
 const drop = async (e: DragEvent) => {
-      let status = true;
+  let status = true;
   const files = Array.from(e.dataTransfer?.files || []);
-      if (e && files) {
-        files.forEach((file) => {
-          if (file.type.startsWith("image") === false) status = false;
-        });
-        if (status === true) {
+  if (e && files) {
+    files.forEach((file) => {
+      if (file.type.startsWith("image") === false) status = false;
+    });
+    if (status === true) {
       if (props.max && files.length + uploadedImages.value.length > props.max) {
         error.value = props.maxError || `Maximum files is ${props.max}`;
-          } else {
+      } else {
         await handleUpload(files);
-          }
-        } else {
-      error.value = props.fileError || "Unsupported file type";
-        }
       }
+    } else {
+      error.value = props.fileError || "Unsupported file type";
+    }
+  }
   dropped.value = 0;
 };
 
@@ -205,8 +205,8 @@ const append = () => {
 const handleUpload = async (files: File[]) => {
   if (props.max && uploadedImages.value.length + files.length > props.max) {
     error.value = props.maxError || `Maximum files is ${props.max}`;
-        return;
-      }
+    return;
+  }
 
   isUploading.value = true;
   error.value = "";

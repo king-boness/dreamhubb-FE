@@ -1,298 +1,977 @@
 <template>
-  <div class="column col-12 postDetail">
-    <!-- TODO: dynamicke nacitanie bg -->
-    <div class="postDetailBg">
-      <ImageIndexSlider
-        :images="postDetail.images"
-        :count="postDetail.images.length"
-      />
-      <div class="postDetail-blurContainer"></div>
-      <div class="detailIconDiv" :class="{ iphoneDevice: $q.platform.is.ios }">
-        <q-btn
-          class="PostDetail-btn PostDetail-closeBtn"
-          @click="$router.go(-1)"
-          ><img src="/icons/closeIcon.svg" alt="" class="closeIcon" />
-        </q-btn>
+  <div class="postDetail" v-if="post">
+    <div class="postDetail-inner">
 
-        <div class="detailIconDivRight">
-          <q-btn class="PostDetail-btn"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                d="M12 14.6667C11.4444 14.6667 10.9722 14.4723 10.5833 14.0834C10.1944 13.6945 10 13.2223 10 12.6667C10 12.5889 10.0056 12.5083 10.0167 12.4247C10.0278 12.3416 10.0444 12.2667 10.0667 12.2L5.36667 9.46671C5.17778 9.63337 4.96667 9.76382 4.73333 9.85804C4.5 9.95271 4.25556 10 4 10C3.44444 10 2.97222 9.8056 2.58333 9.41671C2.19444 9.02782 2 8.5556 2 8.00004C2 7.44449 2.19444 6.97226 2.58333 6.58337C2.97222 6.19449 3.44444 6.00004 4 6.00004C4.25556 6.00004 4.5 6.04715 4.73333 6.14137C4.96667 6.23604 5.17778 6.36671 5.36667 6.53337L10.0667 3.80004C10.0444 3.73337 10.0278 3.65849 10.0167 3.57537C10.0056 3.49182 10 3.41115 10 3.33337C10 2.77782 10.1944 2.3056 10.5833 1.91671C10.9722 1.52782 11.4444 1.33337 12 1.33337C12.5556 1.33337 13.0278 1.52782 13.4167 1.91671C13.8056 2.3056 14 2.77782 14 3.33337C14 3.88893 13.8056 4.36115 13.4167 4.75004C13.0278 5.13893 12.5556 5.33337 12 5.33337C11.7444 5.33337 11.5 5.28604 11.2667 5.19137C11.0333 5.09715 10.8222 4.96671 10.6333 4.80004L5.93333 7.53337C5.95556 7.60004 5.97222 7.67493 5.98333 7.75804C5.99444 7.8416 6 7.92226 6 8.00004C6 8.07782 5.99444 8.15826 5.98333 8.24137C5.97222 8.32493 5.95556 8.40004 5.93333 8.46671L10.6333 11.2C10.8222 11.0334 11.0333 10.9027 11.2667 10.808C11.5 10.7138 11.7444 10.6667 12 10.6667C12.5556 10.6667 13.0278 10.8612 13.4167 11.25C13.8056 11.6389 14 12.1112 14 12.6667C14 13.2223 13.8056 13.6945 13.4167 14.0834C13.0278 14.4723 12.5556 14.6667 12 14.6667Z"
-                fill="#FCFCFC"
-              />
-            </svg>
-          </q-btn>
-          <q-btn
-            class="PostDetail-btn"
-            @click="isLiked = !isLiked"
-            :class="{ liked: isLiked }"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                d="M7.99992 14.2333L7.03325 13.3533C3.59992 10.24 1.33325 8.18 1.33325 5.66667C1.33325 3.60667 2.94659 2 4.99992 2C6.15992 2 7.27325 2.54 7.99992 3.38667C8.72659 2.54 9.83992 2 10.9999 2C13.0533 2 14.6666 3.60667 14.6666 5.66667C14.6666 8.18 12.3999 10.24 8.96659 13.3533L7.99992 14.2333Z"
-                fill="#FCFCFC"
-              /></svg
-          ></q-btn>
-        </div>
-      </div>
-      <div class="postDetailInformations">
-        <div class="postGoal">
-          <img :src="postDetail.goalImage" alt="" class="postGoalImg" />
-          <span class="postGoalText">{{ postDetail.name }}</span>
-        </div>
-
-        <q-btn
-          class="PostDetail-btn PostDetail-messageButton"
-          @click="routeCheck('post-details')"
-        >
-          <img src="/icons/messageIcon.svg" alt="" class="PostDetailIcon" />
-        </q-btn>
-      </div>
-    </div>
-
-    <div class="postDetails">
-      <div class="postDate postCloserInfo">
-        <img src="/icons/calendarIcon.svg" alt="" />
-        <span class="postDatas">{{ postDetail.date }}</span>
-      </div>
-      <div class="postLocation postCloserInfo">
-        <img src="/icons/locationIcon.svg" alt="" />
-        <span class="postDatas">{{ postDetail.location }}</span>
-      </div>
-      <div class="postViews postCloserInfo">
-        <img src="/icons/viewIcon.svg" alt="" />
-        <span class="postDatas">{{ postDetail.views }}</span>
-      </div>
-    </div>
-    <div class="aboutPost">
-      <h4 class="postDetailHeading">About Dream</h4>
-      <span class="aboutPostDescription">{{ postDetail.description }}</span>
-      <div class="reportProblem" v-if="!(route.name === 'donee-post-detail')">
-        <img class="reportDreamImg" src="/icons/reportIcon.svg" alt="" />
-        <a class="reportDreamLink" @click="$router.push('post-detail/report')"
-          >Report a dream</a
-        >
-      </div>
-      <div class="aboutDonne">
-        <h3 class="aboutDoneeHeading">About Donee</h3>
-        <div class="doneeProfile">
+      <!-- TOP IMAGE / SLIDER -->
+      <div class="postDetailBg">
+        <div class="postDetail-imageWrapper" :style="heroStyle">
           <img
-            class="doneeProfilePicture"
-            src="/images/Auth/profilePicture.jpeg"
-            alt=""
+            v-if="safeImages.length === 1"
+            class="postDetail-img"
+            :src="safeImages[0]"
+            alt="Post image"
+            @click="openLightbox(0)"
+            style="cursor: pointer;"
           />
-          <span class="doneeProfileName">{{ postDetail.doneeName }}</span>
-          <div
-            class="postDetail-valueContainer"
-            v-if="route.name === 'donee-post-detail'"
+
+          <ImageIndexSlider
+            v-else
+            :images="safeImages"
+            :current-index="currentImageIndex"
+            @image-click="openLightbox"
+            @index-change="handleImageIndexChange"
+          />
+        </div>
+
+        <!-- TOP PROGRESS BAR -->
+        <div class="postDetail-progressBar" v-if="safeImages.length >= 1">
+          <span
+            v-for="(img, index) in safeImages"
+            :key="`progress-${index}`"
+            class="progress-segment"
+            :class="{ 'is-active': currentImageIndex === index }"
+            :style="{ width: progressBarWidth + 'px' }"
           >
-            <img src="/icons/KarmaIcon.png" alt="" />
-            <span>{{ postDetail.karmaValue }}</span>
+            <span
+              class="progress-segment-fill"
+              :style="{ width: index === currentImageIndex ? progressBarFill + '%' : '0%' }"
+            ></span>
+          </span>
+        </div>
+
+        <!-- GRADIENT -->
+        <div class="postDetail-blurContainer"></div>
+
+      <!-- TOP ICONS -->
+        <div class="postDetail-topIcons">
+          <q-btn
+            round
+            flat
+            dense
+            class="iconBtn iconBtn-left"
+            :icon="'img:/assets/icons/post/icon-close.svg'"
+            @click="handleClose"
+          />
+
+          <div class="postDetail-topIconsRight">
+            <q-btn
+              round
+              flat
+              dense
+              class="iconBtn"
+              :icon="'img:/assets/icons/post/icon-share.svg'"
+              @click="handleShare"
+            />
+            <q-btn
+              round
+              flat
+              dense
+              class="iconBtn"
+              :icon="'img:/assets/icons/post/icon-heart.svg'"
+              @click="handleLike"
+            />
           </div>
         </div>
-        <span class="doneeProfileDescription"
-          >{{ postDetail.aboutDonee }}
-        </span>
-      </div>
-      <div class="row justify-center">
-        <SwipeDrawerComponent
-          v-if="route.name === 'donor-post-detail'"
-          :amount="postDetail.karmaValue"
-        />
-        <div v-else class="postDetail-doneeFooter">
-          <q-btn class="postDetail-editDreamButton"
-            ><span>Edit my dream</span></q-btn
-          >
+
+        <!-- CATEGORY CHIP -->
+        <div class="postDetail-chipRow">
+          <div class="postDetail-categoryPill">
+            <q-icon
+              class="postDetail-categoryIcon"
+              :name="'img:/assets/icons/ui/icon-category-general.svg'"
+            />
+            <span class="postDetail-categoryText">
+              {{ post.category_name || "Aurora Expedition" }}
+            </span>
+          </div>
+        </div>
+
+        <!-- COMMENT ICON (bottom right) -->
+        <div class="postDetail-commentWrapper">
           <q-btn
-            class="postDetail-topUpDreamButton"
-            @click="$router.push({ name: 'donee-post-detail-topUp' })"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              class="topUpIcon"
-            >
-              <path
-                d="M12 16C12.2833 16 12.521 15.9043 12.713 15.713C12.905 15.5217 13.0007 15.284 13 15V11.8L13.9 12.7C14.0833 12.8833 14.3167 12.975 14.6 12.975C14.8833 12.975 15.1167 12.8833 15.3 12.7C15.4833 12.5167 15.575 12.2833 15.575 12C15.575 11.7167 15.4833 11.4833 15.3 11.3L12.7 8.7C12.6 8.6 12.4917 8.52933 12.375 8.488C12.2583 8.44667 12.1333 8.42567 12 8.425C11.8667 8.425 11.7417 8.446 11.625 8.488C11.5083 8.53 11.4 8.60067 11.3 8.7L8.7 11.3C8.51667 11.4833 8.425 11.7167 8.425 12C8.425 12.2833 8.51667 12.5167 8.7 12.7C8.88333 12.8833 9.11667 12.975 9.4 12.975C9.68333 12.975 9.91667 12.8833 10.1 12.7L11 11.8V15C11 15.2833 11.096 15.521 11.288 15.713C11.48 15.905 11.7173 16.0007 12 16ZM12 22C10.6167 22 9.31667 21.7377 8.1 21.213C6.88333 20.6883 5.825 19.9757 4.925 19.075C4.025 18.175 3.31267 17.1167 2.788 15.9C2.26333 14.6833 2.00067 13.3833 2 12C2 10.6167 2.26267 9.31667 2.788 8.1C3.31333 6.88333 4.02567 5.825 4.925 4.925C5.825 4.025 6.88333 3.31233 8.1 2.787C9.31667 2.26167 10.6167 1.99933 12 2C13.3833 2 14.6833 2.26267 15.9 2.788C17.1167 3.31333 18.175 4.02567 19.075 4.925C19.975 5.825 20.6877 6.88333 21.213 8.1C21.7383 9.31667 22.0007 10.6167 22 12C22 13.3833 21.7373 14.6833 21.212 15.9C20.6867 17.1167 19.9743 18.175 19.075 19.075C18.175 19.975 17.1167 20.6877 15.9 21.213C14.6833 21.7383 13.3833 22.0007 12 22Z"
-                fill="white"
+            round
+            flat
+            dense
+            class="postDetail-commentBtn"
+            :icon="'img:/assets/icons/post/icon-comment.svg'"
+            @click="handleComments"
+          />
+          <span v-if="commentsCount !== null && commentsCount > 0" class="postDetail-commentCount">
+            {{ commentsCount }}
+          </span>
+        </div>
+
+        <!-- TITLE + META OVERLAY -->
+        <div class="postDetail-infoOverlay">
+          <h1 class="postTitleOnImage">{{ displayTitle }}</h1>
+          <div class="postDetail-metaRow">
+            <div class="postDetail-metaItem">
+              <q-icon
+                class="postDetail-metaIcon"
+                :name="'img:/assets/icons/ui/icon-date.svg'"
               />
-              <circle cx="20" cy="4" r="4" fill="#BD0043" /></svg
-          ></q-btn>
+              <span>{{ displayDate }}</span>
+            </div>
+            <div class="postDetail-metaItem">
+              <q-icon
+                class="postDetail-metaIcon"
+                :name="'img:/assets/icons/ui/icon-location.svg'"
+              />
+              <span>{{ displayLocation }}</span>
+            </div>
+            <div class="postDetail-metaItem">
+              <q-icon
+                class="postDetail-metaIcon"
+                :name="'img:/assets/icons/ui/icon-views.svg'"
+              />
+              <span>{{ viewsCount }}</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- BODY CONTENT -->
+      <div class="postDetailContent">
+
+        <!-- CTA BUTTON -->
+        <div class="postCTA">
+          <button class="primaryCtaBtn" @click="openContributeSheet">
+            <div class="primaryCtaMain">CONTRIBUTE</div>
+          </button>
+        </div>
+        <div class="postDetail-rewardRow">
+          <q-icon
+            class="postDetail-rewardIcon"
+            :name="'img:/assets/icons/ui/icon-reward.svg'"
+          />
+          <span class="postDetail-rewardLabel">Reward:</span>
+          <span class="postDetail-rewardValue">
+            {{ displayTokens }} tokens
+          </span>
     </div>
+
+      <!-- ABOUT DREAM -->
+      <div class="aboutPost">
+        <h2>About Dream</h2>
+          <p>{{ post.description }}</p>
+          <p v-for="(paragraph, idx) in aboutDreamParagraphs" :key="`dream-${idx}`">
+            {{ paragraph }}
+          </p>
+
+          <button
+            type="button"
+            class="postDetail-reportBtn"
+            @click="handleReportDream"
+          >
+            <q-icon
+              class="postDetail-reportIcon"
+              :name="'img:/assets/icons/ui/icon-report.svg'"
+            />
+            <span>REPORT A DREAM</span>
+          </button>
+      </div>
+
+        <!-- ABOUT AUTHOR / DREAMER -->
+        <div class="aboutAuthor">
+        <h2>About Author</h2>
+
+          <div
+            class="authorCard"
+            role="button"
+            tabindex="0"
+            @click="goToAuthorProfile"
+            @keyup.enter="goToAuthorProfile"
+          >
+          <img
+              :src="displayAuthorAvatar"
+            class="authorAvatar"
+              alt="Author avatar"
+          />
+          <div class="authorInfo">
+              <p class="authorName">{{ displayAuthorName }}</p>
+              <p class="authorRole">{{ displayAuthorLocation }}</p>
+            </div>
+          </div>
+
+          <p class="authorLead">
+            Dreamer · Reykjavík — obsessed with northern lights and community joy.
+          </p>
+          <p v-for="(paragraph, idx) in doneeInfo.description" :key="`author-story-${idx}`" class="authorStory">
+            {{ paragraph }}
+          </p>
+        </div>
+
+      </div>
+    </div>
+    <transition name="sheet-fade">
+      <div
+        v-if="isContributeSheetOpen"
+        class="contributeSheet-backdrop"
+        @click.self="closeContributeSheet"
+      >
+        <div class="contributeSheet">
+          <div class="contributeSheet-handle"></div>
+          <h2 class="contributeSheet-title">How do you want to contribute?</h2>
+
+          <button class="contributeSheet-btn primary" @click="onContributeOption('accomplish')">
+            ACCOMPLISH DREAM
+          </button>
+          <button class="contributeSheet-btn secondary" @click="onContributeOption('help')">
+            HELP TO FULFILL
+          </button>
+          <button class="contributeSheet-btn tertiary" @click="onContributeOption('topup')">
+            TOP UP THE DREAM
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Lightbox Modal -->
+    <q-dialog v-model="isLightboxOpen" maximized class="lightbox-dialog">
+      <q-card class="lightbox-card">
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          class="lightbox-close"
+          @click="isLightboxOpen = false"
+        />
+        <div class="lightbox-content">
+          <img
+            :src="safeImages[lightboxImageIndex]"
+            :alt="`Image ${lightboxImageIndex + 1}`"
+            class="lightbox-image"
+          />
+          <div class="lightbox-nav">
+            <q-btn
+              v-if="safeImages.length > 1"
+              flat
+              round
+              dense
+              icon="chevron_left"
+              class="lightbox-nav-btn"
+              @click="previousLightboxImage"
+            />
+            <q-btn
+              v-if="safeImages.length > 1"
+              flat
+              round
+              dense
+              icon="chevron_right"
+              class="lightbox-nav-btn"
+              @click="nextLightboxImage"
+            />
+          </div>
+          <div class="lightbox-indicator" v-if="safeImages.length > 1">
+            {{ lightboxImageIndex + 1 }} / {{ safeImages.length }}
+          </div>
+        </div>
+      </q-card>
+    </q-dialog>
   </div>
+
+  <!-- LOADER (fallback) -->
+  <template v-else>
+    <AppSplash />
+  </template>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import SwipeDrawerComponent from "src/components/partials/SwipeDrawerComponent.vue";
+import { ref, onMounted, onBeforeUnmount, computed, nextTick, watch } from "vue";
+import { useApiCallStore, type FullPost } from "src/stores/api-calls-store";
+import { useRoute, useRouter } from "vue-router";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
-import { useRouter, useRoute } from "vue-router";
-import { PostDetail } from "src/components/models";
-const isLiked = ref(false);
-const router = useRouter();
-const route = useRoute();
-const routesName = route.name?.toString() || "";
+import AppSplash from "src/components/common/AppSplash.vue";
+import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 
-const routeCheck = (name: string) => {
-  if (process.env.NODE_ENV === "development") {
-  console.log(routesName);
-  }
-  routesName.startsWith("donee")
-    ? router.push({ name: `donee-${name}` })
-    : router.push({ name: `donor-${name}` });
+// Enable swipe-back gesture
+useEdgeSwipeBack();
+
+const api = useApiCallStore();
+const route = useRoute();
+const router = useRouter();
+
+type ContributeOptionType = "tokens" | "share" | "mentoring" | "other";
+
+interface ContributeOption {
+  id: string | number;
+  type: ContributeOptionType;
+  label: string;
+}
+
+interface PostDetail extends FullPost {
+  commentsCount?: number;
+}
+
+// eslint-disable-next-line func-call-spacing
+const emit = defineEmits<{
+  (e: "open-contribute-tokens", payload: { postId: number | string }): void;
+  (e: "open-contribute-mentoring", payload: { postId: number | string }): void;
+  (e: "open-comments-thread", payload: { postId: number | string }): void;
+}>();
+
+type ScrollEventTarget = Window | HTMLElement;
+
+const isLiked = ref(false);
+const likesCount = ref<number | null>(null);
+const isSaved = ref(false);
+const commentsCount = ref<number | null>(null);
+const post = ref<PostDetail | null>(null);
+const scrollY = ref(0);
+const scrollTarget = ref<ScrollEventTarget | null>(null);
+const cleanupFns: Array<() => void> = [];
+const isContributeSheetOpen = ref(false);
+const currentImageIndex = ref(0);
+const progressBarFill = ref(0);
+const autoSlideInterval = ref<number | null>(null);
+const progressIntervalId = ref<number | null>(null);
+const isLightboxOpen = ref(false);
+const lightboxImageIndex = ref(0);
+const additionalImages = ref<string[]>([]);
+const isMounted = ref(false);
+
+const aboutDreamParagraphs = [
+  "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
+  "Aliquam posuere purus pellentesque ipsum imperdiet ut sociis eget egestas pharetra. At nisl nisl lectus enim egestas diam elementum euismod dui.",
+  "Cursus quis et proin quis ut a sit. Nisi massa aenean turpis risus libero amet aliquam."
+];
+
+const doneeInfo = {
+  name: "Mackenzie Doe",
+  role: "Dreamer • Reykjavík",
+  avatar: "/images/Auth/profilePicture.jpeg",
+  description: [
+    "Mackenzie leads local teens on their first northern lights adventures, mixing science, art, and community storytelling to spark curiosity.",
+    "Your support keeps the campfires bright, the cocoa warm, and every night under the aurora full of wonder."
+  ]
 };
 
-const postDetail = ref({
-  name: "Aurora Expedition",
-  goalImage: "/images/Auth/goalPicture.png",
-  images: [
-    "https://images.unsplash.com/photo-1528155124528-06c125d81e89?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=689&q=80",
-    "https://images.unsplash.com/photo-1568607689150-17e625c1586e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    "https://i.etsystatic.com/32050623/r/il/76af79/4305610002/il_fullxfull.4305610002_2o9t.jpg",
-    "https://images.unsplash.com/photo-1686890121573-5feec595490e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
-  ],
-  date: "09/15/2023",
-  location: "Island, Reykjavik",
-  views: 156,
-  description:
-    "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci bibendum aenean morbi id. Bibendum semper viverra aenean turpis risus libero amet aliquam. ",
-  aboutDonee:
-    "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci bibendum aenean morbi id. Bibendum semper viverra aenean turpis risus libero amet aliquam. ",
-  doneeName: "John Doe",
-  karmaValue: 1584
-} as PostDetail);
+const readScrollPosition = () => {
+  // Always use window.scrollY for consistency with Quasar QLayout
+  return window.scrollY || document.documentElement?.scrollTop || document.body?.scrollTop || 0;
+};
+
+const handleScroll = () => {
+  const newScrollY = readScrollPosition();
+  scrollY.value = newScrollY;
+  // Debug: log scroll position to verify it's working
+  if (newScrollY > 0 && newScrollY % 50 === 0) {
+    console.log("📜 Scroll position:", newScrollY, "| Blur progress:", Math.min(newScrollY / 220, 1).toFixed(2));
+  }
+};
+
+const attachScrollListener = (target: ScrollEventTarget) => {
+  target.addEventListener("scroll", handleScroll, { passive: true });
+  cleanupFns.push(() => target.removeEventListener("scroll", handleScroll));
+};
+
+const heroStyle = computed(() => {
+  const maxBlur = 14;
+  const maxTranslate = 40;
+  const maxScroll = 400; // Increased for smoother, more gradual blur
+  const progress = Math.min(scrollY.value / maxScroll, 1);
+
+  const styles = {
+    filter: `blur(${progress * maxBlur}px)`,
+    transform: `translateY(${-progress * maxTranslate}px)`
+  };
+
+  // Debug: log computed style when scroll changes significantly
+  if (progress > 0 && scrollY.value % 100 === 0) {
+    console.log("🎨 heroStyle computed:", styles, "| progress:", progress.toFixed(2));
+  }
+
+  return styles;
+});
+
+// Computed property to get token value - prioritize tokenReward from query params (from feed) over API value
+const displayTokens = computed(() => {
+  // Priority 1: Get tokenReward from query params (passed from PostsPage)
+  const tokenRewardFromQuery = route.query.tokenReward;
+  if (tokenRewardFromQuery && typeof tokenRewardFromQuery === "string") {
+    const parsed = Number.parseInt(tokenRewardFromQuery, 10);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  // Priority 2: Get tokens from post (API value)
+  if (post.value?.tokens !== undefined && post.value.tokens !== null) {
+    return post.value.tokens;
+  }
+
+  // Fallback
+  return 0;
+});
+
+// Computed property to get title - prioritize dreamTitle from query params (from feed) over API value
+const displayTitle = computed(() => {
+  // Priority 1: Get dreamTitle from query params (passed from PostsPage)
+  const dreamTitleFromQuery = route.query.dreamTitle;
+  if (typeof dreamTitleFromQuery === "string" && dreamTitleFromQuery.trim() !== "") {
+    return dreamTitleFromQuery;
+  }
+
+  // Priority 2: Get title from post (API value)
+  return post.value?.title ?? "";
+});
+
+// Computed property to get date - prioritize createdAt from query params (from feed) over API value
+const displayDate = computed(() => {
+  // Priority 1: Get createdAt from query params (passed from PostsPage)
+  const createdAtFromQuery = route.query.createdAt;
+  if (typeof createdAtFromQuery === "string" && createdAtFromQuery.trim() !== "") {
+    // Format date from MM/DD/YYYY (from feed) to DD.MM.YYYY (Slovak format for detail page)
+    const dateParts = createdAtFromQuery.split("/");
+    if (dateParts.length === 3) {
+      const [month, day, year] = dateParts;
+      return `${day}.${month}.${year}`;
+    }
+    return createdAtFromQuery;
+  }
+
+  // Priority 2: Get formatted date from post (API value)
+  return formattedDate.value;
+});
+
+// Computed property to get location - prioritize location from query params (from feed) over API value
+const displayLocation = computed(() => {
+  // Priority 1: Get location from query params (passed from PostsPage)
+  const locationFromQuery = route.query.location;
+  if (typeof locationFromQuery === "string" && locationFromQuery.trim() !== "") {
+    return locationFromQuery;
+  }
+
+  // Priority 2: Get location from post (API value)
+  return locationLabel.value;
+});
+
+// Computed property to get author name - prioritize authorName from query params (from feed) over API value
+const displayAuthorName = computed(() => {
+  // Priority 1: Get authorName from query params (passed from PostsPage)
+  const authorNameFromQuery = route.query.authorName;
+  if (typeof authorNameFromQuery === "string" && authorNameFromQuery.trim() !== "") {
+    return authorNameFromQuery;
+  }
+
+  // Priority 2: Get author_name from post (API value)
+  return post.value?.author_name ?? "";
+});
+
+// Computed property to get author avatar - prioritize authorAvatarUrl from query params (from feed) over API value
+const displayAuthorAvatar = computed(() => {
+  // Priority 1: Get authorAvatarUrl from query params (passed from PostsPage)
+  const authorAvatarUrlFromQuery = route.query.authorAvatarUrl;
+  if (typeof authorAvatarUrlFromQuery === "string" && authorAvatarUrlFromQuery.trim() !== "") {
+    return authorAvatarUrlFromQuery;
+  }
+
+  // Priority 2: Get avatar from doneeInfo (fallback)
+  return doneeInfo.avatar;
+});
+
+// Computed property to get author location for "About Author" section - prioritize location from query params
+const displayAuthorLocation = computed(() => {
+  // Priority 1: Get location from query params (passed from PostsPage)
+  const locationFromQuery = route.query.location;
+  if (typeof locationFromQuery === "string" && locationFromQuery.trim() !== "") {
+    return locationFromQuery;
+  }
+
+  // Priority 2: Extract location from doneeInfo.role or use default
+  const roleParts = doneeInfo.role.split("•");
+  if (roleParts.length > 1) {
+    return roleParts[1].trim();
+  }
+  return "Reykjavík";
+});
+
+onMounted(async () => {
+  isMounted.value = true;
+  const id = Number(route.params.id);
+  post.value = await api.getPostById(id);
+
+  // Debug: log post data to see what we're getting
+  if (process.env.NODE_ENV === "development") {
+    console.log("📦 Post data:", post.value);
+    console.log("🖼️ Images array:", post.value?.images);
+    const postAny = post.value as unknown as Record<string, unknown>;
+    console.log("🖼️ ImageUrl:", typeof postAny?.imageUrl === "string" ? postAny.imageUrl : null);
+  }
+
+  // Generate additional images if needed
+  const imageUrlFromQuery = route.query.imageUrl as string;
+  const postAny = post.value as unknown as Record<string, unknown>;
+  const imageUrlFromPost = (typeof postAny?.imageUrl === "string" ? postAny.imageUrl : null) ||
+    (typeof postAny?.image_url === "string" ? postAny.image_url : null) ||
+    (typeof postAny?.main_image === "string" ? postAny.main_image : null);
+  const imageUrl = imageUrlFromQuery || imageUrlFromPost;
+
+  if (imageUrl && typeof imageUrl === "string") {
+    try {
+      const urlParts = imageUrl.split("/seed/");
+      if (urlParts.length > 1) {
+        const baseUrl = urlParts[0] || "https://picsum.photos";
+        const seedMatch = imageUrl.match(/\/seed\/([^/]+)/);
+        if (seedMatch) {
+          const baseSeed = seedMatch[1].split("/")[0];
+          const additionalSeeds = ["mountain", "ocean", "forest", "desert", "city", "nature"];
+          const generated: string[] = [];
+          for (let i = 0; i < additionalSeeds.length; i++) {
+            const newSeed = additionalSeeds[i];
+            const newImageUrl = `${baseUrl}/seed/${baseSeed}-${newSeed}/800/600`;
+            if (newImageUrl !== imageUrl && !generated.includes(newImageUrl)) {
+              generated.push(newImageUrl);
+            }
+          }
+          additionalImages.value = generated;
+        }
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Error generating additional images:", error);
+      }
+    }
+  }
+
+  await nextTick();
+
+  // Always use window as scroll target for Quasar QLayout compatibility
+  scrollTarget.value = window;
+  console.log("🎯 PostDetail mounted - using window as scroll target");
+  console.log("📍 Initial scroll position:", readScrollPosition());
+
+  attachScrollListener(window);
+  handleScroll();
+
+  // Reset image index when post loads
+  currentImageIndex.value = 0;
+  progressBarFill.value = 0;
+
+  // Start auto-slide for images if we have multiple images
+  await nextTick();
+  console.log("🖼️ Safe images:", safeImages.value);
+  console.log("🖼️ Safe images length:", safeImages.value.length);
+  if (safeImages.value.length > 1 && isMounted.value) {
+    startAutoSlide();
+  }
+});
+
+onBeforeUnmount(() => {
+  isMounted.value = false;
+  pauseAutoSlide();
+  cleanupFns.forEach((fn) => fn());
+});
+
+const safeImages = computed(() => {
+  const p = post.value;
+  if (!p) return ["/images/Auth/postBackground.png"];
+
+  // Priority 1: Get imageUrl from route query (passed from PostsPage) - this ensures same image as on feed
+  const imageUrlFromQuery = route.query.imageUrl as string;
+
+  // Priority 2: Get imageUrl from post (used on PostsPage) - check multiple possible fields
+  const postAny = p as unknown as Record<string, unknown>;
+  const imageUrlFromPost = (typeof postAny?.imageUrl === "string" ? postAny.imageUrl : null) ||
+    (typeof postAny?.image_url === "string" ? postAny.image_url : null) ||
+    (typeof postAny?.main_image === "string" ? postAny.main_image : null);
+
+  // Use query param first (most reliable), then post field
+  const imageUrl = imageUrlFromQuery || imageUrlFromPost;
+  const images = p.images || [];
+
+  // Debug: log what we're getting
+  if (process.env.NODE_ENV === "development") {
+    console.log("🖼️ Computing safeImages - imageUrlFromQuery:", imageUrlFromQuery, "imageUrlFromPost:", imageUrlFromPost, "final imageUrl:", imageUrl, "images:", images);
+  }
+
+  let result: string[] = [];
+
+  // Priority 1: If imageUrl exists (from query or post), use it as first image (this matches PostsPage)
+  if (imageUrl && typeof imageUrl === "string" && !["NULL", "{NULL}"].includes(imageUrl.trim())) {
+    result.push(imageUrl);
+  }
+
+  // Priority 2: If no imageUrl, use first image from images array
+  if (result.length === 0 && Array.isArray(images) && images.length > 0) {
+    const firstValidImage = images[0];
+    if (firstValidImage && typeof firstValidImage === "string" && !["NULL", "{NULL}"].includes(firstValidImage.trim())) {
+      result.push(firstValidImage);
+    }
+  }
+
+  // Priority 3: Add remaining images from images array (avoid duplicates)
+  if (Array.isArray(images) && images.length > 0) {
+    const filteredImages = images.filter(
+      (img, idx) => {
+        // Skip first image if we already added it
+        if (result.length > 0 && idx === 0 && img === result[0]) {
+          return false;
+        }
+        // Skip if it's the same as imageUrl
+        if (imageUrl && img === imageUrl) {
+          return false;
+        }
+        return img &&
+          typeof img === "string" &&
+          !["NULL", "{NULL}"].includes(img.trim());
+      }
+    );
+    result = [...result, ...filteredImages];
+  }
+
+  // Priority 4: Add additional images if we have less than 4
+  if (result.length > 0 && result.length < 4 && additionalImages.value.length > 0) {
+    const needed = 4 - result.length;
+    const toAdd = additionalImages.value.slice(0, needed).filter(img => !result.includes(img));
+    result = [...result, ...toAdd];
+  }
+
+  // Fallback: If still no images found, use fallback
+  if (result.length === 0) {
+    return ["/images/Auth/postBackground.png"];
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🖼️ Final safeImages:", result);
+  }
+
+  return result;
+});
+
+const progressBarWidth = computed(() => {
+  const count = safeImages.value.length;
+  if (count === 0) return 0;
+  const totalGap = (count - 1) * 6; // 6px gap between segments
+  const totalPadding = 24; // 12px left + 12px right
+  return (window.innerWidth - totalPadding - totalGap) / count;
+});
+
+const handleImageIndexChange = (index: number) => {
+  currentImageIndex.value = index;
+  progressBarFill.value = 0;
+  resetAutoSlide();
+};
+
+const openLightbox = (index: number) => {
+  lightboxImageIndex.value = index;
+  isLightboxOpen.value = true;
+  pauseAutoSlide();
+};
+
+const previousLightboxImage = () => {
+  if (lightboxImageIndex.value > 0) {
+    lightboxImageIndex.value--;
+  } else {
+    lightboxImageIndex.value = safeImages.value.length - 1;
+  }
+};
+
+const nextLightboxImage = () => {
+  if (lightboxImageIndex.value < safeImages.value.length - 1) {
+    lightboxImageIndex.value++;
+  } else {
+    lightboxImageIndex.value = 0;
+  }
+};
+
+const startAutoSlide = () => {
+  if (safeImages.value.length <= 1 || !isMounted.value) return;
+
+  pauseAutoSlide();
+
+  // Reset progress bar
+  progressBarFill.value = 0;
+  const progressDuration = 5000; // 5 seconds
+  const progressInterval = 50; // Update every 50ms
+  const progressStep = (100 / progressDuration) * progressInterval;
+
+  progressIntervalId.value = window.setInterval(() => {
+    if (!isMounted.value) {
+      pauseAutoSlide();
+      return;
+    }
+    try {
+      if (progressBarFill.value < 100) {
+        progressBarFill.value = Math.min(progressBarFill.value + progressStep, 100);
+      }
+    } catch (error) {
+      // Component might be unmounting, stop the interval
+      pauseAutoSlide();
+    }
+  }, progressInterval);
+
+  autoSlideInterval.value = window.setInterval(() => {
+    if (!isMounted.value) {
+      pauseAutoSlide();
+      return;
+    }
+    try {
+      if (safeImages.value.length > 1) {
+        if (currentImageIndex.value < safeImages.value.length - 1) {
+          currentImageIndex.value++;
+        } else {
+          currentImageIndex.value = 0;
+        }
+        progressBarFill.value = 0;
+      }
+    } catch (error) {
+      // Component might be unmounting, stop the interval
+      pauseAutoSlide();
+    }
+  }, progressDuration);
+};
+
+const pauseAutoSlide = () => {
+  if (autoSlideInterval.value) {
+    clearInterval(autoSlideInterval.value);
+    autoSlideInterval.value = null;
+  }
+  if (progressIntervalId.value) {
+    clearInterval(progressIntervalId.value);
+    progressIntervalId.value = null;
+  }
+};
+
+const resetAutoSlide = () => {
+  pauseAutoSlide();
+  startAutoSlide();
+};
+
+const formattedDate = computed(() => {
+  if (!post.value?.date_created) return "";
+  const d = new Date(post.value.date_created);
+  if (Number.isNaN(d.getTime())) return post.value.date_created;
+  return d.toLocaleDateString("sk-SK", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+});
+
+const locationLabel = computed(() => {
+  const p = post.value;
+  if (!p) return "";
+  // TODO: typovať podľa API
+  const postAny = p as unknown as Record<string, unknown>;
+  const country = typeof postAny.country === "string" ? postAny.country : null;
+  const city = typeof postAny.city === "string" ? postAny.city : null;
+  const locationLabel = typeof postAny.locationLabel === "string" ? postAny.locationLabel : null;
+  return locationLabel ?? ([country, city].filter(Boolean).join(", ") || "Iceland, Reykjavík");
+});
+
+const viewsCount = computed(() => {
+  const p = post.value;
+  if (!p) return 0;
+  // TODO: typovať podľa API
+  const postAny = p as unknown as Record<string, unknown>;
+  const views = typeof postAny.views === "number" ? postAny.views : null;
+  const viewCount = typeof postAny.viewCount === "number" ? postAny.viewCount : null;
+  return views ?? viewCount ?? p.views ?? 0;
+});
+
+const goToAuthorProfile = () => {
+  // TODO: Get authorId from post data when available
+  // Currently FullPost only has author_name, not author.id
+  const postAny = post.value as unknown as Record<string, unknown>;
+  const author = postAny?.author as unknown as Record<string, unknown> | undefined;
+  const authorIdFromAuthor = author && typeof author.id === "number" ? author.id : null;
+  const authorIdFromPost = typeof postAny?.author_id === "number" ? postAny.author_id : null;
+  const authorId = authorIdFromAuthor || authorIdFromPost;
+  if (!authorId) {
+    console.warn("Chýba authorId, nedá sa otvoriť profil autora");
+    // TODO: navigate to author profile when authorId is available in API response
+    return;
+  }
+  router.push({
+    name: "author-profile", // TODO: predpokladaná budúca route
+    params: { authorId }
+  });
+};
+
+const handleClose = () => {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+  router.push({ name: "donor-posts" });
+};
+
+const currentPostUrl = computed(() => {
+  const id = post.value?.post_id ?? Number(route.params.id ?? NaN);
+  const base = window.location.origin || "https://app.dreamhubb.com";
+  if (!id || Number.isNaN(id)) {
+    return base;
+  }
+  return `${base}/donor/post-detail/${id}`;
+});
+
+const handleShare = async () => {
+  const shareData = {
+    title: post.value?.title ?? "dreamhubb",
+    text: post.value?.description ?? "",
+    url: currentPostUrl.value
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(currentPostUrl.value);
+      console.log("Post link copied to clipboard:", currentPostUrl.value);
+    } else {
+      console.log("Share:", shareData);
+    }
+  } catch (error) {
+    console.error("Share failed", error);
+  }
+};
+
+const sendLikeToApi = async (postId: number | string, like: boolean) => {
+  console.log("sendLikeToApi placeholder", { postId, like });
+};
+
+const handleLike = async () => {
+  const postId = post.value?.post_id;
+  if (!postId) {
+    console.warn("Cannot like: missing post id");
+    return;
+  }
+
+  const newValue = !isLiked.value;
+  isLiked.value = newValue;
+  if (likesCount.value !== null) {
+    likesCount.value += newValue ? 1 : -1;
+  }
+
+  try {
+    await sendLikeToApi(postId, newValue);
+  } catch (error) {
+    console.error("Failed to update like on server", error);
+    isLiked.value = !newValue;
+    if (likesCount.value !== null) {
+      likesCount.value += newValue ? -1 : 1;
+    }
+  }
+};
+
+const sendSaveToApi = async (postId: number | string, save: boolean) => {
+  console.log("sendSaveToApi placeholder", { postId, save });
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const handleSave = async () => {
+  const postId = post.value?.post_id;
+  if (!postId) {
+    console.warn("Cannot save: missing post id");
+    return;
+  }
+
+  const newValue = !isSaved.value;
+  isSaved.value = newValue;
+
+  try {
+    await sendSaveToApi(postId, newValue);
+  } catch (error) {
+    console.error("Failed to update save on server", error);
+    isSaved.value = !newValue;
+  }
+};
+
+const handleReportDream = () => {
+  const postId = post.value?.post_id;
+  if (!postId) return;
+
+  console.log("TODO: open report dream flow for post", postId);
+  // TODO: neskôr nahradiť reálnym modalom / route
+};
+
+const handleComments = () => {
+  const postId = post.value?.post_id ?? (Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
+  if (!postId) {
+    console.warn("Chýba postId, nedá sa otvoriť komentárový thread");
+    return;
+  }
+
+  const postIdValue: number | string = typeof postId === "string" ? (Number(postId) || postId) : postId;
+
+  // 1. emit event pre parent (do budúcna, ak budeme riešiť modaly):
+  emit("open-comments-thread", { postId: postIdValue });
+
+  // 2. zároveň pripravíme skeleton pre route na screen
+  // "Dream Detail - Thread - Contribution" (TODO - route sa doplní neskôr)
+  try {
+    router.push({
+      name: "donor-post-comments", // TODO: prispôsobiť skutočnému názvu route, keď bude vytvorená
+      params: { id: String(postIdValue) }
+    });
+  } catch (error) {
+    console.log("Route na komentáre zatiaľ neexistuje - TODO", error);
+  }
+  // Do implementácie komentárov budú tieto kroky slúžiť ako pripravený skeleton
+};
+
+const openContributeSheet = () => {
+  isContributeSheetOpen.value = true;
+};
+
+const closeContributeSheet = () => {
+  isContributeSheetOpen.value = false;
+};
+
+const onContributeOption = (option: ContributeOption | string) => {
+  const postId = post.value?.post_id;
+  if (!postId) {
+    console.warn("Chýba postId v onContributeOption");
+    return;
+  }
+
+  // Support both string (legacy) and ContributeOption object
+  const optionType = typeof option === "string" ? option : option.type;
+
+  switch (optionType) {
+    case "tokens":
+    case "accomplish":
+      emit("open-contribute-tokens", { postId });
+      break;
+    case "share":
+      handleShare();
+      break;
+    case "mentoring":
+    case "help":
+      emit("open-contribute-mentoring", { postId });
+      break;
+    case "topup":
+    default:
+      console.log("TODO: ďalšie typy contribute option", option);
+      break;
+  }
+
+  closeContributeSheet();
+};
+
+watch(
+  () => post.value,
+  (post) => {
+    if (post) {
+      const postAny = post as unknown as Record<string, unknown>;
+      const likesCountValue = typeof postAny.likesCount === "number" ? postAny.likesCount : null;
+      const likesValue = typeof postAny.likes === "number" ? postAny.likes : null;
+      likesCount.value = likesCountValue ?? likesValue ?? null;
+      isLiked.value = typeof postAny.isLiked === "boolean" ? postAny.isLiked : false;
+      commentsCount.value = typeof postAny.commentsCount === "number" ? postAny.commentsCount : null;
+    } else {
+      likesCount.value = null;
+      isLiked.value = false;
+      commentsCount.value = null;
+    }
+    isSaved.value = false;
+  },
+  { immediate: true }
+);
 </script>
 
-<style scoped lang="scss">
-.liked {
-  * {
-    fill: #bd0043;
-    opacity: 1 !important;
-  }
-}
-.postDetail-valueContainer {
-  display: flex;
-  align-items: center;
-  padding-left: 1rem;
-  gap: 0.4rem;
-  img {
-    height: 1.5rem;
-  }
-  span {
-    font-family: poppinsBold;
-    color: #f3f3f394;
-    font-size: 1rem;
-  }
-}
-
-.doneeProfile {
-  margin-top: 0.5rem !important;
-}
-.PostDetail-btn {
-  margin: 0 0.4rem;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 6.1875rem;
-  background: linear-gradient(
-    135deg,
-    rgba(106, 105, 105, 0.656) 0%,
-    rgba(0, 0, 0, 0.483) 100%
-  );
-  backdrop-filter: blur(1rem);
-  svg {
-    scale: 1.3 !important;
-  }
-}
-.PostDetail-messageButton {
-  background: linear-gradient(
-    135deg,
-    rgba(106, 105, 105, 0.902) 0%,
-    rgba(0, 0, 0, 0.68) 100%
-  );
-  backdrop-filter: blur(10px);
-}
-
-.postGoal {
-  background: linear-gradient(
-    108.46deg,
-    rgba(0, 0, 0, 0.786) 1%,
-    rgba(23, 23, 23, 0.789) 100%
-  );
-  width: auto;
-  padding: 0.9rem 0.7rem;
-  border-radius: 1.3rem;
-}
-.postDetail-doneeFooter {
-  position: fixed;
-  bottom: 0;
-  border-top-left-radius: 1.2rem;
-  border-top-right-radius: 1.2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 6.5rem;
-  padding: 0 1rem;
-  padding-bottom: 0.5rem;
-  border-top: 0.05rem solid rgba(255, 255, 255, 0.202);
-  background-image: url("/images/Auth/bg-explain.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  gap: 0.6rem;
-  .postDetail-editDreamButton {
-    background-color: rgba(182, 0, 67, 1) !important;
-    color: white !important;
-    border: none;
-    font-size: 1.1rem;
-    font-family: montseraatSemiBold;
-    border-radius: 0.5625rem !important;
-    height: 3.5rem;
-  }
-  .postDetail-topUpDreamButton {
-    width: 4.5rem;
-    height: 3.5rem;
-    border-radius: 0.375rem;
-    background: rgba(252, 252, 252, 0.1);
-  }
-}
-
-.aboutDonne {
-  margin-bottom: 8rem;
-}
-
-.postDetailInformations {
-  position: absolute;
-  z-index: 1;
-}
-
-.slide-fade-enter-active {
-  transition: all 0.1s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(20px);
-  opacity: 0;
-}
+<style lang="scss">
+/* styles for this page are v _postDetail.scss imported cez main.scss */
 </style>

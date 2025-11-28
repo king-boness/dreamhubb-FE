@@ -32,9 +32,9 @@ export default boot(async ({ router }) => {
         }
         localStorage.removeItem("jwtToken");
 
-        // Ak nie sme na login stránke, presmerovať
-        if (router && router.currentRoute.value.name !== "login" && router.currentRoute.value.name !== "landing" && router.currentRoute.value.name !== "splash") {
-          router.push({ name: "login" }).catch(() => {
+        // Ak nie sme na auth stránke, presmerovať na auth-welcome
+        if (router && router.currentRoute.value.name !== "login" && router.currentRoute.value.name !== "landing" && router.currentRoute.value.name !== "splash" && router.currentRoute.value.name !== "auth-welcome") {
+          router.push({ name: "auth-welcome" }).catch(() => {
             // Ignorovať chyby pri navigácii
           });
         }

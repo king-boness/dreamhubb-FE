@@ -50,7 +50,7 @@ let routesName = route.name?.toString() || "";
 const routeCheck = () => {
   routesName = route.name?.toString() || "";
   if (process.env.NODE_ENV === "development") {
-  console.log(routesName);
+    console.log(routesName);
   }
   routesName.startsWith("donee-settings")
     ? (settingsPage = true)

@@ -210,7 +210,7 @@ let activeComponent = comps[registrationIndex.value - 1] as {
 watch(registrationInfo, () => {
   disabledCheck();
   if (process.env.NODE_ENV === "development") {
-  console.log(registrationInfo);
+    console.log(registrationInfo);
   }
 });
 

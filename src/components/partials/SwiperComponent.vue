@@ -16,12 +16,12 @@
         @click="nextPage"
       >
         <q-img
-          :src="'/icons/CategoryIcons/' + item.title + '.png'"
+          :src="getIconPath(item.title, false)"
           class="img"
           v-if="!lightMode"
         />
         <q-img
-          :src="'/icons/CategoryIcons/' + item.title + '-light.png'"
+          :src="getIconPath(item.title, true)"
           class="img img-light"
           v-else
         />
@@ -78,6 +78,49 @@ onBeforeUnmount(() => {
 });
 
 const emit = defineEmits(["changed"]);
+
+// Map category titles to icon names
+const getIconName = (title: string): string => {
+  const iconMap: Record<string, string> = {
+    Donor: "donors",
+    Donee: "donees",
+    problem: "problem",
+    dream: "dream",
+    idea: "idea",
+    learning: "learning",
+    health: "health",
+    traveling: "traveling",
+    travelling: "traveling",
+    possesions: "possesions",
+    possessions: "possesions",
+    relationships: "relationships",
+    events: "events",
+    profession: "profession",
+    other: "others",
+    others: "others"
+  };
+  return iconMap[title] || title.toLowerCase();
+};
+
+// Get icon path - prefer SVG, fallback to PNG
+const getIconPath = (title: string, isLight: boolean): string => {
+  const iconName = getIconName(title);
+  const basePath = "/icons/CategoryIcons/";
+
+  // List of categories that have SVG files
+  const svgCategories = ["donors", "donees", "problem", "dream", "idea"];
+
+  if (svgCategories.includes(iconName)) {
+    // Use SVG if available
+    return basePath + iconName + ".svg";
+  } else {
+    // Fallback to PNG (with light variant if needed)
+    if (isLight) {
+      return basePath + iconName + "-light.png";
+    }
+    return basePath + iconName + ".png";
+  }
+};
 
 emit("changed", props.options[flickingOptions.defaultIndex].title);
 

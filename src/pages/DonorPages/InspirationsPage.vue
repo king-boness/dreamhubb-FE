@@ -309,7 +309,7 @@ watch(
       animateDrawerTo(drawerMinHeight);
       dialog.value = false;
       if (process.env.NODE_ENV === "development") {
-      console.log(drawerOpenRatio.value);
+        console.log(drawerOpenRatio.value);
       }
     }
   }

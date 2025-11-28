@@ -8,6 +8,32 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }
   },
   {
+    path: "/auth",
+    component: () => import("src/layouts/Auth/AuthWelcomeLayout.vue"),
+    name: "auth-welcome",
+    meta: { guestOnly: true },
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/Auth/AuthWelcomePage.vue"),
+        name: "auth-welcome-page"
+      }
+    ]
+  },
+  {
+    path: "/auth-help",
+    component: () => import("src/layouts/Auth/AuthWelcomeLayout.vue"),
+    name: "auth-help",
+    meta: { guestOnly: true },
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/Auth/AuthHelpOnboardingPage.vue"),
+        name: "auth-help-page"
+      }
+    ]
+  },
+  {
     path: "/landing",
     component: () => import("src/layouts/Auth/LandingLayout.vue"),
     children: [
@@ -56,6 +82,20 @@ const routes: RouteRecordRaw[] = [
       }
     ]
   },
+  // Onboarding Flow (New)
+  {
+    path: "/onboarding",
+    component: () => import("src/layouts/OnBoarding/OnBoardingLayout.vue"),
+    meta: { guestOnly: true },
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/Onboarding/OnboardingFlowPage.vue"),
+        name: "onboarding",
+        meta: { guestOnly: true }
+      }
+    ]
+  },
   //  Register form
   {
     path: "/register/form",
@@ -76,10 +116,16 @@ const routes: RouteRecordRaw[] = [
         name: "donor-posts"
       },
       {
-        path: "post-detail",
+        path: "post-detail/:id",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/PostDetailPage.vue"),
         name: "donor-post-detail"
+      },
+      {
+        path: "filters",
+        meta: { requiresAuth: true },
+        component: () => import("src/pages/DonorPages/FiltersPage.vue"),
+        name: "donor-filters"
       },
       {
         path: "inspirations",

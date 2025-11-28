@@ -1,10 +1,13 @@
 <template>
   <div class="header row" :class="{ 'iphoneDevice-large': $q.platform.is.ios }">
+    <!-- Splash screen for role switch -->
+    <AppSplash v-if="isSwitchingRole" class="splash-overlay" />
+
     <div class="row" style="">
       <template v-if="!props.showBack">
         <div
           class="iconContainer"
-          @click="$router.push({ name: 'donor-posts' })"
+          @click="handleLogoClick"
         >
           <img
             src="/icons/logo.svg"
@@ -13,7 +16,7 @@
             v-if="!isBodyLight"
           />
           <img src="/icons/logo-light.svg" alt="" class="logoIcon" v-else />
-          <img src="/icons/doneeLogo.svg" alt="" class="navbarIcon" />
+          <img src="/icons/DoneeSwitchIcon.svg" alt="" class="navbarIcon" />
         </div>
       </template>
       <template v-else>
@@ -87,6 +90,16 @@
   align-items: center;
   gap: 0.5rem;
   border-bottom: 0.05rem solid rgba(255, 255, 255, 0.202);
+  z-index: 2000; // Higher z-index to ensure header is above content
+}
+
+.splash-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
 }
 
 .settingsHeader-button {
@@ -151,8 +164,11 @@
 </style>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, ref } from "vue";
+import { useRouter } from "vue-router";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
+import AppSplash from "src/components/common/AppSplash.vue";
+
 interface Props {
   karma: number;
   showBack: boolean;
@@ -173,4 +189,21 @@ const props: Props = defineProps({
     required: true
   }
 });
+
+const router = useRouter();
+const isSwitchingRole = ref(false);
+
+const handleLogoClick = async () => {
+  console.log("Donee logo clicked! Switching to Donor mode...");
+  // Show splash screen
+  isSwitchingRole.value = true;
+  // Wait a bit for splash to show, then navigate
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // Switch to Donor interface (role switch)
+  await router.push({ name: "donor-posts" });
+  // Hide splash after navigation
+  setTimeout(() => {
+    isSwitchingRole.value = false;
+  }, 300);
+};
 </script>
