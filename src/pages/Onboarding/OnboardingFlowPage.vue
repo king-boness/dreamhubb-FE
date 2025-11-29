@@ -13,6 +13,7 @@
     <template v-else-if="currentStep === 2">
       <WhatIsYourGoal
         v-model="userGoal"
+        :progress="40"
         @next="handleNext"
         @back="handleBack"
       />
@@ -22,6 +23,7 @@
     <template v-else-if="currentStep === 3">
       <WhatKindOfDream
         v-model="dreamCategory"
+        :progress="60"
         @next="handleNext"
         @back="handleBack"
       />
@@ -33,6 +35,7 @@
         v-model:continent="userContinent"
         v-model:country="userCountry"
         v-model:city="userCity"
+        :progress="80"
         @next="handleNext"
         @back="handleBack"
       />

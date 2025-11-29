@@ -6,6 +6,9 @@
         <button class="location-backBtn" @click="emit('back')">
           <q-icon name="chevron_left" />
         </button>
+        <div class="location-progress">
+          <span class="location-progress_fill" :style="{ width: progressWidth }"></span>
+        </div>
       </div>
       <div class="location-content">
         <h1 class="location-title">{{ title }}</h1>
@@ -407,12 +410,13 @@ watch(() => props.city, (newVal) => {
 <style lang="scss" scoped>
 .whereAreYou {
   width: 100%;
-  height: 100%;
+  max-width: 390px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0;
-  margin: 0;
-  background: transparent;
+  padding: 24px 20px 40px;
+  margin: 0 auto;
+  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
   overflow: hidden;
   position: relative;
 }
@@ -420,7 +424,8 @@ watch(() => props.city, (newVal) => {
 .location-header {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 0;
+  gap: 16px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 }
 
@@ -468,29 +473,27 @@ watch(() => props.city, (newVal) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 0;
   min-height: 0;
   overflow: hidden;
   position: relative;
-  width: 100%;
-  gap: 3rem;
+  gap: 0;
+  padding-top: 0;
 }
 
 .location-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #ffffff;
-  margin: 5px 0 20px 0;
+  margin: 0 0 2rem 0;
   text-align: center;
   flex-shrink: 0;
   line-height: 1.2;
-  width: 100%;
 }
 
 .location-map {
   width: 100%;
-  max-width: 280px;
   margin: 0 0 2rem 0;
   opacity: 0.7;
   flex-shrink: 0;
@@ -498,8 +501,7 @@ watch(() => props.city, (newVal) => {
   img {
     width: 100%;
     height: auto;
-    display: block;
-    filter: brightness(0.8) saturate(1.5) hue-rotate(300deg);
+    object-fit: contain;
   }
 }
 
@@ -507,8 +509,10 @@ watch(() => props.city, (newVal) => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1.25rem;
   margin: 0;
+  margin-top: auto;
+  margin-bottom: auto;
   flex-shrink: 0;
 }
 
@@ -542,18 +546,18 @@ watch(() => props.city, (newVal) => {
 
 .location-nextBtn {
   width: 100%;
-  height: 48px;
-  flex-shrink: 0;
+  height: 56px;
   border-radius: 9999px;
   background: #BD0043;
   border: none;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin-top: -40px;
+  margin-top: 0;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.3);
+  flex-shrink: 0;
 
   &:disabled {
     opacity: 0.5;

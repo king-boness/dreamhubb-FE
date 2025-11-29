@@ -44,7 +44,7 @@
         </button>
       </div>
 
-      <p class="pick-instruction">Choose your side by swiping up or down</p>
+      <p class="pick-instruction">choose by swiping up or down</p>
     </div>
 
     <!-- Next button -->
@@ -370,8 +370,7 @@ const handleNext = () => {
 .pick-helpBtn {
   position: absolute;
   right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: calc(50% - 40px);
   width: 40px;
   height: 40px;
   border-radius: 50%;

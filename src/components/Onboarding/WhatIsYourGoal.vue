@@ -6,6 +6,9 @@
         <button class="goal-backBtn" @click="emit('back')">
           <q-icon name="chevron_left" />
         </button>
+        <div class="goal-progress">
+          <span class="goal-progress_fill" :style="{ width: progressWidth }"></span>
+        </div>
       </div>
       <div class="goal-content">
         <h1 class="goal-title">{{ title }}</h1>
@@ -40,6 +43,8 @@
             <q-icon name="help_outline" />
           </button>
         </div>
+
+        <p class="goal-instruction">choose by swiping up or down</p>
       </div>
     </template>
     <template v-else>
@@ -201,12 +206,13 @@ const handleNext = () => {
 <style lang="scss" scoped>
 .whatIsYourGoal {
   width: 100%;
-  height: 100%;
+  max-width: 390px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0;
-  margin: 0;
-  background: transparent;
+  padding: 24px 20px 40px;
+  margin: 0 auto;
+  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
   overflow: hidden;
   position: relative;
 }
@@ -214,7 +220,8 @@ const handleNext = () => {
 .goal-header {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 0;
+  gap: 16px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 }
 
@@ -267,7 +274,6 @@ const handleNext = () => {
   min-height: 0;
   overflow: hidden;
   position: relative;
-  width: 100%;
 }
 
 .goal-title {
@@ -278,7 +284,6 @@ const handleNext = () => {
   text-align: center;
   flex-shrink: 0;
   line-height: 1.2;
-  width: 100%;
 }
 
 .goal-carousel-wrapper {
@@ -290,19 +295,19 @@ const handleNext = () => {
   justify-content: center;
   min-height: 0;
   margin: 0;
-  max-height: 400px;
 }
 
 .goal-flicking {
   width: 100%;
   height: 100%;
-  max-height: 400px;
+  max-height: 450px;
 }
 
 :deep(.flicking-viewport) {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  pointer-events: auto;
 }
 
 :deep(.flicking-camera) {
@@ -391,8 +396,7 @@ const handleNext = () => {
 .goal-helpBtn {
   position: absolute;
   right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: calc(50% - 40px);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -420,8 +424,9 @@ const handleNext = () => {
 .goal-instruction {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 40px 0;
+  margin: 0 0 20px 0;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .goal-actions {
@@ -430,7 +435,6 @@ const handleNext = () => {
   gap: 10px;
   width: 100%;
   flex-shrink: 0;
-  margin-top: -40px;
 }
 
 .goal-searchBtn {
@@ -453,24 +457,29 @@ const handleNext = () => {
 
 .goal-nextBtn {
   width: 100%;
-  height: 48px;
+  height: 56px;
   border-radius: 9999px;
   background: #BD0043;
   border: none;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.3);
 
-  &:hover {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 32px rgba(189, 0, 67, 0.4);
   }
 }
 
 .goal-nextBtn-single {
-  margin-top: -40px;
+  margin-top: 0;
 }
 </style>
