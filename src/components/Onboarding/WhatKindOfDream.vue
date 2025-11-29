@@ -1,5 +1,5 @@
 <template>
-  <div class="whatKindOfDream">
+  <div class="whatKindOfDream" :class="{ 'whatKindOfDream--filter-mode': hideHeader && hideFooter }">
     <!-- Back button + Title (hidden if hideHeader is true) -->
     <template v-if="!hideHeader">
       <div class="dream-header">
@@ -231,6 +231,15 @@ const handleNext = () => {
   background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
   overflow: hidden;
   position: relative;
+
+  // When used in filters (hide-header and hide-footer), remove padding and background
+  &.whatKindOfDream--filter-mode {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    height: 100%;
+    max-width: 100%;
+  }
 }
 
 .dream-header {
@@ -290,6 +299,12 @@ const handleNext = () => {
   min-height: 0;
   overflow: hidden;
   position: relative;
+
+  // In filter mode, content should fill available space
+  .whatKindOfDream--filter-mode & {
+    flex: 1;
+    width: 100%;
+  }
 }
 
 .dream-title {

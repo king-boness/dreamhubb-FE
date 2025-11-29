@@ -212,6 +212,9 @@ const handleFinish = async () => {
       gender: localGender.value
     };
 
+    // Save name to localStorage for immediate access
+    localStorage.setItem("userName", localUsername.value);
+
     // Register user and automatically log them in
     const response = await apiStore.register(registrationData);
 

@@ -38,6 +38,12 @@
         <div class="myProfile-nameDiv">
           <h3>{{ profile.user.userName }}</h3>
           <img
+            v-if="selectedBadge"
+            :src="selectedBadge.image"
+            :alt="selectedBadge.title"
+            class="myProfile-selectedBadge"
+          />
+          <img
             src="/icons/addBadge-icon.svg"
             alt=""
             @click="[(dialog = true), cycleDrawer()]"
@@ -113,13 +119,14 @@
           class="imageUploaderComponent"
           :openedFully="openedFully"
           :key="drawerMode"
+          @badge-selected="handleBadgeSelected"
         ></BadgeSwiper>
       </q-card-section>
       <q-card-section class="badgeSwiper-descDiv text-center">
         <span class="badgeSwiper-description"
           >Earn more badges by completing tasks</span
         >
-        <q-btn class="confirmButton"> Save badge </q-btn>
+        <q-btn class="confirmButton" @click="saveBadge"> Save badge </q-btn>
       </q-card-section>
     </q-card>
   </div>
@@ -127,12 +134,16 @@
 <script setup lang="ts">
 /* eslint-disable */
 //@ts-ignore
-import { ref, computed, nextTick, onBeforeUnmount, watch } from "vue";
+import { ref, computed, nextTick, onBeforeUnmount, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import BadgeSwiper from "src/components/partials/BadgeSwiperComponent.vue";
 import { UserProfile } from "src/components/models";
 import { useUserStore } from "src/stores/user-store";
+import { useApiCallStore } from "src/stores/api-calls-store";
+
 const userStore = useUserStore();
+const apiStore = useApiCallStore();
+
 const profile = ref({
   user: {
     userName: "User",
@@ -143,6 +154,66 @@ const profile = ref({
     views: 156
   }
 } as UserProfile);
+
+// Update user name from API store
+watch(
+  () => apiStore.user,
+  (user) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("API Store User:", user);
+    }
+    if (user) {
+      // Try different possible property names from API
+      const userName = (user as any).name || (user as any).username || (user as any).fullName || (user as any).nickname;
+      if (process.env.NODE_ENV === "development") {
+        console.log("Extracted userName:", userName);
+      }
+      if (userName) {
+        profile.value.user.userName = userName;
+        return;
+      }
+    }
+    // Fallback to userStore.name
+    if (userStore.name) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("Using userStore.name:", userStore.name);
+      }
+      profile.value.user.userName = userStore.name;
+    }
+  },
+  { immediate: true, deep: true }
+);
+
+// Selected badge state
+const selectedBadge = ref<{ image: string; title: string } | null>(null);
+const tempSelectedBadge = ref<{ image: string; title: string } | null>(null);
+
+// Load saved badge from localStorage on mount
+const loadSavedBadge = () => {
+  const savedBadge = localStorage.getItem("userSelectedBadge");
+  if (savedBadge) {
+    try {
+      selectedBadge.value = JSON.parse(savedBadge);
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }
+};
+
+// Handle badge selection from BadgeSwiper component
+const handleBadgeSelected = (badge: { image: string; title: string }) => {
+  tempSelectedBadge.value = badge;
+};
+
+// Save badge and close dialog
+const saveBadge = () => {
+  if (tempSelectedBadge.value) {
+    selectedBadge.value = tempSelectedBadge.value;
+    localStorage.setItem("userSelectedBadge", JSON.stringify(tempSelectedBadge.value));
+    dialog.value = false;
+    animateDrawerTo(drawerMinHeight);
+  }
+};
 
 const drawerMinHeight = 40;
 const drawerTopOffset = 30;
@@ -288,6 +359,38 @@ const routeCheck = (name: string) => {
     ? router.push({ name: `donee-${name}` })
     : router.push({ name: `donor-${name}` });
 };
+
+// Load saved badge and user data on mount
+onMounted(async () => {
+  loadSavedBadge();
+  // Fetch user data if not already loaded
+  if (!apiStore.user) {
+    await apiStore.fetchUser();
+  }
+  // Update name from API store - try different possible property names
+  if (apiStore.user) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("API Store User on mount:", apiStore.user);
+    }
+    const userName = (apiStore.user as any).name || (apiStore.user as any).username || (apiStore.user as any).fullName || (apiStore.user as any).nickname;
+    if (process.env.NODE_ENV === "development") {
+      console.log("Extracted userName on mount:", userName);
+    }
+    if (userName) {
+      profile.value.user.userName = userName;
+    } else if (userStore.name) {
+      profile.value.user.userName = userStore.name;
+    }
+  } else if (userStore.name) {
+    profile.value.user.userName = userStore.name;
+  }
+  
+  // Also check localStorage for saved name
+  const savedName = localStorage.getItem("userName") || localStorage.getItem("user_name");
+  if (savedName && !profile.value.user.userName || profile.value.user.userName === "User") {
+    profile.value.user.userName = savedName;
+  }
+});
 </script>
 <style scoped lang="scss"></style>
 <style lang="scss">
@@ -396,11 +499,17 @@ const routeCheck = (name: string) => {
         height: 4rem;
         border-radius: 0.8rem;
         z-index: 1;
+        gap: 0.5rem;
         h3 {
           color: white;
           font-size: 1.5rem;
           font-family: poppinsSemiBold;
-          margin-right: 0.6rem;
+          margin-right: 0;
+        }
+        .myProfile-selectedBadge {
+          height: 1.5rem;
+          width: 1.5rem;
+          object-fit: contain;
         }
       }
     }

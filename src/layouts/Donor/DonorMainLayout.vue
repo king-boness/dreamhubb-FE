@@ -23,7 +23,7 @@
             @click="handleLogoClick"
           >
             <img
-              src="/icons/logo.svg"
+              :src="logoImage"
               alt=""
               class="logoIcon"
             />
@@ -184,6 +184,7 @@ const homeIconActive = new URL("../../assets/icons/homeIcon.svg", import.meta.ur
 const homeIconInactive = new URL("../../assets/icons/homeIcon.svg", import.meta.url).href;
 const discoverIconActive = new URL("../../assets/icons/ExploreIcon.svg", import.meta.url).href;
 const discoverIconInactive = new URL("../../assets/icons/ExploreIcon.svg", import.meta.url).href;
+const logoImage = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
 
 const route = useRoute();
 const router = useRouter();

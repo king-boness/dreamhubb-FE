@@ -103,7 +103,8 @@ export const useApiCallStore = defineStore("apiCall", {
     async fetchUser() {
       try {
         const res = await api.get("/user");
-        this.user = res.data;
+        // Handle different possible response structures
+        this.user = res.data?.user || res.data?.data || res.data;
       } catch (_) {}
     },
 

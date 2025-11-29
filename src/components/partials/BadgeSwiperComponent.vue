@@ -160,10 +160,17 @@ const badges = [
   ]
 ];
 
+const emit = defineEmits(["badge-selected"]);
+
 const activeButton = ref(null);
 
 const activateButton = (array) => {
   activeButton.value = array;
+  // Find the selected badge and emit it
+  const [arrayIndex, index] = array;
+  if (badges[arrayIndex] && badges[arrayIndex][index]) {
+    emit("badge-selected", badges[arrayIndex][index]);
+  }
 };
 const modules = [Grid, Pagination, Navigation, Mousewheel, FreeMode];
 </script>

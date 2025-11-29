@@ -1,5 +1,5 @@
 <template>
-  <div class="whereAreYou">
+  <div class="whereAreYou" :class="{ 'whereAreYou--filter-mode': hideHeader && hideFooter }">
     <!-- Back button + Title (hidden if hideHeader is true) -->
     <template v-if="!hideHeader">
       <div class="location-header">
@@ -27,6 +27,7 @@
             dark
             outlined
             class="location-select"
+            fit
             @update:model-value="handleContinentChange"
           />
 
@@ -40,6 +41,7 @@
             :disable="!localContinent"
             use-input
             input-debounce="0"
+            fit
             @filter="filterCountries"
             @update:model-value="handleCountryChange"
           >
@@ -62,6 +64,7 @@
             :disable="!localCountry"
             use-input
             input-debounce="300"
+            fit
             @filter="filterCities"
           >
             <template v-slot:no-option>
@@ -91,6 +94,7 @@
           dark
           outlined
           class="location-select"
+          fit
           @update:model-value="handleContinentChange"
         />
 
@@ -104,6 +108,7 @@
           :disable="!localContinent"
           use-input
           input-debounce="0"
+          fit
           @filter="filterCountries"
           @update:model-value="handleCountryChange"
         >
@@ -126,6 +131,7 @@
           :disable="!localCountry"
           use-input
           input-debounce="300"
+          fit
           @filter="filterCities"
         >
           <template v-slot:no-option>
@@ -145,7 +151,7 @@
       <button
         class="location-nextBtn"
         @click="handleNext"
-        :disabled="!localContinent || !localCountry || !localCity"
+        :disabled="!localContinent || !localCountry"
       >
         {{ nextButtonLabel }}
       </button>
@@ -172,23 +178,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, withDefaults } from "vue";
 import { Notify } from "quasar";
 import { continents, getCountriesByContinent, getAllCountries, getCountryByCode } from "src/data/countriesData";
 import { getCitiesByCountryCode, getCitySuggestions } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
 
-const props = defineProps<{
-  continent: string;
-  country: string;
-  city: string;
+const props = withDefaults(defineProps<{
+  continent?: string;
+  country?: string;
+  city?: string;
   progress?: number; // Progress percentage (0-100), defaults to 80 for onboarding
   title?: string; // Custom title, defaults to "you live in"
   nextButtonLabel?: string; // Custom next button label, defaults to "NEXT STEP"
   enableGeolocation?: boolean; // Enable geolocation dialog, defaults to true
   hideHeader?: boolean; // Hide header (back button + title), defaults to false
   hideFooter?: boolean; // Hide footer (CTA buttons), defaults to false
-}>();
+}>(), {
+  continent: "",
+  country: "",
+  city: ""
+});
 
 const emit = defineEmits<{
   "update:continent": [value: string];
@@ -405,6 +415,19 @@ watch(() => props.city, (newVal) => {
     localCity.value = newVal;
   }
 });
+
+// Watch local values and emit updates immediately (for filters page validation)
+watch(localContinent, (newVal) => {
+  emit("update:continent", newVal);
+});
+
+watch(localCountry, (newVal) => {
+  emit("update:country", newVal);
+});
+
+watch(localCity, (newVal) => {
+  emit("update:city", newVal);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -419,6 +442,15 @@ watch(() => props.city, (newVal) => {
   background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
   overflow: hidden;
   position: relative;
+
+  // When used in filters (hide-header and hide-footer), remove padding and background
+  &.whereAreYou--filter-mode {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    height: 100%;
+    max-width: 100%;
+  }
 }
 
 .location-header {
@@ -480,6 +512,13 @@ watch(() => props.city, (newVal) => {
   position: relative;
   gap: 0;
   padding-top: 0;
+
+  // In filter mode, use flex-start for step 3 layout
+  .whereAreYou--filter-mode & {
+    justify-content: flex-start;
+    padding-top: 0;
+    gap: 0;
+  }
 }
 
 .location-title {
@@ -517,11 +556,34 @@ watch(() => props.city, (newVal) => {
 }
 
 .location-select {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+
   :deep(.q-field__control) {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     height: 48px;
     color: #ffffff;
+  }
+
+  :deep(.q-field) {
+    width: 100%;
+  }
+
+  :deep(.q-menu) {
+    margin-top: 4px !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  :deep(.q-field__marginal) {
+    z-index: 1;
+  }
+
+  :deep(.q-field__native) {
+    width: 100%;
   }
 
   :deep(.q-field__label) {

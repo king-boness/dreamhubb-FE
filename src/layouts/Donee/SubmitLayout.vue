@@ -139,6 +139,7 @@ const progress = ref(onSubmitIndex.value * 0.35);
 
 let horizontalSwiper = ref(false);
 const selectedGoal = ref();
+const selectedCategory = ref();
 const nextSubmit = async () => {
   if (onSubmitIndex.value !== 2) {
     progress.value += 0.35;
@@ -146,6 +147,13 @@ const nextSubmit = async () => {
     horizontalSwiper = ref(false);
     await router.push({ name: `submit-${onSubmitIndex.value}` });
   } else {
+    // Save selected values to localStorage before navigating
+    if (selectedGoal.value) {
+      localStorage.setItem("postCreation_goal", selectedGoal.value);
+    }
+    if (selectedCategory.value) {
+      localStorage.setItem("postCreation_category", selectedCategory.value);
+    }
     router.push({ name: "submit-postCreation" });
   }
 };
@@ -161,7 +169,20 @@ const previousSubmit = () => {
 };
 const handleChangedHoriz = (data: { horiz: boolean; selectedItemId: any }) => {
   const { horiz, selectedItemId } = data;
-  selectedGoal.value = selectedItemId;
+  // If we're on step 1, save as goal; if on step 2, save as category
+  if (onSubmitIndex.value === 1) {
+    selectedGoal.value = selectedItemId;
+    // Save to localStorage immediately
+    if (selectedItemId) {
+      localStorage.setItem("postCreation_goal", selectedItemId);
+    }
+  } else if (onSubmitIndex.value === 2) {
+    selectedCategory.value = selectedItemId;
+    // Save to localStorage immediately
+    if (selectedItemId) {
+      localStorage.setItem("postCreation_category", selectedItemId);
+    }
+  }
   horizontalSwiper.value = horiz;
 };
 const categories = ref([

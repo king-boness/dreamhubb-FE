@@ -1,5 +1,5 @@
 <template>
-  <div class="whatIsYourGoal">
+  <div class="whatIsYourGoal" :class="{ 'whatIsYourGoal--filter-mode': hideHeader && hideFooter }">
     <!-- Back button + Title (hidden if hideHeader is true) -->
     <template v-if="!hideHeader">
       <div class="goal-header">
@@ -215,6 +215,15 @@ const handleNext = () => {
   background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
   overflow: hidden;
   position: relative;
+
+  // When used in filters (hide-header and hide-footer), remove padding and background
+  &.whatIsYourGoal--filter-mode {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    height: 100%;
+    max-width: 100%;
+  }
 }
 
 .goal-header {
@@ -274,6 +283,12 @@ const handleNext = () => {
   min-height: 0;
   overflow: hidden;
   position: relative;
+
+  // In filter mode, content should fill available space
+  .whatIsYourGoal--filter-mode & {
+    flex: 1;
+    width: 100%;
+  }
 }
 
 .goal-title {

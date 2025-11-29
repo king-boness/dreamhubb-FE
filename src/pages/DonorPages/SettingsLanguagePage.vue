@@ -32,72 +32,188 @@ const shape = ref("English (UK)");
 
 const languages = [
   {
-    icon: "/icons/languageIconUK.png",
-    title: "English (UK)"
+    icon: "/icons/Flags/albania.svg",
+    title: "Albanian"
   },
   {
-    icon: "/icons/languageIconUS.png",
-    title: "English (US)"
+    icon: "/icons/Flags/arab league.svg",
+    title: "Arabic"
   },
   {
-    icon: "/icons/languageIconSK.png",
-    title: "Slovak"
+    icon: "/icons/Flags/armenia.svg",
+    title: "Armenian"
   },
   {
-    icon: "/icons/spain.png",
-    title: "Spanish"
+    icon: "/icons/Flags/azerbaijan.svg",
+    title: "Azerbaijani"
   },
   {
-    icon: "/icons/italy.png",
-    title: "Italian"
+    icon: "/icons/Flags/bangladesh.svg",
+    title: "Bengali"
   },
   {
-    icon: "/icons/germany.png",
-    title: "German"
+    icon: "/icons/Flags/bulgaria.svg",
+    title: "Bulgarian"
   },
   {
-    icon: "/icons/russia-2.png",
-    title: "Russian"
-  },
-  {
-    icon: "/icons/china.png",
+    icon: "/icons/Flags/china.svg",
     title: "Chinese"
   },
   {
-    icon: "/icons/india.png",
-    title: "Hindi"
+    icon: "/icons/Flags/croatia.svg",
+    title: "Croatian"
   },
   {
-    icon: "/icons/france.png",
-    title: "French"
-  },
-  {
-    icon: "/icons/czech-republic.png",
+    icon: "/icons/Flags/czech republic.svg",
     title: "Czech"
   },
   {
-    icon: "/icons/sweden.png",
-    title: "Swedish"
-  },
-  {
-    icon: "/icons/denmark.png",
+    icon: "/icons/Flags/denmark.svg",
     title: "Danish"
   },
   {
-    icon: "/icons/norway.png",
-    title: "Norwegian"
+    icon: "/icons/Flags/netherlands.svg",
+    title: "Dutch"
   },
   {
-    icon: "/icons/finland.png",
+    icon: "/icons/Flags/estonia.svg",
+    title: "Estonian"
+  },
+  {
+    icon: "/icons/Flags/united kingdom.svg",
+    title: "English (UK)"
+  },
+  {
+    icon: "/icons/Flags/united states.svg",
+    title: "English (US)"
+  },
+  {
+    icon: "/icons/Flags/finland.svg",
     title: "Finnish"
   },
   {
-    icon: "/icons/ukraine.png",
+    icon: "/icons/Flags/france.svg",
+    title: "French"
+  },
+  {
+    icon: "/icons/Flags/georgia.svg",
+    title: "Georgian"
+  },
+  {
+    icon: "/icons/Flags/germany.svg",
+    title: "German"
+  },
+  {
+    icon: "/icons/Flags/greece.svg",
+    title: "Greek"
+  },
+  {
+    icon: "/icons/Flags/israel.svg",
+    title: "Hebrew"
+  },
+  {
+    icon: "/icons/Flags/hungary.svg",
+    title: "Hungarian"
+  },
+  {
+    icon: "/icons/Flags/india.svg",
+    title: "Hindi"
+  },
+  {
+    icon: "/icons/Flags/indonesia.svg",
+    title: "Indonesian"
+  },
+  {
+    icon: "/icons/Flags/italy.svg",
+    title: "Italian"
+  },
+  {
+    icon: "/icons/Flags/japan.svg",
+    title: "Japanese"
+  },
+  {
+    icon: "/icons/Flags/kazakhstan.svg",
+    title: "Kazakh"
+  },
+  {
+    icon: "/icons/Flags/south korea.svg",
+    title: "Korean"
+  },
+  {
+    icon: "/icons/Flags/laos.svg",
+    title: "Lao"
+  },
+  {
+    icon: "/icons/Flags/latvia.svg",
+    title: "Latvian"
+  },
+  {
+    icon: "/icons/Flags/lithuania.svg",
+    title: "Lithuanian"
+  },
+  {
+    icon: "/icons/Flags/republic of macedonia.svg",
+    title: "Macedonian"
+  },
+  {
+    icon: "/icons/Flags/nepal.svg",
+    title: "Nepali"
+  },
+  {
+    icon: "/icons/Flags/norway.svg",
+    title: "Norwegian"
+  },
+  {
+    icon: "/icons/Flags/iran.svg",
+    title: "Persian"
+  },
+  {
+    icon: "/icons/Flags/poland.svg",
+    title: "Polish"
+  },
+  {
+    icon: "/icons/Flags/portugal.svg",
+    title: "Portuguese"
+  },
+  {
+    icon: "/icons/Flags/romania.svg",
+    title: "Romanian"
+  },
+  {
+    icon: "/icons/Flags/russia.svg",
+    title: "Russian"
+  },
+  {
+    icon: "/icons/Flags/serbia.svg",
+    title: "Serbian"
+  },
+  {
+    icon: "/icons/Flags/slovakia.svg",
+    title: "Slovak"
+  },
+  {
+    icon: "/icons/Flags/spain.svg",
+    title: "Spanish"
+  },
+  {
+    icon: "/icons/Flags/sweden.svg",
+    title: "Swedish"
+  },
+  {
+    icon: "/icons/Flags/thailand.svg",
+    title: "Thai"
+  },
+  {
+    icon: "/icons/Flags/turkey.svg",
+    title: "Turkish"
+  },
+  {
+    icon: "/icons/Flags/ukraine.svg",
     title: "Ukrainian"
   },
   {
-    icon: "/icons/japan-flag.png",
-    title: "Japanese"
+    icon: "/icons/Flags/pakistan.svg",
+    title: "Urdu"
   }
 ];
 </script>

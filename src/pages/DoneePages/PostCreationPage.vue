@@ -77,7 +77,7 @@
           label-color="grey-6"
           dense
           v-model="postTitle"
-          label="Dream Title"
+          :label="`${selectedGoalLabel} Title`"
           class="registerDatas registerSecrete postCreation-postTitleInput"
         >
         </q-input>
@@ -105,7 +105,7 @@
       <q-btn class="postCreation-addFeatureButton">+ Add Feature</q-btn>
     </div>
     <div class="postCreation-aboutDreamContainer">
-      <span class="postCreation-dreamTitle">About Dream</span>
+      <span class="postCreation-dreamTitle">About {{ selectedGoalLabel }}</span>
       <q-input
         borderless
         dark
@@ -113,7 +113,7 @@
         bottom-slots
         label-color="grey-7"
         v-model="aboutDream"
-        label="Dream Description"
+        :label="`${selectedGoalLabel} Description`"
         class="registerDatas registerSecrete postCreation-dreamDescription"
         type="textarea"
       >
@@ -130,18 +130,21 @@
     <div class="postCreation-submitDreamContainer">
       <q-btn
         class="postCreation-submitButton"
-        @click="$router.push({ name: 'donee-posts' })"
+        @click="handleSubmitPost"
         >Submit Post</q-btn
       >
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import UploadPostImgComponent from "src/components/partials/UploadPostImgComponent.vue";
 import { PostCategories } from "src/components/models";
 import TokenSlider from "../../components/partials/CustomThumb.vue";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
+
+const router = useRouter();
 
 const aboutDream = ref("");
 const postTitle = ref("");
@@ -150,15 +153,88 @@ const imgIndex = ref(0);
 const uploadedImages = ref({
   images: ref<string[]>([])
 });
-const categories = ref({
-  goalImg: "/icons/dreamPost-icon.svg",
-  specificGoalImg: "/icons/travellingPost-icon.svg"
-} as PostCategories);
-const deleteImg = () => {
-  let slicedImageArray = uploadedImages.value.images.splice(imgIndex.value, 1);
-  slicedImageArray = uploadedImages.value.images;
+
+// Get selected goal from localStorage
+const selectedGoal = ref<string | null>(null);
+
+// Get label for selected goal
+const selectedGoalLabel = computed(() => {
+  if (!selectedGoal.value) return "Dream";
+  const goalMap: Record<string, string> = {
+    problem: "Problem",
+    dream: "Dream",
+    idea: "Idea"
+  };
+  return goalMap[selectedGoal.value.toLowerCase()] || "Dream";
+});
+
+// Map goal names to icon file names
+const getGoalIcon = (goal: string | null): string => {
+  if (!goal) return "/icons/CategoryIcons/dream.svg";
+  const goalMap: Record<string, string> = {
+    problem: "problem",
+    dream: "dream",
+    idea: "idea"
+  };
+  const iconName = goalMap[goal.toLowerCase()] || "dream";
+  return `/icons/CategoryIcons/${iconName}.svg`;
 };
-const handleImagesFromChild = (imgs: any) => {
+
+// Map category names to icon file names
+const getCategoryIcon = (category: string | null): string => {
+  if (!category) return "/icons/CategoryIcons/traveling.svg";
+  const categoryMap: Record<string, string> = {
+    traveling: "traveling",
+    travelling: "traveling",
+    health: "health",
+    learning: "learning",
+    possesions: "possesions",
+    possessions: "possesions",
+    relationships: "relationships",
+    events: "events",
+    profession: "proffesion",
+    other: "other",
+    others: "other"
+  };
+  const iconName = categoryMap[category.toLowerCase()] || "traveling";
+  return `/icons/CategoryIcons/${iconName}.svg`;
+};
+
+// Load selected values from localStorage and set icons
+const loadSelectedCategories = () => {
+  const goal = localStorage.getItem("postCreation_goal");
+  const selectedCategory = localStorage.getItem("postCreation_category");
+
+  selectedGoal.value = goal;
+
+  categories.value = {
+    goalImg: getGoalIcon(goal),
+    specificGoalImg: getCategoryIcon(selectedCategory)
+  };
+};
+
+const categories = ref({
+  goalImg: "/icons/CategoryIcons/dream.svg",
+  specificGoalImg: "/icons/CategoryIcons/traveling.svg"
+} as PostCategories);
+
+// Load categories on mount
+onMounted(() => {
+  loadSelectedCategories();
+});
+
+// Handle post submission - clear localStorage and navigate
+const handleSubmitPost = () => {
+  // Clear stored values after submission
+  localStorage.removeItem("postCreation_goal");
+  localStorage.removeItem("postCreation_category");
+  // Navigate to posts page
+  router.push({ name: "donee-posts" });
+};
+const deleteImg = () => {
+  uploadedImages.value.images.splice(imgIndex.value, 1);
+};
+const handleImagesFromChild = (imgs: string[]) => {
   uploadedImages.value.images = imgs;
 };
 const handleIndex = (index: number) => {
@@ -308,7 +384,9 @@ const handleFileChange = (event: Event) => {
     }
     .postCreation-categoryContainer {
       display: flex;
-      gap: 0.5rem;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.5rem 0;
     }
     .postCreation-detailContainer {
       z-index: 111;
@@ -342,7 +420,10 @@ const handleFileChange = (event: Event) => {
         padding-top: 1.5rem;
 
         .postCreation-goalImage {
-          height: 1.4rem;
+          height: 3.5rem;
+          width: auto;
+          margin: 0 0.25rem;
+          padding: 0.25rem;
         }
         .postCreation-changeTypeButton {
           border: 0.1rem solid $primary;

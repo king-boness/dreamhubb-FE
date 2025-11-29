@@ -59,7 +59,7 @@
         <button
           class="filters-nextBtn"
           @click="handleNext"
-          :disabled="!filterContinent || !filterCountry || !filterCity"
+          :disabled="!filterContinent || !filterCountry"
         >
           {{ currentNextLabel }}
         </button>

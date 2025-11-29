@@ -95,31 +95,20 @@ const getIconName = (title: string): string => {
     possessions: "possesions",
     relationships: "relationships",
     events: "events",
-    profession: "profession",
-    other: "others",
-    others: "others"
+    profession: "proffesion",
+    other: "other",
+    others: "other"
   };
   return iconMap[title] || title.toLowerCase();
 };
 
-// Get icon path - prefer SVG, fallback to PNG
+// Get icon path - use SVG for all categories
 const getIconPath = (title: string, isLight: boolean): string => {
   const iconName = getIconName(title);
   const basePath = "/icons/CategoryIcons/";
 
-  // List of categories that have SVG files
-  const svgCategories = ["donors", "donees", "problem", "dream", "idea"];
-
-  if (svgCategories.includes(iconName)) {
-    // Use SVG if available
-    return basePath + iconName + ".svg";
-  } else {
-    // Fallback to PNG (with light variant if needed)
-    if (isLight) {
-      return basePath + iconName + "-light.png";
-    }
-    return basePath + iconName + ".png";
-  }
+  // All categories now use SVG files
+  return basePath + iconName + ".svg";
 };
 
 emit("changed", props.options[flickingOptions.defaultIndex].title);
