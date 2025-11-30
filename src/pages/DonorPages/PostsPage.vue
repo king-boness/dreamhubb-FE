@@ -2,9 +2,11 @@
   <q-page class="donorPostsPage">
     <!-- Tabs: by help / by pay / by top -->
     <div class="donor-tabs">
+      <div class="donor-tabs_indicator" :style="indicatorStyle"></div>
       <button
-        v-for="tab in tabs"
+        v-for="(tab, index) in tabs"
         :key="tab.value"
+        :ref="el => { if (el) tabRefs[index] = el as HTMLElement }"
         class="donor-tabs_button"
         :class="{ 'donor-tabs_button--active': activeTab === tab.value }"
         type="button"
@@ -104,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -134,10 +136,45 @@ const tabs = ref<DonorTab[]>([
 // Active tab
 const activeTab = ref<"help" | "pay" | "top">("help");
 
+// Tab refs for indicator positioning
+const tabRefs = ref<(HTMLElement | null)[]>([]);
+
+// Indicator style computed
+const indicatorStyle = computed(() => {
+  const activeIndex = tabs.value.findIndex(tab => tab.value === activeTab.value);
+  if (activeIndex === -1 || !tabRefs.value[activeIndex]) {
+    return { width: "0", left: "0", opacity: "0" };
+  }
+  const activeButton = tabRefs.value[activeIndex];
+  if (!activeButton) {
+    return { width: "0", left: "0", opacity: "0" };
+  }
+  const tabsContainer = activeButton.parentElement;
+  if (!tabsContainer) {
+    return { width: "0", left: "0", opacity: "0" };
+  }
+  const containerRect = tabsContainer.getBoundingClientRect();
+  const buttonRect = activeButton.getBoundingClientRect();
+  const left = buttonRect.left - containerRect.left;
+  const width = buttonRect.width;
+  return {
+    left: `${left}px`,
+    width: `${width}px`,
+    opacity: "1"
+  };
+});
+
 // Set tab handler
 const setTab = (value: "help" | "pay" | "top") => {
   activeTab.value = value;
 };
+
+// Update indicator position on mount
+onMounted(() => {
+  nextTick(() => {
+    // Indicator position will be computed automatically via computed property
+  });
+});
 
 // Sorted posts - filtered by active tab, always sorted by tokenReward (descending)
 const sortedPosts = computed(() => {
@@ -1308,6 +1345,16 @@ const emitOpenAuthor = (post: DonorPost) => {
   gap: 12px;
   margin: 8px 0 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.donor-tabs_indicator {
+  position: absolute;
+  bottom: -1px;
+  height: 2px;
+  background: #ff2c8b;
+  transition: left 0.3s ease, width 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
 }
 
 .donor-tabs_button {
@@ -1329,19 +1376,23 @@ const emitOpenAuthor = (post: DonorPost) => {
   &.donor-tabs_button--active {
     color: #ff2c8b;
 
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #ff2c8b;
+    .donor-tabs_icon {
+      transform: scale(1.1);
     }
   }
 
   &:hover:not(.donor-tabs_button--active) {
     color: rgba(255, 255, 255, 0.8);
+
+    .donor-tabs_icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &:active {
+    .donor-tabs_icon {
+      transform: scale(0.95);
+    }
   }
 }
 
@@ -1349,6 +1400,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   width: 16px;
   height: 16px;
   display: block;
+  transition: transform 0.2s ease;
 }
 
 .donor-tabs_label {

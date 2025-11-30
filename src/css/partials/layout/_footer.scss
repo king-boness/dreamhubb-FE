@@ -9,8 +9,16 @@
   justify-content: space-between;
   width: 100%;
   height: 4.5rem;
-  border-top: 0.05rem solid rgba(255, 255, 255, 0.202);
+  border-top: none;
   border-bottom: 0;
+  z-index: 2000; // High z-index to ensure footer is above content
+
+  // Hide footer when splash screen is active
+  body.splash-active & {
+    transform: translate3d(0, 110%, 0) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
   .exploreIcon {
     opacity: 0.4;
   }
@@ -41,9 +49,86 @@
     width: 1rem;
     height: 1rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    min-width: auto !important;
+    min-height: auto !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: none !important;
+    }
+
+    :deep(.q-btn__wrapper) {
+      padding: 0 !important;
+      min-height: auto !important;
+      min-width: auto !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+      }
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+    }
+
+    &.active,
+    &.activeProfile {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+      }
+
+      :deep(.q-btn__wrapper) {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+          box-shadow: none !important;
+          border: none !important;
+          background: none !important;
+        }
+      }
+    }
   }
 }
 

@@ -98,16 +98,17 @@
       </div>
     </div>
   </div>
-  <div v-if="dialog" class="badgeSwiper z-max">
+  <div v-if="dialog" class="badgeSwiper z-max" @click="handleDrawerClick">
     <q-card
       class="slide-drawer slide-drawer--bottom text-white fixed-bottom column no-wrap"
       :class="`slide-drawer--open-${drawerMode}`"
       :style="drawerStyle"
-      v-touch-pan.mouse.vertical.prevent="() => {}"
+      @click.stop
     >
       <q-card-section
         class="slide-drawer__handler--horizontal row flex-center"
         v-touch-pan.mouse.vertical.prevent="slideDrawer"
+        @click="cycleDrawer"
       >
         <div class="cursor-pointer"></div>
       </q-card-section>
@@ -295,25 +296,39 @@ const slideDrawer = (ev: any) => {
   if (isFinal === true) {
     nextTick(() => {
       const aboveHalf = drawerOpenRatio.value > drawerOpenRatioHalf;
-      const targetHeight =
-        direction === "up"
-          ? aboveHalf
-            ? drawerMaxHeight.value
-            : Math.round(drawerMaxHeight.value / 2)
-          : aboveHalf
-          ? Math.round(drawerMaxHeight.value / 2)
-          : drawerMinHeight;
+      let targetHeight: number;
+      if (direction === "up") {
+        targetHeight = aboveHalf
+          ? drawerMaxHeight.value
+          : Math.round(drawerMaxHeight.value / 2);
+      } else {
+        // Swiping down
+        if (drawerOpenRatio.value < 10) {
+          // Close drawer if swiped down near the bottom
+          dialog.value = false;
+          targetHeight = drawerMinHeight;
+        } else {
+          targetHeight = aboveHalf
+            ? Math.round(drawerMaxHeight.value / 2)
+            : drawerMinHeight;
+        }
+      }
       animateDrawerTo(targetHeight);
     });
   }
 };
 
 const cycleDrawer = () => {
+  // If drawer is fully open or half open, close it
+  if (drawerMode.value === "full" || drawerMode.value === "half") {
+    dialog.value = false;
+    animateDrawerTo(drawerMinHeight);
+    return;
+  }
+  // Otherwise, open to half
   const targetHeight =
     drawerMode.value === "handler"
       ? Math.round(drawerMaxHeight.value / 2)
-      : drawerMode.value === "half"
-      ? drawerMaxHeight.value
       : drawerMinHeight;
 
   animateDrawerTo(targetHeight);
@@ -335,6 +350,9 @@ const animateDrawerTo = (height: any) => {
 
 onBeforeUnmount(() => {
   clearTimeout(animateTimeout);
+  // Clean up body classes
+  document.body.classList.remove("badge-drawer-open");
+  document.body.classList.remove("badge-drawer-full");
 });
 
 watch(
@@ -346,6 +364,43 @@ watch(
     }
   }
 );
+
+// Watch dialog state and update body class for footer hiding
+watch(
+  () => dialog.value,
+  (isOpen) => {
+    if (isOpen) {
+      document.body.classList.add("badge-drawer-open");
+    } else {
+      document.body.classList.remove("badge-drawer-open");
+      document.body.classList.remove("badge-drawer-full");
+    }
+  },
+  { immediate: true }
+);
+
+// Watch openedFully state and update body class for header hiding
+watch(
+  () => openedFully.value,
+  (isFullyOpen) => {
+    if (isFullyOpen && dialog.value) {
+      document.body.classList.add("badge-drawer-full");
+    } else {
+      document.body.classList.remove("badge-drawer-full");
+    }
+  },
+  { immediate: true }
+);
+
+// Close drawer when clicking outside
+const handleDrawerClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.classList.contains("badgeSwiper")) {
+    // Clicked on overlay, close drawer
+    dialog.value = false;
+    animateDrawerTo(drawerMinHeight);
+  }
+};
 
 const router = useRouter();
 const route = useRoute();

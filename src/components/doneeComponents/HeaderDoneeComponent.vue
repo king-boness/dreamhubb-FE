@@ -195,6 +195,8 @@ const isSwitchingRole = ref(false);
 
 const handleLogoClick = async () => {
   console.log("Donee logo clicked! Switching to Donor mode...");
+  // Add class to body to hide footer
+  document.body.classList.add("splash-active");
   // Show splash screen
   isSwitchingRole.value = true;
   // Wait a bit for splash to show, then navigate
@@ -204,6 +206,7 @@ const handleLogoClick = async () => {
   // Hide splash after navigation
   setTimeout(() => {
     isSwitchingRole.value = false;
+    document.body.classList.remove("splash-active");
   }, 300);
 };
 </script>

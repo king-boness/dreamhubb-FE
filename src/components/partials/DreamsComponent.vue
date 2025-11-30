@@ -3,41 +3,41 @@
     <div
       class="component-header"
       :style="{
-        backgroundImage: 'url(' + props.profile.dreams.postDreamBackground + ')'
+        backgroundImage: props.profile?.dreams?.postDreamBackground ? 'url(' + props.profile.dreams.postDreamBackground + ')' : 'none'
       }"
     >
       <div class="componentProfileContainer">
         <img
-          :src="props.profile.dreams.postOwnerPicture"
+          :src="props.profile?.dreams?.postOwnerPicture"
           alt=""
           class="component-profilePicture"
         />
         <span class="component-profileName">{{
-          props.profile.dreams.postOwner
+          props.profile?.dreams?.postOwner || ""
         }}</span>
       </div>
       <div class="component-informationContainer">
         <div class="component-postNameContainer">
           <img
-            :src="props.profile.dreams.postDreamCategoryImg"
+            :src="props.profile?.dreams?.postDreamCategoryImg"
             alt=""
             class="component-postCategoryImg"
           />
           <span class="component-postTitle">{{
-            props.profile.dreams.postDreamName
+            props.profile?.dreams?.postDreamName || ""
           }}</span>
         </div>
         <div class="component-karmaContainer">
           <img src="/icons/KarmaIcon.png" alt="" class="component-karmaImg" />
           <span class="component-karmaValue">{{
-            formatNumber(props.profile.dreams.donatedValue)
+            formatNumber(props.profile?.dreams?.donatedValue || 0)
           }}</span>
         </div>
       </div>
     </div>
     <div class="component-descriptionContainer">
       <span class="component-descriptionText">{{
-        props.profile.dreams.description
+        props.profile?.dreams?.description || ""
       }}</span>
     </div>
   </div>

@@ -3,7 +3,7 @@
     <div
       class="donationComponent-header"
       :style="{
-        backgroundImage: 'url(' + profile.donations.postDonatedBackground + ')'
+        backgroundImage: profile?.donations?.postDonatedBackground ? 'url(' + profile.donations.postDonatedBackground + ')' : 'none'
       }"
     >
       <div class="donationComponent-valueContainer">
@@ -14,33 +14,33 @@
           class="donationComponent-valueIcon"
         />
         <span class="donationComponent-donatedValue">{{
-          formatNumber(profile.donations.donatedValue)
+          formatNumber(profile?.donations?.donatedValue || 0)
         }}</span>
       </div>
       <div class="donationComponent-donatedPostContainer">
         <img
-          :src="profile.donations.postDonatedCategoryImg"
+          :src="profile?.donations?.postDonatedCategoryImg"
           alt=""
           class="donationComponent-postImg"
         />
         <span class="donationComponent-postTitle">{{
-          profile.donations.postDonatedName
+          profile?.donations?.postDonatedName || ""
         }}</span>
       </div>
     </div>
     <div class="donationComponent-donateContent">
       <div class="donationComponent-postOwnerContainer">
         <img
-          :src="profile.donations.postOwnerPicture"
+          :src="profile?.donations?.postOwnerPicture"
           alt=""
           class="donationComponent-ownerImg"
         />
         <span class="donationCompoment-postOwnerName">{{
-          profile.donations.postOwner
+          profile?.donations?.postOwner || ""
         }}</span>
       </div>
       <span class="donationComponent-postDescription">{{
-        profile.donations.description
+        profile?.donations?.description || ""
       }}</span>
     </div>
   </div>
@@ -68,7 +68,9 @@ const props: Props = defineProps({
   flex-direction: column;
   color: white;
   height: 21rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
   .donationComponent-header {
     background-repeat: no-repeat;
     background-size: cover;

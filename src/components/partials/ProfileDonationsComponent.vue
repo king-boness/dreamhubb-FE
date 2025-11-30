@@ -13,51 +13,43 @@
       >
     </div>
     <div class="profileReviewsComponent-reviewsContainer">
-      <div v-for="(profile, i) in profiles" :key="i">
-        <DonationComponent :profile="profile"></DonationComponent>
+      <div v-for="(profileItem, i) in allDonations" :key="i">
+        <DonationComponent :profile="profileItem"></DonationComponent>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { defineProps, PropType, computed } from "vue";
 import DonationComponent from "./DonationComponent.vue";
 import { UserProfile } from "src/components/models";
 
-const profile = ref({
-  categories: {
-    name: "Donations",
-    amount: 34,
-    img: "/icons/redGiftIcon.svg"
-  }
-} as UserProfile);
+interface Props {
+  profile: UserProfile;
+  onGoing?: UserProfile[];
+  accomplished?: UserProfile[];
+}
 
-const profiles = ref([
-  {
-    donations: {
-      donatedValue: 300,
-      postDonatedName: "Aurora Expedition",
-      postDonatedCategoryImg: "/icons/redCloudIcon.svg",
-      postOwner: "Mackenzie Doe",
-      postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-      postDonatedBackground: "/images/Auth/postBackground.png",
-      description:
-        "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-    }
+const props: Props = defineProps({
+  profile: {
+    type: Object as PropType<UserProfile>,
+    required: true
   },
-  {
-    donations: {
-      donatedValue: 300,
-      postDonatedName: "Aurora Expedition",
-      postDonatedCategoryImg: "/icons/redCloudIcon.svg",
-      postOwner: "Mackenzie Doe",
-      postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-      postDonatedBackground: "/images/Auth/postBackground.png",
-      description:
-        "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-    }
+  onGoing: {
+    type: Array as PropType<UserProfile[]>,
+    default: () => []
+  },
+  accomplished: {
+    type: Array as PropType<UserProfile[]>,
+    default: () => []
   }
-] as UserProfile[]);
+});
+
+// Combine onGoing and accomplished donations, filter only items with donations property
+const allDonations = computed(() => {
+  const all = [...(props.onGoing || []), ...(props.accomplished || [])];
+  return all.filter((item) => item.donations);
+});
 </script>
 <style scoped lang="scss">
 .ProfileReview-page {

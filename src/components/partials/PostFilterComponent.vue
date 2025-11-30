@@ -120,13 +120,13 @@
 
       <q-tab-panels v-model="tab" animated swipeable>
         <q-tab-panel name="onGoing">
-          <div v-for="(profile, i) in onGoing" :key="i">
+          <div v-for="(profile, i) in filteredOnGoing" :key="i">
             <DreamsComponent :profile="profile"></DreamsComponent>
           </div>
         </q-tab-panel>
 
         <q-tab-panel name="accomplished">
-          <div v-for="(profile, i) in accomplished" :key="i">
+          <div v-for="(profile, i) in filteredAccomplished" :key="i">
             <DreamsComponent :profile="profile"></DreamsComponent>
           </div>
         </q-tab-panel>
@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, PropType } from "vue";
+import { ref, defineProps, PropType, computed } from "vue";
 import { UserProfile } from "src/components/models";
 import DreamsComponent from "./DreamsComponent.vue";
 
@@ -157,12 +157,22 @@ const props: Props = defineProps({
     required: true
   }
 });
+
+// Filter only items with dreams property
+const filteredOnGoing = computed(() => {
+  return props.onGoing.filter((item) => item.dreams);
+});
+
+const filteredAccomplished = computed(() => {
+  return props.accomplished.filter((item) => item.dreams);
+});
 </script>
 
 <!-- Add your styles -->
 <style scoped>
 .order-tabs {
   padding-top: 0;
+  width: 100%;
 }
 
 .postFilter {

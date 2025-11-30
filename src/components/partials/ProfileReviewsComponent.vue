@@ -20,19 +20,34 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { defineProps, PropType } from "vue";
 import ReviewComponent from "./ReviewComponent.vue";
 import { UserProfile } from "src/components/models";
 
-const profile = ref({
-  categories: {
-    name: "Reviews",
-    amount: 34,
-    img: "/icons/starIcon.svg"
-  }
-} as UserProfile);
+interface Props {
+  profile: UserProfile;
+  onGoing?: UserProfile[];
+  accomplished?: UserProfile[];
+}
 
-const reviews = ref([
+const props: Props = defineProps({
+  profile: {
+    type: Object as PropType<UserProfile>,
+    required: true
+  },
+  onGoing: {
+    type: Array as PropType<UserProfile[]>,
+    default: () => []
+  },
+  accomplished: {
+    type: Array as PropType<UserProfile[]>,
+    default: () => []
+  }
+});
+
+// For reviews, we'll use a mock array for now
+// In the future, this should come from props
+const reviews = [
   {
     reviews: {
       description:
@@ -51,7 +66,7 @@ const reviews = ref([
       dateReviewed: "09/15/2023"
     }
   }
-] as UserProfile[]);
+] as UserProfile[];
 </script>
 <style scoped lang="scss">
 .ProfileReview-page {

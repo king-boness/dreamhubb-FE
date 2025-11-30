@@ -623,9 +623,12 @@ button {
   width: 1rem;
   height: 1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 0;
+  margin: 0;
 }
 
 .postDetailFooter {
@@ -1361,6 +1364,16 @@ p {
 
 body {
   overflow-x: hidden;
+}
+
+/* Global styles for sticky positioning in profile pages */
+.q-layout,
+.q-page-container,
+.q-page {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
 }
 
 .explainBody {

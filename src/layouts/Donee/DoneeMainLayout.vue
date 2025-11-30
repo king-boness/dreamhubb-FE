@@ -17,7 +17,6 @@
     />
     <RouterView />
     <FooterDoneeComponent
-      userPicture="/images/Auth/profilePicture.jpeg"
       v-if="
         !(route.name === 'donor-post-detail') &&
         !(route.name === 'donor-search') &&
@@ -25,9 +24,10 @@
         !onBoarding &&
         !submit &&
         !postDetail &&
-        !settings
+        !settings &&
+        !isDonorRoute
       "
-      :class="{ 'footer--hidden': !showNavbar }"
+      :class="{ 'footer--hidden': !showNavbar || isSwitchingRole || isDonorRoute }"
       class="navbar"
     />
   </q-layout>
@@ -37,7 +37,10 @@
 import HeaderComponent from "src/components/doneeComponents/HeaderDoneeComponent.vue";
 import FooterDoneeComponent from "src/components/doneeComponents/FooterDoneeComponent.vue";
 import { useRoute } from "vue-router";
-import { watch, ref, onMounted, onBeforeUnmount, watchEffect } from "vue";
+import { watch, ref, computed, onMounted, onBeforeUnmount } from "vue";
+
+// Use MutationObserver to watch for body class changes
+let observer: MutationObserver | null = null;
 
 let settingsPage = false;
 let onBoarding = false;
@@ -75,12 +78,47 @@ watch(route, () => {
 
 const lastScrollPosition = ref(0);
 const showNavbar = ref(true);
+const isBadgeDrawerOpen = ref(false);
+const isBadgeDrawerFull = ref(false);
+const isSwitchingRole = ref(false);
+
+// Check if current route is donor route
+const isDonorRoute = computed(() => {
+  const routeName = route.name?.toString() || "";
+  return routeName.startsWith("donor-");
+});
+
+// Check badge drawer state
+const checkBadgeDrawerState = () => {
+  isBadgeDrawerOpen.value = document.body.classList.contains("badge-drawer-open");
+  isBadgeDrawerFull.value = document.body.classList.contains("badge-drawer-full");
+  // Hide header only when drawer is fully open
+  if (isBadgeDrawerFull.value) {
+    showNavbar.value = false;
+  } else if (isBadgeDrawerOpen.value && !isBadgeDrawerFull.value) {
+    // If drawer is open but not fully, show navbar
+    showNavbar.value = true;
+  }
+  // Footer is hidden via CSS class when badge-drawer-open is present
+};
 
 onMounted(() => {
   window.addEventListener("scroll", onScroll);
 });
 
 const onScroll = () => {
+  // Don't hide/show navbar based on scroll when badge drawer is fully open
+  if (isBadgeDrawerFull.value) {
+    showNavbar.value = false;
+    return;
+  }
+
+  // If badge drawer is open but not fully, show navbar
+  if (isBadgeDrawerOpen.value && !isBadgeDrawerFull.value) {
+    showNavbar.value = true;
+    return;
+  }
+
   const currentScrollPosition =
     window.scrollY || document.documentElement.scrollTop;
 
@@ -125,6 +163,27 @@ onMounted(() => {
     window.addEventListener("resize", handleResize);
   }
   checkBodyClass();
+  checkBadgeDrawerState();
+  // Watch for class changes on body element
+  observer = new MutationObserver(() => {
+    checkBadgeDrawerState();
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+  // Watch for route changes to detect role switching
+  watch(route, (newRoute, oldRoute) => {
+    const newRouteName = newRoute.name?.toString() || "";
+    const oldRouteName = oldRoute?.name?.toString() || "";
+    // If switching from donee to donor route, hide footer immediately
+    if (newRouteName.startsWith("donor-") && oldRouteName.startsWith("donee-")) {
+      isSwitchingRole.value = true;
+      setTimeout(() => {
+        isSwitchingRole.value = false;
+      }, 800);
+    }
+  }, { immediate: true });
 });
 
 onBeforeUnmount(() => {
@@ -132,6 +191,9 @@ onBeforeUnmount(() => {
     window.removeEventListener("resize", handleResize);
   }
   checkBodyClass();
+  if (observer) {
+    observer.disconnect();
+  }
 });
 </script>
 
@@ -144,8 +206,20 @@ onBeforeUnmount(() => {
   box-shadow: none;
   transform: translate3d(0, 110%, 0);
 }
+
+// Hide footer when splash screen is active
+body.splash-active .footer {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 .navbar {
-  transition: transform 0.25s;
+  transition: transform 0.25s ease;
+}
+
+.footer.navbar {
+  transition: transform 0.25s ease;
 }
 .LayoutBackground {
   background-image: url("/images/Auth/bg-explain.png") !important;

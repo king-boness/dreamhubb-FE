@@ -12,12 +12,13 @@
     <q-header
       reveal
       elevated
-      class="donorLayout-header"
-      v-if="shouldShowHeader && !isSwitchingRole"
+      class="donorLayout-header navbar"
+      :class="{ 'navbar--hidden': !shouldShowHeader }"
+      v-if="!isSwitchingRole"
     >
-      <div class="donorLayout-topBar">
+      <div class="donorLayout-topBar row">
         <!-- Logo + switch icon -->
-        <div class="topBar-left">
+        <div class="row">
           <div
             class="iconContainer"
             @click="handleLogoClick"
@@ -35,31 +36,29 @@
           </div>
         </div>
 
-        <!-- Search icon -->
-        <div class="topBar-center">
-          <svg
-            width="49"
-            height="49"
-            viewBox="0 0 44 44"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            @click="handleSearch"
-            class="searchIcon"
-          >
-            <g opacity="0.8">
-              <path
-                d="M31 31L26.65 26.65M29 21C29 25.4183 25.4183 29 21 29C16.5817 29 13 25.4183 13 21C13 16.5817 16.5817 13 21 13C25.4183 13 29 16.5817 29 21Z"
-                stroke="#FAFAFA"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </g>
-          </svg>
-        </div>
-
-        <!-- Token balance + add -->
-        <div class="topBar-right">
+        <!-- Search icon + Token balance -->
+        <div class="row">
+          <div class="row items-center">
+            <svg
+              width="49"
+              height="49"
+              viewBox="0 0 44 44"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              @click="handleSearch"
+              class="searchIcon"
+            >
+              <g opacity="0.8">
+                <path
+                  d="M31 31L26.65 26.65M29 21C29 25.4183 25.4183 29 21 29C16.5817 29 13 25.4183 13 21C13 16.5817 16.5817 13 21 13C25.4183 13 29 16.5817 29 21Z"
+                  stroke="#FAFAFA"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </g>
+            </svg>
+          </div>
           <div class="displayKarma">
             <div class="textWrapper">
               <img
@@ -98,96 +97,116 @@
     </q-page-container>
 
     <!-- BOTTOM FOOTER with reveal -->
-    <q-footer
-      reveal
-      elevated
-      class="donor-footer"
-      v-if="shouldShowFooter"
+    <div
+      class="footer navbar row col-12"
+      :class="{ 'footer--hidden': !shouldShowFooter, 'iphoneDevice-footer': $q.platform.is.ios }"
     >
-      <div class="donor-footer_bg">
-          <!-- HOME -->
-          <button
-            class="donor-footer_item"
-            :class="{ 'donor-footer_item--active': activeNav === 'home' }"
-            type="button"
-            @click="handleNavHome"
-          >
-            <img
-              :src="navIcons.home.value"
-              alt="Home"
-              class="donor-footer_icon"
-            />
-            <span class="donor-footer_label">Home</span>
-          </button>
-
-          <!-- DISCOVER / INSPIRATIONS -->
-          <button
-            class="donor-footer_item"
-            :class="{ 'donor-footer_item--active': activeNav === 'discover' }"
-            type="button"
-            @click="handleNavInspirations"
-          >
-            <img
-              :src="navIcons.discover.value"
-              alt="Discover"
-              class="donor-footer_icon"
-            />
-            <span class="donor-footer_label">Inspirations</span>
-          </button>
-
-          <!-- NOTIFICATIONS -->
-          <button
-            class="donor-footer_item"
-            :class="{ 'donor-footer_item--active': activeNav === 'notifications' }"
-            type="button"
-            @click="handleNavNotifications"
-          >
-            <q-icon
-              name="notifications"
-              class="donor-footer_icon"
-            />
-            <span v-if="notificationCount > 0" class="donor-footer_badge">{{ notificationCount }}</span>
-            <span class="donor-footer_label">Notifications</span>
-          </button>
-
-          <!-- PROFILE -->
-          <button
-            class="donor-footer_item"
-            :class="{ 'donor-footer_item--active': activeNav === 'profile' }"
-            type="button"
-            @click="handleNavProfile"
-          >
-            <q-icon
-              name="person"
-              class="donor-footer_icon"
-            />
-            <span class="donor-footer_label">Profile</span>
-          </button>
-      </div>
-    </q-footer>
+      <q-btn
+        :ripple="false"
+        @click="handleNavHome"
+        class="button-footer"
+        :class="{ active: activeNav === 'home' }"
+      >
+        <img
+          :src="navIcons.home.value"
+          alt="Home"
+          class="footer-marginClass"
+        />
+        <span class="footer-pageName">Home</span>
+      </q-btn>
+      <q-btn
+        :ripple="false"
+        @click="handleNavInspirations"
+        class="button-footer"
+        :class="{ active: activeNav === 'discover' }"
+      >
+        <img
+          :src="navIcons.discover.value"
+          alt="Inspirations"
+          class="footer-marginClass"
+        />
+        <span class="footer-pageName">Inspirations</span>
+      </q-btn>
+      <q-btn
+        :ripple="false"
+        @click="handleNavNotifications"
+        class="button-footer red"
+        :class="{ active: activeNav === 'notifications' }"
+      >
+        <img
+          :src="navIcons.notifications.value"
+          alt="Notifications"
+          class="footer-marginClass"
+        />
+        <span v-if="notificationCount > 0" class="donor-footer_badge">{{ notificationCount }}</span>
+        <span class="footer-pageName">Notifications</span>
+      </q-btn>
+      <q-btn
+        :ripple="false"
+        @click="handleNavProfile"
+        class="button-footer profileIcon"
+        :class="{ activeProfile: activeNav === 'profile' }"
+      >
+        <img
+          :src="navIcons.profile.value"
+          alt="Profile"
+          class="footer-marginClass"
+        />
+        <span class="footer-pageName profileName">Profile</span>
+      </q-btn>
+    </div>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
+
+const $q = useQuasar();
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
 
 // Asset imports
 const donorSwitchIcon = new URL("../../assets/icons/DonorSwitchIcon.svg", import.meta.url).href;
-const homeIconActive = new URL("../../assets/icons/homeIcon.svg", import.meta.url).href;
-const homeIconInactive = new URL("../../assets/icons/homeIcon.svg", import.meta.url).href;
-const discoverIconActive = new URL("../../assets/icons/ExploreIcon.svg", import.meta.url).href;
-const discoverIconInactive = new URL("../../assets/icons/ExploreIcon.svg", import.meta.url).href;
 const logoImage = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
 
 const route = useRoute();
 const router = useRouter();
+
+// Scroll-based header/footer hiding (matching donee behavior)
+const lastScrollPosition = ref(0);
+const showNavbar = ref(true);
+
+const onScroll = () => {
+  // Don't hide/show navbar based on scroll when badge drawer is fully open
+  if (isBadgeDrawerFull.value) {
+    showNavbar.value = false;
+    return;
+  }
+
+  // If badge drawer is open but not fully, show navbar
+  if (isBadgeDrawerOpen.value && !isBadgeDrawerFull.value) {
+    showNavbar.value = true;
+    return;
+  }
+
+  const currentScrollPosition =
+    window.scrollY || document.documentElement.scrollTop;
+
+  if (currentScrollPosition < 0) {
+    return;
+  }
+  if (Math.abs(currentScrollPosition - lastScrollPosition.value) < 65) {
+    return;
+  }
+  showNavbar.value = currentScrollPosition < lastScrollPosition.value;
+  lastScrollPosition.value = currentScrollPosition;
+};
 
 // Mock data
 const tokenBalance = ref(268);
@@ -197,34 +216,40 @@ const isSwitchingRole = ref(false);
 // Active navigation state
 const activeNav = ref<"home" | "discover" | "notifications" | "profile">("home");
 
-// Computed for icons
+// Computed for footer icons
 const navIcons = {
-  home: computed(() => activeNav.value === "home" ? homeIconActive : homeIconInactive),
-  discover: computed(() => activeNav.value === "discover" ? discoverIconActive : discoverIconInactive)
+  home: computed(() => activeNav.value === "home" ? "/footer_icons/home_s.svg" : "/footer_icons/home.svg"),
+  discover: computed(() => activeNav.value === "discover" ? "/footer_icons/compass_s.svg" : "/footer_icons/compass.svg"),
+  notifications: computed(() => activeNav.value === "notifications" ? "/footer_icons/bell_s.svg" : "/footer_icons/bell.svg"),
+  profile: computed(() => activeNav.value === "profile" ? "/footer_icons/profile_s.svg" : "/footer_icons/profile.svg")
 };
 
 // Header/Footer visibility logic
 const shouldShowHeader = computed(() => {
   const routeName = route.name?.toString() || "";
   // Hide header on detail pages, search, settings, etc.
-  return !(
+  const hideOnRoute = (
     routeName === "donor-post-detail" ||
     routeName === "donor-search" ||
     routeName.startsWith("donor-settings") ||
     routeName.startsWith("donor-onBoarding")
   );
+  // Hide header if on specific routes, badge drawer is fully open, or scrolling down
+  return !(hideOnRoute || isBadgeDrawerFull.value || !showNavbar.value);
 });
 
 const shouldShowFooter = computed(() => {
   const routeName = route.name?.toString() || "";
   // Hide footer on detail pages, search, settings, filters, etc.
-  return !(
+  const hideOnRoute = (
     routeName === "donor-post-detail" ||
     routeName === "donor-search" ||
     routeName === "donor-filters" ||
     routeName.startsWith("donor-settings") ||
     routeName.startsWith("donor-onBoarding")
   );
+  // Hide footer if on specific routes, badge drawer is open, scrolling down, or switching role
+  return !(hideOnRoute || isBadgeDrawerOpen.value || !showNavbar.value || isSwitchingRole.value);
 });
 
 // Handlers
@@ -258,6 +283,8 @@ const handleNavProfile = () => {
 
 const handleLogoClick = async () => {
   console.log("Donor logo clicked! Switching to Donee mode...");
+  // Add class to body to hide footer
+  document.body.classList.add("splash-active");
   // Show splash screen
   isSwitchingRole.value = true;
   // Wait a bit for splash to show, then navigate
@@ -267,6 +294,7 @@ const handleLogoClick = async () => {
   // Hide splash after navigation
   setTimeout(() => {
     isSwitchingRole.value = false;
+    document.body.classList.remove("splash-active");
   }, 300);
 };
 
@@ -302,6 +330,37 @@ const onTouchEnd = (event: TouchEvent) => {
   }
   isSwipeTracking.value = false;
 };
+
+// Watch for badge drawer state changes
+const isBadgeDrawerOpen = ref(false);
+const isBadgeDrawerFull = ref(false);
+const checkBadgeDrawerState = () => {
+  isBadgeDrawerOpen.value = document.body.classList.contains("badge-drawer-open");
+  isBadgeDrawerFull.value = document.body.classList.contains("badge-drawer-full");
+};
+
+// Use MutationObserver to watch for body class changes
+let observer: MutationObserver | null = null;
+
+onMounted(() => {
+  checkBadgeDrawerState();
+  window.addEventListener("scroll", onScroll);
+  // Watch for class changes on body element
+  observer = new MutationObserver(() => {
+    checkBadgeDrawerState();
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onScroll);
+  if (observer) {
+    observer.disconnect();
+  }
+});
 </script>
 
 <style lang="scss">
@@ -318,7 +377,7 @@ const onTouchEnd = (event: TouchEvent) => {
     background-repeat: no-repeat;
     background-size: auto;
     border-bottom: 0.05rem solid rgba(255, 255, 255, 0.202);
-    padding: 1.3rem 0 1rem 0; // Match donee header padding (top and bottom)
+    padding: 0; // No padding on header, padding is in topBar
   }
 
   .donorLayout-topBar {
@@ -326,20 +385,8 @@ const onTouchEnd = (event: TouchEvent) => {
     align-items: center;
     justify-content: space-around;
     gap: 0.5rem;
-    padding: 0; // Remove padding from topBar, it's now in header
+    padding: 1.3rem 0 1rem 0; // Match donee header padding (top and bottom)
     width: 100%;
-
-    .topBar-left,
-    .topBar-center,
-    .topBar-right {
-      display: flex;
-      align-items: center;
-    }
-
-    .topBar-left {
-      flex: 0;
-      justify-content: flex-start;
-    }
 
     .iconContainer {
       display: flex;
@@ -363,11 +410,6 @@ const onTouchEnd = (event: TouchEvent) => {
       width: auto;
     }
 
-    .topBar-center {
-      flex: 0;
-      justify-content: center;
-    }
-
     .searchIcon {
       cursor: pointer;
       transition: opacity 0.2s ease;
@@ -375,11 +417,6 @@ const onTouchEnd = (event: TouchEvent) => {
       &:hover {
         opacity: 0.6;
       }
-    }
-
-    .topBar-right {
-      flex: 0;
-      justify-content: flex-end;
     }
 
     .displayKarma {
@@ -433,71 +470,173 @@ const onTouchEnd = (event: TouchEvent) => {
     }
   }
 
-  // BOTTOM FOOTER
-  .donor-footer {
-    background: transparent;
-    padding-bottom: env(safe-area-inset-bottom);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+  // BOTTOM FOOTER (matching donee footer style)
+  .footer {
+    background-image: none;
+    background-image: url("/icons/rectangle.svg") !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-top: none !important;
+    box-shadow: none !important;
+    z-index: 2000; // Higher z-index to ensure footer is above content
 
-  .donor-footer_bg {
-    width: 100%;
-    max-width: 390px; // šírka Figma layoutu
-    height: 80px; // podľa PNG baru
-    margin: 0 auto;
-    background: linear-gradient(180deg, rgba(23, 21, 31, 0.95) 0%, rgba(13, 11, 19, 0.9) 100%);
-    border-radius: 40px 40px 0 0;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-  }
-
-  .donor-footer_item {
-    position: relative;
-    border: none;
-    background: transparent;
-    padding: 8px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: scale(1.05);
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
     }
   }
 
-  .donor-footer_label {
-    font-size: 0.65rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 2px;
-    transition: color 0.2s ease;
+  .active {
+    transition: none !important;
+    background: transparent !important;
+
+    * {
+      fill: #bd0043;
+      opacity: 1 !important;
+    }
   }
 
-  .donor-footer_item--active .donor-footer_label {
-    color: #ff2c8b;
+  .button-footer {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    transition: transform 0.2s ease !important;
+    outline: none !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: none !important;
+    }
+
+    :deep(.q-btn__wrapper) {
+      padding: 0 !important;
+      min-height: auto !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+      }
+    }
+
+    &:hover {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+      transform: scale(1.1);
+    }
+
+    &:active {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+      transform: scale(0.95);
+    }
+
+    &:focus {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+    }
+
+    &:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
   }
 
-  .donor-footer_icon {
-    width: 24px;
-    height: 24px;
+  .active.button-footer,
+  .activeProfile.button-footer {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: none !important;
+    }
+
+    :deep(.q-btn__wrapper) {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+      }
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+    }
+  }
+
+  .footer-marginClass {
+    height: 1.6rem;
+    width: 1.6rem;
     display: block;
-    filter: brightness(0) invert(1); // White color for inactive
-    opacity: 0.6;
   }
 
-  .donor-footer_item--active .donor-footer_icon {
-    opacity: 1;
+  .profileIcon .footer-marginClass {
+    height: 2rem !important;
+    width: 2rem !important;
   }
 
-  .donor-footer_item--active img.donor-footer_icon {
-    filter: brightness(0) saturate(100%) invert(35%) sepia(95%) saturate(7500%) hue-rotate(325deg) brightness(110%) contrast(105%); // Brighter pink for active
+  .activeProfile {
+    background: transparent !important;
+
+    .profileImg {
+      border: 0.16rem solid #bd0043 !important;
+    }
+  }
+
+  .footer-pageName {
+    color: white;
+    font-size: 0.7rem;
+    font-family: poppins;
+    margin-bottom: -0.4rem;
+    margin-top: 0.2rem;
+    text-transform: capitalize;
+    text-align: center;
+    width: 100%;
+  }
+
+  .profileName {
+    margin-bottom: 0rem !important;
   }
 
   .donor-footer_badge {
@@ -520,9 +659,26 @@ const onTouchEnd = (event: TouchEvent) => {
 }
 
 // Quasar overrides
-.q-header,
-.q-footer {
+.q-header {
   transition: transform 0.3s ease;
+}
+
+.footer--hidden {
+  box-shadow: none;
+  transform: translate3d(0, 110%, 0);
+}
+
+.navbar {
+  transition: transform 0.25s ease;
+}
+
+.footer.navbar {
+  transition: transform 0.25s ease;
+}
+
+.navbar--hidden {
+  box-shadow: none;
+  transform: translate3d(0, -100%, 0);
 }
 
 .splash-overlay {

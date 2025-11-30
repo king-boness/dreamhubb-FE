@@ -59,7 +59,7 @@ import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
 
 const slide = ref("1");
-const navPos = ref("top");
+const navPos = ref<"top" | "right" | "bottom" | "left" | undefined>("top");
 
 const categories = [
   { title: "Recently Acomplished" },
