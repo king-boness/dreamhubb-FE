@@ -160,7 +160,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "myprofile",
         meta: { requiresAuth: true },
-        component: () => import("src/pages/DoneePages/MyProfilePage.vue"),
+        component: () => import("src/pages/DonorPages/MyProfilePage.vue"),
         name: "donor-myprofile"
       },
       {

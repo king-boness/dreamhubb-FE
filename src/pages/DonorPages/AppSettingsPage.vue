@@ -72,6 +72,43 @@
         ></q-btn>
       </div>
     </div>
+    <!-- Language Section -->
+    <div class="acccoutSettings-div">
+      <span class="appSettings-title">Language</span>
+      <div class="appSettings-languageContainer">
+        <q-select
+          v-model="selectedLanguage"
+          :options="languageOptions"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
+          class="appSettings-languageSelect"
+          :dark="!lightMode"
+          @update:model-value="handleLanguageChange"
+        />
+        <span class="appSettings-languageNote">
+          {{ currentLanguageLabel }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Coming Soon Section -->
+    <div class="acccoutSettings-div">
+      <span class="appSettings-title">Coming Soon</span>
+      <div
+        class="appSettings-content appSettings-content--disabled"
+        v-for="(item, i) in comingSoonItems"
+        :key="i"
+      >
+        <div class="appSetting-description">
+          <img :src="item.img" alt="" class="appSettings-img" />
+          <span class="appSettings-name">{{ item.title }}</span>
+        </div>
+        <span class="appSettings-comingSoon">Coming soon</span>
+      </div>
+    </div>
+
     <div class="screenMode-container">
       <span class="appSettings-name">Screen Mode</span>
       <div class="btn-container darkMode-toggle">
@@ -161,7 +198,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
@@ -171,6 +208,54 @@ const router = useRouter();
 const auth = useAuthStore();
 const lightMode = ref(false);
 const nameShown = ref(false);
+
+// Language selection
+const selectedLanguage = ref("sk");
+const languageOptions = [
+  { label: "Slovak (SK)", value: "sk" },
+  { label: "English (EN)", value: "en" }
+];
+
+// Get current language label
+const currentLanguageLabel = computed(() => {
+  const option = languageOptions.find(opt => opt.value === selectedLanguage.value);
+  return option ? option.label : "Slovak (SK)";
+});
+
+// Handle language change
+const handleLanguageChange = (value: string) => {
+  // TODO: If i18n is implemented, update locale here
+  // Example: i18n.locale.value = value;
+  if (process.env.NODE_ENV === "development") {
+    console.log("Language changed to:", value);
+  }
+  // For now, just store in localStorage for persistence
+  localStorage.setItem("appLanguage", value);
+};
+
+// Coming soon items
+const comingSoonItems = [
+  {
+    img: "/icons/privacyIcon.svg",
+    title: "Notifications"
+  },
+  {
+    img: "/icons/privacyIcon.svg",
+    title: "Appearance"
+  },
+  {
+    img: "/icons/privacyIcon.svg",
+    title: "Privacy"
+  }
+];
+
+// Load saved language on mount
+onMounted(() => {
+  const savedLanguage = localStorage.getItem("appLanguage");
+  if (savedLanguage) {
+    selectedLanguage.value = savedLanguage;
+  }
+});
 
 const checkBodyClass = () => {
   lightMode.value = document.body.classList.contains("body--light");
@@ -218,12 +303,8 @@ const appSettings = [
     img: "/icons/privacyIcon.svg",
     title: "Privacy Settings",
     destination: "settings-privacy"
-  },
-  {
-    img: "/icons/langIcon.svg",
-    title: "Language",
-    destination: "settings-language"
   }
+  // Language is now handled directly in the template, not as a separate route
 ];
 const sources = [
   {
@@ -350,6 +431,36 @@ const routeCheck = (name: string) => {
       .arrowBtn {
         width: 2.5rem;
         padding-left: 3rem;
+      }
+
+      &--disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+    }
+
+    .appSettings-comingSoon {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.9rem;
+      font-family: poppins;
+    }
+
+    .appSettings-languageContainer {
+      margin-top: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .appSettings-languageSelect {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .appSettings-languageNote {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        font-family: poppins;
       }
     }
   }

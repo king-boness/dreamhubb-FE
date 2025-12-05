@@ -1,246 +1,253 @@
 <template>
   <div class="myProfile">
-    <MyProfileHeaderComponent></MyProfileHeaderComponent>
-    <div class="userProfile-detailsContainer">
-      <div v-for="(profile, i) in profiles" :key="i" class="profile-item-wrapper">
-        <UserProfileDetailsComponent
-          :profile="profile"
-          :expanded="expandedCategory === profile.categories.name"
-          :on-going="getMockData(profile.categories.name).onGoing"
-          :accomplished="getMockData(profile.categories.name).accomplished"
-          @toggle="handleToggle"
-        ></UserProfileDetailsComponent>
+    <!-- Minimal Profile Header -->
+    <div class="myProfile-header">
+      <div class="myProfile-avatarContainer">
+        <div class="myProfile-avatar" v-if="!authStore.user?.profile_picture">
+          <span class="myProfile-avatarInitials">{{ userInitials }}</span>
+        </div>
+        <img
+          v-else
+          :src="authStore.user.profile_picture"
+          alt="Profile"
+          class="myProfile-avatarImg"
+        />
       </div>
+      <div class="myProfile-info">
+        <h2 class="myProfile-username">{{ displayUsername }}</h2>
+        <p class="myProfile-email">{{ displayEmail }}</p>
+        <div class="myProfile-tokens">
+          <span class="myProfile-tokensLabel">Tokens:</span>
+          <span class="myProfile-tokensValue">{{ displayTokens }}</span>
+        </div>
+        <div class="myProfile-role">
+          <span class="myProfile-roleLabel">Role:</span>
+          <span class="myProfile-roleValue">{{ currentRole }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Button -->
+    <div class="myProfile-actions">
+      <q-btn
+        class="myProfile-settingsBtn"
+        @click="goToSettings"
+      >
+        Settings
+      </q-btn>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="myProfile-logout">
+      <q-btn
+        class="myProfile-logoutBtn"
+        @click="handleLogout"
+      >
+        Logout
+      </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
-import UserProfileDetailsComponent from "src/components/partials/UserProfileDetailsComponent.vue";
-import MyProfileHeaderComponent from "src/components/partials/MyProfileHeaderComponent.vue";
-import { UserProfile } from "src/components/models";
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useAuthStore } from "src/stores/auth";
+import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 
-const expandedCategory = ref<string | null>(null);
+const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
 
-const handleToggle = (category: string) => {
-  if (expandedCategory.value === category) {
-    expandedCategory.value = null;
+// Get current role from route name
+const currentRole = computed(() => {
+  const routeName = route.name?.toString() || "";
+  return routeName.startsWith("donee") ? "Donee" : "Donor";
+});
+
+// Get user initials for avatar placeholder
+const userInitials = computed(() => {
+  const username = authStore.user?.username || "";
+  if (!username) return "U";
+  const parts = username.split(" ");
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return username.substring(0, 2).toUpperCase();
+});
+
+// Display username
+const displayUsername = computed(() => {
+  return authStore.user?.username || "User";
+});
+
+// Display email
+const displayEmail = computed(() => {
+  return authStore.user?.email || "—";
+});
+
+// Display tokens
+const displayTokens = computed(() => {
+  // TODO: If tokens are not available, display "— tokens"
+  if (authStore.user?.tokens !== undefined && authStore.user?.tokens !== null) {
+    return formatNumber(authStore.user.tokens);
+  }
+  return "— tokens";
+});
+
+// Navigate to settings
+const goToSettings = () => {
+  const routeName = route.name?.toString() || "";
+  if (routeName.startsWith("donee")) {
+    router.push({ name: "donee-settings" });
   } else {
-    expandedCategory.value = category;
+    router.push({ name: "donor-settings" });
   }
 };
 
-// Mock data for ongoing and accomplished posts
-const getMockData = (categoryName: string) => {
-  // Special handling for Donations
-  if (categoryName === "Donations") {
-    return {
-      onGoing: [
-        {
-          donations: {
-            donatedValue: 300,
-            postDonatedName: "Aurora Expedition",
-            postDonatedCategoryImg: "/icons/redCloudIcon.svg",
-            postOwner: "Mackenzie Doe",
-            postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-            postDonatedBackground: "/images/Auth/postBackground.png",
-            description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-          }
-        },
-        {
-          donations: {
-            donatedValue: 500,
-            postDonatedName: "Ocean Cleanup Project",
-            postDonatedCategoryImg: "/icons/redCloudIcon.svg",
-            postOwner: "John Smith",
-            postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-            postDonatedBackground: "/images/Auth/postBackground.png",
-            description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-          }
-        }
-      ] as UserProfile[],
-      accomplished: [
-        {
-          donations: {
-            donatedValue: 1000,
-            postDonatedName: "Education for All",
-            postDonatedCategoryImg: "/icons/redCloudIcon.svg",
-            postOwner: "Sarah Johnson",
-            postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-            postDonatedBackground: "/images/Auth/postBackground.png",
-            description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-          }
-        },
-        {
-          donations: {
-            donatedValue: 750,
-            postDonatedName: "Healthcare Initiative",
-            postDonatedCategoryImg: "/icons/redCloudIcon.svg",
-            postOwner: "Michael Brown",
-            postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-            postDonatedBackground: "/images/Auth/postBackground.png",
-            description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-          }
-        }
-      ] as UserProfile[]
-    };
-  }
-
-  // For Dreams, Problems, Ideas
-  const categoryMap: Record<string, { img: string; category: string }> = {
-    Dreams: { img: "/icons/redCloudIcon.svg", category: "dream" },
-    Problems: { img: "/icons/problemIcon.svg", category: "problem" },
-    Ideas: { img: "/icons/ideaIcon.svg", category: "idea" }
-  };
-  const categoryInfo = categoryMap[categoryName] || { img: "/icons/redCloudIcon.svg", category: "dream" };
-
-  return {
-    onGoing: [
-      {
-        dreams: {
-          category: categoryInfo.category,
-          type: "onGoing",
-          donatedValue: 3000,
-          postDreamName: `${categoryName} Post 1`,
-          postDreamBackground: "/images/Auth/postBackground.png",
-          postDreamCategoryImg: categoryInfo.img,
-          postOwner: "John Doe",
-          postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-          description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-        }
-      },
-      {
-        dreams: {
-          category: categoryInfo.category,
-          type: "onGoing",
-          donatedValue: 30000,
-          postDreamName: `${categoryName} Post 2`,
-          postDreamBackground: "/images/Auth/postBackground.png",
-          postDreamCategoryImg: categoryInfo.img,
-          postOwner: "John Doe",
-          postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-          description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-        }
-      }
-    ] as UserProfile[],
-    accomplished: [
-      {
-        dreams: {
-          category: categoryInfo.category,
-          type: "accomplished",
-          donatedValue: 43000,
-          postDreamName: `${categoryName} Accomplished 1`,
-          postDreamBackground: "/images/Auth/postBackground.png",
-          postDreamCategoryImg: categoryInfo.img,
-          postOwner: "John Doe",
-          postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-          description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-        }
-      },
-      {
-        dreams: {
-          category: categoryInfo.category,
-          type: "accomplished",
-          donatedValue: 30000,
-          postDreamName: `${categoryName} Accomplished 2`,
-          postDreamBackground: "/images/Auth/postBackground.png",
-          postDreamCategoryImg: categoryInfo.img,
-          postOwner: "John Doe",
-          postOwnerPicture: "/images/Auth/profilePicture.jpeg",
-          description: "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci."
-        }
-      }
-    ] as UserProfile[]
-  };
+// Handle logout
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push({ name: "login" });
 };
 
-const profiles = ref([
-  {
-    categories: {
-      name: "Reviews",
-      amount: 0, // Will be calculated dynamically
-      img: "/icons/starIcon.svg",
-      destination: "myprofile-reviews"
-    }
-  },
-  {
-    categories: {
-      name: "Donations",
-      amount: 0, // Will be calculated dynamically
-      img: "/icons/redGiftIcon.svg",
-      destination: "myprofile-donations"
-    }
-  },
-  {
-    categories: {
-      name: "Dreams",
-      amount: 0, // Will be calculated dynamically
-      img: "/icons/redCloudIcon.svg",
-      destination: "myprofile-dreams"
-    }
-  },
-  {
-    categories: {
-      name: "Problems",
-      amount: 0, // Will be calculated dynamically
-      img: "/icons/problemIcon.svg",
-      destination: "myprofile-problems"
-    }
-  },
-  {
-    categories: {
-      name: "Ideas",
-      amount: 0, // Will be calculated dynamically
-      img: "/icons/ideaIcon.svg",
-      destination: "myprofile-ideas"
+// Fetch user data on mount if not loaded
+onMounted(async () => {
+  if (authStore.isAuthenticated && !authStore.user) {
+    try {
+      await authStore.fetchUser();
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to fetch user data:", error);
+      }
     }
   }
-] as UserProfile[]);
+});
+
 </script>
 <style scoped lang="scss">
 .myProfile {
-  overflow: visible !important;
-  position: relative;
-  min-height: 100%;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-:deep(.q-layout) {
-  overflow: visible !important;
-}
-
-:deep(.q-page-container) {
-  overflow: visible !important;
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-}
-
-:deep(.q-page) {
-  overflow: visible !important;
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-}
-
-.userProfile-detailsContainer {
-  margin-top: 6rem;
-  margin-bottom: 0;
-  padding: 0;
-  padding-bottom: 5.5rem;
+.myProfile-header {
   width: 100%;
-  position: relative;
-  overflow: visible !important;
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-  height: auto;
+  max-width: 400px;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.profile-item-wrapper {
+.myProfile-avatarContainer {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.myProfile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(102deg, #ff006e, #ff8c00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.myProfile-avatarInitials {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  font-family: poppinsSemiBold;
+}
+
+.myProfile-avatarImg {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.myProfile-info {
+  color: white;
+}
+
+.myProfile-username {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: poppinsSemiBold;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.myProfile-email {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+  font-family: poppins;
+}
+
+.myProfile-tokens,
+.myProfile-role {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-family: poppins;
+}
+
+.myProfile-tokensLabel,
+.myProfile-roleLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+}
+
+.myProfile-tokensValue,
+.myProfile-roleValue {
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.myProfile-actions {
   width: 100%;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  overflow: visible !important;
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-  box-sizing: border-box;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.myProfile-settingsBtn {
+  width: 100%;
+  height: 56px;
+  background: linear-gradient(102deg, #ff006e, #ff8c00);
+  color: white;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: montseraatSemiBold;
+  text-transform: none;
+  box-shadow: 0 18px 40px rgba(255, 0, 110, 0.35);
+}
+
+.myProfile-logout {
+  width: 100%;
+  max-width: 400px;
+  margin-top: auto;
+  padding-bottom: 2rem;
+}
+
+.myProfile-logoutBtn {
+  width: 100%;
+  height: 56px;
+  background-color: rgba(141, 31, 70, 0.272);
+  color: rgba(218, 3, 82, 0.704);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: montseraatSemiBold;
+  text-transform: none;
 }
 </style>

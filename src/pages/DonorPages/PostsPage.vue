@@ -51,8 +51,15 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
-        <p v-if="hasActiveFilters">No posts found for this filter.</p>
+        <p v-if="hasActiveFilters">No posts match your filters yet.</p>
         <p v-else>No posts yet.</p>
+        <q-btn
+          v-if="hasActiveFilters"
+          class="donorPosts-resetFiltersBtn"
+          @click="handleResetFilters"
+        >
+          Reset filters
+        </q-btn>
       </div>
 
       <!-- Posts list -->
@@ -306,6 +313,12 @@ const handleOpenFilters = () => {
   router.push({ name: "donor-filters" });
 };
 
+// Reset filters handler
+const handleResetFilters = async () => {
+  postsStore.resetFilters();
+  await postsStore.fetchPosts({ sort: activeTab.value });
+};
+
 // Format date from MM/DD/YYYY to DD/MM/YYYY
 const formatDate = (dateString: string): string => {
   const dateParts = dateString.split("/");
@@ -460,9 +473,31 @@ const emitOpenAuthor = (post: DonorPost) => {
   padding: 2rem;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 
   &--error {
     color: rgba(255, 68, 68, 0.8);
+  }
+}
+
+.donorPosts-resetFiltersBtn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: poppins;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 }
 
