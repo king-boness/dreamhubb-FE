@@ -1,5 +1,24 @@
 <template>
   <div class="post-page">
+    <!-- First Post Hint Bubble -->
+    <div
+      v-if="showFirstPostHint"
+      class="firstPostHint-bubble"
+    >
+      <button
+        class="firstPostHint-close"
+        @click="dismissFirstPostHint"
+        aria-label="Close hint"
+      >
+        ×
+      </button>
+      <div class="firstPostHint-content">
+        <h3 class="firstPostHint-title">Start your journey!</h3>
+        <p class="firstPostHint-text">Create your first dream, problem or idea and share it with the world.</p>
+      </div>
+      <div class="firstPostHint-arrow"></div>
+    </div>
+
     <div class="postPage-carouselContainer">
       <q-carousel
         v-model="slide"
@@ -27,44 +46,128 @@
         </q-carousel-slide>
       </q-carousel>
     </div>
+
+    <!-- My Dreams Section -->
     <div class="postPage-header postPgae-myDreamsContainer">
       <div class="postPage-headerContainer">
-        <span class="postPage-title">My Dreams</span>
+        <span class="postPage-title">my dreams</span>
       </div>
+      <!-- Loading state -->
+      <div v-if="postsStore.myDreamsLoading" class="postPage-loading">
+        <p>Loading...</p>
+      </div>
+      <!-- Error state -->
+      <div v-else-if="postsStore.myDreamsError" class="postPage-error">
+        <p>{{ postsStore.myDreamsError }}</p>
+      </div>
+      <!-- Empty state -->
+      <div v-else-if="!postsStore.myDreamsLoading && mappedMyDreams.length === 0" class="postPage-empty">
+        <p>You don't have any dreams yet. Create your first dream!</p>
+      </div>
+      <!-- Posts -->
       <PostComponent
+        v-else
         class="postPage-postComponent"
-        :post="post"
+        :post="mappedMyDreams"
       ></PostComponent>
     </div>
-    <div
-      v-for="(category, i) in categories"
-      :key="i"
-      class="postPage-postsContainer"
-    >
+
+    <!-- My Problems Section -->
+    <div class="postPage-postsContainer">
       <div class="postPage-header">
         <div class="postPage-headerContainer">
-          <span class="postPage-title">{{ category.title }}</span>
+          <span class="postPage-title">my problems</span>
         </div>
+        <!-- Loading state -->
+        <div v-if="postsStore.myProblemsLoading" class="postPage-loading">
+          <p>Loading...</p>
+        </div>
+        <!-- Error state -->
+        <div v-else-if="postsStore.myProblemsError" class="postPage-error">
+          <p>{{ postsStore.myProblemsError }}</p>
+        </div>
+        <!-- Empty state -->
+        <div v-else-if="!postsStore.myProblemsLoading && mappedMyProblems.length === 0" class="postPage-empty">
+          <p>You don't have any problems yet.</p>
+        </div>
+        <!-- Posts -->
         <PostComponent
+          v-else
           class="postPage-postComponent"
-          :post="post"
+          :post="mappedMyProblems"
+        ></PostComponent>
+      </div>
+    </div>
+
+    <!-- My Ideas Section -->
+    <div class="postPage-postsContainer">
+      <div class="postPage-header">
+        <div class="postPage-headerContainer">
+          <span class="postPage-title">my ideas</span>
+        </div>
+        <!-- Loading state -->
+        <div v-if="postsStore.myIdeasLoading" class="postPage-loading">
+          <p>Loading...</p>
+        </div>
+        <!-- Error state -->
+        <div v-else-if="postsStore.myIdeasError" class="postPage-error">
+          <p>{{ postsStore.myIdeasError }}</p>
+        </div>
+        <!-- Empty state -->
+        <div v-else-if="!postsStore.myIdeasLoading && mappedMyIdeas.length === 0" class="postPage-empty">
+          <p>You don't have any ideas yet.</p>
+        </div>
+        <!-- Posts -->
+        <PostComponent
+          v-else
+          class="postPage-postComponent"
+          :post="mappedMyIdeas"
+        ></PostComponent>
+      </div>
+    </div>
+
+    <!-- Recently Accomplished Section -->
+    <div class="postPage-postsContainer">
+      <div class="postPage-header">
+        <div class="postPage-headerContainer">
+          <span class="postPage-title">Recently Accomplished</span>
+        </div>
+        <!-- Loading state -->
+        <div v-if="postsStore.recentlyAccomplishedLoading" class="postPage-loading">
+          <p>Loading...</p>
+        </div>
+        <!-- Error state -->
+        <div v-else-if="postsStore.recentlyAccomplishedError" class="postPage-error">
+          <p>{{ postsStore.recentlyAccomplishedError }}</p>
+        </div>
+        <!-- Empty state -->
+        <div v-else-if="!postsStore.recentlyAccomplishedLoading && mappedRecentlyAccomplished.length === 0" class="postPage-empty">
+          <p>No dreams accomplished yet.</p>
+        </div>
+        <!-- Posts -->
+        <PostComponent
+          v-else
+          class="postPage-postComponent"
+          :post="mappedRecentlyAccomplished"
         ></PostComponent>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted, onActivated } from "vue";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
+import { usePostsStore } from "src/stores/posts";
+
+// Reactive state for dismissed hint
+const hintDismissed = ref(false);
+
+const postsStore = usePostsStore();
 
 const slide = ref("1");
 const navPos = ref<"top" | "right" | "bottom" | "left" | undefined>("top");
 
-const categories = [
-  { title: "Recently Acomplished" },
-  { title: "Favourite Dreams" }
-];
 const carousels = ref([
   {
     value: "1",
@@ -92,38 +195,155 @@ const carousels = ref([
   }
 ] as CarouselPost[]);
 
-const post = ref([
-  {
-    goalName: "Aurora Expeditione",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png"
-  },
-  {
-    goalName: "Aurora Expeditione",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png"
-  },
-  {
-    goalName: "Aurora Expeditione",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 1213,
-    image: "/images/Auth/postBackground.png"
-  },
-  {
-    goalName: "Aurora Expeditione",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 1213,
-    image: "/images/Auth/postBackground.png"
-  },
-  {
-    goalName: "Aurora Expeditione",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 42010,
-    image: "/images/Auth/postBackground.png"
+// Map category names to icon file names (same as PostCreationPage)
+const getCategoryIcon = (category: string | null): string => {
+  if (!category) return "/icons/CategoryIcons/traveling.svg";
+  const categoryMap: Record<string, string> = {
+    traveling: "traveling",
+    travelling: "traveling",
+    health: "health",
+    learning: "learning",
+    possesions: "possesions",
+    possessions: "possesions",
+    relationships: "relationships",
+    events: "events",
+    profession: "proffesion",
+    other: "other",
+    others: "other"
+  };
+  const iconName = categoryMap[category.toLowerCase()] || "traveling";
+  return `/icons/CategoryIcons/${iconName}.svg`;
+};
+
+// Map BE post data to Post interface format (for PostComponent)
+const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
+  const images = Array.isArray(post.images) ? post.images as string[] : [];
+  const firstImage = images.length > 0 ? images[0] : "/images/Auth/postBackground.png";
+
+  return {
+    goalName: (post.title || "Untitled") as string,
+    goalImage: getCategoryIcon((post.fe_category || post.category_name || null) as string | null),
+    karma: (post.tokens || 0) as number,
+    image: firstImage,
+    description: (post.description || "") as string,
+    user: {
+      userName: (post.author_name || "Unknown") as string,
+      userPicture: "",
+      badge: "verified"
+    },
+    postInfo: {
+      dateCreated: (post.date_created || "") as string,
+      location: "Unknown",
+      viewed: (post.views || 0) as number
+    }
+  };
+};
+
+// Map my dreams from store to Post[] format
+const mappedMyDreams = computed(() => {
+  if (!postsStore.myDreams || postsStore.myDreams.length === 0) {
+    return [];
   }
-] as Post[]);
+  return postsStore.myDreams.map(mapPostToComponentFormat);
+});
+
+// Map my problems from store to Post[] format
+const mappedMyProblems = computed(() => {
+  if (!postsStore.myProblems || postsStore.myProblems.length === 0) {
+    return [];
+  }
+  return postsStore.myProblems.map(mapPostToComponentFormat);
+});
+
+// Map my ideas from store to Post[] format
+const mappedMyIdeas = computed(() => {
+  if (!postsStore.myIdeas || postsStore.myIdeas.length === 0) {
+    return [];
+  }
+  return postsStore.myIdeas.map(mapPostToComponentFormat);
+});
+
+// Map recently accomplished dreams from store to Post[] format
+const mappedRecentlyAccomplished = computed(() => {
+  if (!postsStore.recentlyAccomplishedDreams || postsStore.recentlyAccomplishedDreams.length === 0) {
+    return [];
+  }
+  return postsStore.recentlyAccomplishedDreams.map(mapPostToComponentFormat);
+});
+
+// Check if user has any posts
+const hasAnyPosts = computed(() => {
+  const totalPosts =
+    (postsStore.myDreams?.length || 0) +
+    (postsStore.myProblems?.length || 0) +
+    (postsStore.myIdeas?.length || 0);
+  return totalPosts > 0;
+});
+
+// Check if first post hint should be shown
+const showFirstPostHint = computed(() => {
+  // Check if hint was dismissed (reactive state or localStorage)
+  if (hintDismissed.value) {
+    return false;
+  }
+
+  const dismissed = localStorage.getItem("dh_donee_first_post_hint_dismissed");
+  if (dismissed === "true") {
+    return false;
+  }
+
+  // Don't show if user has posts (priority over localStorage)
+  if (hasAnyPosts.value) {
+    return false;
+  }
+
+  // Show only if all data is loaded (not loading)
+  const isLoading =
+    postsStore.myDreamsLoading ||
+    postsStore.myProblemsLoading ||
+    postsStore.myIdeasLoading;
+
+  if (isLoading) {
+    return false;
+  }
+
+  return true;
+});
+
+// Dismiss first post hint
+const dismissFirstPostHint = () => {
+  hintDismissed.value = true;
+  localStorage.setItem("dh_donee_first_post_hint_dismissed", "true");
+  if (process.env.NODE_ENV === "development") {
+    console.log("❌ First post hint dismissed by user");
+  }
+};
+
+// Fetch data on mount
+onMounted(async () => {
+  // Check localStorage first
+  const dismissed = localStorage.getItem("dh_donee_first_post_hint_dismissed");
+  if (dismissed === "true") {
+    hintDismissed.value = true;
+  }
+
+  await Promise.all([
+    postsStore.fetchMyDreams({ type: "dream" }),
+    postsStore.fetchMyProblems({ type: "problem" }),
+    postsStore.fetchMyIdeas({ type: "idea" }),
+    postsStore.fetchRecentlyAccomplishedDreams()
+  ]);
+});
+
+// Re-fetch data when returning to this page (for updated data after post creation/donation)
+onActivated(async () => {
+  await Promise.all([
+    postsStore.fetchMyDreams({ type: "dream" }),
+    postsStore.fetchMyProblems({ type: "problem" }),
+    postsStore.fetchMyIdeas({ type: "idea" }),
+    postsStore.fetchRecentlyAccomplishedDreams()
+  ]);
+});
 </script>
 <style scoped lang="scss">
 .post-page {
@@ -167,7 +387,7 @@ const post = ref([
     display: flex;
     align-items: center;
     flex-direction: column;
-    height: 18rem;
+    min-height: 18rem;
     .postPage-headerContainer {
       display: flex;
       justify-content: space-between;
@@ -189,6 +409,109 @@ const post = ref([
       padding: 0;
     }
   }
+
+  .postPage-loading,
+  .postPage-error,
+  .postPage-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    font-family: poppins;
+    width: 100%;
+  }
+
+  .postPage-error {
+    color: rgba(255, 68, 68, 0.8);
+  }
+
+  .postPage-empty {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* First Post Hint Bubble */
+.firstPostHint-bubble {
+  position: fixed;
+  bottom: 8.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(189, 0, 67, 0.95), rgba(255, 0, 110, 0.95));
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  max-width: 300px;
+  width: calc(100% - 3rem);
+  box-shadow: 0 8px 24px rgba(189, 0, 67, 0.4);
+  z-index: 9999;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.firstPostHint-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.firstPostHint-content {
+  color: white;
+  text-align: center;
+}
+
+.firstPostHint-title {
+  font-family: poppinsSemiBold;
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  color: white;
+}
+
+.firstPostHint-text {
+  font-family: poppins;
+  font-size: 0.85rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.4;
+}
+
+.firstPostHint-arrow {
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 0.75rem solid transparent;
+  border-right: 0.75rem solid transparent;
+  border-top: 0.75rem solid rgba(189, 0, 67, 0.95);
+  margin-left: 0;
 }
 </style>
 <style lang="scss">

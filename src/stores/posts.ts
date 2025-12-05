@@ -30,6 +30,22 @@ export const usePostsStore = defineStore("posts", {
     // Donate state
     donateLoading: false,
     donateError: null as string | null,
+    // My Dreams state
+    myDreams: [] as Record<string, unknown>[],
+    myDreamsLoading: false,
+    myDreamsError: null as string | null,
+    // My Problems state
+    myProblems: [] as Record<string, unknown>[],
+    myProblemsLoading: false,
+    myProblemsError: null as string | null,
+    // My Ideas state
+    myIdeas: [] as Record<string, unknown>[],
+    myIdeasLoading: false,
+    myIdeasError: null as string | null,
+    // Recently Accomplished Dreams state
+    recentlyAccomplishedDreams: [] as Record<string, unknown>[],
+    recentlyAccomplishedLoading: false,
+    recentlyAccomplishedError: null as string | null,
     // Filters state
     filters: {
       type: null as "dream" | "problem" | "idea" | null,
@@ -329,6 +345,146 @@ export const usePostsStore = defineStore("posts", {
         throw error;
       } finally {
         this.donateLoading = false;
+      }
+    },
+
+    // 🟣 Fetch my dreams (posts of logged-in user)
+    async fetchMyDreams(params: Record<string, unknown> = {}) {
+      this.myDreamsLoading = true;
+      this.myDreamsError = null;
+
+      try {
+        const queryParams: Record<string, unknown> = { ...params };
+
+        // Filter by type if specified (default to 'dream' for "My Dreams")
+        if (!queryParams.type) {
+          queryParams.type = "dream";
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 Fetching my dreams with params:", queryParams);
+        }
+
+        const { data } = await api.get("/my-posts", { params: queryParams });
+
+        // Robustný fallback pre rôzne BE štruktúry
+        this.myDreams = data.data || data.posts || data || [];
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 My dreams received from BE:", this.myDreams.length, "posts");
+        }
+      } catch (error: unknown) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌ Failed to fetch my dreams:", error);
+        }
+        this.myDreamsError = "Failed to load your dreams.";
+      } finally {
+        this.myDreamsLoading = false;
+      }
+    },
+
+    // 🟣 Fetch my problems (posts of logged-in user with type=problem)
+    async fetchMyProblems(params: Record<string, unknown> = {}) {
+      this.myProblemsLoading = true;
+      this.myProblemsError = null;
+
+      try {
+        const queryParams: Record<string, unknown> = { ...params };
+
+        // Filter by type if specified (default to 'problem' for "My Problems")
+        if (!queryParams.type) {
+          queryParams.type = "problem";
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 Fetching my problems with params:", queryParams);
+        }
+
+        const { data } = await api.get("/my-posts", { params: queryParams });
+
+        // Robustný fallback pre rôzne BE štruktúry
+        this.myProblems = data.data || data.posts || data || [];
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 My problems received from BE:", this.myProblems.length, "posts");
+        }
+      } catch (error: unknown) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌ Failed to fetch my problems:", error);
+        }
+        this.myProblemsError = "Failed to load your problems.";
+      } finally {
+        this.myProblemsLoading = false;
+      }
+    },
+
+    // 🟣 Fetch my ideas (posts of logged-in user with type=idea)
+    async fetchMyIdeas(params: Record<string, unknown> = {}) {
+      this.myIdeasLoading = true;
+      this.myIdeasError = null;
+
+      try {
+        const queryParams: Record<string, unknown> = { ...params };
+
+        // Filter by type if specified (default to 'idea' for "My Ideas")
+        if (!queryParams.type) {
+          queryParams.type = "idea";
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 Fetching my ideas with params:", queryParams);
+        }
+
+        const { data } = await api.get("/my-posts", { params: queryParams });
+
+        // Robustný fallback pre rôzne BE štruktúry
+        this.myIdeas = data.data || data.posts || data || [];
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 My ideas received from BE:", this.myIdeas.length, "posts");
+        }
+      } catch (error: unknown) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌ Failed to fetch my ideas:", error);
+        }
+        this.myIdeasError = "Failed to load your ideas.";
+      } finally {
+        this.myIdeasLoading = false;
+      }
+    },
+
+    // 🟣 Fetch recently accomplished dreams
+    async fetchRecentlyAccomplishedDreams() {
+      this.recentlyAccomplishedLoading = true;
+      this.recentlyAccomplishedError = null;
+
+      try {
+        // For now, we'll use my-posts endpoint with type=dream
+        // TODO: When BE adds is_accomplished or status column, filter by that
+        // For now, return empty array or filter by some criteria (e.g., tokens reached a threshold)
+        const { data } = await api.get("/my-posts", {
+          params: { type: "dream" }
+        });
+
+        const allDreams = data.data || data.posts || data || [];
+
+        // TODO: Filter accomplished dreams when BE supports it
+        // For now, we'll return empty array or filter by high tokens as a placeholder
+        // Filter dreams with tokens >= 1000 as "accomplished" (placeholder logic)
+        this.recentlyAccomplishedDreams = allDreams.filter(
+          (post: Record<string, unknown>) => (post.tokens as number) >= 1000
+        ).slice(0, 10); // Limit to 10 most recent
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("📦 Recently accomplished dreams:", this.recentlyAccomplishedDreams.length, "posts");
+        }
+      } catch (error: unknown) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌ Failed to fetch recently accomplished dreams:", error);
+        }
+        this.recentlyAccomplishedError = "Failed to load accomplished dreams.";
+      } finally {
+        this.recentlyAccomplishedLoading = false;
       }
     }
   }
