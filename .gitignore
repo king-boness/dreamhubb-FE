@@ -34,3 +34,8 @@ yarn-error.log*
 
 resources/ios/**/*
 resources/android/**/*
+
+# Environment files
+.env
+.env.local
+.env.*.local
