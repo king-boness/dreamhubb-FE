@@ -330,6 +330,10 @@
         border-radius: 9999px;
         padding: 0;
         background: linear-gradient(102deg, #ff006e, #ff8c00);
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
         color: #fff;
         display: flex;
         align-items: center;
@@ -353,6 +357,18 @@
           letter-spacing: 0.55px;
           text-transform: uppercase;
         }
+      }
+
+      .postDetail-donateError {
+        margin-top: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 0, 0, 0.1);
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        border-radius: 8px;
+        color: #ff6b6b;
+        font-size: 0.875rem;
+        text-align: center;
+        line-height: 1.5;
       }
     }
 

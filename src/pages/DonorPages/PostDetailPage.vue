@@ -169,9 +169,19 @@
 
         <!-- CTA BUTTON -->
         <div class="postCTA">
-          <button class="primaryCtaBtn" @click="openContributeSheet">
-            <div class="primaryCtaMain">CONTRIBUTE</div>
+          <button
+            class="primaryCtaBtn"
+            :disabled="postsStore.donateLoading"
+            @click="openContributeSheet"
+          >
+            <div class="primaryCtaMain">
+              {{ postsStore.donateLoading ? "PROCESSING..." : "CONTRIBUTE" }}
+            </div>
           </button>
+          <!-- Error message display -->
+          <div v-if="postsStore.donateError" class="postDetail-donateError">
+            {{ postsStore.donateError }}
+          </div>
         </div>
         <div class="postDetail-rewardRow">
           <q-icon
@@ -250,8 +260,12 @@
           <button class="contributeSheet-btn secondary" @click="onContributeOption('help')">
             HELP TO FULFILL
           </button>
-          <button class="contributeSheet-btn tertiary" @click="onContributeOption('topup')">
-            TOP UP THE DREAM
+          <button
+            class="contributeSheet-btn tertiary"
+            :disabled="postsStore.donateLoading"
+            @click="onContributeOption('topup')"
+          >
+            {{ postsStore.donateLoading ? "PROCESSING..." : "TOP UP THE DREAM" }}
           </button>
         </div>
       </div>
@@ -312,6 +326,7 @@ import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 import { getCategoryDisplayName } from "src/data/categoryNames";
+import { Notify } from "quasar";
 
 // Get post type icon (dream_mini.svg, problem_mini.svg, idea_mini.svg)
 const getPostTypeIcon = (type: string | null | undefined): string => {
@@ -840,6 +855,8 @@ const handleComments = () => {
 };
 
 const openContributeSheet = () => {
+  // Reset error state when opening sheet
+  postsStore.donateError = null;
   isContributeSheetOpen.value = true;
 };
 
@@ -847,7 +864,7 @@ const closeContributeSheet = () => {
   isContributeSheetOpen.value = false;
 };
 
-const onContributeOption = (option: ContributeOption | string) => {
+const onContributeOption = async (option: ContributeOption | string) => {
   const postId = post.value?.post_id;
   if (!postId) {
     console.warn("Chýba postId v onContributeOption");
@@ -870,12 +887,49 @@ const onContributeOption = (option: ContributeOption | string) => {
       emit("open-contribute-mentoring", { postId });
       break;
     case "topup":
+      // Handle token donation
+      await handleDonateTokens(postId);
+      break;
     default:
       console.log("TODO: ďalšie typy contribute option", option);
       break;
   }
 
   closeContributeSheet();
+};
+
+// Handle token donation
+const handleDonateTokens = async (postId: number) => {
+  if (!post.value) {
+    return;
+  }
+
+  // For now, use a simple fixed amount (e.g., 10 tokens)
+  // TODO: In the future, this could open a modal to select amount
+  const tokensToDonate = 10;
+
+  try {
+    // Reset error state before donation
+    postsStore.donateError = null;
+    await postsStore.donateToPost(postId, tokensToDonate);
+
+    // Success notification
+    Notify.create({
+      type: "positive",
+      message: `Successfully donated ${tokensToDonate} tokens!`,
+      position: "top",
+      timeout: 3000
+    });
+  } catch (error) {
+    // Error notification (error message is already set in store)
+    const errorMessage = postsStore.donateError || "Failed to process donation. Please try again.";
+    Notify.create({
+      type: "negative",
+      message: errorMessage,
+      position: "top",
+      timeout: 5000
+    });
+  }
 };
 
 watch(

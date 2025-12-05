@@ -27,6 +27,9 @@ export const usePostsStore = defineStore("posts", {
     currentPost: null as PostDetail | null,
     detailLoading: false,
     detailError: null as string | null,
+    // Donate state
+    donateLoading: false,
+    donateError: null as string | null,
     // Filters state
     filters: {
       type: null as "dream" | "problem" | "idea" | null,
@@ -248,6 +251,84 @@ export const usePostsStore = defineStore("posts", {
         this.currentPost = null;
       } finally {
         this.detailLoading = false;
+      }
+    },
+
+    // 💰 Donate tokens to a post
+    async donateToPost(postId: number, tokens: number) {
+      this.donateLoading = true;
+      this.donateError = null;
+
+      try {
+        if (process.env.NODE_ENV === "development") {
+          console.log("💰 Donating tokens:", { postId, tokens });
+        }
+
+        const { data } = await api.post(`/posts/${postId}/donate`, {
+          tokens
+        });
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("💰 Donation successful:", data);
+        }
+
+        // ✅ On success: Re-fetch post detail to get updated data
+        if (data.post) {
+          // Update currentPost if it's the same post
+          if (this.currentPost && this.currentPost.post_id === postId) {
+            this.currentPost.tokens = data.post.tokens;
+          }
+          // Re-fetch full post detail to ensure all data is up to date
+          await this.fetchPostById(postId);
+        }
+
+        // ✅ Update user tokens in auth store if BE returns updated user tokens
+        if (data.user?.tokens !== undefined) {
+          const { useAuthStore } = await import("src/stores/auth");
+          const authStore = useAuthStore();
+          authStore.updateTokens(data.user.tokens);
+        }
+
+        return data;
+      } catch (error: unknown) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌ Donation failed:", error);
+        }
+
+        // Handle different error types
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as {
+            response?: {
+              status?: number;
+              data?: {
+                message?: string;
+                errors?: Record<string, string[]>;
+              };
+            };
+          };
+
+          if (axiosError.response?.data?.message) {
+            this.donateError = axiosError.response.data.message;
+          } else if (axiosError.response?.status === 400) {
+            this.donateError = "Insufficient tokens or invalid request.";
+          } else if (axiosError.response?.status === 401) {
+            this.donateError = "Please log in to donate.";
+          } else if (axiosError.response?.status === 403) {
+            this.donateError = "You cannot donate to your own post.";
+          } else if (axiosError.response?.status === 404) {
+            this.donateError = "Post not found.";
+          } else if (axiosError.response?.status === 422) {
+            this.donateError = "Invalid donation amount.";
+          } else {
+            this.donateError = "Failed to process donation. Please try again.";
+          }
+        } else {
+          this.donateError = "Network error. Please check your connection.";
+        }
+
+        throw error;
+      } finally {
+        this.donateLoading = false;
       }
     }
   }

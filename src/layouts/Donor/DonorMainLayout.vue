@@ -174,8 +174,10 @@ import { useQuasar } from "quasar";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
+import { useAuthStore } from "src/stores/auth";
 
 const $q = useQuasar();
+const authStore = useAuthStore();
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
@@ -225,8 +227,8 @@ const onScroll = () => {
   lastScrollPosition.value = currentScrollPosition;
 };
 
-// Mock data
-const tokenBalance = ref(200000);
+// Token balance from auth store (falls back to 30 if not loaded)
+const tokenBalance = computed(() => authStore.user?.tokens ?? 30);
 const notificationCount = ref(1);
 const isSwitchingRole = ref(false);
 
@@ -402,7 +404,7 @@ watch(() => $q.dark.isActive, () => {
   }, 0);
 }, { immediate: true });
 
-onMounted(() => {
+onMounted(async () => {
   checkBadgeDrawerState();
   checkBodyClass();
   window.addEventListener("scroll", onScroll);
@@ -411,6 +413,17 @@ onMounted(() => {
     checkBadgeDrawerState();
     checkBodyClass();
   });
+
+  // Fetch user data to get current token balance
+  if (authStore.isAuthenticated && !authStore.user) {
+    try {
+      await authStore.fetchUser();
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to fetch user data:", error);
+      }
+    }
+  }
   observer.observe(document.body, {
     attributes: true,
     attributeFilter: ["class"]

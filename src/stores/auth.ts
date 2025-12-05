@@ -124,6 +124,13 @@ export const useAuthStore = defineStore("auth", {
           }
         }
       }
+    },
+
+    // Update user tokens (e.g., after donation)
+    updateTokens(newTokens: number) {
+      if (this.user) {
+        this.user.tokens = newTokens;
+      }
     }
   }
 });
