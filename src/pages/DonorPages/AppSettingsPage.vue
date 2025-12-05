@@ -164,11 +164,11 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useQuasar } from "quasar";
-import { useUserStore } from "src/stores/user-store";
+import { useAuthStore } from "src/stores/auth";
 
 const $q = useQuasar();
 const router = useRouter();
-const userStore = useUserStore();
+const auth = useAuthStore();
 const lightMode = ref(false);
 const nameShown = ref(false);
 
@@ -183,12 +183,18 @@ onBeforeUnmount(() => {
 });
 
 const logout = async () => {
-  // Volať logout action z user store (už robí redirect na auth-welcome)
-  await userStore.logout();
+  await auth.logout();
+  router.push({ name: "login" });
 };
 function changeTheme() {
   $q.dark.toggle();
   lightMode.value = !lightMode.value;
+  // Manually add/remove body--light class to ensure it's available for MutationObserver
+  if (lightMode.value) {
+    document.body.classList.add("body--light");
+  } else {
+    document.body.classList.remove("body--light");
+  }
 }
 const accountSettings = [
   {

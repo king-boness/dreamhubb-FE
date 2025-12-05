@@ -201,7 +201,7 @@ const profiles = ref([
 .myProfile {
   overflow: visible !important;
   position: relative;
-  height: 100%;
+  min-height: 100%;
 }
 
 :deep(.q-layout) {
@@ -222,14 +222,14 @@ const profiles = ref([
 
 .userProfile-detailsContainer {
   margin-top: 6rem;
-  margin-bottom: 4rem;
+  margin-bottom: 0;
   padding: 0;
+  padding-bottom: 5.5rem;
   width: 100%;
   position: relative;
   overflow: visible !important;
   overflow-x: visible !important;
   overflow-y: visible !important;
-  min-height: 100vh;
   height: auto;
 }
 

@@ -1,12 +1,13 @@
 <template>
+  <!-- Splash screen for role switch - outside q-layout -->
+  <AppSplash v-if="isSwitchingRole" class="splash-overlay" />
+
   <q-layout
     view="lHh Lpr lFf"
     class="donorLayout"
     @touchstart.passive="onTouchStart"
     @touchend.passive="onTouchEnd"
   >
-    <!-- Splash screen for role switch -->
-    <AppSplash v-if="isSwitchingRole" class="splash-overlay" />
 
     <!-- TOP HEADER with reveal -->
     <q-header
@@ -17,23 +18,31 @@
       v-if="!isSwitchingRole"
     >
       <div class="donorLayout-topBar row">
-        <!-- Logo + switch icon -->
+        <!-- Logo + switch icon OR Back button -->
         <div class="row">
-          <div
-            class="iconContainer"
-            @click="handleLogoClick"
-          >
-            <img
-              :src="logoImage"
-              alt=""
-              class="logoIcon"
-            />
-            <img
-              :src="donorSwitchIcon"
-              alt="donor"
-              class="navbarIcon"
-            />
-          </div>
+          <template v-if="!isSettingsSubPage">
+            <div
+              class="iconContainer"
+              @click="handleLogoClick"
+            >
+              <img
+                :src="logoImage"
+                alt=""
+                class="logoIcon"
+              />
+              <img src="/header_icons/donor.svg" alt="" class="header-roleIcon" />
+              <img
+                :src="donorSwitchIcon"
+                alt="donor"
+                class="navbarIcon"
+              />
+            </div>
+          </template>
+          <template v-else>
+            <q-btn class="settingsHeader-button" @click="$router.go(-1)">
+              <img src="/icons/arrowIcon.svg" alt="" />
+            </q-btn>
+          </template>
         </div>
 
         <!-- Search icon + Token balance -->
@@ -92,7 +101,7 @@
     </q-header>
 
     <!-- PAGE CONTAINER -->
-    <q-page-container>
+    <q-page-container class="no-padding-bottom">
       <router-view />
     </q-page-container>
 
@@ -159,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
@@ -172,8 +181,16 @@ const $q = useQuasar();
 useEdgeSwipeBack();
 
 // Asset imports
-const donorSwitchIcon = new URL("../../assets/icons/DonorSwitchIcon.svg", import.meta.url).href;
-const logoImage = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
+const donorSwitchIcon = "/header_icons/swap.svg";
+const logoImageLight = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
+const logoImageDark = new URL("../../assets/logos/dreamhubb_logo_d.svg", import.meta.url).href;
+
+// Computed logo based on light/dark mode
+const logoImage = computed(() => {
+  // Light mode: use dark logo (dreamhubb_logo_d.svg)
+  // Dark mode: use light logo (dreamhubb_logo_l.svg)
+  return isBodyLight.value ? logoImageDark : logoImageLight;
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -209,29 +226,63 @@ const onScroll = () => {
 };
 
 // Mock data
-const tokenBalance = ref(268);
+const tokenBalance = ref(200000);
 const notificationCount = ref(1);
 const isSwitchingRole = ref(false);
 
 // Active navigation state
 const activeNav = ref<"home" | "discover" | "notifications" | "profile">("home");
 
+// Check if light mode is enabled
+const isBodyLight = ref(false);
+const checkBodyClass = () => {
+  // Check both Quasar dark mode and body class
+  isBodyLight.value = !$q.dark.isActive || document.body.classList.contains("body--light");
+};
+
 // Computed for footer icons
 const navIcons = {
   home: computed(() => activeNav.value === "home" ? "/footer_icons/home_s.svg" : "/footer_icons/home.svg"),
-  discover: computed(() => activeNav.value === "discover" ? "/footer_icons/compass_s.svg" : "/footer_icons/compass.svg"),
-  notifications: computed(() => activeNav.value === "notifications" ? "/footer_icons/bell_s.svg" : "/footer_icons/bell.svg"),
-  profile: computed(() => activeNav.value === "profile" ? "/footer_icons/profile_s.svg" : "/footer_icons/profile.svg")
+  discover: computed(() => {
+    // If selected, always use _s version
+    if (activeNav.value === "discover") {
+      return "/footer_icons/compass_s.svg";
+    }
+    // If not selected: light mode uses _lm, dark mode uses normal
+    return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass.svg";
+  }),
+  notifications: computed(() => {
+    // If selected, always use _s version
+    if (activeNav.value === "notifications") {
+      return "/footer_icons/bell_s.svg";
+    }
+    // If not selected: light mode uses _lm, dark mode uses normal
+    return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell.svg";
+  }),
+  profile: computed(() => {
+    // If selected, always use _s version
+    if (activeNav.value === "profile") {
+      return "/footer_icons/profile_s.svg";
+    }
+    // If not selected: light mode uses _lm, dark mode uses normal
+    return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile.svg";
+  })
 };
+
+// Check if we're on a settings sub-page
+const isSettingsSubPage = computed(() => {
+  const routeName = route.name?.toString() || "";
+  return routeName.startsWith("donor-settings") && routeName !== "donor-settings";
+});
 
 // Header/Footer visibility logic
 const shouldShowHeader = computed(() => {
   const routeName = route.name?.toString() || "";
-  // Hide header on detail pages, search, settings, etc.
+  // Hide header on detail pages, search, etc.
+  // Show header on all settings pages (main and sub-settings), same as donee side
   const hideOnRoute = (
     routeName === "donor-post-detail" ||
     routeName === "donor-search" ||
-    routeName.startsWith("donor-settings") ||
     routeName.startsWith("donor-onBoarding")
   );
   // Hide header if on specific routes, badge drawer is fully open, or scrolling down
@@ -240,12 +291,13 @@ const shouldShowHeader = computed(() => {
 
 const shouldShowFooter = computed(() => {
   const routeName = route.name?.toString() || "";
-  // Hide footer on detail pages, search, settings, filters, etc.
+  // Hide footer on detail pages, search, sub-settings pages, filters, etc.
+  // Show footer on main settings page (donor-settings), hide on sub-settings (donor-settings-*)
   const hideOnRoute = (
     routeName === "donor-post-detail" ||
     routeName === "donor-search" ||
     routeName === "donor-filters" ||
-    routeName.startsWith("donor-settings") ||
+    (routeName.startsWith("donor-settings") && routeName !== "donor-settings") ||
     routeName.startsWith("donor-onBoarding")
   );
   // Hide footer if on specific routes, badge drawer is open, scrolling down, or switching role
@@ -342,12 +394,22 @@ const checkBadgeDrawerState = () => {
 // Use MutationObserver to watch for body class changes
 let observer: MutationObserver | null = null;
 
+// Watch for Quasar dark mode changes
+watch(() => $q.dark.isActive, () => {
+  // Use nextTick to ensure body class is updated
+  setTimeout(() => {
+    checkBodyClass();
+  }, 0);
+}, { immediate: true });
+
 onMounted(() => {
   checkBadgeDrawerState();
+  checkBodyClass();
   window.addEventListener("scroll", onScroll);
-  // Watch for class changes on body element
+  // Watch for class changes on body element (including body--light for light mode)
   observer = new MutationObserver(() => {
     checkBadgeDrawerState();
+    checkBodyClass();
   });
   observer.observe(document.body, {
     attributes: true,
@@ -377,15 +439,16 @@ onBeforeUnmount(() => {
     background-repeat: no-repeat;
     background-size: auto;
     border-bottom: 0.05rem solid rgba(255, 255, 255, 0.202);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     padding: 0; // No padding on header, padding is in topBar
   }
 
   .donorLayout-topBar {
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
     gap: 0.5rem;
-    padding: 1.3rem 0 1rem 0; // Match donee header padding (top and bottom)
+    padding: 3rem 1rem 1rem 1rem; // Match donee header padding
     width: 100%;
 
     .iconContainer {
@@ -393,6 +456,8 @@ onBeforeUnmount(() => {
       align-items: center;
       cursor: pointer;
       transition: opacity 0.2s ease;
+      gap: 0.6rem;
+      flex-shrink: 0;
 
       &:hover {
         opacity: 0.8;
@@ -402,12 +467,19 @@ onBeforeUnmount(() => {
     .logoIcon {
       height: 1.6rem;
       width: 1.6rem;
-      margin-right: 0.5rem;
+      object-fit: contain;
+    }
+
+    .header-roleIcon {
+      height: 1rem;
+      width: auto;
+      object-fit: contain;
     }
 
     .navbarIcon {
-      height: auto;
+      height: 1.6rem;
       width: auto;
+      object-fit: contain;
     }
 
     .searchIcon {
@@ -468,6 +540,19 @@ onBeforeUnmount(() => {
         height: 1rem;
       }
     }
+
+    .settingsHeader-button {
+      margin: 0 0.4rem;
+      width: 2.8rem;
+      height: 2.8rem;
+      border-radius: 2rem;
+      margin-right: 4.1rem;
+      background: linear-gradient(
+        90deg,
+        rgba(44, 44, 44, 0.832) 10%,
+        rgba(67, 66, 66, 0.986) 100%
+      );
+    }
   }
 
   // BOTTOM FOOTER (matching donee footer style)
@@ -485,6 +570,22 @@ onBeforeUnmount(() => {
     &::after {
       display: none !important;
       content: none !important;
+    }
+
+    // Ensure all q-btn elements in footer have transparent background
+    :deep(.q-btn) {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
     }
   }
 
@@ -508,6 +609,8 @@ onBeforeUnmount(() => {
     min-height: auto !important;
     padding: 0 !important;
     margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
 
     &::before,
     &::after {
@@ -516,11 +619,16 @@ onBeforeUnmount(() => {
       box-shadow: none !important;
       border: none !important;
       background: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
     }
 
     :deep(.q-btn__wrapper) {
       padding: 0 !important;
       min-height: auto !important;
+      min-width: auto !important;
+      width: auto !important;
+      height: auto !important;
       background: transparent !important;
       box-shadow: none !important;
       border: none !important;
@@ -532,7 +640,23 @@ onBeforeUnmount(() => {
         box-shadow: none !important;
         border: none !important;
         background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
       }
+    }
+
+    :deep(.q-focus-helper) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    :deep(.q-ripple) {
+      display: none !important;
+    }
+
+    img {
+      transition: opacity 0.3s ease, transform 0.3s ease !important;
     }
 
     &:hover {
@@ -570,6 +694,8 @@ onBeforeUnmount(() => {
     box-shadow: none !important;
     border: none !important;
     outline: none !important;
+    width: auto !important;
+    height: auto !important;
 
     &::before,
     &::after {
@@ -578,9 +704,16 @@ onBeforeUnmount(() => {
       box-shadow: none !important;
       border: none !important;
       background: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
     }
 
     :deep(.q-btn__wrapper) {
+      padding: 0 !important;
+      min-height: auto !important;
+      min-width: auto !important;
+      width: auto !important;
+      height: auto !important;
       background: transparent !important;
       box-shadow: none !important;
       border: none !important;
@@ -592,7 +725,19 @@ onBeforeUnmount(() => {
         box-shadow: none !important;
         border: none !important;
         background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
       }
+    }
+
+    :deep(.q-focus-helper) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    :deep(.q-ripple) {
+      display: none !important;
     }
 
     &:hover,
@@ -605,15 +750,25 @@ onBeforeUnmount(() => {
     }
   }
 
+  .no-padding-bottom {
+    padding-bottom: 0 !important;
+  }
+
+  // Remove padding-top for post-detail page
+  .q-page-container:has(.postDetail) {
+    padding-top: 0 !important;
+  }
+
   .footer-marginClass {
     height: 1.6rem;
     width: 1.6rem;
     display: block;
+    transition: opacity 0.3s ease, transform 0.3s ease !important;
   }
 
   .profileIcon .footer-marginClass {
-    height: 2rem !important;
-    width: 2rem !important;
+    height: 2.4rem !important;
+    width: 2.4rem !important;
   }
 
   .activeProfile {
@@ -658,6 +813,90 @@ onBeforeUnmount(() => {
   }
 }
 
+// Light mode overrides for footer buttons
+.body--light {
+  .donorLayout {
+    .button-footer {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      :deep(.q-btn__wrapper) {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+          box-shadow: none !important;
+          border: none !important;
+          background: none !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+        }
+      }
+
+      :deep(.q-focus-helper) {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      :deep(.q-ripple) {
+        display: none !important;
+      }
+    }
+
+    .active.button-footer,
+    .activeProfile.button-footer {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      :deep(.q-btn__wrapper) {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+          box-shadow: none !important;
+          border: none !important;
+          background: none !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+        }
+      }
+    }
+  }
+}
+
 // Quasar overrides
 .q-header {
   transition: transform 0.3s ease;
@@ -682,11 +921,41 @@ onBeforeUnmount(() => {
 }
 
 .splash-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
+}
+
+// Remove padding from q-layout when splash is active
+body:has(.splash-overlay) .q-layout {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+// Ensure body and html have no padding/margin when splash is active
+body:has(.splash-overlay),
+html:has(.splash-overlay) {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+// Ensure splash overlay covers entire viewport
+body:has(.splash-overlay) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
 }
 </style>

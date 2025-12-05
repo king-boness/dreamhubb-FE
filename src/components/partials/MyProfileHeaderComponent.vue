@@ -319,19 +319,24 @@ const slideDrawer = (ev: any) => {
 };
 
 const cycleDrawer = () => {
-  // If drawer is fully open or half open, close it
-  if (drawerMode.value === "full" || drawerMode.value === "half") {
+  // If drawer is fully open, close it
+  if (drawerMode.value === "full") {
     dialog.value = false;
     animateDrawerTo(drawerMinHeight);
     return;
   }
-  // Otherwise, open to half
-  const targetHeight =
-    drawerMode.value === "handler"
-      ? Math.round(drawerMaxHeight.value / 2)
-      : drawerMinHeight;
-
-  animateDrawerTo(targetHeight);
+  // If drawer is half open, open it fully
+  if (drawerMode.value === "half") {
+    animateDrawerTo(drawerMaxHeight.value);
+    return;
+  }
+  // If drawer is closed (handler), open to half first
+  if (drawerMode.value === "handler") {
+    animateDrawerTo(Math.round(drawerMaxHeight.value / 2));
+    return;
+  }
+  // Fallback
+  animateDrawerTo(drawerMinHeight);
 };
 
 const animateDrawerTo = (height: any) => {

@@ -1,5 +1,38 @@
 <template>
-  <div class="postDetail" v-if="post">
+  <!-- Loading state -->
+  <div v-if="loading" class="postDetail-loading">
+    <AppSplash />
+  </div>
+
+  <!-- Error state -->
+  <div v-else-if="error" class="postDetail-error">
+    <div class="postDetail-errorContent">
+      <h2>Unable to load this post</h2>
+      <p>{{ error }}</p>
+      <div class="postDetail-errorActions">
+        <button class="primaryCtaBtn" @click="handleRetry">
+          Try Again
+        </button>
+        <button class="secondaryBtn" @click="handleClose">
+          Back to Feed
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state (post not found) -->
+  <div v-else-if="!post" class="postDetail-empty">
+    <div class="postDetail-errorContent">
+      <h2>Post not found</h2>
+      <p>This post may have been deleted or doesn't exist.</p>
+      <button class="primaryCtaBtn" @click="handleClose">
+        Back to Feed
+      </button>
+    </div>
+  </div>
+
+  <!-- Post content -->
+  <div v-else class="postDetail">
     <div class="postDetail-inner">
 
       <!-- TOP IMAGE / SLIDER -->
@@ -76,12 +109,13 @@
         <!-- CATEGORY CHIP -->
         <div class="postDetail-chipRow">
           <div class="postDetail-categoryPill">
-            <q-icon
+            <img
+              :src="getPostTypeIcon(post.type)"
               class="postDetail-categoryIcon"
-              :name="'img:/assets/icons/ui/icon-category-general.svg'"
+              alt=""
             />
             <span class="postDetail-categoryText">
-              {{ post.category_name || "Aurora Expedition" }}
+              {{ post.fe_category ? getCategoryDisplayName(post.fe_category) : (post.category_name || "General") }}
             </span>
           </div>
         </div>
@@ -150,28 +184,13 @@
           </span>
     </div>
 
-      <!-- ABOUT DREAM -->
+      <!-- ABOUT DREAM/PROBLEM/IDEA -->
       <div class="aboutPost">
-        <h2>About Dream</h2>
+        <h2>{{ aboutSectionTitle }}</h2>
           <p>{{ post.description }}</p>
-          <p v-for="(paragraph, idx) in aboutDreamParagraphs" :key="`dream-${idx}`">
-            {{ paragraph }}
-          </p>
-
-          <button
-            type="button"
-            class="postDetail-reportBtn"
-            @click="handleReportDream"
-          >
-            <q-icon
-              class="postDetail-reportIcon"
-              :name="'img:/assets/icons/ui/icon-report.svg'"
-            />
-            <span>REPORT A DREAM</span>
-          </button>
       </div>
 
-        <!-- ABOUT AUTHOR / DREAMER -->
+        <!-- ABOUT AUTHOR -->
         <div class="aboutAuthor">
         <h2>About Author</h2>
 
@@ -193,12 +212,24 @@
             </div>
           </div>
 
-          <p class="authorLead">
-            Dreamer · Reykjavík — obsessed with northern lights and community joy.
-          </p>
           <p v-for="(paragraph, idx) in doneeInfo.description" :key="`author-story-${idx}`" class="authorStory">
             {{ paragraph }}
           </p>
+        </div>
+
+        <!-- REPORT POST BUTTON (moved to bottom) -->
+        <div class="postDetail-reportSection">
+          <button
+            type="button"
+            class="postDetail-reportBtn"
+            @click="handleReportDream"
+          >
+            <q-icon
+              class="postDetail-reportIcon"
+              :name="'img:/assets/icons/ui/icon-report.svg'"
+            />
+            <span>REPORT A POST</span>
+          </button>
         </div>
 
       </div>
@@ -271,24 +302,31 @@
     </q-dialog>
   </div>
 
-  <!-- LOADER (fallback) -->
-  <template v-else>
-    <AppSplash />
-  </template>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, nextTick, watch } from "vue";
-import { useApiCallStore, type FullPost } from "src/stores/api-calls-store";
+import { usePostsStore } from "src/stores/posts";
 import { useRoute, useRouter } from "vue-router";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
+import { getCategoryDisplayName } from "src/data/categoryNames";
+
+// Get post type icon (dream_mini.svg, problem_mini.svg, idea_mini.svg)
+const getPostTypeIcon = (type: string | null | undefined): string => {
+  const typeMap: Record<string, string> = {
+    dream: "/post_icons/dream_mini.svg",
+    problem: "/post_icons/problem_mini.svg",
+    idea: "/post_icons/idea_mini.svg"
+  };
+  return typeMap[type?.toLowerCase() || ""] || "/post_icons/dream_mini.svg";
+};
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
 
-const api = useApiCallStore();
+const postsStore = usePostsStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -298,10 +336,6 @@ interface ContributeOption {
   id: string | number;
   type: ContributeOptionType;
   label: string;
-}
-
-interface PostDetail extends FullPost {
-  commentsCount?: number;
 }
 
 // eslint-disable-next-line func-call-spacing
@@ -317,7 +351,6 @@ const isLiked = ref(false);
 const likesCount = ref<number | null>(null);
 const isSaved = ref(false);
 const commentsCount = ref<number | null>(null);
-const post = ref<PostDetail | null>(null);
 const scrollY = ref(0);
 const scrollTarget = ref<ScrollEventTarget | null>(null);
 const cleanupFns: Array<() => void> = [];
@@ -328,18 +361,11 @@ const autoSlideInterval = ref<number | null>(null);
 const progressIntervalId = ref<number | null>(null);
 const isLightboxOpen = ref(false);
 const lightboxImageIndex = ref(0);
-const additionalImages = ref<string[]>([]);
 const isMounted = ref(false);
-
-const aboutDreamParagraphs = [
-  "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-  "Aliquam posuere purus pellentesque ipsum imperdiet ut sociis eget egestas pharetra. At nisl nisl lectus enim egestas diam elementum euismod dui.",
-  "Cursus quis et proin quis ut a sit. Nisi massa aenean turpis risus libero amet aliquam."
-];
 
 const doneeInfo = {
   name: "Mackenzie Doe",
-  role: "Dreamer • Reykjavík",
+  role: "Reykjavík",
   avatar: "/images/Auth/profilePicture.jpeg",
   description: [
     "Mackenzie leads local teens on their first northern lights adventures, mixing science, art, and community storytelling to spark curiosity.",
@@ -385,101 +411,47 @@ const heroStyle = computed(() => {
   return styles;
 });
 
-// Computed property to get token value - prioritize tokenReward from query params (from feed) over API value
+// Computed properties from store
+const post = computed(() => postsStore.currentPost);
+const loading = computed(() => postsStore.detailLoading);
+const error = computed(() => postsStore.detailError);
+
+// Computed property to get token value from post
 const displayTokens = computed(() => {
-  // Priority 1: Get tokenReward from query params (passed from PostsPage)
-  const tokenRewardFromQuery = route.query.tokenReward;
-  if (tokenRewardFromQuery && typeof tokenRewardFromQuery === "string") {
-    const parsed = Number.parseInt(tokenRewardFromQuery, 10);
-    if (!Number.isNaN(parsed)) {
-      return parsed;
-    }
-  }
-
-  // Priority 2: Get tokens from post (API value)
-  if (post.value?.tokens !== undefined && post.value.tokens !== null) {
-    return post.value.tokens;
-  }
-
-  // Fallback
-  return 0;
+  return post.value?.tokens ?? 0;
 });
 
-// Computed property to get title - prioritize dreamTitle from query params (from feed) over API value
+// Computed property to get title from post
 const displayTitle = computed(() => {
-  // Priority 1: Get dreamTitle from query params (passed from PostsPage)
-  const dreamTitleFromQuery = route.query.dreamTitle;
-  if (typeof dreamTitleFromQuery === "string" && dreamTitleFromQuery.trim() !== "") {
-    return dreamTitleFromQuery;
-  }
-
-  // Priority 2: Get title from post (API value)
   return post.value?.title ?? "";
 });
 
-// Computed property to get date - prioritize createdAt from query params (from feed) over API value
+// Computed property to get formatted date from post
 const displayDate = computed(() => {
-  // Priority 1: Get createdAt from query params (passed from PostsPage)
-  const createdAtFromQuery = route.query.createdAt;
-  if (typeof createdAtFromQuery === "string" && createdAtFromQuery.trim() !== "") {
-    // Format date from MM/DD/YYYY (from feed) to DD.MM.YYYY (Slovak format for detail page)
-    const dateParts = createdAtFromQuery.split("/");
-    if (dateParts.length === 3) {
-      const [month, day, year] = dateParts;
-      return `${day}.${month}.${year}`;
-    }
-    return createdAtFromQuery;
-  }
-
-  // Priority 2: Get formatted date from post (API value)
   return formattedDate.value;
 });
 
-// Computed property to get location - prioritize location from query params (from feed) over API value
+// Computed property to get location from post
 const displayLocation = computed(() => {
-  // Priority 1: Get location from query params (passed from PostsPage)
-  const locationFromQuery = route.query.location;
-  if (typeof locationFromQuery === "string" && locationFromQuery.trim() !== "") {
-    return locationFromQuery;
-  }
-
-  // Priority 2: Get location from post (API value)
   return locationLabel.value;
 });
 
-// Computed property to get author name - prioritize authorName from query params (from feed) over API value
+// Computed property to get author name from post
 const displayAuthorName = computed(() => {
-  // Priority 1: Get authorName from query params (passed from PostsPage)
-  const authorNameFromQuery = route.query.authorName;
-  if (typeof authorNameFromQuery === "string" && authorNameFromQuery.trim() !== "") {
-    return authorNameFromQuery;
-  }
-
-  // Priority 2: Get author_name from post (API value)
   return post.value?.author_name ?? "";
 });
 
-// Computed property to get author avatar - prioritize authorAvatarUrl from query params (from feed) over API value
+// Computed property to get author avatar (fallback to default)
 const displayAuthorAvatar = computed(() => {
-  // Priority 1: Get authorAvatarUrl from query params (passed from PostsPage)
-  const authorAvatarUrlFromQuery = route.query.authorAvatarUrl;
-  if (typeof authorAvatarUrlFromQuery === "string" && authorAvatarUrlFromQuery.trim() !== "") {
-    return authorAvatarUrlFromQuery;
-  }
-
-  // Priority 2: Get avatar from doneeInfo (fallback)
+  // TODO: BE ešte neposiela author_picture/avatar - keď bude, pridať:
+  // return post.value?.author_picture || post.value?.author_avatar_url || doneeInfo.avatar;
   return doneeInfo.avatar;
 });
 
-// Computed property to get author location for "About Author" section - prioritize location from query params
+// Computed property to get author location for "About Author" section
 const displayAuthorLocation = computed(() => {
-  // Priority 1: Get location from query params (passed from PostsPage)
-  const locationFromQuery = route.query.location;
-  if (typeof locationFromQuery === "string" && locationFromQuery.trim() !== "") {
-    return locationFromQuery;
-  }
-
-  // Priority 2: Extract location from doneeInfo.role or use default
+  // TODO: BE ešte neposiela location - keď bude, pridať:
+  // return post.value?.location || post.value?.author_location || "Unknown";
   const roleParts = doneeInfo.role.split("•");
   if (roleParts.length > 1) {
     return roleParts[1].trim();
@@ -487,53 +459,70 @@ const displayAuthorLocation = computed(() => {
   return "Reykjavík";
 });
 
+// Computed property to get post type (dream/problem/idea)
+const postType = computed(() => {
+  const p = post.value;
+  if (!p) return "dream"; // Default fallback
+
+  // BE posiela type pole
+  const type = p.type || "dream";
+
+  if (["dream", "problem", "idea"].includes(type)) {
+    return type;
+  }
+
+  // Default to "dream" if type is not valid
+  return "dream";
+});
+
+// Computed property for "About" section title
+const aboutSectionTitle = computed(() => {
+  const type = postType.value;
+  const titles: Record<string, string> = {
+    dream: "About Dream",
+    problem: "About Problem",
+    idea: "About Idea"
+  };
+  return titles[type] || "About Dream";
+});
+
+// Load post by ID
+const loadPost = async (id: number) => {
+  // Nastaviť loading na true okamžite, aby sa splash screen zobrazil
+  postsStore.detailLoading = true;
+  await postsStore.fetchPostById(id);
+};
+
+// Watch for route param changes (e.g., when navigating between posts)
+watch(
+  () => route.params.id,
+  async (newId) => {
+    if (newId) {
+      const id = Number(newId);
+      if (!Number.isNaN(id)) {
+        // Reset image index when loading new post
+        currentImageIndex.value = 0;
+        progressBarFill.value = 0;
+        pauseAutoSlide();
+        await loadPost(id);
+      }
+    }
+  },
+  { immediate: false }
+);
+
 onMounted(async () => {
   isMounted.value = true;
   const id = Number(route.params.id);
-  post.value = await api.getPostById(id);
 
-  // Debug: log post data to see what we're getting
-  if (process.env.NODE_ENV === "development") {
-    console.log("📦 Post data:", post.value);
-    console.log("🖼️ Images array:", post.value?.images);
-    const postAny = post.value as unknown as Record<string, unknown>;
-    console.log("🖼️ ImageUrl:", typeof postAny?.imageUrl === "string" ? postAny.imageUrl : null);
-  }
-
-  // Generate additional images if needed
-  const imageUrlFromQuery = route.query.imageUrl as string;
-  const postAny = post.value as unknown as Record<string, unknown>;
-  const imageUrlFromPost = (typeof postAny?.imageUrl === "string" ? postAny.imageUrl : null) ||
-    (typeof postAny?.image_url === "string" ? postAny.image_url : null) ||
-    (typeof postAny?.main_image === "string" ? postAny.main_image : null);
-  const imageUrl = imageUrlFromQuery || imageUrlFromPost;
-
-  if (imageUrl && typeof imageUrl === "string") {
-    try {
-      const urlParts = imageUrl.split("/seed/");
-      if (urlParts.length > 1) {
-        const baseUrl = urlParts[0] || "https://picsum.photos";
-        const seedMatch = imageUrl.match(/\/seed\/([^/]+)/);
-        if (seedMatch) {
-          const baseSeed = seedMatch[1].split("/")[0];
-          const additionalSeeds = ["mountain", "ocean", "forest", "desert", "city", "nature"];
-          const generated: string[] = [];
-          for (let i = 0; i < additionalSeeds.length; i++) {
-            const newSeed = additionalSeeds[i];
-            const newImageUrl = `${baseUrl}/seed/${baseSeed}-${newSeed}/800/600`;
-            if (newImageUrl !== imageUrl && !generated.includes(newImageUrl)) {
-              generated.push(newImageUrl);
-            }
-          }
-          additionalImages.value = generated;
-        }
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Error generating additional images:", error);
-      }
+  if (Number.isNaN(id)) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("❌ Invalid post ID:", route.params.id);
     }
+    return;
   }
+
+  await loadPost(id);
 
   await nextTick();
 
@@ -568,76 +557,23 @@ const safeImages = computed(() => {
   const p = post.value;
   if (!p) return ["/images/Auth/postBackground.png"];
 
-  // Priority 1: Get imageUrl from route query (passed from PostsPage) - this ensures same image as on feed
-  const imageUrlFromQuery = route.query.imageUrl as string;
-
-  // Priority 2: Get imageUrl from post (used on PostsPage) - check multiple possible fields
-  const postAny = p as unknown as Record<string, unknown>;
-  const imageUrlFromPost = (typeof postAny?.imageUrl === "string" ? postAny.imageUrl : null) ||
-    (typeof postAny?.image_url === "string" ? postAny.image_url : null) ||
-    (typeof postAny?.main_image === "string" ? postAny.main_image : null);
-
-  // Use query param first (most reliable), then post field
-  const imageUrl = imageUrlFromQuery || imageUrlFromPost;
   const images = p.images || [];
 
-  // Debug: log what we're getting
-  if (process.env.NODE_ENV === "development") {
-    console.log("🖼️ Computing safeImages - imageUrlFromQuery:", imageUrlFromQuery, "imageUrlFromPost:", imageUrlFromPost, "final imageUrl:", imageUrl, "images:", images);
+  // Filter out invalid images
+  const validImages = images.filter(
+    (img) =>
+      img &&
+      typeof img === "string" &&
+      !["NULL", "{NULL}"].includes(img.trim())
+  );
+
+  // If we have valid images, use them
+  if (validImages.length > 0) {
+    return validImages;
   }
 
-  let result: string[] = [];
-
-  // Priority 1: If imageUrl exists (from query or post), use it as first image (this matches PostsPage)
-  if (imageUrl && typeof imageUrl === "string" && !["NULL", "{NULL}"].includes(imageUrl.trim())) {
-    result.push(imageUrl);
-  }
-
-  // Priority 2: If no imageUrl, use first image from images array
-  if (result.length === 0 && Array.isArray(images) && images.length > 0) {
-    const firstValidImage = images[0];
-    if (firstValidImage && typeof firstValidImage === "string" && !["NULL", "{NULL}"].includes(firstValidImage.trim())) {
-      result.push(firstValidImage);
-    }
-  }
-
-  // Priority 3: Add remaining images from images array (avoid duplicates)
-  if (Array.isArray(images) && images.length > 0) {
-    const filteredImages = images.filter(
-      (img, idx) => {
-        // Skip first image if we already added it
-        if (result.length > 0 && idx === 0 && img === result[0]) {
-          return false;
-        }
-        // Skip if it's the same as imageUrl
-        if (imageUrl && img === imageUrl) {
-          return false;
-        }
-        return img &&
-          typeof img === "string" &&
-          !["NULL", "{NULL}"].includes(img.trim());
-      }
-    );
-    result = [...result, ...filteredImages];
-  }
-
-  // Priority 4: Add additional images if we have less than 4
-  if (result.length > 0 && result.length < 4 && additionalImages.value.length > 0) {
-    const needed = 4 - result.length;
-    const toAdd = additionalImages.value.slice(0, needed).filter(img => !result.includes(img));
-    result = [...result, ...toAdd];
-  }
-
-  // Fallback: If still no images found, use fallback
-  if (result.length === 0) {
-    return ["/images/Auth/postBackground.png"];
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🖼️ Final safeImages:", result);
-  }
-
-  return result;
+  // Fallback: If no images found, use default
+  return ["/images/Auth/postBackground.png"];
 });
 
 const progressBarWidth = computed(() => {
@@ -752,42 +688,26 @@ const formattedDate = computed(() => {
 
 const locationLabel = computed(() => {
   const p = post.value;
-  if (!p) return "";
-  // TODO: typovať podľa API
-  const postAny = p as unknown as Record<string, unknown>;
-  const country = typeof postAny.country === "string" ? postAny.country : null;
-  const city = typeof postAny.city === "string" ? postAny.city : null;
-  const locationLabel = typeof postAny.locationLabel === "string" ? postAny.locationLabel : null;
-  return locationLabel ?? ([country, city].filter(Boolean).join(", ") || "Iceland, Reykjavík");
+  if (!p) return "Unknown";
+  // TODO: BE ešte neposiela location údaje - keď bude, pridať:
+  // return p.location || p.location_city || p.location_country || "Unknown";
+  return "Iceland, Reykjavík"; // Placeholder until BE provides location data
 });
 
 const viewsCount = computed(() => {
-  const p = post.value;
-  if (!p) return 0;
-  // TODO: typovať podľa API
-  const postAny = p as unknown as Record<string, unknown>;
-  const views = typeof postAny.views === "number" ? postAny.views : null;
-  const viewCount = typeof postAny.viewCount === "number" ? postAny.viewCount : null;
-  return views ?? viewCount ?? p.views ?? 0;
+  return post.value?.views ?? 0;
 });
 
 const goToAuthorProfile = () => {
-  // TODO: Get authorId from post data when available
-  // Currently FullPost only has author_name, not author.id
-  const postAny = post.value as unknown as Record<string, unknown>;
-  const author = postAny?.author as unknown as Record<string, unknown> | undefined;
-  const authorIdFromAuthor = author && typeof author.id === "number" ? author.id : null;
-  const authorIdFromPost = typeof postAny?.author_id === "number" ? postAny.author_id : null;
-  const authorId = authorIdFromAuthor || authorIdFromPost;
-  if (!authorId) {
-    console.warn("Chýba authorId, nedá sa otvoriť profil autora");
-    // TODO: navigate to author profile when authorId is available in API response
-    return;
-  }
-  router.push({
-    name: "author-profile", // TODO: predpokladaná budúca route
-    params: { authorId }
-  });
+  // TODO: BE ešte neposiela author_id/user_id - keď bude, pridať:
+  // const authorId = post.value?.author_id || post.value?.user_id;
+  // if (authorId) {
+  //   router.push({
+  //     name: "author-profile",
+  //     params: { authorId }
+  //   });
+  // }
+  console.warn("TODO: Navigate to author profile when BE provides author_id");
 };
 
 const handleClose = () => {
@@ -796,6 +716,13 @@ const handleClose = () => {
     return;
   }
   router.push({ name: "donor-posts" });
+};
+
+const handleRetry = async () => {
+  const id = Number(route.params.id);
+  if (!Number.isNaN(id)) {
+    await loadPost(id);
+  }
 };
 
 const currentPostUrl = computed(() => {
@@ -953,14 +880,15 @@ const onContributeOption = (option: ContributeOption | string) => {
 
 watch(
   () => post.value,
-  (post) => {
-    if (post) {
-      const postAny = post as unknown as Record<string, unknown>;
-      const likesCountValue = typeof postAny.likesCount === "number" ? postAny.likesCount : null;
-      const likesValue = typeof postAny.likes === "number" ? postAny.likes : null;
-      likesCount.value = likesCountValue ?? likesValue ?? null;
-      isLiked.value = typeof postAny.isLiked === "boolean" ? postAny.isLiked : false;
-      commentsCount.value = typeof postAny.commentsCount === "number" ? postAny.commentsCount : null;
+  (newPost) => {
+    if (newPost) {
+      // TODO: BE ešte neposiela likes/comments - keď bude, pridať:
+      // likesCount.value = newPost.likes_count ?? null;
+      // isLiked.value = newPost.is_liked ?? false;
+      // commentsCount.value = newPost.comments_count ?? null;
+      likesCount.value = null;
+      isLiked.value = false;
+      commentsCount.value = null;
     } else {
       likesCount.value = null;
       isLiked.value = false;

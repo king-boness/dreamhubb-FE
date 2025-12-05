@@ -13,7 +13,7 @@
           <img class="langIcon" :src="lang.icon" alt="" />
           <span class="langName">{{ lang.title }}</span>
         </div>
-        <q-radio v-model="shape" :val="lang.title" dark size="lg" />
+        <q-radio v-model="shape" :val="lang.title" :dark="!isBodyLight" size="lg" />
       </div>
       <div class="confirmationButton-div">
         <q-btn class="confirmButton" @click="$router.go(-1)">
@@ -27,8 +27,37 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useQuasar } from "quasar";
+
+const $q = useQuasar();
 const shape = ref("English (UK)");
+
+// Check if light mode is enabled
+const isBodyLight = ref(false);
+const checkBodyClass = () => {
+  isBodyLight.value = !$q.dark.isActive || document.body.classList.contains("body--light");
+};
+
+let observer: MutationObserver | null = null;
+
+onMounted(() => {
+  checkBodyClass();
+  // Watch for class changes on body element
+  observer = new MutationObserver(() => {
+    checkBodyClass();
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+});
+
+onBeforeUnmount(() => {
+  if (observer) {
+    observer.disconnect();
+  }
+});
 
 const languages = [
   {
