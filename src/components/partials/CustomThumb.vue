@@ -25,12 +25,15 @@
       :max="props.userKarma"
       track-color="brand"
       :inner-max="props.userKarma"
+      :step="1"
+      snap
+      @update:model-value="(val) => { sliderValue = val; emit('update:modelValue', val); }"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, watch } from "vue";
+import { ref, defineProps, watch, defineEmits } from "vue";
 
 const sliderValue = ref(0);
 
@@ -38,6 +41,7 @@ interface Props {
   userKarma: number;
   maxValue: number;
   review: boolean;
+  modelValue?: number;
 }
 
 const props: Props = defineProps({
@@ -52,13 +56,30 @@ const props: Props = defineProps({
   review: {
     type: Boolean,
     required: true
+  },
+  modelValue: {
+    type: Number,
+    default: 0
   }
 });
 
-watch(sliderValue, (newX) => {
-  if (sliderValue.value > props.userKarma) {
+const emit = defineEmits<{
+  "update:modelValue": [value: number];
+}>();
+
+// Sync s modelValue prop
+watch(() => props.modelValue, (newVal) => {
+  if (newVal !== undefined && newVal !== sliderValue.value) {
+    sliderValue.value = newVal;
+  }
+}, { immediate: true });
+
+watch(sliderValue, (newVal) => {
+  if (newVal > props.userKarma) {
     sliderValue.value = props.userKarma;
   }
+  // Emit hodnotu
+  emit("update:modelValue", sliderValue.value);
 });
 </script>
 
@@ -116,12 +137,29 @@ watch(sliderValue, (newX) => {
   filter: contrast(1);
   background-size: auto;
   background-repeat: no-repeat;
+  cursor: grab !important;
+  touch-action: none !important;
+  pointer-events: auto !important;
+  user-select: none;
+  -webkit-user-select: none;
 }
+
+.q-slider__thumb:active {
+  cursor: grabbing !important;
+}
+
+.q-slider__track-container {
+  cursor: pointer !important;
+  touch-action: none !important;
+}
+
 .q-slider__thumb-shape {
   display: none;
 }
 .q-slider__track {
   height: 0.6rem !important;
+  cursor: pointer !important;
+  touch-action: none !important;
 }
 
 .bg-brand {

@@ -1,5 +1,9 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="q-pb-md LayoutBackground">
+  <!-- Splash screen for role switch - outside q-layout -->
+  <AppSplash v-if="isSwitchingRole" class="splash-overlay" />
+
+  <q-layout view="lHh Lpr lFf" class="LayoutBackground">
+
     <HeaderComponent
       :karma="200000"
       :showBack="settingsPage"
@@ -27,7 +31,7 @@
         !settings &&
         !isDonorRoute
       "
-      :class="{ 'footer--hidden': !showNavbar || isSwitchingRole || isDonorRoute }"
+      :class="{ 'footer--hidden': !showNavbar || isSwitchingRole || isDonorRoute || isBadgeDrawerOpen }"
       class="navbar"
     />
   </q-layout>
@@ -36,6 +40,7 @@
 <script setup lang="ts">
 import HeaderComponent from "src/components/doneeComponents/HeaderDoneeComponent.vue";
 import FooterDoneeComponent from "src/components/doneeComponents/FooterDoneeComponent.vue";
+import AppSplash from "src/components/common/AppSplash.vue";
 import { useRoute } from "vue-router";
 import { watch, ref, computed, onMounted, onBeforeUnmount } from "vue";
 
@@ -55,7 +60,8 @@ const routeCheck = () => {
   if (process.env.NODE_ENV === "development") {
     console.log(routesName);
   }
-  routesName.startsWith("donee-settings")
+  // Show back button only on settings sub-pages, not on main settings page
+  routesName.startsWith("donee-settings") && routesName !== "donee-settings"
     ? (settingsPage = true)
     : (settingsPage = false);
   routesName.startsWith("donee-onBoarding")
@@ -214,6 +220,45 @@ body.splash-active .footer {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+.splash-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
+}
+
+// Remove padding from q-layout when splash is active
+body:has(.splash-overlay) .q-layout {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+// Ensure body and html have no padding/margin when splash is active
+body:has(.splash-overlay),
+html:has(.splash-overlay) {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+// Ensure splash overlay covers entire viewport
+body:has(.splash-overlay) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
 .navbar {
   transition: transform 0.25s ease;
 }
@@ -221,6 +266,16 @@ body.splash-active .footer {
 .footer.navbar {
   transition: transform 0.25s ease;
 }
+
+// Quasar overrides
+.q-header {
+  transition: transform 0.3s ease;
+}
+
+:deep(.q-page-container) {
+  padding-bottom: 0 !important;
+}
+
 .LayoutBackground {
   background-image: url("/images/Auth/bg-explain.png") !important;
   background-repeat: no-repeat;

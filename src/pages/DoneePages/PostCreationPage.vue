@@ -124,34 +124,62 @@
           :user-karma="1001"
           :max-value="100000000"
           :review="false"
+          v-model="tokens"
         ></TokenSlider>
       </div>
     </div>
     <div class="postCreation-submitDreamContainer">
+      <!-- Error message -->
+      <div v-if="postCreationStore.error" class="postCreation-error">
+        {{ postCreationStore.error }}
+      </div>
       <q-btn
         class="postCreation-submitButton"
         @click="handleSubmitPost"
-        >Submit Post</q-btn
+        :disabled="!postCreationStore.isValid || postCreationStore.loading"
       >
+        <span v-if="postCreationStore.loading">Creating post...</span>
+        <span v-else>Submit Post</span>
+      </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from "vue";
+import { ref, watch, onMounted, onActivated, computed } from "vue";
 import { useRouter } from "vue-router";
+import { usePostCreationStore } from "src/stores/postCreation";
+import { usePostsStore } from "src/stores/posts";
+import { Notify } from "quasar";
 import UploadPostImgComponent from "src/components/partials/UploadPostImgComponent.vue";
 import { PostCategories } from "src/components/models";
 import TokenSlider from "../../components/partials/CustomThumb.vue";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
+import type { UploadedImage } from "src/composables/useUpload";
 
 const router = useRouter();
+const postCreationStore = usePostCreationStore();
+const postsStore = usePostsStore();
 
-const aboutDream = ref("");
-const postTitle = ref("");
 const fileInput = ref<HTMLInputElement | null>(null);
 const imgIndex = ref(0);
 const uploadedImages = ref({
   images: ref<string[]>([])
+});
+
+// Computed properties from store
+const aboutDream = computed({
+  get: () => postCreationStore.description,
+  set: (value) => postCreationStore.setField("description", value)
+});
+
+const postTitle = computed({
+  get: () => postCreationStore.title,
+  set: (value) => postCreationStore.setField("title", value)
+});
+
+const tokens = computed({
+  get: () => postCreationStore.tokens,
+  set: (value) => postCreationStore.setField("tokens", value)
 });
 
 // Get selected goal from localStorage
@@ -168,7 +196,7 @@ const selectedGoalLabel = computed(() => {
   return goalMap[selectedGoal.value.toLowerCase()] || "Dream";
 });
 
-// Map goal names to icon file names
+// Map goal names to icon file names (use original CategoryIcons)
 const getGoalIcon = (goal: string | null): string => {
   if (!goal) return "/icons/CategoryIcons/dream.svg";
   const goalMap: Record<string, string> = {
@@ -188,8 +216,8 @@ const getCategoryIcon = (category: string | null): string => {
     travelling: "traveling",
     health: "health",
     learning: "learning",
-    possesions: "possesions",
-    possessions: "possesions",
+    possesions: "possesions", // Súbor sa volá possesions.svg (s jedným 's')
+    possessions: "possesions", // Mapovanie na správny názov súboru
     relationships: "relationships",
     events: "events",
     profession: "proffesion",
@@ -200,17 +228,74 @@ const getCategoryIcon = (category: string | null): string => {
   return `/icons/CategoryIcons/${iconName}.svg`;
 };
 
+// Map numeric IDs to category names (for backward compatibility with old localStorage values)
+const goalIdToName: Record<string, string> = {
+  1: "problem",
+  2: "dream",
+  3: "idea"
+};
+
+const categoryIdToName: Record<string, string> = {
+  1: "learning",
+  2: "health",
+  3: "traveling",
+  4: "possessions",
+  5: "relationships",
+  6: "profession",
+  7: "events",
+  8: "other"
+};
+
 // Load selected values from localStorage and set icons
 const loadSelectedCategories = () => {
-  const goal = localStorage.getItem("postCreation_goal");
-  const selectedCategory = localStorage.getItem("postCreation_category");
+  let goal = localStorage.getItem("postCreation_goal");
+  let selectedCategory = localStorage.getItem("postCreation_category");
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("📝 Raw values from localStorage:", {
+      goal,
+      selectedCategory
+    });
+  }
+
+  // Konvertovať číselné ID na názvy (pre kompatibilitu so starými hodnotami v localStorage)
+  // localStorage vracia stringy, takže musíme porovnať so stringmi
+  if (goal && goalIdToName[String(goal)]) {
+    goal = goalIdToName[String(goal)];
+  }
+  if (selectedCategory && categoryIdToName[String(selectedCategory)]) {
+    selectedCategory = categoryIdToName[String(selectedCategory)];
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("📝 After conversion:", {
+      goal,
+      selectedCategory
+    });
+  }
 
   selectedGoal.value = goal;
 
+  // Nastaviť hodnoty do store
+  if (goal) {
+    postCreationStore.setField("type", goal as "dream" | "problem" | "idea");
+  }
+  if (selectedCategory) {
+    postCreationStore.setField("category", selectedCategory);
+  }
+
+  // Aktualizovať ikony
   categories.value = {
     goalImg: getGoalIcon(goal),
     specificGoalImg: getCategoryIcon(selectedCategory)
   };
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("📝 Categories loaded:", {
+      goalImg: categories.value.goalImg,
+      specificGoalImg: categories.value.specificGoalImg
+    });
+  }
 };
 
 const categories = ref({
@@ -223,19 +308,86 @@ onMounted(() => {
   loadSelectedCategories();
 });
 
-// Handle post submission - clear localStorage and navigate
-const handleSubmitPost = () => {
-  // Clear stored values after submission
-  localStorage.removeItem("postCreation_goal");
-  localStorage.removeItem("postCreation_category");
-  // Navigate to posts page
-  router.push({ name: "donee-posts" });
+// Reload categories when component is activated (e.g., returning from submit-2 page)
+onActivated(() => {
+  loadSelectedCategories();
+});
+
+// Handle post submission - submit to BE
+const handleSubmitPost = async () => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔵 handleSubmitPost called", {
+      isValid: postCreationStore.isValid,
+      loading: postCreationStore.loading,
+      type: postCreationStore.type,
+      category: postCreationStore.category,
+      title: postCreationStore.title,
+      description: postCreationStore.description
+    });
+  }
+
+  if (!postCreationStore.isValid || postCreationStore.loading) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ Submit blocked:", {
+        isValid: postCreationStore.isValid,
+        loading: postCreationStore.loading
+      });
+    }
+    return;
+  }
+
+  try {
+    // Submit post via store
+    const result = await postCreationStore.submit();
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ Submit result:", result);
+    }
+
+    // Show success message
+    Notify.create({
+      type: "positive",
+      message: "Post created successfully!",
+      position: "top"
+    });
+
+    // Clear localStorage
+    localStorage.removeItem("postCreation_goal");
+    localStorage.removeItem("postCreation_category");
+
+    // Refresh posts feed
+    await postsStore.fetchPosts({ sort: "help" });
+
+    // Navigate to donor posts page (kde sa zobrazí nový post)
+    router.push({ name: "donor-posts" });
+  } catch (error: unknown) {
+    // Error je už nastavený v store
+    if (postCreationStore.error) {
+      Notify.create({
+        type: "negative",
+        message: postCreationStore.error,
+        position: "top"
+      });
+    } else {
+      Notify.create({
+        type: "negative",
+        message: "Failed to create post. Please try again.",
+        position: "top"
+      });
+    }
+  }
 };
 const deleteImg = () => {
   uploadedImages.value.images.splice(imgIndex.value, 1);
+  // Aktualizovať store
+  postCreationStore.setField("images", uploadedImages.value.images);
 };
-const handleImagesFromChild = (imgs: string[]) => {
-  uploadedImages.value.images = imgs;
+const handleImagesFromChild = (imgs: UploadedImage[]) => {
+  // Konvertovať UploadedImage[] na string[] (použiť secure_url)
+  const imageUrls = imgs.map((img) => img.secure_url);
+  uploadedImages.value.images = imageUrls;
+  // Aktualizovať store
+  postCreationStore.setField("images", imageUrls);
 };
 const handleIndex = (index: number) => {
   imgIndex.value = index;
@@ -262,6 +414,8 @@ const handleFileChange = (event: Event) => {
 
       reader.onload = () => {
         uploadedImages.value.images.push(reader.result as string);
+        // Aktualizovať store
+        postCreationStore.setField("images", uploadedImages.value.images);
         if (process.env.NODE_ENV === "development") {
           console.log(uploadedImages.value.images.length);
         }
@@ -416,14 +570,21 @@ const handleFileChange = (event: Event) => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 0.5rem;
+        gap: 1.5rem;
         padding-top: 1.5rem;
 
+        .postCreation-categoryContainer {
+          display: flex;
+          gap: 1rem;
+          align-items: center;
+          padding: 0.5rem 0.5rem 0.5rem 0;
+          margin-right: auto;
+        }
+
         .postCreation-goalImage {
-          height: 3.5rem;
+          height: 2.5rem;
           width: auto;
-          margin: 0 0.25rem;
-          padding: 0.25rem;
+          margin: 0;
         }
         .postCreation-changeTypeButton {
           border: 0.1rem solid $primary;
@@ -526,8 +687,23 @@ const handleFileChange = (event: Event) => {
   .postCreation-submitDreamContainer {
     width: 100%;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     padding: 0 1rem;
+    gap: 0.5rem;
+
+    .postCreation-error {
+      font-size: 0.875rem;
+      color: #ff2c8b;
+      text-align: center;
+      padding: 8px 12px;
+      background: rgba(255, 44, 139, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 44, 139, 0.3);
+      width: 100%;
+    }
+
     .postCreation-submitButton {
       background-color: rgba(182, 0, 67, 1);
       color: white;
@@ -540,6 +716,11 @@ const handleFileChange = (event: Event) => {
       margin-top: 1rem;
       margin-bottom: 2rem;
       font-family: montseraatSemiBold;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
   }
 }

@@ -6,7 +6,7 @@
     <q-btn
       :ripple="false"
       @click="$router.push({ name: 'donee-posts' })"
-      class="button-footer"
+      class="button-footer footer-left"
       :class="{ active: $route.name === 'donee-posts' }"
     >
       <img
@@ -19,11 +19,11 @@
     <q-btn
       :ripple="false"
       @click="$router.push({ name: 'donee-inspirations' })"
-      class="button-footer"
+      class="button-footer footer-left"
       :class="{ active: $route.name === 'donee-inspirations' }"
     >
       <img
-        :src="$route.name === 'donee-inspirations' ? '/footer_icons/compass_s.svg' : '/footer_icons/compass.svg'"
+        :src="compassIcon"
         alt="Inspirations"
         class="footer-marginClass"
       />
@@ -35,11 +35,11 @@
     <q-btn
       :ripple="false"
       @click="$router.push({ name: 'donee-notifications' })"
-      class="button-footer red"
+      class="button-footer red footer-right"
       :class="{ active: $route.name === 'donee-notifications' }"
     >
       <img
-        :src="$route.name === 'donee-notifications' ? '/footer_icons/bell_s.svg' : '/footer_icons/bell.svg'"
+        :src="bellIcon"
         alt="Notifications"
         class="footer-marginClass"
       />
@@ -49,14 +49,14 @@
     <q-btn
       :ripple="false"
       @click="$router.push({ name: 'donee-myprofile' })"
-      class="button-footer profileIcon"
+      class="button-footer profileIcon footer-right"
       :class="{
         activeProfile:
           $route.name == 'donee-myprofile' || $route.name == 'donee-settings'
       }"
     >
       <img
-        :src="($route.name == 'donee-myprofile' || $route.name == 'donee-settings') ? '/footer_icons/profile_s.svg' : '/footer_icons/profile.svg'"
+        :src="profileIcon"
         alt="Profile"
         class="footer-marginClass"
       />
@@ -65,7 +65,63 @@
   </div>
 </template>
 <script setup lang="ts">
-// No props needed - footer icons are handled via route state
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const isBodyLight = ref(false);
+
+const checkBodyClass = () => {
+  isBodyLight.value = document.body.classList.contains("body--light");
+};
+
+let observer: MutationObserver | null = null;
+
+onMounted(() => {
+  checkBodyClass();
+  // Watch for class changes on body element
+  observer = new MutationObserver(() => {
+    checkBodyClass();
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+});
+
+onBeforeUnmount(() => {
+  if (observer) {
+    observer.disconnect();
+  }
+});
+
+// Computed properties for icons based on light mode
+const compassIcon = computed(() => {
+  // If selected, always use _s version
+  if (route.name === "donee-inspirations") {
+    return "/footer_icons/compass_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses normal
+  return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass.svg";
+});
+
+const bellIcon = computed(() => {
+  // If selected, always use _s version
+  if (route.name === "donee-notifications") {
+    return "/footer_icons/bell_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses normal
+  return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell.svg";
+});
+
+const profileIcon = computed(() => {
+  // If selected, always use _s version
+  if (route.name === "donee-myprofile" || route.name === "donee-settings") {
+    return "/footer_icons/profile_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses normal
+  return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile.svg";
+});
 </script>
 <style lang="scss" scoped>
 .body--light {
@@ -85,6 +141,94 @@
   .footer-marginClass *:not(.newNotification) {
     fill: black;
   }
+
+  .button-footer {
+    img {
+      transition: none !important;
+    }
+  }
+
+  .button-footer {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    :deep(.q-btn__wrapper) {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    :deep(.q-focus-helper) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+  :deep(.q-ripple) {
+    display: none !important;
+  }
+
+  img {
+    transition: none !important;
+  }
+}
+
+.active.button-footer {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    :deep(.q-btn__wrapper) {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+  }
 }
 .footer {
   background-image: none;
@@ -92,6 +236,29 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  overflow: visible;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: nowrap;
+  height: auto;
+  min-height: auto;
+
+  // Ensure all q-btn elements in footer have transparent background
+  :deep(.q-btn) {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      background: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+  }
 }
 
 .active {
@@ -112,8 +279,16 @@
   outline: none !important;
   min-width: auto !important;
   min-height: auto !important;
+  width: auto !important;
+  height: auto !important;
   padding: 0 !important;
   margin: 0 !important;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  flex-grow: 0;
+  align-self: center;
+  position: relative;
+  z-index: 1;
 
   &::before,
   &::after {
@@ -122,12 +297,16 @@
     box-shadow: none !important;
     border: none !important;
     background: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
   }
 
   :deep(.q-btn__wrapper) {
     padding: 0 !important;
     min-height: auto !important;
     min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
@@ -139,7 +318,23 @@
       box-shadow: none !important;
       border: none !important;
       background: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
     }
+  }
+
+  :deep(.q-focus-helper) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  :deep(.q-ripple) {
+    display: none !important;
+  }
+
+  img {
+    transition: none !important;
   }
 
   &:hover {
@@ -218,8 +413,8 @@
 }
 
 .profileIcon .footer-marginClass {
-  height: 2rem !important;
-  width: 2rem !important;
+  height: 2.4rem !important;
+  width: 2.4rem !important;
 }
 
 .activeProfile {
@@ -243,17 +438,95 @@
   margin-bottom: 0rem !important;
 }
 
+.footer-left {
+  margin-left: -1.5rem !important;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-right {
+  margin-right: -1.5rem !important;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
 .circle {
-  width: 4.1rem;
-  height: 4.1rem;
-  border-radius: 50%;
-  background-color: $primary;
-  display: flex;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background-color: transparent;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  margin-top: -1.9rem;
+  margin-top: -1rem;
+  padding: 0;
+  min-width: auto !important;
+  min-height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  position: relative;
+  overflow: visible;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  flex-grow: 0;
+  align-self: flex-start;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1000;
+
+  &::before,
+  &::after {
+    display: none !important;
+    content: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  :deep(.q-btn__wrapper) {
+    padding: 0 !important;
+    min-height: 6rem !important;
+    min-width: 6rem !important;
+    width: 6rem !important;
+    height: 6rem !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 1000;
+  }
+
+  :deep(.q-focus-helper) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  :deep(.q-ripple) {
+    display: none !important;
+  }
+
   img {
-    height: 1.8rem;
+    height: 1.6rem;
+    width: 1.6rem;
+    object-fit: contain;
+    transition: none !important;
+    transform: scale(6);
+    transform-origin: center;
+    display: block;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
   }
 }
 </style>

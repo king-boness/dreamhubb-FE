@@ -10,13 +10,12 @@
           @click="handleLogoClick"
         >
           <img
-            src="/icons/logo.svg"
+            :src="logoImage"
             alt=""
             class="logoIcon"
-            v-if="!isBodyLight"
           />
-          <img src="/icons/logo-light.svg" alt="" class="logoIcon" v-else />
-          <img src="/icons/DoneeSwitchIcon.svg" alt="" class="navbarIcon" />
+          <img src="/header_icons/donee.svg" alt="" class="header-roleIcon" />
+          <img src="/header_icons/swap.svg" alt="" class="navbarIcon" />
         </div>
       </template>
       <template v-else>
@@ -86,20 +85,26 @@
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  padding: 1.3rem 1rem 1rem 1rem;
   border-bottom: 0.05rem solid rgba(255, 255, 255, 0.202);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.1);
   z-index: 2000; // Higher z-index to ensure header is above content
 }
 
 .splash-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
 }
 
 .settingsHeader-button {
@@ -117,11 +122,26 @@
 .iconContainer {
   display: flex;
   align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
+
 .logoIcon {
   height: 1.6rem;
   width: 1.6rem;
-  margin-right: 0.5rem;
+  object-fit: contain;
+}
+
+.header-roleIcon {
+  height: 1rem;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbarIcon {
+  height: 1.6rem;
+  width: auto;
+  object-fit: contain;
 }
 .buttonIcon {
   width: 1rem;
@@ -164,7 +184,7 @@
 </style>
 
 <script setup lang="ts">
-import { defineProps, ref } from "vue";
+import { defineProps, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
@@ -192,6 +212,17 @@ const props: Props = defineProps({
 
 const router = useRouter();
 const isSwitchingRole = ref(false);
+
+// Logo imports
+const logoImageLight = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
+const logoImageDark = new URL("../../assets/logos/dreamhubb_logo_d.svg", import.meta.url).href;
+
+// Computed logo based on light/dark mode
+const logoImage = computed(() => {
+  // Light mode: use dark logo (dreamhubb_logo_d.svg)
+  // Dark mode: use light logo (dreamhubb_logo_l.svg)
+  return props.isBodyLight ? logoImageDark : logoImageLight;
+});
 
 const handleLogoClick = async () => {
   console.log("Donee logo clicked! Switching to Donor mode...");
