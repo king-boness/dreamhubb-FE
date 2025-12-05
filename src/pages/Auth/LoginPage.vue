@@ -40,28 +40,35 @@
       color="primary"
       text-color="white"
       class="LoginPage-loginButton"
-      :loading="loading"
+      :loading="auth.loading"
     />
     <q-btn class="LoginPage-forgotPswButton">Forgot Password?</q-btn>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter, useRoute } from "vue-router";
-import { useApiCallStore } from "src/stores/api-calls-store";
+import { useAuthStore } from "src/stores/auth";
 
 const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
-const apiCall = useApiCallStore();
+const auth = useAuthStore();
 
 const email = ref("");
 const password = ref("");
-const remember = ref(false); // momentálne ho BE nepoužíva, ale nechávame pre UI
-const loading = ref(false);
+const remember = ref(false);
 const showPassword = ref(false);
+
+// Pre dev prostredie - predvyplnenie
+onMounted(() => {
+  if (process.env.NODE_ENV === "development") {
+    email.value = "mattik24@example.com";
+    password.value = "secret123";
+  }
+});
 
 const onSubmit = async () => {
   if (!email.value || !password.value) {
@@ -73,34 +80,19 @@ const onSubmit = async () => {
     return;
   }
 
-  loading.value = true;
-
   try {
-    // apiCall.login vracia Axios response
-    const res = await apiCall.login({
-      email: email.value,
-      password: password.value
+    await auth.login({ email: email.value, password: password.value });
+    await auth.fetchUser();
+
+    $q.notify({
+      message: "Login successful!",
+      color: "positive",
+      icon: "check"
     });
 
-    const data = res?.data;
-
-    if (data && data.status === "success") {
-      $q.notify({
-        message: "Login successful!",
-        color: "positive",
-        icon: "check"
-      });
-
-      // ak máme v URL ?redirect=..., použi ho; inak choď na donor-posts
-      const redirect = (route.query.redirect as string) || { name: "donor-posts" };
-      router.push(redirect);
-    } else {
-      $q.notify({
-        message: data?.message || "Invalid credentials",
-        color: "negative",
-        icon: "error"
-      });
-    }
+    // Redirect na feed (donor-posts) alebo podľa query parametra
+    const redirect = (route.query.redirect as string) || { name: "donor-posts" };
+    router.push(redirect);
   } catch (err: unknown) {
     if (process.env.NODE_ENV === "development") {
       console.error("Login error:", err);
@@ -125,8 +117,6 @@ const onSubmit = async () => {
       color: "negative",
       icon: "error"
     });
-  } finally {
-    loading.value = false;
   }
 };
 </script>

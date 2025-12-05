@@ -59,8 +59,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useOnboardingStore } from "src/stores/onboarding";
 import PickYourSide from "src/components/Onboarding/PickYourSide.vue";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
@@ -68,23 +69,71 @@ import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
 import WhoAreYou from "src/components/Onboarding/WhoAreYou.vue";
 
 const router = useRouter();
+const onboardingStore = useOnboardingStore();
 
 // Current step (1-5)
 const currentStep = ref(1);
 
-// User data
-const userSide = ref<"donor" | "donee" | null>(null);
-const userGoal = ref<"problem" | "dream" | "idea" | null>(null);
-const dreamCategory = ref<string | null>(null);
-const userContinent = ref("");
-const userCountry = ref("");
-const userCity = ref("");
-const username = ref("");
-const dateOfBirth = ref("");
-const gender = ref("");
-const email = ref("");
-const password = ref("");
-const repeatPassword = ref("");
+// Computed properties from store
+const userSide = computed({
+  get: () => onboardingStore.role,
+  set: (value) => onboardingStore.setStepData("role", value)
+});
+
+const userGoal = computed({
+  get: () => onboardingStore.goalType,
+  set: (value) => onboardingStore.setStepData("goalType", value)
+});
+
+const dreamCategory = computed({
+  get: () => onboardingStore.category,
+  set: (value) => onboardingStore.setStepData("category", value)
+});
+
+const userContinent = computed({
+  get: () => onboardingStore.locationContinent,
+  set: (value) => onboardingStore.setStepData("locationContinent", value)
+});
+
+const userCountry = computed({
+  get: () => onboardingStore.locationCountry,
+  set: (value) => onboardingStore.setStepData("locationCountry", value)
+});
+
+const userCity = computed({
+  get: () => onboardingStore.locationCity,
+  set: (value) => onboardingStore.setStepData("locationCity", value)
+});
+
+const username = computed({
+  get: () => onboardingStore.name,
+  set: (value) => onboardingStore.setStepData("name", value)
+});
+
+const dateOfBirth = computed({
+  get: () => onboardingStore.dateOfBirth,
+  set: (value) => onboardingStore.setStepData("dateOfBirth", value)
+});
+
+const gender = computed({
+  get: () => onboardingStore.gender,
+  set: (value) => onboardingStore.setStepData("gender", value)
+});
+
+const email = computed({
+  get: () => onboardingStore.email,
+  set: (value) => onboardingStore.setStepData("email", value)
+});
+
+const password = computed({
+  get: () => onboardingStore.password,
+  set: (value) => onboardingStore.setStepData("password", value)
+});
+
+const repeatPassword = computed({
+  get: () => onboardingStore.passwordConfirmation,
+  set: (value) => onboardingStore.setStepData("passwordConfirmation", value)
+});
 
 const handleNext = () => {
   if (currentStep.value < 5) {
@@ -101,13 +150,15 @@ const handleBack = () => {
   }
 };
 
-const handleFinish = () => {
-  // Save onboarding completion flag
-  localStorage.setItem("dh_onboarding_done", "1");
-
-  // Registration and redirect are handled in WhoAreYou component
+const handleFinish = async () => {
+  // Registration is handled in WhoAreYou component via onboarding store
   // This function is called after successful registration via emit("finish")
-  // No need to redirect here as WhoAreYou already handles it
+  // Redirect based on role
+  if (onboardingStore.role === "donee") {
+    router.push({ name: "donee-posts" });
+  } else {
+    router.push({ name: "donor-posts" });
+  }
 };
 </script>
 

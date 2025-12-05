@@ -113,23 +113,33 @@
       </div>
 
       <p class="who-instruction">Fill up your data</p>
+
+      <!-- Error message -->
+      <div v-if="onboardingStore.error" class="who-error">
+        {{ onboardingStore.error }}
+      </div>
     </div>
 
     <!-- Finish button -->
-    <button class="who-finishBtn" @click="handleFinish" :disabled="!isFormValid">
-      FINISH UP THE ACCOUNT
+    <button
+      class="who-finishBtn"
+      @click="handleFinish"
+      :disabled="!isFormValid || onboardingStore.loading"
+    >
+      <span v-if="onboardingStore.loading">Creating account...</span>
+      <span v-else>FINISH UP THE ACCOUNT</span>
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { useApiCallStore } from "src/stores/api-calls-store";
+import { useOnboardingStore } from "src/stores/onboarding";
 import { Notify } from "quasar";
 
 const router = useRouter();
-const apiStore = useApiCallStore();
+const onboardingStore = useOnboardingStore();
 
 const props = defineProps<{
   username: string;
@@ -159,6 +169,37 @@ const localEmail = ref(props.email || "");
 const localPassword = ref(props.password || "");
 const localRepeatPassword = ref(props.repeatPassword || "");
 
+// Sync local values with store
+watch(localUsername, (val) => {
+  onboardingStore.setStepData("name", val);
+  emit("update:username", val);
+});
+
+watch(localDateOfBirth, (val) => {
+  onboardingStore.setStepData("dateOfBirth", val);
+  emit("update:dateOfBirth", val);
+});
+
+watch(localGender, (val) => {
+  onboardingStore.setStepData("gender", val);
+  emit("update:gender", val);
+});
+
+watch(localEmail, (val) => {
+  onboardingStore.setStepData("email", val);
+  emit("update:email", val);
+});
+
+watch(localPassword, (val) => {
+  onboardingStore.setStepData("password", val);
+  emit("update:password", val);
+});
+
+watch(localRepeatPassword, (val) => {
+  onboardingStore.setStepData("passwordConfirmation", val);
+  emit("update:repeatPassword", val);
+});
+
 const showPassword = ref(false);
 const showRepeatPassword = ref(false);
 const avatarInput = ref<HTMLInputElement | null>(null);
@@ -183,86 +224,40 @@ const handleAvatarChange = (event: Event) => {
 };
 
 const isFormValid = computed(() => {
-  return (
-    localUsername.value &&
-    localDateOfBirth.value &&
-    localGender.value &&
-    localEmail.value &&
-    localPassword.value &&
-    localRepeatPassword.value &&
-    localPassword.value === localRepeatPassword.value
-  );
+  return onboardingStore.isReadyForRegister;
 });
 
-const isSubmitting = ref(false);
-
 const handleFinish = async () => {
-  if (!isFormValid.value || isSubmitting.value) return;
+  if (!isFormValid.value || onboardingStore.loading) return;
 
   try {
-    isSubmitting.value = true;
+    // Register user via onboarding store (automaticky prihlási a nastaví token)
+    await onboardingStore.register();
 
-    // Call registration API
-    const registrationData = {
-      name: localUsername.value,
-      email: localEmail.value,
-      password: localPassword.value,
-      password_confirmation: localRepeatPassword.value,
-      date_of_birth: localDateOfBirth.value,
-      gender: localGender.value
-    };
-
-    // Save name to localStorage for immediate access
-    localStorage.setItem("userName", localUsername.value);
-
-    // Register user and automatically log them in
-    const response = await apiStore.register(registrationData);
-
-    // Save JWT token
-    if (response.data?.authorization?.token || response.data?.token) {
-      const token = response.data?.authorization?.token || response.data?.token;
-      localStorage.setItem("jwtToken", token);
-      apiStore.isAuthenticated = true;
-
-      // Synchronizovať s user-store
-      const { useUserStore } = await import("src/stores/user-store");
-      const userStore = useUserStore();
-      userStore.isAuthenticated = true;
-      userStore.token = token;
-
-      // Fetch user data
-      await apiStore.fetchUser();
-
-      // Show success message
-      Notify.create({
-        type: "positive",
-        message: "Account created successfully!",
-        position: "top"
-      });
-
-      // Emit finish event
-      emit("finish");
-
-      // Redirect based on userSide
-      if (props.userSide === "donee") {
-        router.replace({ name: "donee-posts" });
-      } else {
-        router.replace({ name: "donor-posts" });
-      }
-    }
-  } catch (error: unknown) {
-    console.error("Registration error:", error);
-
-    // Show error message
-    const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Registration failed. Please try again.";
-
+    // Show success message
     Notify.create({
-      type: "negative",
-      message: errorMessage,
+      type: "positive",
+      message: "Account created successfully!",
       position: "top"
     });
-  } finally {
-    isSubmitting.value = false;
+
+    // Emit finish event (redirect je v OnboardingFlowPage.vue handleFinish)
+    emit("finish");
+  } catch (error: unknown) {
+    // Error je už nastavený v onboarding store
+    if (onboardingStore.error) {
+      Notify.create({
+        type: "negative",
+        message: onboardingStore.error,
+        position: "top"
+      });
+    } else {
+      Notify.create({
+        type: "negative",
+        message: "Registration failed. Please try again.",
+        position: "top"
+      });
+    }
   }
 };
 </script>
@@ -448,6 +443,18 @@ const handleFinish = async () => {
   margin: 0;
   text-align: center;
   flex-shrink: 0;
+}
+
+.who-error {
+  font-size: 0.875rem;
+  color: #ff2c8b;
+  margin-top: 12px;
+  text-align: center;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  background: rgba(255, 44, 139, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 44, 139, 0.3);
 }
 
 .who-finishBtn {

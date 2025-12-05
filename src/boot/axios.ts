@@ -38,7 +38,7 @@ const api = axios.create({
 // ------------------------------------
 //  Token zo storage
 // ------------------------------------
-const savedToken = localStorage.getItem("jwtToken");
+const savedToken = localStorage.getItem("token");
 if (savedToken) {
   api.defaults.headers.common.Authorization = `Bearer ${savedToken}`;
   axiosInstance.defaults.headers.common.Authorization = `Bearer ${savedToken}`;
@@ -53,7 +53,7 @@ if (savedToken) {
 const attachInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.request.use(
     async (config) => {
-      const token = localStorage.getItem("jwtToken");
+      const token = localStorage.getItem("token");
 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -78,9 +78,9 @@ const attachInterceptor = (instance: AxiosInstance) => {
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
-        const token = localStorage.getItem("jwtToken");
+        const token = localStorage.getItem("token");
         if (!token) {
-          localStorage.removeItem("jwtToken");
+          localStorage.removeItem("token");
           window.location.href = "/login";
           return Promise.reject(error);
         }
@@ -97,12 +97,12 @@ const attachInterceptor = (instance: AxiosInstance) => {
             refreshResponse.data?.token;
 
           if (newToken) {
-            localStorage.setItem("jwtToken", newToken);
+            localStorage.setItem("token", newToken);
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return instance(originalRequest);
           }
         } catch (refreshError) {
-          localStorage.removeItem("jwtToken");
+          localStorage.removeItem("token");
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }

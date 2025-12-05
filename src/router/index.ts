@@ -8,7 +8,8 @@ import {
 } from "vue-router";
 
 import routes from "./routes";
-import { useUserStore } from "src/stores/user-store";
+import { useAuthStore } from "src/stores/auth";
+import { useOnboardingStore } from "src/stores/onboarding";
 
 export default route(function ({ store }) {
   const createHistory = process.env.SERVER
@@ -24,31 +25,21 @@ export default route(function ({ store }) {
   });
 
   Router.beforeEach((to, from, next) => {
-    // Pri prvotnom načítaní (from je undefined) - použiť len localStorage
-    const isInitialNavigation = !from || from.name === undefined;
-
     try {
-      // Použiť userStore.isAuthenticated primárne, fallback na localStorage
-      // Na prvotnom načítaní môže byť store ešte nie je pripravený, takže použijeme fallback
+      // Použiť authStore.isAuthenticated
       let isAuthenticated = false;
-      const hasToken = !!localStorage.getItem("jwtToken");
+      const hasToken = !!localStorage.getItem("token");
 
-      if (isInitialNavigation) {
-        // Pri prvotnom načítaní používame len localStorage
-        isAuthenticated = hasToken;
-      } else {
-        // Pri ďalších navigáciách môžeme použiť store
-        try {
-          if (store) {
-            const userStore = useUserStore(store);
-            isAuthenticated = userStore.isAuthenticated || hasToken;
-          } else {
-            isAuthenticated = hasToken;
-          }
-        } catch (storeError) {
-          // Ak store nie je pripravený, použij len localStorage
+      try {
+        if (store) {
+          const authStore = useAuthStore(store);
+          isAuthenticated = authStore.isAuthenticated || hasToken;
+        } else {
           isAuthenticated = hasToken;
         }
+      } catch (storeError) {
+        // Ak store nie je pripravený, použij len localStorage
+        isAuthenticated = hasToken;
       }
 
       // 🌀 Splash screen – vždy povolený
@@ -102,7 +93,7 @@ export default route(function ({ store }) {
       next();
     } catch (error) {
       // Fallback: ak je problém s store, použij len localStorage
-      const hasToken = !!localStorage.getItem("jwtToken");
+      const hasToken = !!localStorage.getItem("token");
       if (to.meta.requiresAuth && !hasToken) {
         next({ name: "auth-welcome-page" });
       } else if (to.meta.guestOnly && hasToken) {

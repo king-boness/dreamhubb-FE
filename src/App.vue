@@ -3,18 +3,21 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/auth";
 
 const $q = useQuasar();
 $q.dark.set(true);
 
-// -------------------------------------------------------
-// ❗️ ŽIADNY autoLogin, žiadne logout, žiadny redirect
-// -------------------------------------------------------
-
-// 🧩 Test integrácie Pinia (necháme iba debug)
-import { useAuthStore } from "src/stores/useAuthStore";
 const auth = useAuthStore();
 
-console.log("🧠 Pinia Auth Store loaded:", auth);
+// Inicializácia usera pri štarte appky
+onMounted(() => {
+  if (auth.token) {
+    auth.fetchUser().catch(() => {
+      auth.logout();
+    });
+  }
+});
 </script>

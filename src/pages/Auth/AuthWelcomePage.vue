@@ -71,9 +71,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { useOnboardingStore } from "src/stores/onboarding";
 import { completedDreamsBank, type CompletedDreamCard } from "src/data/completedDreamsBank";
 
 const router = useRouter();
+const onboardingStore = useOnboardingStore();
 
 // Map image
 import mapImage from "src/assets/Auth/map-image.svg";
@@ -219,6 +221,8 @@ const handleSignIn = () => {
 };
 
 const handleCreateAccount = () => {
+  // Reset onboarding store pri začatí nového onboarding-u
+  onboardingStore.reset();
   router.push({ name: "onboarding" });
 };
 

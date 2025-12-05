@@ -29,8 +29,19 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
   background-color: #0f0026;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
 }
 
 .app-splash_animation {

@@ -138,7 +138,7 @@ const emit = defineEmits<{
 const categories: Category[] = [
   { id: "traveling", label: "traveling", icon: "public", iconFile: "traveling" },
   { id: "health", label: "health", icon: "local_hospital", iconFile: "health" },
-  { id: "possessions", label: "possesions", icon: "home", iconFile: "possesions" },
+  { id: "possessions", label: "possessions", icon: "home", iconFile: "possesions" },
   { id: "relationships", label: "relationships", icon: "favorite", iconFile: "relationships" },
   { id: "learning", label: "learning", icon: "school", iconFile: "learning" },
   { id: "events", label: "events", icon: "event", iconFile: "events" },
