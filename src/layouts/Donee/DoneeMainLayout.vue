@@ -5,7 +5,7 @@
   <q-layout view="lHh Lpr lFf" class="LayoutBackground">
 
     <HeaderComponent
-      :karma="200000"
+      :karma="tokenBalance"
       :showBack="settingsPage"
       :is-body-light="isBodyLight"
       v-if="
@@ -43,6 +43,7 @@ import FooterDoneeComponent from "src/components/doneeComponents/FooterDoneeComp
 import AppSplash from "src/components/common/AppSplash.vue";
 import { useRoute } from "vue-router";
 import { watch, ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useAuthStore } from "src/stores/auth";
 
 // Use MutationObserver to watch for body class changes
 let observer: MutationObserver | null = null;
@@ -81,6 +82,11 @@ watch(route, () => {
   routeCheck();
   checkBodyClass();
 });
+
+const authStore = useAuthStore();
+
+// Token balance - must match DonorMainLayout (fallback to 50 after migration)
+const tokenBalance = computed(() => authStore.user?.tokens ?? 50);
 
 const lastScrollPosition = ref(0);
 const showNavbar = ref(true);
@@ -164,7 +170,18 @@ const checkBodyClass = () => {
   isBodyLight.value = document.body.classList.contains("body--light");
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch user data to ensure tokens are loaded
+  if (authStore.isAuthenticated && !authStore.user) {
+    try {
+      await authStore.fetchUser();
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to fetch user data:", error);
+      }
+    }
+  }
+
   if (isMobileDevice) {
     window.addEventListener("resize", handleResize);
   }

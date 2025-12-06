@@ -228,7 +228,7 @@ const onScroll = () => {
 };
 
 // Token balance from auth store (falls back to 30 if not loaded)
-const tokenBalance = computed(() => authStore.user?.tokens ?? 30);
+const tokenBalance = computed(() => authStore.user?.tokens ?? 50);
 const notificationCount = ref(1);
 const isSwitchingRole = ref(false);
 
@@ -588,16 +588,29 @@ onBeforeUnmount(() => {
     // Ensure all q-btn elements in footer have transparent background
     :deep(.q-btn) {
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      min-width: auto !important;
+      min-height: auto !important;
+      width: auto !important;
+      height: auto !important;
 
       &::before,
       &::after {
         display: none !important;
         content: none !important;
         background: none !important;
+        background-color: transparent !important;
         opacity: 0 !important;
         visibility: hidden !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
       }
     }
   }
@@ -614,9 +627,11 @@ onBeforeUnmount(() => {
 
   .button-footer {
     background: transparent !important;
+    background-color: transparent !important;
     box-shadow: none !important;
     border: none !important;
-    transition: transform 0.2s ease !important;
+    border-width: 0 !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
     outline: none !important;
     min-width: auto !important;
     min-height: auto !important;
@@ -624,6 +639,7 @@ onBeforeUnmount(() => {
     margin: 0 !important;
     width: auto !important;
     height: auto !important;
+    color: inherit !important;
 
     &::before,
     &::after {
@@ -645,6 +661,7 @@ onBeforeUnmount(() => {
       background: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      outline: none !important;
 
       &::before,
       &::after {
@@ -655,6 +672,40 @@ onBeforeUnmount(() => {
         background: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
+      }
+    }
+
+    :deep(.q-btn__content) {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      min-width: auto !important;
+      min-height: auto !important;
+      width: auto !important;
+      height: auto !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+      }
+    }
+
+    :deep(*) {
+      &::selection {
+        background: transparent !important;
       }
     }
 
@@ -669,43 +720,95 @@ onBeforeUnmount(() => {
     }
 
     img {
-      transition: opacity 0.3s ease, transform 0.3s ease !important;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     &:hover {
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
       outline: none !important;
-      transform: scale(1.1);
+      transform: scale(1.08);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+
+      img {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+
+      :deep(.q-btn__wrapper),
+      :deep(.q-btn__content) {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
     }
 
     &:active {
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
       outline: none !important;
-      transform: scale(0.95);
+      transform: scale(0.96);
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+      img {
+        transform: scale(0.98);
+      }
+
+      :deep(.q-btn__wrapper),
+      :deep(.q-btn__content) {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
     }
 
     &:focus {
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
       outline: none !important;
+
+      :deep(.q-btn__wrapper),
+      :deep(.q-btn__content) {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+      }
     }
 
     &:focus-visible {
       outline: none !important;
       box-shadow: none !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      border-width: 0 !important;
     }
   }
 
   .active.button-footer,
   .activeProfile.button-footer {
     background: transparent !important;
+    background-color: transparent !important;
     box-shadow: none !important;
     border: none !important;
+    border-width: 0 !important;
     outline: none !important;
     width: auto !important;
     height: auto !important;
@@ -716,9 +819,34 @@ onBeforeUnmount(() => {
       content: none !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
       background: none !important;
+      background-color: transparent !important;
       opacity: 0 !important;
       visibility: hidden !important;
+    }
+
+    :deep(.q-btn__wrapper),
+    :deep(.q-btn__content) {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+      }
     }
 
     :deep(.q-btn__wrapper) {
@@ -730,6 +858,7 @@ onBeforeUnmount(() => {
       background: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      outline: none !important;
 
       &::before,
       &::after {
@@ -737,6 +866,24 @@ onBeforeUnmount(() => {
         content: none !important;
         box-shadow: none !important;
         border: none !important;
+        background: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    :deep(.q-btn__content) {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
         background: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
