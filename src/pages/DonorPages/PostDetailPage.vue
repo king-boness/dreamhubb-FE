@@ -35,41 +35,19 @@
   <div v-else class="postDetail">
     <div class="postDetail-inner">
 
-      <!-- TOP IMAGE / SLIDER -->
+      <!-- TOP IMAGE -->
       <div class="postDetailBg">
         <div class="postDetail-imageWrapper" :style="heroStyle">
-          <img
-            v-if="safeImages.length === 1"
-            class="postDetail-img"
-            :src="safeImages[0]"
+          <PostImagesCarousel
+            :images="post?.images"
+            :auto-slide="true"
+            :show-progress="true"
+            :show-arrows="true"
+            :show-dots="true"
             alt="Post image"
-            @click="openLightbox(0)"
-            style="cursor: pointer;"
-          />
-
-          <ImageIndexSlider
-            v-else
-            :images="safeImages"
-            :current-index="currentImageIndex"
+            :image-style="{ cursor: 'pointer' }"
             @image-click="openLightbox"
-            @index-change="handleImageIndexChange"
           />
-        </div>
-
-        <!-- TOP PROGRESS BAR -->
-        <div class="postDetail-progressBar" v-if="safeImages.length >= 1">
-          <span
-            v-for="(img, index) in safeImages"
-            :key="`progress-${index}`"
-            class="progress-segment"
-            :class="{ 'is-active': currentImageIndex === index }"
-            :style="{ width: progressBarWidth + 'px' }"
-          >
-            <span
-              class="progress-segment-fill"
-              :style="{ width: index === currentImageIndex ? progressBarFill + '%' : '0%' }"
-            ></span>
-          </span>
         </div>
 
         <!-- GRADIENT -->
@@ -95,14 +73,17 @@
               :icon="'img:/assets/icons/post/icon-share.svg'"
               @click="handleShare"
             />
-            <q-btn
-              round
-              flat
-              dense
-              class="iconBtn"
-              :icon="'img:/assets/icons/post/icon-heart.svg'"
-              @click="handleLike"
-            />
+            <button
+              class="postDetail-heartBtn"
+              :class="{ 'postDetail-heartBtn--liked': isLiked }"
+              @click.stop="handleLike"
+            >
+              <img
+                :src="isLiked ? '/post_icons/hearth_s.svg' : '/header_icons/hearth_ns.svg'"
+                alt="Like"
+                class="postDetail-heartIcon"
+              />
+            </button>
           </div>
         </div>
 
@@ -175,7 +156,7 @@
             @click="openContributeSheet"
           >
             <div class="primaryCtaMain">
-              {{ postsStore.donateLoading ? "PROCESSING..." : "CONTRIBUTE" }}
+              {{ postsStore.donateLoading ? t("processing") : t("contribute") }}
             </div>
           </button>
           <!-- Error message display -->
@@ -184,15 +165,13 @@
           </div>
         </div>
         <div class="postDetail-rewardRow">
-          <q-icon
+          <img
+            src="/post_icons/stars.svg"
+            alt="Reward"
             class="postDetail-rewardIcon"
-            :name="'img:/assets/icons/ui/icon-reward.svg'"
           />
-          <span class="postDetail-rewardLabel">Reward:</span>
-          <span class="postDetail-rewardValue">
-            {{ displayTokens }} tokens
-          </span>
-    </div>
+          <span class="postDetail-rewardLabel">REWARD: {{ displayTokens }} tokens</span>
+        </div>
 
       <!-- ABOUT DREAM/PROBLEM/IDEA -->
       <div class="aboutPost">
@@ -202,29 +181,31 @@
 
         <!-- ABOUT AUTHOR -->
         <div class="aboutAuthor">
-        <h2>About Author</h2>
+        <h2>{{ t("aboutAuthor") }}</h2>
 
           <div
             class="authorCard"
             role="button"
             tabindex="0"
-            @click="goToAuthorProfile"
+            @click.prevent="goToAuthorProfile"
             @keyup.enter="goToAuthorProfile"
           >
-          <img
-              :src="displayAuthorAvatar"
-            class="authorAvatar"
-              alt="Author avatar"
-          />
-          <div class="authorInfo">
+            <div class="authorCard-avatarWrapper" @click.prevent="goToAuthorProfile">
+              <UserAvatar
+                :image-url="displayAuthorAvatar"
+                :name="displayAuthorName"
+                size="32px"
+              />
+            </div>
+            <div class="authorInfo" @click.prevent="goToAuthorProfile">
               <p class="authorName">{{ displayAuthorName }}</p>
               <p class="authorRole">{{ displayAuthorLocation }}</p>
             </div>
           </div>
 
-          <p v-for="(paragraph, idx) in doneeInfo.description" :key="`author-story-${idx}`" class="authorStory">
-            {{ paragraph }}
-          </p>
+          <!-- TODO: Replace with API data from author.bio when BE endpoint is ready -->
+          <p v-if="authorBio" class="authorStory">{{ authorBio }}</p>
+          <p v-else class="authorStory">{{ t("noBioYet") }}</p>
         </div>
 
         <!-- REPORT POST BUTTON (moved to bottom) -->
@@ -265,7 +246,7 @@
             :disabled="postsStore.donateLoading"
             @click="onContributeOption('topup')"
           >
-            {{ postsStore.donateLoading ? "PROCESSING..." : "TOP UP THE DREAM" }}
+            {{ postsStore.donateLoading ? t("processing") : t("topUpTheDream") }}
           </button>
         </div>
       </div>
@@ -284,64 +265,55 @@
         />
         <div class="lightbox-content">
           <img
-            :src="safeImages[lightboxImageIndex]"
-            :alt="`Image ${lightboxImageIndex + 1}`"
+            v-if="post?.images && post.images.length > 0"
+            :src="post.images[0]"
+            :alt="`Post image`"
             class="lightbox-image"
           />
-          <div class="lightbox-nav">
-            <q-btn
-              v-if="safeImages.length > 1"
-              flat
-              round
-              dense
-              icon="chevron_left"
-              class="lightbox-nav-btn"
-              @click="previousLightboxImage"
-            />
-            <q-btn
-              v-if="safeImages.length > 1"
-              flat
-              round
-              dense
-              icon="chevron_right"
-              class="lightbox-nav-btn"
-              @click="nextLightboxImage"
-            />
-          </div>
-          <div class="lightbox-indicator" v-if="safeImages.length > 1">
-            {{ lightboxImageIndex + 1 }} / {{ safeImages.length }}
-          </div>
         </div>
       </q-card>
     </q-dialog>
+
+    <!-- Share Post Sheet -->
+    <ShareProfileSheet
+      v-model="isShareSheetOpen"
+      :profile-url="currentPostUrl"
+      :profile-title="sharePostTitle"
+      :profile-text="sharePostText"
+      :post-type="post?.type || null"
+    />
   </div>
 
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, nextTick, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { translateCityName, translateCountryName } from "src/utils/cityNames";
 import { usePostsStore } from "src/stores/posts";
+import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore } from "src/stores/preferences";
 import { useRoute, useRouter } from "vue-router";
-import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
+import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
+import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 import { getCategoryDisplayName } from "src/data/categoryNames";
+import { getPostTypeIcon } from "src/utils/postIcons";
+import { getUserAvatarUrl } from "src/utils/avatar";
+import UserAvatar from "src/components/common/UserAvatar.vue";
 import { Notify } from "quasar";
 
-// Get post type icon (dream_mini.svg, problem_mini.svg, idea_mini.svg)
-const getPostTypeIcon = (type: string | null | undefined): string => {
-  const typeMap: Record<string, string> = {
-    dream: "/post_icons/dream_mini.svg",
-    problem: "/post_icons/problem_mini.svg",
-    idea: "/post_icons/idea_mini.svg"
-  };
-  return typeMap[type?.toLowerCase() || ""] || "/post_icons/dream_mini.svg";
-};
+const { t, locale } = useI18n();
+
+// Post type icon function is now imported from utils/postIcons.ts
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
 
 const postsStore = usePostsStore();
+const authStore = useAuthStore();
+const preferencesStore = usePreferencesStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -370,23 +342,9 @@ const scrollY = ref(0);
 const scrollTarget = ref<ScrollEventTarget | null>(null);
 const cleanupFns: Array<() => void> = [];
 const isContributeSheetOpen = ref(false);
-const currentImageIndex = ref(0);
-const progressBarFill = ref(0);
-const autoSlideInterval = ref<number | null>(null);
-const progressIntervalId = ref<number | null>(null);
 const isLightboxOpen = ref(false);
-const lightboxImageIndex = ref(0);
-const isMounted = ref(false);
-
-const doneeInfo = {
-  name: "Mackenzie Doe",
-  role: "Reykjavík",
-  avatar: "/images/Auth/profilePicture.jpeg",
-  description: [
-    "Mackenzie leads local teens on their first northern lights adventures, mixing science, art, and community storytelling to spark curiosity.",
-    "Your support keeps the campfires bright, the cocoa warm, and every night under the aurora full of wonder."
-  ]
-};
+const isShareSheetOpen = ref(false);
+let errorTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 const readScrollPosition = () => {
   // Always use window.scrollY for consistency with Quasar QLayout
@@ -458,20 +416,62 @@ const displayAuthorName = computed(() => {
 
 // Computed property to get author avatar (fallback to default)
 const displayAuthorAvatar = computed(() => {
-  // TODO: BE ešte neposiela author_picture/avatar - keď bude, pridať:
-  // return post.value?.author_picture || post.value?.author_avatar_url || doneeInfo.avatar;
-  return doneeInfo.avatar;
+  // Use unified avatar utility function
+  const avatarUrl = getUserAvatarUrl(
+    post.value?.user as { profile_picture?: string | null } | null,
+    post.value as { author_picture?: string | null; authorAvatarUrl?: string | null; user?: { profile_picture?: string | null } } | null
+  );
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development" && !avatarUrl && post.value) {
+    console.log("🔍 No avatar found for post detail:", {
+      post_id: post.value.post_id,
+      author_name: post.value.author_name,
+      has_user: !!post.value.user,
+      user_profile_picture: post.value.user?.profile_picture,
+      author_picture: post.value.author_picture
+    });
+  }
+
+  // Return avatar URL or null (UserAvatar component will show initials)
+  return avatarUrl;
+});
+
+const authorId = computed(() => {
+  // BE now sends user_id directly in response
+  const id = (post.value?.user_id || post.value?.author_id || post.value?.user?.id || null) as number | null;
+  if (process.env.NODE_ENV === "development" && !id && post.value) {
+    console.warn("⚠️ No authorId found in post:", {
+      post_id: post.value.post_id,
+      author_name: post.value.author_name,
+      has_author_id: !!post.value.author_id,
+      has_user_id: !!post.value.user_id,
+      has_user: !!post.value.user,
+      user_id: post.value.user?.id
+    });
+  }
+  return id;
 });
 
 // Computed property to get author location for "About Author" section
 const displayAuthorLocation = computed(() => {
-  // TODO: BE ešte neposiela location - keď bude, pridať:
-  // return post.value?.location || post.value?.author_location || "Unknown";
-  const roleParts = doneeInfo.role.split("•");
-  if (roleParts.length > 1) {
-    return roleParts[1].trim();
-  }
-  return "Reykjavík";
+  const p = post.value;
+  if (!p) return "Unknown";
+
+  // Build location string from author's location (city, country, continent)
+  const parts = [];
+  if (p.author_city) parts.push(p.author_city);
+  if (p.author_country) parts.push(p.author_country);
+  if (p.author_continent && !parts.length) parts.push(p.author_continent);
+
+  return parts.length > 0 ? parts.join(", ") : "Unknown";
+});
+
+const authorBio = computed(() => {
+  const p = post.value;
+  if (!p) return null;
+  // Prefer explicit author_bio from BE, fallback to nested user.bio if present
+  return (p as any).author_bio || (p as any).user?.bio || null;
 });
 
 // Computed property to get post type (dream/problem/idea)
@@ -494,11 +494,11 @@ const postType = computed(() => {
 const aboutSectionTitle = computed(() => {
   const type = postType.value;
   const titles: Record<string, string> = {
-    dream: "About Dream",
-    problem: "About Problem",
-    idea: "About Idea"
+    dream: t("aboutTheDream"),
+    problem: t("aboutTheProblem"),
+    idea: t("aboutTheIdea")
   };
-  return titles[type] || "About Dream";
+  return titles[type] || t("aboutTheDream");
 });
 
 // Load post by ID
@@ -512,13 +512,11 @@ const loadPost = async (id: number) => {
 watch(
   () => route.params.id,
   async (newId) => {
+    // Clear error when navigating to a different post
+    clearDonateError();
     if (newId) {
       const id = Number(newId);
       if (!Number.isNaN(id)) {
-        // Reset image index when loading new post
-        currentImageIndex.value = 0;
-        progressBarFill.value = 0;
-        pauseAutoSlide();
         await loadPost(id);
       }
     }
@@ -526,8 +524,47 @@ watch(
   { immediate: false }
 );
 
+// Clear error message helper
+const clearDonateError = () => {
+  if (errorTimeoutId) {
+    clearTimeout(errorTimeoutId);
+    errorTimeoutId = null;
+  }
+  postsStore.donateError = null;
+};
+
+// Watch for donateError changes to auto-clear after 5 seconds
+watch(
+  () => postsStore.donateError,
+  (newError) => {
+    if (newError) {
+      // Clear any existing timeout
+      if (errorTimeoutId) {
+        clearTimeout(errorTimeoutId);
+      }
+      // Set new timeout to clear error after 5 seconds
+      errorTimeoutId = setTimeout(() => {
+        clearDonateError();
+      }, 5000);
+    } else {
+      // Clear timeout if error is already cleared
+      if (errorTimeoutId) {
+        clearTimeout(errorTimeoutId);
+        errorTimeoutId = null;
+      }
+    }
+  }
+);
+
+// Lifecycle hooks
 onMounted(async () => {
-  isMounted.value = true;
+  if (process.env.NODE_ENV === "development") {
+    console.log("🟢 [PostDetailPage] onMounted called");
+  }
+
+  // Clear any existing error when mounting
+  clearDonateError();
+
   const id = Number(route.params.id);
 
   if (Number.isNaN(id)) {
@@ -543,151 +580,39 @@ onMounted(async () => {
 
   // Always use window as scroll target for Quasar QLayout compatibility
   scrollTarget.value = window;
-  console.log("🎯 PostDetail mounted - using window as scroll target");
-  console.log("📍 Initial scroll position:", readScrollPosition());
+  if (process.env.NODE_ENV === "development") {
+    console.log("🎯 PostDetail mounted - using window as scroll target");
+    console.log("📍 Initial scroll position:", readScrollPosition());
+  }
 
   attachScrollListener(window);
   handleScroll();
-
-  // Reset image index when post loads
-  currentImageIndex.value = 0;
-  progressBarFill.value = 0;
-
-  // Start auto-slide for images if we have multiple images
-  await nextTick();
-  console.log("🖼️ Safe images:", safeImages.value);
-  console.log("🖼️ Safe images length:", safeImages.value.length);
-  if (safeImages.value.length > 1 && isMounted.value) {
-    startAutoSlide();
-  }
 });
 
 onBeforeUnmount(() => {
-  isMounted.value = false;
-  pauseAutoSlide();
-  cleanupFns.forEach((fn) => fn());
-});
-
-const safeImages = computed(() => {
-  const p = post.value;
-  if (!p) return ["/images/Auth/postBackground.png"];
-
-  const images = p.images || [];
-
-  // Filter out invalid images
-  const validImages = images.filter(
-    (img) =>
-      img &&
-      typeof img === "string" &&
-      !["NULL", "{NULL}"].includes(img.trim())
-  );
-
-  // If we have valid images, use them
-  if (validImages.length > 0) {
-    return validImages;
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔴 [PostDetailPage] onBeforeUnmount called");
   }
 
-  // Fallback: If no images found, use default
-  return ["/images/Auth/postBackground.png"];
-});
+  // Clear error message and timeout
+  clearDonateError();
 
-const progressBarWidth = computed(() => {
-  const count = safeImages.value.length;
-  if (count === 0) return 0;
-  const totalGap = (count - 1) * 6; // 6px gap between segments
-  const totalPadding = 24; // 12px left + 12px right
-  return (window.innerWidth - totalPadding - totalGap) / count;
-});
-
-const handleImageIndexChange = (index: number) => {
-  currentImageIndex.value = index;
-  progressBarFill.value = 0;
-  resetAutoSlide();
-};
-
-const openLightbox = (index: number) => {
-  lightboxImageIndex.value = index;
-  isLightboxOpen.value = true;
-  pauseAutoSlide();
-};
-
-const previousLightboxImage = () => {
-  if (lightboxImageIndex.value > 0) {
-    lightboxImageIndex.value--;
-  } else {
-    lightboxImageIndex.value = safeImages.value.length - 1;
-  }
-};
-
-const nextLightboxImage = () => {
-  if (lightboxImageIndex.value < safeImages.value.length - 1) {
-    lightboxImageIndex.value++;
-  } else {
-    lightboxImageIndex.value = 0;
-  }
-};
-
-const startAutoSlide = () => {
-  if (safeImages.value.length <= 1 || !isMounted.value) return;
-
-  pauseAutoSlide();
-
-  // Reset progress bar
-  progressBarFill.value = 0;
-  const progressDuration = 5000; // 5 seconds
-  const progressInterval = 50; // Update every 50ms
-  const progressStep = (100 / progressDuration) * progressInterval;
-
-  progressIntervalId.value = window.setInterval(() => {
-    if (!isMounted.value) {
-      pauseAutoSlide();
-      return;
-    }
+  // Run cleanup functions
+  cleanupFns.forEach((fn) => {
     try {
-      if (progressBarFill.value < 100) {
-        progressBarFill.value = Math.min(progressBarFill.value + progressStep, 100);
-      }
+      fn();
     } catch (error) {
-      // Component might be unmounting, stop the interval
-      pauseAutoSlide();
-    }
-  }, progressInterval);
-
-  autoSlideInterval.value = window.setInterval(() => {
-    if (!isMounted.value) {
-      pauseAutoSlide();
-      return;
-    }
-    try {
-      if (safeImages.value.length > 1) {
-        if (currentImageIndex.value < safeImages.value.length - 1) {
-          currentImageIndex.value++;
-        } else {
-          currentImageIndex.value = 0;
-        }
-        progressBarFill.value = 0;
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Error in cleanup function:", error);
       }
-    } catch (error) {
-      // Component might be unmounting, stop the interval
-      pauseAutoSlide();
     }
-  }, progressDuration);
-};
+  });
+});
 
-const pauseAutoSlide = () => {
-  if (autoSlideInterval.value) {
-    clearInterval(autoSlideInterval.value);
-    autoSlideInterval.value = null;
+const openLightbox = () => {
+  if (post.value?.images && post.value.images.length > 0) {
+    isLightboxOpen.value = true;
   }
-  if (progressIntervalId.value) {
-    clearInterval(progressIntervalId.value);
-    progressIntervalId.value = null;
-  }
-};
-
-const resetAutoSlide = () => {
-  pauseAutoSlide();
-  startAutoSlide();
 };
 
 const formattedDate = computed(() => {
@@ -704,9 +629,30 @@ const formattedDate = computed(() => {
 const locationLabel = computed(() => {
   const p = post.value;
   if (!p) return "Unknown";
-  // TODO: BE ešte neposiela location údaje - keď bude, pridať:
-  // return p.location || p.location_city || p.location_country || "Unknown";
-  return "Iceland, Reykjavík"; // Placeholder until BE provides location data
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("📍 PostDetailPage locationLabel:", {
+      post_id: p.post_id,
+      author_city: p.author_city,
+      author_country: p.author_country,
+      author_continent: p.author_continent,
+      full_post: p
+    });
+  }
+
+  // Build location string from author's location (city, country, continent)
+  const parts = [];
+  if (p.author_city) {
+    const translatedCity = translateCityName(p.author_city, locale.value as string);
+    parts.push(translatedCity);
+  }
+  if (p.author_country) {
+    const translatedCountry = translateCountryName(p.author_country, locale.value as string);
+    parts.push(translatedCountry);
+  }
+  if (p.author_continent && !parts.length) parts.push(p.author_continent);
+
+  return parts.length > 0 ? parts.join(", ") : "Unknown";
 });
 
 const viewsCount = computed(() => {
@@ -714,15 +660,49 @@ const viewsCount = computed(() => {
 });
 
 const goToAuthorProfile = () => {
-  // TODO: BE ešte neposiela author_id/user_id - keď bude, pridať:
-  // const authorId = post.value?.author_id || post.value?.user_id;
-  // if (authorId) {
-  //   router.push({
-  //     name: "author-profile",
-  //     params: { authorId }
-  //   });
-  // }
-  console.warn("TODO: Navigate to author profile when BE provides author_id");
+  const targetId = authorId.value;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 goToAuthorProfile called:", {
+      targetId,
+      currentUserId: authStore.user?.id,
+      currentSide: preferencesStore.currentSide,
+      post: post.value
+    });
+  }
+
+  if (!targetId) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ No authorId available for navigation");
+    }
+    return;
+  }
+
+  const currentSide = preferencesStore.currentSide || "donor";
+
+  // If user clicks on their own profile, stay on current side
+  if (authStore.user?.id === targetId) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ Navigating to own profile on side:", currentSide);
+    }
+    if (currentSide === "donee") {
+      router.push({ name: "donee-myprofile" });
+    } else {
+      router.push({ name: "donor-myprofile" });
+    }
+    return;
+  }
+
+  // For other users, keep existing logic on donor side and map to proper profile route on donee side
+  if (process.env.NODE_ENV === "development") {
+    console.log("✅ Navigating to user profile:", { targetId, currentSide });
+  }
+
+  if (currentSide === "donee") {
+    router.push({ name: "donee-user-profile", params: { userId: String(targetId) } });
+  } else {
+    router.push({ name: "donor-user-profile", params: { userId: String(targetId) } });
+  }
 };
 
 const handleClose = () => {
@@ -749,25 +729,18 @@ const currentPostUrl = computed(() => {
   return `${base}/donor/post-detail/${id}`;
 });
 
-const handleShare = async () => {
-  const shareData = {
-    title: post.value?.title ?? "dreamhubb",
-    text: post.value?.description ?? "",
-    url: currentPostUrl.value
-  };
+// Share post computed properties
+const sharePostTitle = computed(() => {
+  return post.value?.title || "Check out this post on dreamhubb";
+});
 
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(currentPostUrl.value);
-      console.log("Post link copied to clipboard:", currentPostUrl.value);
-    } else {
-      console.log("Share:", shareData);
-    }
-  } catch (error) {
-    console.error("Share failed", error);
-  }
+const sharePostText = computed(() => {
+  return post.value?.description || "Check out this post on dreamhubb";
+});
+
+const handleShare = () => {
+  // Open share bottom-sheet (same as share profile)
+  isShareSheetOpen.value = true;
 };
 
 const sendLikeToApi = async (postId: number | string, like: boolean) => {

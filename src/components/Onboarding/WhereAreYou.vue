@@ -57,6 +57,10 @@
           <q-select
             v-model="localCity"
             :options="filteredCityOptions"
+            :option-label="emitCityId ? 'name' : undefined"
+            :option-value="emitCityId ? 'id' : undefined"
+            :emit-value="emitCityId"
+            :map-options="emitCityId"
             label="Choose your city"
             dark
             outlined
@@ -124,6 +128,10 @@
         <q-select
           v-model="localCity"
           :options="filteredCityOptions"
+          :option-label="emitCityId ? 'name' : undefined"
+          :option-value="emitCityId ? 'id' : undefined"
+          :emit-value="emitCityId"
+          :map-options="emitCityId"
           label="Choose your city"
           dark
           outlined
@@ -158,7 +166,13 @@
     </template>
 
     <!-- Geolocation Permission Dialog (only show if enableGeolocation is true) -->
-    <q-dialog v-model="showGeolocationDialog" persistent v-if="enableGeolocation">
+    <q-dialog
+      v-model="showGeolocationDialog"
+      persistent
+      v-if="enableGeolocation"
+      no-focus
+      no-refocus
+    >
       <q-card class="geolocation-dialog">
         <q-card-section>
           <div class="text-h6">Enable Location Services</div>
@@ -180,30 +194,38 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, withDefaults } from "vue";
 import { Notify } from "quasar";
-import { continents, getCountriesByContinent, getAllCountries, getCountryByCode } from "src/data/countriesData";
+import { api } from "boot/axios";
+import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, getCitySuggestions } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
+
+interface CityOption {
+  id: number;
+  name: string;
+}
 
 const props = withDefaults(defineProps<{
   continent?: string;
   country?: string;
-  city?: string;
+  city?: string | number; // Can be string (name) or number (id) depending on emitCityId
   progress?: number; // Progress percentage (0-100), defaults to 80 for onboarding
   title?: string; // Custom title, defaults to "you live in"
   nextButtonLabel?: string; // Custom next button label, defaults to "NEXT STEP"
   enableGeolocation?: boolean; // Enable geolocation dialog, defaults to true
   hideHeader?: boolean; // Hide header (back button + title), defaults to false
   hideFooter?: boolean; // Hide footer (CTA buttons), defaults to false
+  emitCityId?: boolean; // If true, emit city ID instead of name, defaults to false
 }>(), {
   continent: "",
   country: "",
-  city: ""
+  city: "",
+  emitCityId: false
 });
 
 const emit = defineEmits<{
   "update:continent": [value: string];
   "update:country": [value: string];
-  "update:city": [value: string];
+  "update:city": [value: string | number];
   next: [];
   back: [];
 }>();
@@ -219,6 +241,7 @@ const progressWidth = computed(() => {
 const title = computed(() => props.title ?? "you live in");
 const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
 const enableGeolocation = computed(() => props.enableGeolocation ?? true);
+const emitCityId = computed(() => props.emitCityId ?? false);
 
 // Geolocation
 const showGeolocationDialog = ref(false);
@@ -234,9 +257,13 @@ const countryOptions = ref<string[]>([]);
 const countryFilter = ref("");
 
 // City options with filtering
-const allCitiesForCountry = ref<string[]>([]);
-const filteredCityOptions = ref<string[]>([]);
+// If emitCityId is true, use CityOption objects with id and name
+// Otherwise, use string array for backward compatibility
+const allCitiesForCountry = ref<string[] | CityOption[]>([]);
+const filteredCityOptions = ref<string[] | CityOption[]>([]);
 const cityFilter = ref("");
+const cityOptionsWithIds = ref<CityOption[]>([]); // Cities with IDs from BE
+const countryIdForCities = ref<number | null>(null); // Store country ID for fetching cities
 
 // Get country code from country name
 const getCountryCode = (countryName: string): string | undefined => {
@@ -259,21 +286,84 @@ const updateCountryOptions = () => {
 };
 
 // Update city options when country changes
-const updateCityOptions = () => {
+const updateCityOptions = async () => {
   if (!localCountry.value) {
     allCitiesForCountry.value = [];
     filteredCityOptions.value = [];
+    cityOptionsWithIds.value = [];
+    countryIdForCities.value = null;
     return;
   }
 
-  const countryCode = getCountryCode(localCountry.value);
-  if (countryCode) {
-    const cities = getCitiesByCountryCode(countryCode);
-    allCitiesForCountry.value = cities;
-    filteredCityOptions.value = cities;
+  // If emitCityId is true, fetch cities with IDs from BE
+  if (props.emitCityId) {
+    try {
+      // First, get country_id from country name
+      const { data: locationData } = await api.get("/locations/ids", {
+        params: {
+          continent: localContinent.value,
+          country: localCountry.value
+        }
+      });
+
+      if (locationData.status === "success" && locationData.location_ids?.country_id) {
+        const countryId = locationData.location_ids.country_id;
+        countryIdForCities.value = countryId;
+
+        // Fetch cities with IDs from BE (scope=all to show all cities, deduplicated)
+        const { data: citiesData } = await api.get("/locations/cities", {
+          params: { country_id: countryId, scope: "all" }
+        });
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("🔍 Cities data from BE:", {
+            status: citiesData.status,
+            citiesCount: citiesData.cities?.length || 0,
+            cities: citiesData.cities
+          });
+        }
+
+        if (citiesData.status === "success" && citiesData.cities) {
+          cityOptionsWithIds.value = citiesData.cities.map((c: { id: number; name: string }) => ({
+            id: c.id,
+            name: c.name
+          }));
+          allCitiesForCountry.value = cityOptionsWithIds.value;
+          filteredCityOptions.value = cityOptionsWithIds.value;
+
+          if (process.env.NODE_ENV === "development") {
+            console.log("🔍 Cities mapped:", {
+              count: cityOptionsWithIds.value.length,
+              cities: cityOptionsWithIds.value
+            });
+          }
+        } else {
+          if (process.env.NODE_ENV === "development") {
+            console.warn("⚠️ No cities data from BE, using fallback");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch cities with IDs:", error);
+      // Fallback to static data
+      const countryCode = getCountryCode(localCountry.value);
+      if (countryCode) {
+        const cities = getCitiesByCountryCode(countryCode);
+        allCitiesForCountry.value = cities;
+        filteredCityOptions.value = cities;
+      }
+    }
   } else {
-    allCitiesForCountry.value = [];
-    filteredCityOptions.value = [];
+    // Backward compatibility: use static data
+    const countryCode = getCountryCode(localCountry.value);
+    if (countryCode) {
+      const cities = getCitiesByCountryCode(countryCode);
+      allCitiesForCountry.value = cities;
+      filteredCityOptions.value = cities;
+    } else {
+      allCitiesForCountry.value = [];
+      filteredCityOptions.value = [];
+    }
   }
 };
 
@@ -299,13 +389,22 @@ const filterCities = (val: string, update: (callback: () => void) => void) => {
     if (val === "") {
       filteredCityOptions.value = allCitiesForCountry.value;
     } else {
-      const countryCode = getCountryCode(localCountry.value);
-      if (countryCode) {
-        filteredCityOptions.value = getCitySuggestions(countryCode, val);
-      } else {
-        filteredCityOptions.value = allCitiesForCountry.value.filter(
-          v => v.toLowerCase().includes(val.toLowerCase())
+      if (props.emitCityId && Array.isArray(allCitiesForCountry.value)) {
+        // Filter CityOption objects
+        const needle = val.toLowerCase();
+        filteredCityOptions.value = (allCitiesForCountry.value as CityOption[]).filter(
+          (city: CityOption) => city.name.toLowerCase().includes(needle)
         );
+      } else {
+        // Filter string array (backward compatibility)
+        const countryCode = getCountryCode(localCountry.value);
+        if (countryCode) {
+          filteredCityOptions.value = getCitySuggestions(countryCode, val);
+        } else {
+          filteredCityOptions.value = (allCitiesForCountry.value as string[]).filter(
+            (v: string) => v.toLowerCase().includes(val.toLowerCase())
+          );
+        }
       }
     }
   });
@@ -576,6 +675,20 @@ watch(localCity, (newVal) => {
     max-width: 100% !important;
     min-width: 100% !important;
     width: 100% !important;
+    transition: opacity 0.01s ease, transform 0.01s ease !important;
+    animation: none !important;
+  }
+
+  :deep(.q-select__dropdown-icon) {
+    transition: transform 0.01s ease !important;
+  }
+
+  :deep(.q-field__control) {
+    transition: background-color 0.01s ease !important;
+  }
+
+  :deep(.q-item) {
+    transition: background-color 0.01s ease !important;
   }
 
   :deep(.q-field__marginal) {

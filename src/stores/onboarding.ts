@@ -11,18 +11,25 @@ export const useOnboardingStore = defineStore("onboarding", {
     // Step 2: What is your goal
     goalType: null as "problem" | "dream" | "idea" | null,
 
-    // Step 3: Category
+    // Step 3: Category / Subcategory (preferred post subcategory)
     category: null as string | null,
     subcategory: null as string | null,
 
-    // Step 4: Location
-    locationContinent: "" as string,
-    locationCountry: "" as string,
-    locationCity: "" as string,
-    // TODO: Location IDs - možno budeme musieť získať z BE alebo mapovať
-    locationContinentId: null as number | null,
-    locationCountryId: null as number | null,
-    locationCityId: null as number | null,
+    // Step 1: User profile location (profile)
+    profileContinent: "" as string,
+    profileCountry: "" as string,
+    profileCity: "" as string,
+    profileContinentId: null as number | null,
+    profileCountryId: null as number | null,
+    profileCityId: null as number | null,
+
+    // Step 5: Feed preferred location (preferences)
+    feedContinent: "" as string,
+    feedCountry: "" as string,
+    feedCity: "" as string,
+    feedContinentId: null as number | null,
+    feedCountryId: null as number | null,
+    feedCityId: null as number | null,
 
     // Step 5: Registration form
     name: "" as string,
@@ -34,7 +41,11 @@ export const useOnboardingStore = defineStore("onboarding", {
 
     // UI state
     loading: false,
-    error: null as string | null
+    error: null as string | null,
+    // per-field validation errors from BE
+    fieldErrors: {} as Record<string, string> | null,
+    profilePictureFile: null as File | null,
+    profilePicturePreview: null as string | null // Base64 preview for avatar
   }),
 
   getters: {
@@ -48,9 +59,9 @@ export const useOnboardingStore = defineStore("onboarding", {
         state.password === state.passwordConfirmation &&
         state.dateOfBirth &&
         state.gender &&
-        state.locationContinent &&
-        state.locationCountry &&
-        state.locationCity
+        state.profileContinent &&
+        state.profileCountry
+        // City is optional - user can type it manually
       );
     }
   },
@@ -68,12 +79,18 @@ export const useOnboardingStore = defineStore("onboarding", {
       this.goalType = null;
       this.category = null;
       this.subcategory = null;
-      this.locationContinent = "";
-      this.locationCountry = "";
-      this.locationCity = "";
-      this.locationContinentId = null;
-      this.locationCountryId = null;
-      this.locationCityId = null;
+      this.profileContinent = "";
+      this.profileCountry = "";
+      this.profileCity = "";
+      this.profileContinentId = null;
+      this.profileCountryId = null;
+      this.profileCityId = null;
+      this.feedContinent = "";
+      this.feedCountry = "";
+      this.feedCity = "";
+      this.feedContinentId = null;
+      this.feedCountryId = null;
+      this.feedCityId = null;
       this.name = "";
       this.email = "";
       this.password = "";
@@ -82,22 +99,228 @@ export const useOnboardingStore = defineStore("onboarding", {
       this.gender = "";
       this.loading = false;
       this.error = null;
+      this.fieldErrors = null;
+      this.profilePictureFile = null;
+      this.profilePicturePreview = null;
     },
 
-    // Pomocná metóda na získanie location IDs (zatiaľ placeholder - BE endpoint ešte nie je implementovaný)
-    async fetchLocationIds() {
-      // TODO: Keď BE implementuje /api/locations endpoint, použiť ho na získanie IDs
-      // Zatiaľ používame placeholder hodnoty (1, 1, 1) - BE by malo mať aspoň jednu location v DB
-      // V produkcii by sme mali volať napr.:
-      // const { data } = await api.get("/locations", { params: { continent: this.locationContinent, country: this.locationCountry, city: this.locationCity } });
-      // return { continentId: data.continent_id, countryId: data.country_id, cityId: data.city_id };
+    // Pomocná metóda na získanie location IDs pre profil (zatiaľ placeholder)
+    async fetchProfileLocationIds() {
+      // If IDs are already set, use them
+      if (this.profileContinentId && this.profileCountryId && this.profileCityId) {
+        return {
+          continentId: this.profileContinentId,
+          countryId: this.profileCountryId,
+          cityId: this.profileCityId
+        };
+      }
 
-      // Placeholder - BE by malo mať aspoň jednu location v DB
-      // V reálnom prípade by sme mali získať IDs z BE endpointu
+      // If we have names but not IDs, fetch IDs from BE
+      if (this.profileContinent && this.profileCountry) {
+        try {
+          if (process.env.NODE_ENV === "development") {
+            console.log("🔍 Fetching location IDs for:", {
+              continent: this.profileContinent,
+              country: this.profileCountry,
+              city: this.profileCity
+            });
+          }
+
+          if (process.env.NODE_ENV === "development") {
+            console.log("🔍 Fetching location IDs for profile:", {
+              continent: this.profileContinent,
+              country: this.profileCountry,
+              city: this.profileCity
+            });
+          }
+
+          const { data } = await api.get("/locations/ids", {
+            params: {
+              continent: this.profileContinent,
+              country: this.profileCountry,
+              city: this.profileCity || null
+            }
+          });
+
+          if (process.env.NODE_ENV === "development") {
+            console.log("✅ Location IDs response:", data);
+          }
+
+          if (data) {
+            if (data.status === "error") {
+              // BE returned an error
+              const errorMsg = data.message || "Failed to get location IDs from server";
+              if (process.env.NODE_ENV === "development") {
+                console.error("❌ BE returned error:", errorMsg, data);
+              }
+              throw new Error(errorMsg);
+            }
+
+            if (data.status === "success" && data.location_ids) {
+              const ids = data.location_ids;
+
+              // Check if we got valid IDs (continent and country are required)
+              if (!ids.continent_id || !ids.country_id) {
+                const errorMsg = `Invalid location IDs received from server. Continent: ${ids.continent_id}, Country: ${ids.country_id}`;
+                if (process.env.NODE_ENV === "development") {
+                  console.error("❌", errorMsg, ids);
+                }
+                throw new Error(errorMsg);
+              }
+
+              // Update store with IDs
+              this.profileContinentId = ids.continent_id;
+              this.profileCountryId = ids.country_id;
+              this.profileCityId = ids.city_id;
+
+              if (process.env.NODE_ENV === "development") {
+                console.log("✅ Location IDs set in store:", {
+                  continentId: ids.continent_id,
+                  countryId: ids.country_id,
+                  cityId: ids.city_id
+                });
+              }
+
+              return {
+                continentId: ids.continent_id,
+                countryId: ids.country_id,
+                cityId: ids.city_id || null // City can be null
+              };
+            }
+          }
+        } catch (error) {
+          if (process.env.NODE_ENV === "development") {
+            console.error("❌ Failed to fetch location IDs:", error);
+          }
+          // Re-throw error so register() can handle it
+          throw error;
+        }
+      }
+
+      // Fallback: If we still don't have IDs, throw error instead of using defaults
+      // This prevents silent failures where wrong location IDs are used
+      if (!this.profileContinentId || !this.profileCountryId) {
+        const errorMsg = `Failed to get location IDs. Continent: ${this.profileContinent}, Country: ${this.profileCountry}, City: ${this.profileCity}`;
+        if (process.env.NODE_ENV === "development") {
+          console.error("❌", errorMsg);
+        }
+        throw new Error(errorMsg);
+      }
+
       return {
-        continentId: this.locationContinentId || 1,
-        countryId: this.locationCountryId || 1,
-        cityId: this.locationCityId || 1
+        continentId: this.profileContinentId,
+        countryId: this.profileCountryId,
+        cityId: this.profileCityId || null
+      };
+    },
+
+    // Pomocná metóda na získanie location IDs pre feed (podobne ako fetchProfileLocationIds)
+    async fetchFeedLocationIds() {
+      // If IDs are already set, use them
+      if (this.feedContinentId && this.feedCountryId && this.feedCityId) {
+        return {
+          continentId: this.feedContinentId,
+          countryId: this.feedCountryId,
+          cityId: this.feedCityId
+        };
+      }
+
+      // If we have names but not IDs, fetch IDs from BE
+      if (this.feedContinent && this.feedCountry) {
+        try {
+          if (process.env.NODE_ENV === "development") {
+            console.log("🔍 Fetching feed location IDs for:", {
+              continent: this.feedContinent,
+              country: this.feedCountry,
+              city: this.feedCity
+            });
+          }
+
+          if (process.env.NODE_ENV === "development") {
+            console.log("🔍 Fetching location IDs for feed:", {
+              continent: this.feedContinent,
+              country: this.feedCountry,
+              city: this.feedCity
+            });
+          }
+
+          const { data } = await api.get("/locations/ids", {
+            params: {
+              continent: this.feedContinent,
+              country: this.feedCountry,
+              city: this.feedCity || null
+            }
+          });
+
+          if (process.env.NODE_ENV === "development") {
+            console.log("✅ Feed location IDs response:", data);
+          }
+
+          if (data) {
+            if (data.status === "error") {
+              const errorMsg = data.message || "Failed to get feed location IDs from server";
+              if (process.env.NODE_ENV === "development") {
+                console.error("❌ BE returned error:", errorMsg, data);
+              }
+              throw new Error(errorMsg);
+            }
+
+            if (data.status === "success" && data.location_ids) {
+              const ids = data.location_ids;
+
+              // Check if we got valid IDs (continent and country are required)
+              if (!ids.continent_id || !ids.country_id) {
+                const errorMsg = `Invalid feed location IDs received from server. Continent: ${ids.continent_id}, Country: ${ids.country_id}`;
+                if (process.env.NODE_ENV === "development") {
+                  console.error("❌", errorMsg, ids);
+                }
+                throw new Error(errorMsg);
+              }
+
+              // Update store with IDs
+              this.feedContinentId = ids.continent_id;
+              this.feedCountryId = ids.country_id;
+              this.feedCityId = ids.city_id || null; // City can be null
+
+              if (process.env.NODE_ENV === "development") {
+                console.log("✅ Feed location IDs set in store:", {
+                  continentId: ids.continent_id,
+                  countryId: ids.country_id,
+                  cityId: ids.city_id
+                });
+              }
+
+              return {
+                continentId: ids.continent_id,
+                countryId: ids.country_id,
+                cityId: ids.city_id || null // City can be null
+              };
+            }
+          }
+        } catch (error) {
+          if (process.env.NODE_ENV === "development") {
+            console.error("❌ Failed to fetch feed location IDs:", error);
+          }
+          // Re-throw error so it can be handled
+          throw error;
+        }
+      }
+
+      // If we still don't have IDs but have names, return null IDs (will filter by country if available)
+      // This allows filtering by country even if city is not selected
+      if (this.feedContinentId && this.feedCountryId) {
+        return {
+          continentId: this.feedContinentId,
+          countryId: this.feedCountryId,
+          cityId: this.feedCityId || null
+        };
+      }
+
+      // If we have names but no IDs, return null (no filtering)
+      return {
+        continentId: null,
+        countryId: null,
+        cityId: null
       };
     },
 
@@ -112,23 +335,81 @@ export const useOnboardingStore = defineStore("onboarding", {
       this.error = null;
 
       try {
-        // Získať location IDs (zatiaľ placeholder)
-        const locationIds = await this.fetchLocationIds();
+        // Získať location IDs - if it fails, use IDs from store or let backend validate
+        let locationIds;
+        try {
+          locationIds = await this.fetchProfileLocationIds();
+        } catch (locationError) {
+          // If location fetch fails, use IDs from store if available
+          // Backend will validate them anyway
+          if (process.env.NODE_ENV === "development") {
+            console.warn("⚠️ Location IDs fetch failed, using store IDs:", locationError);
+          }
+          locationIds = {
+            continentId: this.profileContinentId,
+            countryId: this.profileCountryId,
+            cityId: this.profileCityId
+          };
+        }
+
+        // Validate location IDs before proceeding
+        if (!locationIds.continentId || !locationIds.countryId) {
+          throw new Error("Invalid location IDs. Please select a valid continent and country.");
+        }
+
+        // Format date_birth - ensure it's in YYYY-MM-DD format
+        // q-input type="date" returns YYYY-MM-DD format, but we need to handle other formats too
+        let formattedDate = this.dateOfBirth;
+        if (formattedDate) {
+          // Remove any spaces
+          formattedDate = formattedDate.trim();
+
+          // If date is in DD.MM.YYYY format, convert to YYYY-MM-DD
+          if (formattedDate.includes(".")) {
+            const parts = formattedDate.split(".").map(p => p.trim());
+            if (parts.length === 3) {
+              // Pad day and month with leading zeros if needed
+              const day = parts[0].padStart(2, "0");
+              const month = parts[1].padStart(2, "0");
+              const year = parts[2];
+              formattedDate = `${year}-${month}-${day}`;
+            }
+          } else if (formattedDate.includes("/")) {
+            // If date is in DD/MM/YYYY format, convert to YYYY-MM-DD
+            const parts = formattedDate.split("/").map(p => p.trim());
+            if (parts.length === 3) {
+              // Pad day and month with leading zeros if needed
+              const day = parts[0].padStart(2, "0");
+              const month = parts[1].padStart(2, "0");
+              const year = parts[2];
+              formattedDate = `${year}-${month}-${day}`;
+            }
+          }
+          // If already in YYYY-MM-DD format, use as is
+        }
 
         const payload = {
           username: this.name,
           email: this.email,
           password: this.password,
           password_confirmation: this.passwordConfirmation,
-          date_birth: this.dateOfBirth,
+          date_birth: formattedDate || this.dateOfBirth,
           gender: this.gender,
-          location_country_id: locationIds.countryId,
-          location_continent_id: locationIds.continentId,
-          location_city_id: locationIds.cityId
+          location_country_id: locationIds.countryId || null,
+          location_continent_id: locationIds.continentId || null,
+          location_city_id: locationIds.cityId || null
         };
 
         if (process.env.NODE_ENV === "development") {
           console.log("🚀 Register payload:", payload);
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("🚀 Calling register API with payload:", payload);
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("🚀 Calling register API with payload:", payload);
         }
 
         const { data } = await api.post("/register", payload);
@@ -147,8 +428,25 @@ export const useOnboardingStore = defineStore("onboarding", {
             password: this.password
           });
 
-          // Reset onboarding store po úspešnej registrácii
-          this.reset();
+          // Upload profile picture if provided
+          if (this.profilePictureFile) {
+            try {
+              const formData = new FormData();
+              formData.append("file", this.profilePictureFile);
+              await api.post("/user/profile-picture", formData, {
+                headers: {
+                  "Content-Type": "multipart/form-data"
+                }
+              });
+              // Refresh user data to get updated profile picture
+              await authStore.fetchUser();
+            } catch (error) {
+              // Log error but don't fail registration
+              if (process.env.NODE_ENV === "development") {
+                console.error("Failed to upload profile picture:", error);
+              }
+            }
+          }
 
           return data;
         } else {
@@ -159,9 +457,20 @@ export const useOnboardingStore = defineStore("onboarding", {
           console.error("❌ Registration error:", error);
         }
 
+        // Check if it's a location-related error
+        if (error instanceof Error) {
+          const errorMessage = error.message.toLowerCase();
+          if (errorMessage.includes("location") || errorMessage.includes("failed to get location")) {
+            this.error = "Failed to process your location. Please make sure you selected a valid continent, country, and city (if applicable).";
+            this.loading = false;
+            return;
+          }
+        }
+
         // Spracovať error response z BE
         const errorResponse = error as {
           response?: {
+            status?: number;
             data?: {
               message?: string;
               errors?: Record<string, string[]>;
@@ -169,13 +478,35 @@ export const useOnboardingStore = defineStore("onboarding", {
           };
         };
 
-        if (errorResponse.response?.data?.message) {
-          this.error = errorResponse.response.data.message;
-        } else if (errorResponse.response?.data?.errors) {
-          // Laravel validation errors
+        if (process.env.NODE_ENV === "development") {
+          console.log("🔍 Error response status:", errorResponse.response?.status);
+          console.log("🔍 Error response data:", errorResponse.response?.data);
+        }
+
+        if (errorResponse.response?.data?.errors) {
+          // Map Laravel validation errors to fieldErrors
+          const fieldErrors: Record<string, string> = {};
           const errors = errorResponse.response.data.errors;
-          const firstError = Object.values(errors)[0];
-          this.error = Array.isArray(firstError) ? firstError[0] : "Validation error";
+          Object.keys(errors).forEach((key) => {
+            const value = errors[key];
+            const raw =
+              Array.isArray(value) && value.length > 0 ? String(value[0]) : "Validation error";
+            // Friendlier message for already registered email
+            if (key === "email" && /already been taken/i.test(raw)) {
+              fieldErrors.email = "This email is already registered. Please choose another one or log in.";
+            } else {
+              fieldErrors[key] = raw;
+            }
+          });
+          this.fieldErrors = fieldErrors;
+          if (process.env.NODE_ENV === "development") {
+            console.log("✅ Set fieldErrors:", this.fieldErrors);
+          }
+          // Also show first error as global message for visibility
+          const firstKey = Object.keys(fieldErrors)[0];
+          this.error = firstKey ? fieldErrors[firstKey] : "Validation error";
+        } else if (errorResponse.response?.data?.message) {
+          this.error = errorResponse.response.data.message;
         } else {
           this.error = "Registration failed. Please try again.";
         }

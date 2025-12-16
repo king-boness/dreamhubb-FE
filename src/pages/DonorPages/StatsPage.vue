@@ -45,64 +45,19 @@
               :class="{ 'usedOn-button': true, active: model === 'onDream' }"
               @click="model = 'onDream'"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="12"
-                viewBox="0 0 16 12"
-                fill="none"
-                class="icon"
-              >
-                <path
-                  d="M12.9 4.69341C12.6761 3.55856 12.0651 2.53665 11.1714 1.80225C10.2777 1.06784 9.15674 0.666487 8 0.666748C6.07333 0.666748 4.4 1.76008 3.56667 3.36008C2.58682 3.46597 1.68067 3.93022 1.02233 4.66363C0.363981 5.39704 -0.000114468 6.34787 2.69952e-08 7.33341C2.69952e-08 9.54008 1.79333 11.3334 4 11.3334H12.6667C14.5067 11.3334 16 9.84008 16 8.00008C16 6.24008 14.6333 4.81341 12.9 4.69341Z"
-                  fill="#BD0043"
-                />
-              </svg>
+              <img src="/post_icons/dream_mini.svg" alt="dream" class="usedOn-icon" />
             </q-btn>
             <q-btn
               :class="{ 'usedOn-button': true, active: model === 'onProblem' }"
               @click="model = 'onProblem'"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                class="icon"
-              >
-                <g clip-path="url(#clip0_491_37483)">
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M0 4C0 2.93913 0.421427 1.92172 1.17157 1.17157C1.92172 0.421427 2.93913 0 4 0L12 0C13.0609 0 14.0783 0.421427 14.8284 1.17157C15.5786 1.92172 16 2.93913 16 4V12C16 13.0609 15.5786 14.0783 14.8284 14.8284C14.0783 15.5786 13.0609 16 12 16H4C2.93913 16 1.92172 15.5786 1.17157 14.8284C0.421427 14.0783 0 13.0609 0 12V4ZM6.996 4.165C6.97456 4.02042 6.98454 3.87291 7.02525 3.73253C7.06597 3.59216 7.13646 3.4622 7.23194 3.35153C7.32741 3.24086 7.44561 3.15206 7.5785 3.0912C7.71139 3.03033 7.85584 2.99883 8.002 2.99883C8.14816 2.99883 8.29261 3.03033 8.4255 3.0912C8.55838 3.15206 8.67659 3.24086 8.77207 3.35153C8.86754 3.4622 8.93803 3.59216 8.97875 3.73253C9.01946 3.87291 9.02944 4.02042 9.008 4.165L8 11L6.996 4.165ZM8 11C8.26522 11 8.51957 11.1054 8.70711 11.2929C8.89464 11.4804 9 11.7348 9 12C9 12.2652 8.89464 12.5196 8.70711 12.7071C8.51957 12.8946 8.26522 13 8 13C7.73478 13 7.48043 12.8946 7.29289 12.7071C7.10536 12.5196 7 12.2652 7 12C7 11.7348 7.10536 11.4804 7.29289 11.2929C7.48043 11.1054 7.73478 11 8 11Z"
-                    fill="#BD0043"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_491_37483">
-                    <rect width="16" height="16" fill="white" />
-                  </clipPath>
-                </defs>
-              </svg>
+              <img src="/post_icons/problem_mini.svg" alt="problem" class="usedOn-icon" />
             </q-btn>
             <q-btn
               :class="{ 'usedOn-button': true, active: model === 'onIdea' }"
               @click="model = 'onIdea'"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 18 16"
-                fill="none"
-                class="icon icons-left"
-              >
-                <path
-                  d="M11.0001 14.5C11.0001 14.6326 10.9474 14.7598 10.8537 14.8536C10.7599 14.9473 10.6327 15 10.5001 15H5.50011C5.3675 15 5.24032 14.9473 5.14656 14.8536C5.05279 14.7598 5.00011 14.6326 5.00011 14.5C5.00011 14.3674 5.05279 14.2402 5.14656 14.1465C5.24032 14.0527 5.3675 14 5.50011 14H10.5001C10.6327 14 10.7599 14.0527 10.8537 14.1465C10.9474 14.2402 11.0001 14.3674 11.0001 14.5ZM13.5001 6.50001C13.5018 7.33311 13.3135 8.15562 12.9496 8.90505C12.5857 9.65448 12.0558 10.3111 11.4001 10.825C11.2763 10.9185 11.1757 11.0393 11.1063 11.1781C11.0369 11.3169 11.0006 11.4699 11.0001 11.625V12C11.0001 12.2652 10.8948 12.5196 10.7072 12.7071C10.5197 12.8947 10.2653 13 10.0001 13H6.00011C5.73489 13 5.48054 12.8947 5.293 12.7071C5.10547 12.5196 5.00011 12.2652 5.00011 12V11.625C4.99968 11.472 4.96459 11.3211 4.89748 11.1837C4.83036 11.0462 4.73297 10.9257 4.61261 10.8313C3.95828 10.3209 3.42822 9.66878 3.06231 8.92398C2.69641 8.17917 2.50418 7.36108 2.50011 6.53126C2.48136 3.55001 4.89386 1.06876 7.86886 1.00001C8.60232 0.981648 9.33203 1.11039 10.0149 1.37863C10.6978 1.64688 11.3201 2.0492 11.845 2.56184C12.3698 3.07449 12.7867 3.68708 13.071 4.36346C13.3553 5.03985 13.5012 5.76632 13.5001 6.50001ZM10.3564 6.64376C10.2616 6.54987 10.1335 6.4972 10.0001 6.4972C9.86668 6.4972 9.73866 6.54987 9.64386 6.64376L8.00011 8.29376L6.35636 6.64376C6.25921 6.56403 6.13588 6.52328 6.01035 6.52945C5.88483 6.53561 5.76608 6.58825 5.67721 6.67712C5.58835 6.76599 5.53571 6.88473 5.52955 7.01026C5.52338 7.13578 5.56413 7.25911 5.64386 7.35626L7.50011 9.20626V11.5C7.50011 11.6326 7.55279 11.7598 7.64656 11.8536C7.74032 11.9473 7.8675 12 8.00011 12C8.13272 12 8.25989 11.9473 8.35366 11.8536C8.44743 11.7598 8.50011 11.6326 8.50011 11.5V9.20626L10.3564 7.35626C10.4502 7.26147 10.5029 7.13344 10.5029 7.00001C10.5029 6.86659 10.4502 6.73856 10.3564 6.64376Z"
-                  fill="#BD0043"
-                />
-              </svg>
+              <img src="/post_icons/idea_mini.svg" alt="idea" class="usedOn-icon" />
             </q-btn>
           </div>
         </div>
@@ -159,83 +114,79 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
 import { Stats, specificSpending } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 
 const model = ref("onDream");
-const selectedCategory = ref({
-  label: "Events",
-  value: "Events",
-  icon: "/icons/events-icon.svg",
-  tokens: 10
-});
-const options = ref([
-  {
-    label: "Events",
-    value: "Events",
-    icon: "/icons/events-icon.svg",
-    tokens: 10
-  },
-  {
-    label: "Health",
-    value: "Health",
-    icon: "/icons/health-icon.svg",
-    tokens: 400
-  },
-  {
-    label: "Learning",
-    value: "Learning",
-    icon: "/icons/learning-icon.svg",
-    tokens: 10
-  },
-  {
-    label: "Possesions",
-    value: "Possesions",
-    icon: "/icons/possesion-icon.svg",
-    tokens: 1200
-  },
-  {
-    label: "Proffesion",
-    value: "Proffesion",
-    icon: "/icons/proffesion-icon.svg",
-    tokens: 10
-  },
-  {
-    label: "Relationships",
-    value: "Relationships",
-    icon: "/icons/relationship-icon.svg",
-    tokens: 10
-  },
-  {
-    label: "The Other",
-    value: "Other",
-    icon: "/icons/others-icon.svg",
-    tokens: 10
-  },
-  {
-    label: "Travelling",
-    value: "Travelling",
-    icon: "/icons/travelling-icon.svg",
-    tokens: 2000
-  }
-] as specificSpending[]);
 
-const stats = ref({
+// TODO: Replace with API data when BE endpoint is ready
+// Computed properties for stats data
+const totalTokensDonated = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/total-donated')
+  return 0;
+});
+
+const remainingKarma = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/remaining-karma')
+  return 0;
+});
+
+const tokensUsedOnDreams = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/used-on-dreams')
+  return 0;
+});
+
+const tokensUsedOnProblems = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/used-on-problems')
+  return 0;
+});
+
+const tokensUsedOnIdeas = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/used-on-ideas')
+  return 0;
+});
+
+const tokensUsedOnDonations = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/used-on-donations')
+  return 0;
+});
+
+const tokensGainedFromDonations = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/gained-from-donations')
+  return 0;
+});
+
+const categorySpecificSpending = computed(() => {
+  // TODO: Replace with API data: await api.get('/user/stats/category-spending')
+  return {
+    Events: 0,
+    Health: 0,
+    Learning: 0,
+    Possesions: 0,
+    Proffesion: 0,
+    Relationships: 0,
+    Other: 0,
+    Travelling: 0
+  };
+});
+
+const stats = computed(() => ({
   usedKarma: {
-    onDream: 543,
-    onProblem: 5234,
-    onIdea: 153,
-    onDonation: 2345
+    onDream: tokensUsedOnDreams.value,
+    onProblem: tokensUsedOnProblems.value,
+    onIdea: tokensUsedOnIdeas.value,
+    onDonation: tokensUsedOnDonations.value
   }
-} as Stats);
-const cards = ref([
+} as Stats));
+
+const cards = computed(() => [
   {
     overview: {
       title: "Gained From",
       comesFrom: "Donations",
       comesFromImg: "/icons/giftIcon-red.svg",
-      comesFromValue: 145
+      comesFromValue: tokensGainedFromDonations.value
     }
   },
   {
@@ -243,16 +194,82 @@ const cards = ref([
       title: "Gained From",
       comesFrom: "Donations",
       comesFromImg: "/icons/giftIcon-red.svg",
-      comesFromValue: 145
+      comesFromValue: tokensGainedFromDonations.value
     }
   },
   {
     overview: {
       title: "karma remaining",
-      comesFromValue: 2400
+      comesFromValue: remainingKarma.value
     }
   }
 ] as Stats[]);
+
+const options = computed(() => [
+  {
+    label: "Events",
+    value: "Events",
+    icon: "/icons/events-icon.svg",
+    tokens: categorySpecificSpending.value.Events
+  },
+  {
+    label: "Health",
+    value: "Health",
+    icon: "/icons/health-icon.svg",
+    tokens: categorySpecificSpending.value.Health
+  },
+  {
+    label: "Learning",
+    value: "Learning",
+    icon: "/icons/learning-icon.svg",
+    tokens: categorySpecificSpending.value.Learning
+  },
+  {
+    label: "Possesions",
+    value: "Possesions",
+    icon: "/icons/possesion-icon.svg",
+    tokens: categorySpecificSpending.value.Possesions
+  },
+  {
+    label: "Proffesion",
+    value: "Proffesion",
+    icon: "/icons/proffesion-icon.svg",
+    tokens: categorySpecificSpending.value.Proffesion
+  },
+  {
+    label: "Relationships",
+    value: "Relationships",
+    icon: "/icons/relationship-icon.svg",
+    tokens: categorySpecificSpending.value.Relationships
+  },
+  {
+    label: "The Other",
+    value: "Other",
+    icon: "/icons/others-icon.svg",
+    tokens: categorySpecificSpending.value.Other
+  },
+  {
+    label: "Travelling",
+    value: "Travelling",
+    icon: "/icons/travelling-icon.svg",
+    tokens: categorySpecificSpending.value.Travelling
+  }
+] as specificSpending[]);
+
+const selectedCategory = ref({
+  label: "Events",
+  value: "Events",
+  icon: "/icons/events-icon.svg",
+  tokens: 0
+});
+
+// Update selectedCategory tokens when category changes
+watch(() => selectedCategory.value.value, (newValue) => {
+  const category = options.value.find(opt => opt.value === newValue);
+  if (category) {
+    selectedCategory.value = { ...category };
+  }
+}, { immediate: true });
 </script>
 <style scoped lang="scss">
 .usedOnStats-spendingContainer {
@@ -334,6 +351,12 @@ const cards = ref([
       margin-left: 0.1rem;
       scale: 2;
     }
+    .usedOn-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      display: block;
+    }
   }
 }
 .usedOn-button.active {
@@ -343,6 +366,12 @@ const cards = ref([
       fill: white;
       opacity: 1 !important;
     }
+  }
+  .usedOn-icon {
+    // Make icon white when active - use filter to convert red (#BD0043) to white
+    filter: brightness(0) saturate(100%) invert(100%) !important;
+    opacity: 1 !important;
+    display: block;
   }
 }
 .statsPage {

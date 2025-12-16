@@ -9,10 +9,16 @@
       v-model="tab"
       active-class="activeStatsTab"
     >
-      <q-tab name="Profile" label="Profile" class="profileTab"
-        ><img class="profilePicture" :src="props.post.user.userPicture" alt=""
-      /></q-tab>
-      <q-tab name="funds" label="Funds" style="" class="statsTab"
+      <q-tab name="Profile" :label="t('profile')" class="profileTab">
+        <div class="profileTab-avatarWrapper">
+          <UserAvatar
+            :image-url="authStore.avatarUrl"
+            :name="authStore.name"
+            size="22px"
+          />
+        </div>
+      </q-tab>
+      <q-tab name="funds" :label="t('funds')" style="" class="statsTab"
         ><svg
           width="22"
           height="22"
@@ -29,7 +35,7 @@
         </svg>
       </q-tab>
 
-      <q-tab name="stats" label="Stats" style="" class="statsTab"
+      <q-tab name="stats" :label="t('stats')" style="" class="statsTab"
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           width="15"
@@ -44,7 +50,7 @@
         </svg>
       </q-tab>
 
-      <q-tab name="earn" label="Earn" style="" class="statsTab"
+      <q-tab name="earn" :label="t('earn')" style="" class="statsTab"
         ><svg
           width="22"
           height="22"
@@ -68,7 +74,7 @@
 
     <q-tab-panels v-model="tab" animated class="panel" swipeable>
       <q-tab-panel class="tabPanel" name="Profile"
-        ><MyProfilePage></MyProfilePage
+        ><ProfileContent></ProfileContent
       ></q-tab-panel>
       <q-tab-panel class="tabPanel" name="funds"
         ><TokenShopPage></TokenShopPage>
@@ -84,12 +90,18 @@
 </template>
 <script setup lang="ts">
 import { ref, defineProps, PropType } from "vue";
+import { useI18n } from "vue-i18n";
 import { Post } from "src/components/models";
 
-import MyProfilePage from "src/pages/DonorPages/MyProfilePage.vue";
+import ProfileContent from "src/components/partials/ProfileContent.vue";
 import StatsPage from "src/pages/DonorPages/StatsPage.vue";
 import EarnPage from "src/pages/DonorPages/EarnPage.vue";
 import TokenShopPage from "src/pages/DonorPages/TokenShopPage.vue";
+import { useAuthStore } from "src/stores/auth";
+import UserAvatar from "src/components/common/UserAvatar.vue";
+
+const { t } = useI18n();
+const authStore = useAuthStore();
 const tab = ref("Profile");
 interface Props {
   post: Post;
@@ -128,7 +140,7 @@ const props: Props = defineProps({
   padding: 0 0.6rem;
   .q-tab__label {
     font-size: 0.8rem;
-    text-transform: capitalize !important;
+    text-transform: lowercase !important;
     font-family: poppinsMedium;
   }
   .q-tab {
@@ -140,6 +152,9 @@ const props: Props = defineProps({
 }
 
 .profileTab {
+  .profileTab-avatarWrapper {
+    margin-right: 0.5rem !important;
+  }
   .profilePicture {
     border-radius: 50% !important;
     height: 1.5rem;

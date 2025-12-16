@@ -99,7 +99,7 @@ const subCategoryOptions: RegistrationOptions[] = [
   },
   {
     id: 4,
-    title: "possesions"
+    title: "possessions"
   },
   {
     id: 5,

@@ -62,13 +62,7 @@ const password = ref("");
 const remember = ref(false);
 const showPassword = ref(false);
 
-// Pre dev prostredie - predvyplnenie
-onMounted(() => {
-  if (process.env.NODE_ENV === "development") {
-    email.value = "mattik24@example.com";
-    password.value = "secret123";
-  }
-});
+// No pre-filled data
 
 const onSubmit = async () => {
   if (!email.value || !password.value) {

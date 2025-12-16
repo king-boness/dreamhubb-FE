@@ -10,9 +10,13 @@ interface User {
   email: string;
   date_birth?: string;
   gender?: string;
+  bio?: string | null;
   location_country_id?: number;
   location_continent_id?: number;
   location_city_id?: number;
+  location_city?: string | null;
+  location_country?: string | null;
+  location_continent?: string | null;
   tokens?: number;
   profile_picture?: string | null;
   profile_picture_public_id?: string | null;
@@ -31,7 +35,9 @@ export const useAuthStore = defineStore("auth", {
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token
+    isAuthenticated: (state) => !!state.token,
+    avatarUrl: (state) => state.user?.profile_picture || null,
+    name: (state) => state.user?.username || ""
   },
 
   actions: {
@@ -84,6 +90,15 @@ export const useAuthStore = defineStore("auth", {
 
         if (data && data.status === "success") {
           this.user = data.user || null;
+          if (process.env.NODE_ENV === "development") {
+            console.log("✅ User data loaded:", {
+              id: this.user?.id,
+              username: this.user?.username,
+              location_city: this.user?.location_city,
+              location_country: this.user?.location_country,
+              location_continent: this.user?.location_continent
+            });
+          }
         } else {
           this.user = data || null;
         }
@@ -130,6 +145,21 @@ export const useAuthStore = defineStore("auth", {
     updateTokens(newTokens: number) {
       if (this.user) {
         this.user.tokens = newTokens;
+      }
+    },
+
+    async updateBio(newBio: string) {
+      if (!this.token) return;
+
+      const payload = { bio: newBio };
+      const { data } = await api.put("/user/update", payload);
+
+      if (data && data.status === "success") {
+        if (!this.user) {
+          this.user = data.user;
+        } else {
+          this.user.bio = data.user.bio;
+        }
       }
     }
   }

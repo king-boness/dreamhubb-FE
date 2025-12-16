@@ -22,9 +22,23 @@ declare module "vue-i18n" {
 /* eslint-enable @typescript-eslint/no-empty-interface */
 
 export default boot(({ app }) => {
+  // Load saved language from localStorage
+  const LANGUAGE_STORAGE_KEY = "dreamhubb_language";
+  const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+
+  // Map language codes to i18n locale codes
+  const localeMap: Record<string, string> = {
+    sk: "sk",
+    "en-US": "en-US",
+    "en-GB": "en-US" // Use en-US as fallback for en-GB
+  };
+
+  const mappedLocale = savedLanguage ? (localeMap[savedLanguage] || savedLanguage) : "en-US";
+  const defaultLocale = mappedLocale || "en-US";
+
   const i18n = createI18n({
-    locale: "en-US",
-    // locale: "sk",
+    locale: defaultLocale,
+    fallbackLocale: "en-US",
     legacy: false,
     messages
   });

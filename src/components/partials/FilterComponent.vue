@@ -11,7 +11,7 @@
         inline-label
         active-class="activeTab"
       >
-        <q-tab name="byHelp" label="by help" style="" class="tab"
+        <q-tab name="byHelp" :label="t('byHelp')" style="" class="tab"
           ><svg
             width="24"
             height="24"
@@ -26,7 +26,7 @@
           </svg>
         </q-tab>
 
-        <q-tab name="byPay" label="by pay" style="" class="tab"
+        <q-tab name="byPay" :label="t('byPay')" style="" class="tab"
           ><svg
             width="22"
             height="22"
@@ -43,7 +43,7 @@
           </svg>
         </q-tab>
 
-        <q-tab name="byTop" label="by top" style="" class="tab"
+        <q-tab name="byTop" :label="t('byTop')" style="" class="tab"
           ><svg
             width="22"
             height="22"
@@ -78,13 +78,13 @@
             fill="#FCFCFC"
           />
         </svg>
-        <div class="filtercomponent-title">Filters</div>
+        <div class="filtercomponent-title">{{ t("filters") }}</div>
       </q-btn>
     </div>
     <Transition name="slide-fade">
       <div v-if="isFilter" class="filter-options">
         <div class="category">
-          <p class="categoryTitle">Category</p>
+          <p class="categoryTitle">{{ t("category") }}</p>
           <SwiperComponent
             :options="categoryOptions"
             :horizontal="true"
@@ -92,7 +92,7 @@
           />
         </div>
         <div class="sub-category">
-          <p class="categoryTitle">Sub-category</p>
+          <p class="categoryTitle">{{ t("subCategory") }}</p>
           <SwiperComponent
             :options="subCategoryOptions"
             :horizontal="true"
@@ -140,8 +140,11 @@
 </template>
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import SwiperComponent from "./SwiperComponent.vue";
 import { RegistrationOptions } from "src/components/models";
+
+const { t } = useI18n();
 const tab = ref("byHelp");
 const isFilter = ref(false);
 
@@ -186,7 +189,7 @@ const subCategoryOptions: RegistrationOptions[] = [
   },
   {
     id: 4,
-    title: "possesions"
+    title: "possessions"
   },
   {
     id: 5,

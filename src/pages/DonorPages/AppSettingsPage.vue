@@ -1,7 +1,7 @@
 <template>
   <div class="appSettings">
     <div class="acccoutSettings-div accontSettings-container">
-      <span class="appSettings-title">Account Settings</span>
+      <span class="appSettings-title">{{ t("accountSettings") }}</span>
       <div
         class="appSettings-content"
         v-for="(accountSetting, i) in accountSettings"
@@ -30,21 +30,21 @@
       </div>
     </div>
     <div class="screenMode-container">
-      <span class="appSettings-name">Name shown</span>
+      <span class="appSettings-name">{{ t("nameShown") }}</span>
       <div class="btn-container name-ButtonContainer">
         <div
           class="toggle-btn name-button"
           :class="nameShown ? 'active' : ' '"
           @click="nameShown = !nameShown"
         >
-          <span class="nickname-option">Nickname</span>
-          <span class="realName-option">Real Name</span>
+          <span class="nickname-option">{{ t("nickname") }}</span>
+          <span class="realName-option">{{ t("realName") }}</span>
           <div class="inner-circle name-buttonCircle"></div>
         </div>
       </div>
     </div>
     <div class="acccoutSettings-div">
-      <span class="appSettings-title">App Settings</span>
+      <span class="appSettings-title">{{ t("appSettings") }}</span>
       <div
         class="appSettings-content"
         v-for="(appSetting, i) in appSettings"
@@ -74,22 +74,30 @@
     </div>
     <!-- Language Section -->
     <div class="acccoutSettings-div">
-      <span class="appSettings-title">Language</span>
-      <div class="appSettings-languageContainer">
-        <q-select
-          v-model="selectedLanguage"
-          :options="languageOptions"
-          option-label="label"
-          option-value="value"
-          emit-value
-          map-options
-          class="appSettings-languageSelect"
-          :dark="!lightMode"
-          @update:model-value="handleLanguageChange"
-        />
-        <span class="appSettings-languageNote">
-          {{ currentLanguageLabel }}
-        </span>
+      <span class="appSettings-title">{{ t("language") }}</span>
+      <div
+        class="appSettings-content"
+        @click="routeCheck('settings-language')"
+      >
+        <div class="appSetting-description">
+          <img src="/icons/langIcon.svg" alt="" class="appSettings-img" />
+          <span class="appSettings-name">{{ currentLanguageLabel }}</span>
+        </div>
+        <q-btn class="arrowBtn"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
+            <g opacity="0.6">
+              <path
+                d="M8.47503 15.8332C8.59952 15.8337 8.72253 15.8062 8.83501 15.7528C8.9475 15.6995 9.04659 15.6216 9.12503 15.5249L13.15 10.5249C13.2726 10.3758 13.3396 10.1888 13.3396 9.99574C13.3396 9.80272 13.2726 9.61568 13.15 9.46657L8.98336 4.46657C8.84191 4.29639 8.63865 4.18937 8.4183 4.16905C8.19794 4.14874 7.97854 4.21679 7.80836 4.35824C7.63818 4.49969 7.53116 4.70295 7.51084 4.9233C7.49053 5.14366 7.55858 5.36306 7.70003 5.53324L11.425 9.9999L7.82503 14.4666C7.72312 14.5889 7.65839 14.7378 7.63849 14.8958C7.61859 15.0538 7.64436 15.2141 7.71274 15.3579C7.78112 15.5017 7.88925 15.6228 8.02434 15.7071C8.15944 15.7913 8.31583 15.8351 8.47503 15.8332Z"
+                fill="#D0DCD8"
+              />
+            </g></svg
+        ></q-btn>
       </div>
     </div>
 
@@ -145,7 +153,7 @@
         @click="routeCheck(source.destination)"
       >
         <div
-          v-if="source.title == 'About App'"
+          v-if="source.destination === 'settings-about'"
           class="appSetting-description aboutAppSection"
         >
           <img
@@ -198,40 +206,48 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
+import { useI18n } from "vue-i18n";
 
 const $q = useQuasar();
 const router = useRouter();
 const auth = useAuthStore();
+const { t, locale } = useI18n();
 const lightMode = ref(false);
 const nameShown = ref(false);
 
-// Language selection
-const selectedLanguage = ref("sk");
-const languageOptions = [
-  { label: "Slovak (SK)", value: "sk" },
-  { label: "English (EN)", value: "en" }
-];
-
-// Get current language label
-const currentLanguageLabel = computed(() => {
-  const option = languageOptions.find(opt => opt.value === selectedLanguage.value);
-  return option ? option.label : "Slovak (SK)";
+// Watch for locale changes to trigger reactivity
+watch(() => locale.value, () => {
+  // Force reactivity update when locale changes
+  if (process.env.NODE_ENV === "development") {
+    console.log("Locale changed to:", locale.value);
+  }
 });
 
-// Handle language change
-const handleLanguageChange = (value: string) => {
-  // TODO: If i18n is implemented, update locale here
-  // Example: i18n.locale.value = value;
-  if (process.env.NODE_ENV === "development") {
-    console.log("Language changed to:", value);
-  }
-  // For now, just store in localStorage for persistence
-  localStorage.setItem("appLanguage", value);
-};
+// Get current language label from localStorage
+const currentLanguageLabel = computed(() => {
+  const savedLanguage = localStorage.getItem("dreamhubb_language") || "en-US";
+  // Map language codes to display names
+  const languageMap: Record<string, string> = {
+    sk: "Slovak",
+    "en-US": "English (US)",
+    "en-GB": "English (UK)",
+    de: "German",
+    fr: "French",
+    es: "Spanish",
+    it: "Italian",
+    pl: "Polish",
+    cs: "Czech",
+    hu: "Hungarian",
+    ro: "Romanian",
+    ru: "Russian",
+    uk: "Ukrainian"
+  };
+  return languageMap[savedLanguage] || "English (US)";
+});
 
 // Coming soon items
 const comingSoonItems = [
@@ -248,14 +264,6 @@ const comingSoonItems = [
     title: "Privacy"
   }
 ];
-
-// Load saved language on mount
-onMounted(() => {
-  const savedLanguage = localStorage.getItem("appLanguage");
-  if (savedLanguage) {
-    selectedLanguage.value = savedLanguage;
-  }
-});
 
 const checkBodyClass = () => {
   lightMode.value = document.body.classList.contains("body--light");
@@ -281,50 +289,50 @@ function changeTheme() {
     document.body.classList.remove("body--light");
   }
 }
-const accountSettings = [
+const accountSettings = computed(() => [
   {
     img: "/icons/keyIcon.svg",
-    title: "Change Password",
+    title: t("changePassword"),
     destination: "settings-password"
   },
   {
     img: "/icons/emailIcon.svg",
-    title: "Change E-mail Address",
+    title: t("changeEmailAddress"),
     destination: "settings-email"
   },
   {
     img: "/icons/bioIcon.svg",
-    title: "Change Bio",
+    title: t("changeBio"),
     destination: "settings-bio"
   }
-];
-const appSettings = [
+]);
+const appSettings = computed(() => [
   {
     img: "/icons/privacyIcon.svg",
-    title: "Privacy Settings",
+    title: t("privacySettings"),
     destination: "settings-privacy"
   }
   // Language is now handled directly in the template, not as a separate route
-];
-const sources = [
+]);
+const sources = computed(() => [
   {
     img: "/icons/supportIcon.svg",
-    title: "Help and Support",
+    title: t("helpAndSupport"),
     destination: "settings-support"
   },
-  { img: "/icons/redHelpIcon.svg", title: "FAQ", destination: "settings-faq" },
+  { img: "/icons/redHelpIcon.svg", title: t("faq"), destination: "settings-faq" },
   {
     imgLight: "/icons/logo-light.svg",
     imgDark: "/icons/logo.svg",
-    title: "About App",
+    title: t("aboutApp"),
     destination: "settings-about"
   },
   {
     img: "/icons/banIcon.svg",
-    title: "Ban List",
+    title: t("banList"),
     destination: "settings-ban"
   }
-];
+]);
 
 const route = useRoute();
 const routesName = route.name?.toString() || "";

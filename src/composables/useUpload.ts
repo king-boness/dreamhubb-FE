@@ -67,11 +67,8 @@ export function useUpload() {
       });
 
       if (response.data.status === "success") {
-        Notify.create({
-          type: "positive",
-          message: "✅ Upload successful",
-          position: "top"
-        });
+        // Don't show notification here - let the caller handle it
+        // This allows for better error handling (e.g., don't show "Upload successful" if profile update fails)
         return response.data;
       }
 

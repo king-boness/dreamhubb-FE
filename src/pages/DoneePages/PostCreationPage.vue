@@ -15,13 +15,18 @@
     </div>
     <div class="postCreation-uploadedImgContainer">
       <ImageIndexSlider
-        v-if="uploadedImages.images.length != 0"
+        v-if="hasUploadedImages"
         :images="uploadedImages.images"
         class="postCreation-imageSlider"
         :count="uploadedImages.images.length"
         @change="handleIndex"
+        key="image-slider"
       ></ImageIndexSlider>
-      <UploadPostImgComponent @images-updated="handleImagesFromChild" v-else />
+      <UploadPostImgComponent
+        v-else
+        @images-updated="handleImagesFromChild"
+        key="upload-component"
+      />
       <div
         class="postCreation-imgOptionsContainer"
         v-if="uploadedImages.images.length != 0"
@@ -33,7 +38,11 @@
             alt=""
           />Remove Image</q-btn
         >
-        <q-btn class="postCreation-addImgButton" @click="openFileInput">
+        <q-btn
+          class="postCreation-addImgButton"
+          @click="openFileInput"
+          :disabled="isUploadingAdditional || uploadedImages.images.length >= 5"
+        >
           <img
             src="/icons/addImg-icon.svg"
             alt=""
@@ -47,6 +56,7 @@
           style="display: none"
           multiple
           accept="image/*"
+          :disabled="isUploadingAdditional"
         />
       </div>
       <div class="postCreation-detailContainer">
@@ -145,25 +155,35 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, onActivated, computed } from "vue";
+import { ref, watch, onMounted, onActivated, computed, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { usePostCreationStore } from "src/stores/postCreation";
 import { usePostsStore } from "src/stores/posts";
+import { useAuthStore } from "src/stores/auth";
 import { Notify } from "quasar";
 import UploadPostImgComponent from "src/components/partials/UploadPostImgComponent.vue";
 import { PostCategories } from "src/components/models";
 import TokenSlider from "../../components/partials/CustomThumb.vue";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import type { UploadedImage } from "src/composables/useUpload";
+import { useUpload } from "src/composables/useUpload";
 
 const router = useRouter();
 const postCreationStore = usePostCreationStore();
 const postsStore = usePostsStore();
+const authStore = useAuthStore();
+const { uploadMultipleImages } = useUpload();
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const imgIndex = ref(0);
-const uploadedImages = ref({
-  images: ref<string[]>([])
+const uploadedImages = ref<{ images: string[] }>({
+  images: []
+});
+const isUploadingAdditional = ref(false);
+
+// Computed property pre kontrolu, či sú nahraté obrázky
+const hasUploadedImages = computed(() => {
+  return uploadedImages.value.images && uploadedImages.value.images.length > 0;
 });
 
 // Computed properties from store
@@ -344,6 +364,14 @@ const handleSubmitPost = async () => {
       console.log("✅ Submit result:", result);
     }
 
+    // Update user tokens if returned from BE
+    if (result?.user?.tokens !== undefined) {
+      authStore.updateTokens(result.user.tokens);
+      if (process.env.NODE_ENV === "development") {
+        console.log("💰 Updated user tokens:", result.user.tokens);
+      }
+    }
+
     // Show success message
     Notify.create({
       type: "positive",
@@ -355,11 +383,16 @@ const handleSubmitPost = async () => {
     localStorage.removeItem("postCreation_goal");
     localStorage.removeItem("postCreation_category");
 
-    // Refresh posts feed
-    await postsStore.fetchPosts({ sort: "help" });
+    // Refresh posts feed and my posts (for Donee home)
+    await Promise.all([
+      postsStore.fetchPosts({ sort: "help" }),
+      postsStore.fetchMyDreams({ type: "dream" }),
+      postsStore.fetchMyProblems({ type: "problem" }),
+      postsStore.fetchMyIdeas({ type: "idea" })
+    ]);
 
-    // Navigate to donor posts page (kde sa zobrazí nový post)
-    router.push({ name: "donor-posts" });
+    // Navigate to donee posts page (Donee home)
+    router.push({ name: "donee-posts" });
   } catch (error: unknown) {
     // Error je už nastavený v store
     if (postCreationStore.error) {
@@ -382,12 +415,23 @@ const deleteImg = () => {
   // Aktualizovať store
   postCreationStore.setField("images", uploadedImages.value.images);
 };
-const handleImagesFromChild = (imgs: UploadedImage[]) => {
+const handleImagesFromChild = async (imgs: UploadedImage[]) => {
   // Konvertovať UploadedImage[] na string[] (použiť secure_url)
   const imageUrls = imgs.map((img) => img.secure_url);
-  uploadedImages.value.images = imageUrls;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("📸 handleImagesFromChild called with:", imgs);
+    console.log("📸 Extracted URLs:", imageUrls);
+  }
+
+  // Nastaviť obrázky reaktívne - použiť nový array pre lepšiu reaktivitu
+  uploadedImages.value.images = [...imageUrls];
+
   // Aktualizovať store
   postCreationStore.setField("images", imageUrls);
+
+  // Počkať na DOM update
+  await nextTick();
 };
 const handleIndex = (index: number) => {
   imgIndex.value = index;
@@ -403,25 +447,59 @@ const openFileInput = () => {
   }
 };
 
-const handleFileChange = (event: Event) => {
+const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = target.files;
 
-  if (files) {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
+  if (!files || files.length === 0) {
+    return;
+  }
 
-      reader.onload = () => {
-        uploadedImages.value.images.push(reader.result as string);
-        // Aktualizovať store
-        postCreationStore.setField("images", uploadedImages.value.images);
-        if (process.env.NODE_ENV === "development") {
-          console.log(uploadedImages.value.images.length);
-        }
-      };
+  // Limit na max 5 obrázkov celkovo
+  const maxImages = 5;
+  const currentCount = uploadedImages.value.images.length;
+  const remainingSlots = maxImages - currentCount;
 
-      reader.readAsDataURL(file);
+  if (remainingSlots <= 0) {
+    Notify.create({
+      type: "negative",
+      message: `Maximum ${maxImages} images allowed.`,
+      position: "top"
+    });
+    return;
+  }
+
+  const filesToUpload = Array.from(files).slice(0, remainingSlots);
+  isUploadingAdditional.value = true;
+
+  try {
+    const folder = "uploads";
+    const uploaded = await uploadMultipleImages(filesToUpload, folder);
+
+    // Pridať nové Cloudinary URL-y do zoznamu
+    const newImageUrls = uploaded.map((img) => img.secure_url);
+    uploadedImages.value.images = [...uploadedImages.value.images, ...newImageUrls];
+
+    // Aktualizovať store
+    postCreationStore.setField("images", uploadedImages.value.images);
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("📸 Additional images uploaded:", newImageUrls.length);
+      console.log("📸 Total images:", uploadedImages.value.images.length);
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("❌ Failed to upload additional images:", error);
+    }
+    Notify.create({
+      type: "negative",
+      message: "Failed to upload images. Please try again.",
+      position: "top"
+    });
+  } finally {
+    isUploadingAdditional.value = false;
+    if (fileInput.value) {
+      fileInput.value.value = "";
     }
   }
 };
@@ -439,11 +517,54 @@ const handleFileChange = (event: Event) => {
   .flicking-camera {
     height: 40rem;
     * {
-      transition: all 0.2s;
+      transition: all 0.01s;
     }
   }
   .postDetail-img {
     width: 100%;
+  }
+  .postCreation-imageSlider {
+    width: 100% !important;
+    height: 40rem !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+
+    :deep(.flicking-wrapper) {
+      width: 100% !important;
+      height: 100% !important;
+      position: relative !important;
+      display: block !important;
+    }
+
+    :deep(.flicking-viewport) {
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+
+    :deep(.flicking-camera) {
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    :deep(.flicking-panel) {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    :deep(.slider-image) {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      display: block !important;
+    }
   }
 }
 </style>
@@ -451,20 +572,7 @@ const handleFileChange = (event: Event) => {
 .iphoneDevice-postCreation {
   padding-top: 3.3rem !important;
 }
-.postCreation-uploadedImgContainer::after {
-  content: "";
-  position: absolute;
-  top: 21px;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0.712)
-  );
-  pointer-events: none;
-}
+// Removed ::after gradient to prevent visual split
 .postCreation-page {
   .postCreation-header {
     position: absolute;
@@ -488,6 +596,23 @@ const handleFileChange = (event: Event) => {
     }
   }
   .postCreation-uploadedImgContainer {
+    position: relative;
+    width: 100%;
+    height: 40rem;
+    background: #161616;
+    overflow: hidden;
+    // Ensure consistent background color
+    background-color: #161616 !important;
+
+    .postCreation-imageSlider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
     .postCreation-imgOptionsContainer {
       z-index: 111;
       position: absolute;
@@ -503,7 +628,7 @@ const handleFileChange = (event: Event) => {
       .postCreation-deleteImgButton {
         background: rgba(84, 0, 29, 0.841);
         font-family: poppins;
-        color: $primary;
+        color: #ffffff;
         display: flex;
         flex-direction: column;
         width: 12rem;
@@ -515,6 +640,7 @@ const handleFileChange = (event: Event) => {
         .postCreation-deleteImgIcon {
           margin-right: 0.4rem;
           width: 1.5rem;
+          filter: brightness(0) invert(1);
         }
       }
 
@@ -522,11 +648,7 @@ const handleFileChange = (event: Event) => {
         width: 3rem;
         height: 3rem;
         border-radius: 2rem;
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.175) 0%,
-          rgba(255, 255, 255, 0.07) 100%
-        );
+        background: rgba(84, 0, 29, 0.841);
         padding-right: 1.2rem;
         padding-bottom: 0.4rem;
 

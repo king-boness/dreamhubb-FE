@@ -26,7 +26,8 @@
       track-color="brand"
       :inner-max="props.userKarma"
       :step="1"
-      snap
+      :disable="false"
+      :disable-drag-value="false"
       @update:model-value="(val) => { sliderValue = val; emit('update:modelValue', val); }"
     />
   </div>
@@ -78,9 +79,12 @@ watch(sliderValue, (newVal) => {
   if (newVal > props.userKarma) {
     sliderValue.value = props.userKarma;
   }
+  if (newVal < 0) {
+    sliderValue.value = 0;
+  }
   // Emit hodnotu
   emit("update:modelValue", sliderValue.value);
-});
+}, { flush: "sync" });
 </script>
 
 <style lang="scss">
@@ -138,19 +142,24 @@ watch(sliderValue, (newVal) => {
   background-size: auto;
   background-repeat: no-repeat;
   cursor: grab !important;
-  touch-action: none !important;
+  touch-action: pan-x !important;
   pointer-events: auto !important;
   user-select: none;
   -webkit-user-select: none;
+  transition: transform 0.01s ease-out, left 0s linear !important;
+  will-change: transform, left;
 }
 
 .q-slider__thumb:active {
   cursor: grabbing !important;
+  transform: scale(1.1);
+  transition: transform 0.01s ease-out !important;
 }
 
 .q-slider__track-container {
   cursor: pointer !important;
-  touch-action: none !important;
+  touch-action: pan-x !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .q-slider__thumb-shape {
@@ -159,7 +168,36 @@ watch(sliderValue, (newVal) => {
 .q-slider__track {
   height: 0.6rem !important;
   cursor: pointer !important;
-  touch-action: none !important;
+  touch-action: pan-x !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Improve slider responsiveness
+:deep(.q-slider) {
+  touch-action: pan-x !important;
+  -webkit-tap-highlight-color: transparent;
+  transition: none !important;
+
+  .q-slider__track-container {
+    touch-action: pan-x !important;
+    transition: none !important;
+  }
+
+  .q-slider__thumb-container {
+    touch-action: pan-x !important;
+    transition: left 0s linear !important;
+    will-change: left;
+  }
+
+  .q-slider__track {
+    transition: width 0s linear !important;
+    will-change: width;
+  }
+
+  .q-slider__track-fill {
+    transition: width 0s linear !important;
+    will-change: width;
+  }
 }
 
 .bg-brand {

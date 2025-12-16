@@ -31,13 +31,14 @@ export const citiesByCountry: Record<string, string[]> = {
     "Sečovce", "Tisovec", "Želiezovce", "Kozárovce", "Kováčová", "Kamenica nad Cirochou"
   ],
   // Czech Republic
+  // Note: "Prague" was removed to avoid duplicate with "Praha"
   CZ: [
-    "Prague", "Brno", "Ostrava", "Plzeň", "Liberec", "Olomouc", "Ústí nad Labem",
+    "Praha", "Brno", "Ostrava", "Plzeň", "Liberec", "Olomouc", "Ústí nad Labem",
     "České Budějovice", "Hradec Králové", "Pardubice", "Zlín", "Havířov",
     "Kladno", "Most", "Opava", "Frýdek-Místek", "Jihlava", "Karviná", "Teplice",
     "Děčín", "Chomutov", "Jablonec nad Nisou", "Mladá Boleslav", "Prostějov",
     "Přerov", "Česká Lípa", "Třebíč", "Třinec", "Tábor", "Znojmo", "Příbram",
-    "Orlová", "Cheb", "Modřany", "Kladno", "Kroměříž", "Litoměřice", "Hodonín",
+    "Orlová", "Cheb", "Modřany", "Kroměříž", "Litoměřice", "Hodonín",
     "Nový Jičín", "Uherské Hradiště", "Chrudim", "Jindřichův Hradec", "Vsetín",
     "Valašské Meziříčí", "Litvínov", "Trutnov", "Písek", "Kopřivnice", "Klatovy",
     "Břeclav", "Šumperk", "Varnsdorf", "Kutná Hora", "Sokolov", "Žďár nad Sázavou",
@@ -200,7 +201,18 @@ export const citiesByCountry: Record<string, string[]> = {
 
 // Helper function to get cities by country code
 export function getCitiesByCountryCode(countryCode: string): string[] {
-  return citiesByCountry[countryCode] || [];
+  const list = citiesByCountry[countryCode] || [];
+  // Deduplicate by case-insensitive name to avoid obvious duplicates (e.g. Praha / Prague)
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const name of list) {
+    const key = name.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(name);
+    }
+  }
+  return result;
 }
 
 // Helper function to filter cities by search term

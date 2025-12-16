@@ -37,15 +37,31 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { UserDatas } from "src/components/models";
 import { maskEmail } from "src/components/partials/FunctionsComponent.vue";
+import { useAuthStore } from "src/stores/auth";
 
+const authStore = useAuthStore();
 const resetEmail = ref("");
 const userEmail = ref("");
-const profile = ref({
-  email: "perdochjakub@gmail.com"
-} as UserDatas);
+
+const profile = computed(() => ({
+  email: authStore.user?.email || ""
+} as UserDatas));
+
+onMounted(async () => {
+  // Ensure user data is loaded
+  if (!authStore.user && authStore.isAuthenticated) {
+    try {
+      await authStore.fetchUser();
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to fetch user:", error);
+      }
+    }
+  }
+});
 </script>
 <style scoped lang="scss">
 .settingsEmail-page {

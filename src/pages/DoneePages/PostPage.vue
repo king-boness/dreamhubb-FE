@@ -50,11 +50,11 @@
     <!-- My Dreams Section -->
     <div class="postPage-header postPgae-myDreamsContainer">
       <div class="postPage-headerContainer">
-        <span class="postPage-title">my dreams</span>
+        <span class="postPage-title">{{ t("myDreams") }} ({{ mappedMyDreams.length }})</span>
       </div>
       <!-- Loading state -->
       <div v-if="postsStore.myDreamsLoading" class="postPage-loading">
-        <p>Loading...</p>
+        <p>{{ t("loading") }}</p>
       </div>
       <!-- Error state -->
       <div v-else-if="postsStore.myDreamsError" class="postPage-error">
@@ -62,7 +62,7 @@
       </div>
       <!-- Empty state -->
       <div v-else-if="!postsStore.myDreamsLoading && mappedMyDreams.length === 0" class="postPage-empty">
-        <p>You don't have any dreams yet. Create your first dream!</p>
+        <p>{{ t("noDreamsYet") }}</p>
       </div>
       <!-- Posts -->
       <PostComponent
@@ -76,11 +76,11 @@
     <div class="postPage-postsContainer">
       <div class="postPage-header">
         <div class="postPage-headerContainer">
-          <span class="postPage-title">my problems</span>
+          <span class="postPage-title">{{ t("myProblems") }} ({{ mappedMyProblems.length }})</span>
         </div>
         <!-- Loading state -->
         <div v-if="postsStore.myProblemsLoading" class="postPage-loading">
-          <p>Loading...</p>
+          <p>{{ t("loading") }}</p>
         </div>
         <!-- Error state -->
         <div v-else-if="postsStore.myProblemsError" class="postPage-error">
@@ -88,7 +88,7 @@
         </div>
         <!-- Empty state -->
         <div v-else-if="!postsStore.myProblemsLoading && mappedMyProblems.length === 0" class="postPage-empty">
-          <p>You don't have any problems yet.</p>
+          <p>{{ t("noProblemsYet") }}</p>
         </div>
         <!-- Posts -->
         <PostComponent
@@ -103,11 +103,11 @@
     <div class="postPage-postsContainer">
       <div class="postPage-header">
         <div class="postPage-headerContainer">
-          <span class="postPage-title">my ideas</span>
+          <span class="postPage-title">{{ t("myIdeas") }} ({{ mappedMyIdeas.length }})</span>
         </div>
         <!-- Loading state -->
         <div v-if="postsStore.myIdeasLoading" class="postPage-loading">
-          <p>Loading...</p>
+          <p>{{ t("loading") }}</p>
         </div>
         <!-- Error state -->
         <div v-else-if="postsStore.myIdeasError" class="postPage-error">
@@ -115,7 +115,7 @@
         </div>
         <!-- Empty state -->
         <div v-else-if="!postsStore.myIdeasLoading && mappedMyIdeas.length === 0" class="postPage-empty">
-          <p>You don't have any ideas yet.</p>
+          <p>{{ t("noIdeasYet") }}</p>
         </div>
         <!-- Posts -->
         <PostComponent
@@ -130,11 +130,11 @@
     <div class="postPage-postsContainer">
       <div class="postPage-header">
         <div class="postPage-headerContainer">
-          <span class="postPage-title">Recently Accomplished</span>
+          <span class="postPage-title">{{ t("recentlyAccomplished") }}</span>
         </div>
         <!-- Loading state -->
         <div v-if="postsStore.recentlyAccomplishedLoading" class="postPage-loading">
-          <p>Loading...</p>
+          <p>{{ t("loading") }}</p>
         </div>
         <!-- Error state -->
         <div v-else-if="postsStore.recentlyAccomplishedError" class="postPage-error">
@@ -142,7 +142,7 @@
         </div>
         <!-- Empty state -->
         <div v-else-if="!postsStore.recentlyAccomplishedLoading && mappedRecentlyAccomplished.length === 0" class="postPage-empty">
-          <p>No dreams accomplished yet.</p>
+          <p>{{ t("noGoalsAccomplished") }}</p>
         </div>
         <!-- Posts -->
         <PostComponent
@@ -156,9 +156,12 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onActivated } from "vue";
+import { useI18n } from "vue-i18n";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
 import { usePostsStore } from "src/stores/posts";
+
+const { t } = useI18n();
 
 // Reactive state for dismissed hint
 const hintDismissed = ref(false);
@@ -221,10 +224,12 @@ const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
   const firstImage = images.length > 0 ? images[0] : "/images/Auth/postBackground.png";
 
   return {
+    post_id: (post.post_id || null) as number | undefined,
     goalName: (post.title || "Untitled") as string,
     goalImage: getCategoryIcon((post.fe_category || post.category_name || null) as string | null),
     karma: (post.tokens || 0) as number,
     image: firstImage,
+    images: images.length > 0 ? images : null,
     description: (post.description || "") as string,
     user: {
       userName: (post.author_name || "Unknown") as string,

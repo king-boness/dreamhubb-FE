@@ -7,10 +7,18 @@
   >
     <div
       class="post-component"
-      :style="{
-        backgroundImage: 'url(' + item.image + ')'
-      }"
+      @click="handlePostClick(item)"
     >
+      <div class="post-component-imageWrapper">
+        <PostImagesCarousel
+          :images="item.images"
+          :auto-slide="true"
+          :show-progress="true"
+          :show-arrows="false"
+          :show-dots="false"
+          alt="Post image"
+        />
+      </div>
       <div class="postComponent-valueContainer">
         <img class="postComponent-valueImg" src="/icons/KarmaIcon.png" alt="" />
         <span class="postComponent-value">{{ formatNumber(item.karma) }}</span>
@@ -33,8 +41,7 @@
   margin-top: 1rem;
 }
 .post-component {
-  background-repeat: round;
-  background-size: cover;
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -43,6 +50,17 @@
   margin: 0 1rem;
   border-radius: 1.25rem;
   padding: 0.7rem;
+  overflow: hidden;
+
+  .post-component-imageWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    border-radius: 1.25rem;
+  }
   .postComponent-valueContainer {
     display: flex;
     align-items: center;
@@ -66,6 +84,8 @@
     }
   }
   .postComponent-categoryContainer {
+    position: relative;
+    z-index: 1;
     background: linear-gradient(
       108.46deg,
       rgba(0, 0, 0, 0.441) 1%,
@@ -90,8 +110,10 @@
 </style>
 <script setup lang="ts">
 import { defineProps, PropType } from "vue";
+import { useRouter } from "vue-router";
 import { Post } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
+import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
 
 interface Props {
   post: Post[];
@@ -103,4 +125,13 @@ const props: Props = defineProps({
     required: true
   }
 });
+
+const router = useRouter();
+
+const handlePostClick = (post: Post) => {
+  if (post.post_id) {
+    // Navigate to post detail page (same as Donor feed)
+    router.push({ name: "donor-post-detail", params: { id: post.post_id } });
+  }
+};
 </script>

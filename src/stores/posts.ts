@@ -15,6 +15,7 @@ export type PostDetail = {
   fe_category: string | null; // FE category name (traveling, health, etc.)
   category_name: string; // BE category name (pre kompatibilitu)
   author_name: string;
+  author_bio?: string | null;
   images: string[];
 };
 
@@ -50,12 +51,10 @@ export const usePostsStore = defineStore("posts", {
     filters: {
       type: null as "dream" | "problem" | "idea" | null,
       categoryId: null as number | null, // BE category_id (fallback)
-      feCategory: null as string | null // FE category name (traveling, health, etc.) - preferované
-      // TODO: Location IDs - BE ešte nepodporuje location filtre
-      // Keď BE implementuje podporu, odkomentovať:
-      // continentId: null as number | null,
-      // countryId: null as number | null,
-      // cityId: null as number | null
+      feCategory: null as string | null, // FE category name (traveling, health, etc.) - preferované
+      continentId: null as number | null,
+      countryId: null as number | null,
+      cityId: null as number | null
     }
   }),
 
@@ -66,7 +65,10 @@ export const usePostsStore = defineStore("posts", {
       this.filters = {
         type: partial.type !== undefined ? partial.type : this.filters.type,
         categoryId: partial.categoryId !== undefined ? partial.categoryId : this.filters.categoryId,
-        feCategory: partial.feCategory !== undefined ? partial.feCategory : this.filters.feCategory
+        feCategory: partial.feCategory !== undefined ? partial.feCategory : this.filters.feCategory,
+        continentId: partial.continentId !== undefined ? partial.continentId : this.filters.continentId,
+        countryId: partial.countryId !== undefined ? partial.countryId : this.filters.countryId,
+        cityId: partial.cityId !== undefined ? partial.cityId : this.filters.cityId
       };
     },
 
@@ -75,15 +77,16 @@ export const usePostsStore = defineStore("posts", {
       this.filters = {
         type: null,
         categoryId: null,
-        feCategory: null
-        // TODO: Keď BE podporí location filtre, pridať:
-        // continentId: null,
-        // countryId: null,
-        // cityId: null
+        feCategory: null,
+        continentId: null,
+        countryId: null,
+        cityId: null
       };
     },
 
     async fetchPosts(params: Record<string, unknown> = {}) {
+      // Clear feed before fetching new posts (to prevent mixing old and new results)
+      this.posts = [];
       this.loading = true;
       this.error = null;
 
@@ -110,21 +113,47 @@ export const usePostsStore = defineStore("posts", {
           queryParams.category_id = Number(this.filters.categoryId);
         }
 
-        // TODO: Location filtre - BE ešte nepodporuje
-        // Keď BE implementuje podporu, pridať:
-        // if (this.filters.continentId) {
-        //   queryParams.location_continent_id = this.filters.continentId;
-        // }
-        // if (this.filters.countryId) {
-        //   queryParams.location_country_id = this.filters.countryId;
-        // }
-        // if (this.filters.cityId) {
-        //   queryParams.location_city_id = this.filters.cityId;
-        // }
+        // Location filtre (ids) - priority: city > country > continent
+        // Send only the most specific location filter to BE
+        // If city is set, send only city (BE will filter strictly by city)
+        // If city is not set but country is set, send only country (BE will filter strictly by country)
+        // If only continent is set, send only continent
+        if (this.filters.cityId && this.filters.cityId > 0) {
+          queryParams.location_city_id = Number(this.filters.cityId);
+          // Explicitly remove country/continent params when city is selected (strict filtering)
+          delete queryParams.location_country_id;
+          delete queryParams.location_continent_id;
+        } else if (this.filters.countryId && this.filters.countryId > 0) {
+          queryParams.location_country_id = Number(this.filters.countryId);
+          // Explicitly remove city/continent params when country is selected (strict filtering)
+          delete queryParams.location_city_id;
+          delete queryParams.location_continent_id;
+        } else if (this.filters.continentId && this.filters.continentId > 0) {
+          queryParams.location_continent_id = Number(this.filters.continentId);
+          // Explicitly remove city/country params when continent is selected
+          delete queryParams.location_city_id;
+          delete queryParams.location_country_id;
+        } else {
+          // No location filters - explicitly remove all location params
+          delete queryParams.location_city_id;
+          delete queryParams.location_country_id;
+          delete queryParams.location_continent_id;
+        }
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 Fetching posts with params:", queryParams);
           console.log("📦 Current filters in store:", this.filters);
+          console.log("📦 Location filter details:", {
+            cityId: this.filters.cityId,
+            cityId_type: typeof this.filters.cityId,
+            countryId: this.filters.countryId,
+            continentId: this.filters.continentId,
+            sending_city_id: queryParams.location_city_id,
+            sending_city_id_type: typeof queryParams.location_city_id,
+            sending_country_id: queryParams.location_country_id,
+            sending_continent_id: queryParams.location_continent_id,
+            all_query_params: Object.keys(queryParams)
+          });
         }
 
         const { data } = await api.get("/posts", { params: queryParams });
@@ -134,13 +163,24 @@ export const usePostsStore = defineStore("posts", {
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 Posts received from BE:", this.posts.length, "posts");
-          console.log("📦 First post details:", this.posts[0] ? {
-            post_id: this.posts[0].post_id || this.posts[0].id,
-            title: this.posts[0].title,
-            type: this.posts[0].type,
-            category_id: this.posts[0].category_id,
-            category_name: this.posts[0].category_name
-          } : "No posts");
+          if (this.posts.length > 0) {
+            const firstPost = this.posts[0];
+            console.log("📦 First post details:", {
+              post_id: firstPost.post_id || firstPost.id,
+              title: firstPost.title,
+              type: firstPost.type,
+              category_id: firstPost.category_id,
+              category_name: firstPost.category_name,
+              author_name: firstPost.author_name,
+              has_user: !!firstPost.user,
+              user_profile_picture: firstPost.user?.profile_picture,
+              author_picture: firstPost.author_picture,
+              author_city: firstPost.author_city,
+              author_country: firstPost.author_country,
+              author_continent: firstPost.author_continent,
+              full_user_object: firstPost.user
+            });
+          }
         }
 
         if (process.env.NODE_ENV === "development") {
@@ -185,10 +225,20 @@ export const usePostsStore = defineStore("posts", {
             type: (cachedPost.type || "dream") as string | null,
             fe_category: (cachedPost.fe_category || null) as string | null,
             category_name: (cachedPost.category_name || "") as string,
+            // BE now sends user_id directly in response - map from cache too
+            author_id: (cachedPost.user_id || cachedPost.author_id || cachedPost.user?.id || null) as number | null,
+            user_id: (cachedPost.user_id || null) as number | null,
             author_name: (cachedPost.author_name || "") as string,
+            author_picture: (cachedPost.author_picture || cachedPost.user?.profile_picture || null) as string | null,
+            user: (cachedPost.user || null) as { profile_picture?: string | null; [key: string]: unknown } | null,
             images: Array.isArray(cachedPost.images)
               ? (cachedPost.images as string[])
-              : []
+              : [],
+            // Add author location data from cache
+            author_city: (cachedPost.author_city || null) as string | null,
+            author_country: (cachedPost.author_country || null) as string | null,
+            author_continent: (cachedPost.author_continent || null) as string | null,
+            author_bio: (cachedPost.author_bio || null) as string | null
           };
           this.currentPost = mappedPost;
 
@@ -198,6 +248,17 @@ export const usePostsStore = defineStore("posts", {
 
           if (process.env.NODE_ENV === "development") {
             console.log("📦 Post loaded from cache:", id);
+            console.log("📦 Cached post mapping:", {
+              post_id: mappedPost.post_id,
+              author_id: mappedPost.author_id,
+              user_id: mappedPost.user_id,
+              author_name: mappedPost.author_name,
+              raw_cachedPost: {
+                user_id: cachedPost.user_id,
+                author_id: cachedPost.author_id,
+                user: cachedPost.user
+              }
+            });
           }
           return;
         }
@@ -240,12 +301,34 @@ export const usePostsStore = defineStore("posts", {
           type: postData.type || "dream",
           fe_category: postData.fe_category || null,
           category_name: postData.category_name || "",
+          // BE now sends user_id directly in response
+          author_id: postData.user_id || postData.author_id || postData.user?.id || null,
+          user_id: postData.user_id || null, // Store user_id separately for easier access
           author_name: postData.author_name || "",
-          images
+          images,
+          // Add user/author data for avatar - BE now sends author_picture directly
+          user: postData.user || null,
+          author_picture: postData.author_picture || postData.user?.profile_picture || null,
+          // Add author location data
+          author_city: postData.author_city || null,
+          author_country: postData.author_country || null,
+          author_continent: postData.author_continent || null,
+          author_bio: postData.author_bio || null
         };
 
         if (process.env.NODE_ENV === "development") {
-          console.log("📦 Post detail fetched:", this.currentPost);
+          console.log("📦 Post detail fetched:", {
+            ...this.currentPost,
+            raw_postData: {
+              author_id: postData.author_id,
+              user_id: postData.user_id,
+              user: postData.user,
+              author_name: postData.author_name,
+              author_city: postData.author_city,
+              author_country: postData.author_country,
+              author_continent: postData.author_continent
+            }
+          });
         }
       } catch (error: unknown) {
         if (process.env.NODE_ENV === "development") {

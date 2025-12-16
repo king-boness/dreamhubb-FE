@@ -245,7 +245,7 @@ const specificCategory = ref([
   },
   {
     id: 4,
-    title: "possesions",
+    title: "possessions",
     description:
       "Any person that can give or provide anything or any service that someone else might be interested in and find valuable. There is a variety of ways in which the mentor can help donees. He or she can either help in a full or just partially or anything in between depending on his or her skills, means, and abilities."
   },

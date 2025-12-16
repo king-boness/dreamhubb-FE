@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Dreamhubb</string>
-    <string name="title_activity_main">Dreamhubb</string>
+    <string name="app_name">dreamhubb</string>
+    <string name="title_activity_main">dreamhubb</string>
     <string name="package_name">com.dreamhubb</string>
     <string name="custom_url_scheme">com.dreamhubb</string>
 </resources>

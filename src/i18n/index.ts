@@ -1,7 +1,7 @@
 import enUS from "./en-US/auth";
-// import sk from "./sk/auth";
+import sk from "./sk";
 
 export default {
-  "en-US": enUS
-  // sk
+  "en-US": enUS,
+  sk: sk
 };

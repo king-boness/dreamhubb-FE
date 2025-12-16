@@ -12,14 +12,17 @@
     >
       <div
         v-for="(img, index) in finalImages"
-        :key="index"
+        :key="`image-${index}-${img}`"
         class="flicking-panel slider-panel"
       >
         <img
           :src="img"
+          :alt="`Image ${index + 1}`"
           class="slider-image"
           loading="lazy"
           @click="emit('image-click', index)"
+          @error="handleImageError(img, $event)"
+          @load="handleImageLoad(img)"
           style="cursor: pointer;"
         />
       </div>
@@ -54,7 +57,14 @@ const emit = defineEmits<{
 // 🛡 Sanitizácia obrázkov
 // --------------------------------------------------
 const finalImages = computed(() => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🖼️ ImageIndexSlider - props.images:", props.images);
+  }
+
   if (!props.images || !Array.isArray(props.images)) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🖼️ ImageIndexSlider - no images, using fallback");
+    }
     return ["/images/Auth/postBackground.png"];
   }
 
@@ -66,6 +76,10 @@ const finalImages = computed(() => {
       img !== "{NULL}" &&
       img.trim() !== ""
   );
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🖼️ ImageIndexSlider - cleaned images:", clean);
+  }
 
   return clean.length > 0 ? clean : ["/images/Auth/postBackground.png"];
 });
@@ -98,9 +112,30 @@ watch(() => props.currentIndex, (newIndex) => {
   }
 }, { flush: "post" });
 
+// Watch for images changes
+watch(() => props.images, (newImages) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🖼️ ImageIndexSlider - images prop changed:", newImages);
+    console.log("🖼️ ImageIndexSlider - finalImages computed:", finalImages.value);
+  }
+}, { immediate: true, deep: true });
+
 // Expose method to get Flicking instance
 const onFlickingReady = (e: any) => {
   flickingInstance = e;
+};
+
+// Handle image load events
+const handleImageLoad = (img: string) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🖼️ Image loaded:", img);
+  }
+};
+
+const handleImageError = (img: string, event: Event) => {
+  if (process.env.NODE_ENV === "development") {
+    console.error("🖼️ Image load error:", img, event);
+  }
 };
 
 // --------------------------------------------------
@@ -125,6 +160,7 @@ const flickingOptions = {
   height: 100%;
   overflow: hidden;
   position: relative;
+  background: #161616; // Ensure consistent background
 }
 
 .slider-panel {

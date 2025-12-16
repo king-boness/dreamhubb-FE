@@ -4,7 +4,7 @@
       <div class="karmaAvailable-stats">
         <div class="karmaDisplay">
           <img src="/icons/KarmaIcon.png" alt="" />
-          <span>{{ formatNumber(post.karma) }}</span>
+          <span>{{ formatNumber(tokenBalance) }}</span>
         </div>
         <span>Available Tokens</span>
       </div>
@@ -40,12 +40,28 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { PriceCards, Post } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
-const post = ref({
-  karma: 200000
-} as Post);
+import { useAuthStore } from "src/stores/auth";
+
+const authStore = useAuthStore();
+
+// Use auth store tokens - must match tokenBalance in DonorMainLayout
+const tokenBalance = computed(() => authStore.user?.tokens ?? 30);
+
+// Fetch user data on mount if not loaded
+onMounted(async () => {
+  if (authStore.isAuthenticated && !authStore.user) {
+    try {
+      await authStore.fetchUser();
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to fetch user data:", error);
+      }
+    }
+  }
+});
 const cards = ref([
   {
     description: "Fist full of",

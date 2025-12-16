@@ -117,11 +117,11 @@
         :class="{ active: activeNav === 'home' }"
       >
         <img
-          :src="navIcons.home.value"
-          alt="Home"
+          :src="navIconHome"
+          :alt="t('home')"
           class="footer-marginClass"
         />
-        <span class="footer-pageName">Home</span>
+        <span class="footer-pageName">{{ t("home") }}</span>
       </q-btn>
       <q-btn
         :ripple="false"
@@ -130,11 +130,11 @@
         :class="{ active: activeNav === 'discover' }"
       >
         <img
-          :src="navIcons.discover.value"
-          alt="Inspirations"
+          :src="navIconDiscover"
+          :alt="t('inspirations')"
           class="footer-marginClass"
         />
-        <span class="footer-pageName">Inspirations</span>
+        <span class="footer-pageName">{{ t("inspirations") }}</span>
       </q-btn>
       <q-btn
         :ripple="false"
@@ -143,12 +143,12 @@
         :class="{ active: activeNav === 'notifications' }"
       >
         <img
-          :src="navIcons.notifications.value"
-          alt="Notifications"
+          :src="navIconNotifications"
+          :alt="t('notifications')"
           class="footer-marginClass"
         />
         <span v-if="notificationCount > 0" class="donor-footer_badge">{{ notificationCount }}</span>
-        <span class="footer-pageName">Notifications</span>
+        <span class="footer-pageName">{{ t("notifications") }}</span>
       </q-btn>
       <q-btn
         :ripple="false"
@@ -156,12 +156,12 @@
         class="button-footer profileIcon"
         :class="{ activeProfile: activeNav === 'profile' }"
       >
-        <img
-          :src="navIcons.profile.value"
-          alt="Profile"
-          class="footer-marginClass"
+        <UserAvatar
+          :image-url="authStore.avatarUrl"
+          :name="authStore.name"
+          size="24px"
         />
-        <span class="footer-pageName profileName">Profile</span>
+        <span class="footer-pageName profileName">{{ t("profile") }}</span>
       </q-btn>
     </div>
   </q-layout>
@@ -171,13 +171,19 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore } from "src/stores/preferences";
+import UserAvatar from "src/components/common/UserAvatar.vue";
+
+const { t } = useI18n();
 
 const $q = useQuasar();
 const authStore = useAuthStore();
+const preferencesStore = usePreferencesStore();
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
@@ -243,33 +249,31 @@ const checkBodyClass = () => {
 };
 
 // Computed for footer icons
-const navIcons = {
-  home: computed(() => activeNav.value === "home" ? "/footer_icons/home_s.svg" : "/footer_icons/home.svg"),
-  discover: computed(() => {
-    // If selected, always use _s version
-    if (activeNav.value === "discover") {
-      return "/footer_icons/compass_s.svg";
-    }
-    // If not selected: light mode uses _lm, dark mode uses normal
-    return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass.svg";
-  }),
-  notifications: computed(() => {
-    // If selected, always use _s version
-    if (activeNav.value === "notifications") {
-      return "/footer_icons/bell_s.svg";
-    }
-    // If not selected: light mode uses _lm, dark mode uses normal
-    return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell.svg";
-  }),
-  profile: computed(() => {
-    // If selected, always use _s version
-    if (activeNav.value === "profile") {
-      return "/footer_icons/profile_s.svg";
-    }
-    // If not selected: light mode uses _lm, dark mode uses normal
-    return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile.svg";
-  })
-};
+const navIconHome = computed(() => activeNav.value === "home" ? "/footer_icons/home_s.svg" : "/footer_icons/home.svg");
+const navIconDiscover = computed(() => {
+  // If selected, always use _s version
+  if (activeNav.value === "discover") {
+    return "/footer_icons/compass_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses normal
+  return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass.svg";
+});
+const navIconNotifications = computed(() => {
+  // If selected, always use _s version
+  if (activeNav.value === "notifications") {
+    return "/footer_icons/bell_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses normal
+  return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell.svg";
+});
+const navIconProfile = computed(() => {
+  // If selected, always use _s version
+  if (activeNav.value === "profile") {
+    return "/footer_icons/profile_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses normal
+  return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile.svg";
+});
 
 // Check if we're on a settings sub-page
 const isSettingsSubPage = computed(() => {
@@ -336,16 +340,11 @@ const handleNavProfile = () => {
 };
 
 const handleLogoClick = async () => {
-  console.log("Donor logo clicked! Switching to Donee mode...");
-  // Add class to body to hide footer
+  preferencesStore.setCurrentSide("donee");
   document.body.classList.add("splash-active");
-  // Show splash screen
   isSwitchingRole.value = true;
-  // Wait a bit for splash to show, then navigate
   await new Promise(resolve => setTimeout(resolve, 500));
-  // Switch to Donee interface (role switch)
   await router.push({ name: "donee-posts" });
-  // Hide splash after navigation
   setTimeout(() => {
     isSwitchingRole.value = false;
     document.body.classList.remove("splash-active");
@@ -612,6 +611,73 @@ onBeforeUnmount(() => {
         border: none !important;
         border-width: 0 !important;
       }
+
+      // Target q-btn__wrapper specifically
+      .q-btn__wrapper {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-width: auto !important;
+        min-height: auto !important;
+        width: auto !important;
+        height: auto !important;
+
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+          background: none !important;
+          background-color: transparent !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          box-shadow: none !important;
+          border: none !important;
+          border-width: 0 !important;
+        }
+      }
+
+      // Target q-btn__content
+      .q-btn__content {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-width: auto !important;
+        min-height: auto !important;
+        width: auto !important;
+        height: auto !important;
+
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+          background: none !important;
+          background-color: transparent !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          box-shadow: none !important;
+          border: none !important;
+          border-width: 0 !important;
+        }
+      }
+
+      // Hide focus helper and ripple
+      .q-focus-helper {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      .q-ripple {
+        display: none !important;
+      }
     }
   }
 
@@ -631,7 +697,7 @@ onBeforeUnmount(() => {
     box-shadow: none !important;
     border: none !important;
     border-width: 0 !important;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease !important;
     outline: none !important;
     min-width: auto !important;
     min-height: auto !important;
@@ -640,6 +706,8 @@ onBeforeUnmount(() => {
     width: auto !important;
     height: auto !important;
     color: inherit !important;
+    cursor: pointer;
+    will-change: transform, opacity;
 
     &::before,
     &::after {
@@ -720,7 +788,13 @@ onBeforeUnmount(() => {
     }
 
     img {
-      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      will-change: opacity, transform;
+    }
+
+    .footer-pageName {
+      transition: opacity 0.25s ease, color 0.25s ease !important;
+      will-change: opacity, color;
     }
 
     &:hover {
@@ -730,12 +804,16 @@ onBeforeUnmount(() => {
       border: none !important;
       border-width: 0 !important;
       outline: none !important;
-      transform: scale(1.08);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+      transform: translateY(-2px) scale(1.05);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
       img {
-        transform: scale(1.05);
+        transform: scale(1.1);
         opacity: 0.9;
+      }
+
+      .footer-pageName {
+        opacity: 0.8;
       }
 
       :deep(.q-btn__wrapper),
@@ -756,11 +834,11 @@ onBeforeUnmount(() => {
       border: none !important;
       border-width: 0 !important;
       outline: none !important;
-      transform: scale(0.96);
-      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transform: translateY(0) scale(0.95);
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
       img {
-        transform: scale(0.98);
+        transform: scale(0.95);
       }
 
       :deep(.q-btn__wrapper),
@@ -812,6 +890,20 @@ onBeforeUnmount(() => {
     outline: none !important;
     width: auto !important;
     height: auto !important;
+    transform: translateY(-1px) scale(1.02);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+    img {
+      transform: scale(1.05);
+      opacity: 1;
+      transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+
+    .footer-pageName {
+      opacity: 1;
+      color: #bd0043;
+      transition: opacity 0.3s ease, color 0.3s ease !important;
+    }
 
     &::before,
     &::after {

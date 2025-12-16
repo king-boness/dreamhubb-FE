@@ -15,19 +15,56 @@
       </q-input>
     </div>
     <div class="confirmationButton-div">
-      <q-btn class="confirmButton" @click="$router.go(-1)">
+      <q-btn class="confirmButton" :loading="saving" @click="handleSave">
         Save changes
       </q-btn>
     </div>
     <div class="pageFooter-div">
-      <q-btn class="cancelButton" @click="$router.go(-1)"> Cancel </q-btn>
+      <q-btn class="cancelButton" :disable="saving" @click="handleCancel">
+        Cancel
+      </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/auth";
 
-const bio = ref("");
+const router = useRouter();
+const $q = useQuasar();
+const authStore = useAuthStore();
+
+const bio = ref(authStore.user?.bio || "");
+const saving = ref(false);
+
+const handleSave = async () => {
+  if (saving.value) return;
+  saving.value = true;
+
+  try {
+    await authStore.updateBio(bio.value);
+    $q.notify({
+      type: "positive",
+      message: "Bio updated",
+      position: "top"
+    });
+    router.back();
+  } catch (error) {
+    $q.notify({
+      type: "negative",
+      message: "Failed to update bio. Please try again.",
+      position: "top"
+    });
+  } finally {
+    saving.value = false;
+  }
+};
+
+const handleCancel = () => {
+  router.back();
+};
 </script>
 <style scoped lang="scss">
 .settingsBio-page {

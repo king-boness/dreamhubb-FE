@@ -110,13 +110,6 @@ export const usePostCreationStore = defineStore("postCreation", {
           throw new Error("Category is required. Please select a category.");
         }
 
-        // TODO: Reálny upload obrázkov
-        // Zatiaľ používame placeholder URL ak nie sú obrázky
-        // V produkcii by sme mali:
-        // 1. Upload obrázkov cez /api/upload alebo FormData
-        // 2. Získať URL-y z response
-        // 3. Poslať ich v payload alebo ako multipart/form-data
-
         const payload: Record<string, unknown> = {
           title: this.title.trim(),
           description: this.description.trim(),
@@ -130,9 +123,11 @@ export const usePostCreationStore = defineStore("postCreation", {
           payload.date_deadline = this.dateDeadline;
         }
 
-        // TODO: Ak máme obrázky, poslať ich ako FormData alebo v payload
-        // Zatiaľ neposielame obrázky - BE ich očakáva ako files v multipart/form-data
-        // Ak máme base64 obrázky, museli by sme ich konvertovať na File objekty
+        // Pridať obrázky (Cloudinary URL-y) ak existujú
+        // Limit na max 5 obrázkov
+        if (this.images && this.images.length > 0) {
+          payload.images = this.images.slice(0, 5);
+        }
 
         if (process.env.NODE_ENV === "development") {
           console.log("🚀 Post creation payload:", payload);

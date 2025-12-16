@@ -40,10 +40,11 @@
         v-else-if="currentStep === 3"
         v-model:continent="filterContinent"
         v-model:country="filterCountry"
-        v-model:city="filterCity"
+        v-model:city="filterCityId"
         :hide-header="true"
         :hide-footer="true"
         :enable-geolocation="false"
+        :emit-city-id="true"
         @next="handleNext"
         @back="handleBack"
       />
@@ -68,14 +69,6 @@
         </button>
       </template>
 
-      <!-- Reset filters button (show if any filters are active) -->
-      <button
-        v-if="hasActiveFilters"
-        class="filters-resetBtn"
-        @click="handleResetFilters"
-      >
-        Reset Filters
-      </button>
     </footer>
   </q-page>
 </template>
@@ -84,6 +77,8 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { usePostsStore } from "src/stores/posts";
+import { usePreferencesStore } from "src/stores/preferences";
+import { api } from "boot/axios";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
@@ -91,6 +86,7 @@ import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
 
 const router = useRouter();
 const postsStore = usePostsStore();
+const preferencesStore = usePreferencesStore();
 
 // Current step (1-3)
 const currentStep = ref(1);
@@ -100,7 +96,7 @@ const filterGoal = ref<"problem" | "dream" | "idea" | null>(postsStore.filters.t
 const filterCategory = ref<string | null>(null);
 const filterContinent = ref("");
 const filterCountry = ref("");
-const filterCity = ref("");
+const filterCityId = ref<number | null>(null); // Changed from filterCity (string) to filterCityId (number)
 
 // getCategoryId je importovaný z categoryMapping.ts
 
@@ -143,6 +139,15 @@ const handleSearchFromStep1 = () => {
       categoryId: null, // Explicitne nastaviť na null, ak nie je vybraná podkategória
       feCategory: null // Explicitne nastaviť na null, ak nie je vybraná podkategória
     });
+    preferencesStore.setLastUsedFeedFilters({
+      postType: filterGoal.value,
+      subcategory: null,
+      location: {
+        continentId: null,
+        countryId: null,
+        cityId: null
+      }
+    });
     // Navigovať späť na posts page
     router.push({ name: "donor-posts" });
   } else {
@@ -169,11 +174,11 @@ const handleBack = (event?: Event) => {
       filterCategory.value = null;
       filterContinent.value = "";
       filterCountry.value = "";
-      filterCity.value = "";
+      filterCityId.value = null;
     } else if (previousStep === 2) {
       filterContinent.value = "";
       filterCountry.value = "";
-      filterCity.value = "";
+      filterCityId.value = null;
     }
   }
 };
@@ -182,21 +187,89 @@ const applyFilters = async () => {
   if (process.env.NODE_ENV === "development") {
     console.log("🔍 Applying filters:", {
       type: filterGoal.value,
-      feCategory: filterCategory.value, // FE category name (traveling, health, etc.)
-      currentStep: currentStep.value
+      feCategory: filterCategory.value,
+      currentStep: currentStep.value,
+      location: {
+        continent: filterContinent.value,
+        country: filterCountry.value,
+        cityId: filterCityId.value
+      }
     });
   }
 
-  // Aktualizovať filtre v store
-  // Použiť fe_category (FE category name) - každá FE kategória má svoj vlastný filter
-  postsStore.setFilters({
-    type: filterGoal.value,
-    categoryId: null, // Už nepoužívame category_id
-    feCategory: filterCategory.value // FE category name (traveling, health, etc.) - povinné
-    // TODO: Location IDs - keď BE podporí, pridať:
-    // continentId: getContinentId(filterContinent.value),
-    // countryId: getCountryId(filterCountry.value),
-    // cityId: getCityId(filterCity.value)
+  // Get country and continent IDs if needed (only if city is not selected)
+  let countryId: number | null = null;
+  let continentId: number | null = null;
+
+  // If city is selected, use it directly (no lookup needed)
+  if (filterCityId.value && filterCityId.value > 0) {
+    postsStore.setFilters({
+      type: filterGoal.value,
+      categoryId: null,
+      feCategory: filterCategory.value,
+      cityId: Number(filterCityId.value),
+      countryId: null,
+      continentId: null
+    });
+  } else if (filterContinent.value && filterCountry.value) {
+    // City is not selected, but country is - get country ID
+    try {
+      const { data } = await api.get("/locations/ids", {
+        params: {
+          continent: filterContinent.value,
+          country: filterCountry.value
+        }
+      });
+
+      if (data.status === "success" && data.location_ids) {
+        countryId = data.location_ids.country_id || data.location_ids.countryId || null;
+        continentId = data.location_ids.continent_id || data.location_ids.continentId || null;
+
+        if (countryId && countryId > 0) {
+          postsStore.setFilters({
+            type: filterGoal.value,
+            categoryId: null,
+            feCategory: filterCategory.value,
+            countryId: Number(countryId),
+            cityId: null,
+            continentId: null
+          });
+        } else if (continentId && continentId > 0) {
+          postsStore.setFilters({
+            type: filterGoal.value,
+            categoryId: null,
+            feCategory: filterCategory.value,
+            continentId: Number(continentId),
+            countryId: null,
+            cityId: null
+          });
+        }
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("❌ Failed to fetch location IDs:", error);
+      }
+    }
+  } else {
+    // No location filters
+    postsStore.setFilters({
+      type: filterGoal.value,
+      categoryId: null,
+      feCategory: filterCategory.value,
+      continentId: null,
+      countryId: null,
+      cityId: null
+    });
+  }
+
+  preferencesStore.setLastUsedFeedFilters({
+    postType: filterGoal.value,
+    subcategory: filterCategory.value,
+    location: {
+      continentId,
+      countryId,
+      cityId: filterCityId.value
+    }
   });
 
   // Navigovať späť na posts page a načítať posty s filtrami
@@ -224,18 +297,6 @@ onMounted(() => {
   currentStep.value = 1;
 });
 
-// Check if any filters are active
-const hasActiveFilters = computed(() => {
-  return !!(
-    postsStore.filters.type ||
-    postsStore.filters.categoryId
-    // TODO: Keď BE podporí location filtre, pridať:
-    // postsStore.filters.continentId ||
-    // postsStore.filters.countryId ||
-    // postsStore.filters.cityId
-  );
-});
-
 // Watch filter changes and update store immediately (for real-time updates)
 watch(filterGoal, (newVal) => {
   postsStore.setFilters({ type: newVal });
@@ -251,25 +312,6 @@ watch(filterGoal, (newVal) => {
 //   postsStore.setFilters({ categoryId });
 // });
 
-// Reset filters handler
-const handleResetFilters = async () => {
-  // Reset store filters
-  postsStore.resetFilters();
-
-  // Reset local filter values
-  filterGoal.value = null;
-  filterCategory.value = null;
-  filterContinent.value = "";
-  filterCountry.value = "";
-  filterCity.value = "";
-  currentStep.value = 1;
-
-  // Načítať posty bez filtrov
-  await postsStore.fetchPosts({ sort: "help" });
-
-  // Navigovať späť na posts page
-  router.push({ name: "donor-posts" });
-};
 </script>
 
 <style lang="scss" scoped>
@@ -418,23 +460,4 @@ const handleResetFilters = async () => {
   }
 }
 
-.filters-resetBtn {
-  width: 100%;
-  height: 48px;
-  border-radius: 9999px;
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.5rem;
-
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.5);
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.05);
-  }
-}
 </style>

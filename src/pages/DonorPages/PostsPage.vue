@@ -33,7 +33,7 @@
           alt=""
           class="donor-filters_icon"
         />
-        <span>filters</span>
+        <span>{{ t("filters") }}</span>
       </button>
     </div>
 
@@ -41,7 +41,7 @@
     <div class="donorPosts-feed">
       <!-- Loading state -->
       <div v-if="loading" class="donorPosts-state">
-        <p>Loading posts...</p>
+        <p>{{ t("loadingPosts") }}</p>
       </div>
 
       <!-- Error state -->
@@ -51,14 +51,14 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
-        <p v-if="hasActiveFilters">No posts match your filters yet.</p>
-        <p v-else>No posts yet.</p>
+        <p v-if="hasActiveFilters">{{ t("noPostsMatchFilters") }}</p>
+        <p v-else>{{ t("noPosts") }}</p>
         <q-btn
           v-if="hasActiveFilters"
           class="donorPosts-resetFiltersBtn"
           @click="handleResetFilters"
         >
-          Reset filters
+          {{ t("resetFilters") }}
         </q-btn>
       </div>
 
@@ -75,17 +75,23 @@
         >
           <!-- Hero image with overlay -->
           <div class="postCard-imageWrapper">
-          <img
-            :src="post.imageUrl"
-            :alt="post.dreamTitle"
-            class="postCard-image"
-          />
+            <PostImagesCarousel
+              :images="post.images"
+              :auto-slide="true"
+              :show-progress="true"
+              :show-arrows="false"
+              :show-dots="false"
+              :alt="post.dreamTitle"
+            />
 
           <!-- Author badge (top left) -->
           <div class="postCard-authorBadge" @click.stop="emitOpenAuthor(post)">
-            <q-avatar size="32px">
-              <img :src="post.authorAvatarUrl" alt="" />
-            </q-avatar>
+        <UserAvatar
+          :image-url="post.authorAvatarUrl"
+          :name="post.authorName"
+          size="32px"
+          @click.stop="goToUserProfile(post.authorId)"
+        />
             <div class="postCard-authorText">
               <div class="postCard-authorName">{{ post.authorName }}</div>
               <div class="postCard-authorBadgeLabel">{{ post.authorBadgeLabel }}</div>
@@ -133,12 +139,23 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, onActivated } from "vue";
-import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { translateCityName, translateCountryName } from "src/utils/cityNames";
+import { useRouter, useRoute } from "vue-router";
 import { usePostsStore } from "src/stores/posts";
+import { usePreferencesStore } from "src/stores/preferences";
 import { getCategoryDisplayName } from "src/data/categoryNames";
+import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
+import { getPostTypeIcon } from "src/utils/postIcons";
+import { getUserAvatarUrl } from "src/utils/avatar";
+import UserAvatar from "src/components/common/UserAvatar.vue";
+
+const { t, locale } = useI18n();
 
 const router = useRouter();
+const route = useRoute();
 const postsStore = usePostsStore();
+const preferencesStore = usePreferencesStore();
 
 // Tab interface
 interface DonorTab {
@@ -147,32 +164,38 @@ interface DonorTab {
   icon: string;
 }
 
-// Tab icons - using existing SVG icons
-const tabHelpIcon = new URL("../../assets/icons/byHelpHeart-icon.svg", import.meta.url).href; // srdiečko (heart) - selected
-const tabHelpIconNs = "/header_icons/hearth_ns.svg"; // hearth_ns.svg - not selected
-const tabPayIcon = new URL("../../assets/icons/byPay-icon.svg", import.meta.url).href; // diamant (diamond) - not selected
-const tabPayIconSelected = "/header_icons/star.svg"; // star.svg - selected
-const tabTopIcon = new URL("../../assets/icons/byTop-icon.svg", import.meta.url).href; // šípka hore (up arrow)
-
-// Filters icon - custom sliders icon
-const filtersIcon = "/header_icons/filters_ns.svg";
-
-// Computed tab icons based on active tab
+// Tab icons - using header_icons with _ns.svg (non-selected) and _s.svg (selected) variants
 const getTabIcon = (tabValue: "help" | "pay" | "top") => {
-  if (tabValue === "help") {
-    return activeTab.value === "help" ? tabHelpIcon : tabHelpIconNs;
-  }
-  if (tabValue === "pay") {
-    return activeTab.value === "pay" ? tabPayIconSelected : tabPayIcon;
-  }
-  return tabTopIcon;
+  const isActive = activeTab.value === tabValue;
+  const iconMap: Record<string, { selected: string; nonSelected: string }> = {
+    help: {
+      selected: "/header_icons/hearth_s.svg",
+      nonSelected: "/header_icons/hearth_ns.svg"
+    },
+    pay: {
+      selected: "/header_icons/star_s.svg",
+      nonSelected: "/header_icons/star_ns.svg"
+    },
+    top: {
+      selected: "/header_icons/top_s.svg",
+      nonSelected: "/header_icons/top_ns.svg"
+    }
+  };
+  const icons = iconMap[tabValue];
+  return icons ? (isActive ? icons.selected : icons.nonSelected) : "/header_icons/hearth_ns.svg";
 };
+
+// Filters icon - use _s.svg when on filters page, _ns.svg otherwise
+const filtersIcon = computed(() => {
+  const isOnFiltersPage = route.name === "donor-filters";
+  return isOnFiltersPage ? "/header_icons/filters_s.svg" : "/header_icons/filters_ns.svg";
+});
 
 // Tabs definition
 const tabs = computed<DonorTab[]>(() => [
-  { value: "help", label: "by help", icon: getTabIcon("help") },
-  { value: "pay", label: "by pay", icon: getTabIcon("pay") },
-  { value: "top", label: "by top", icon: getTabIcon("top") }
+  { value: "help", label: t("byHelp"), icon: getTabIcon("help") },
+  { value: "pay", label: t("byPay"), icon: getTabIcon("pay") },
+  { value: "top", label: t("byTop"), icon: getTabIcon("top") }
 ]);
 
 // Active tab
@@ -218,6 +241,7 @@ onMounted(() => {
   nextTick(() => {
     // Indicator position will be computed automatically via computed property
   });
+  applyInitialFiltersFromPreferences();
   // Fetch initial posts with default "help" sort (filters sa automaticky použijú z store)
   postsStore.fetchPosts({ sort: activeTab.value });
 });
@@ -251,6 +275,7 @@ interface DonorPost {
   backendPostId: number; // ID that exists in BE (e.g., 3)
   tab: "help" | "pay" | "top";
   type: "dream" | "problem" | "idea"; // Post type for icon
+  authorId: number | null;
   authorName: string;
   authorAvatarUrl: string;
   authorBadgeLabel: string;
@@ -263,33 +288,104 @@ interface DonorPost {
   imageUrl: string;
 }
 
-// Get post type icon (dream_mini.svg, problem_mini.svg, idea_mini.svg)
-const getPostTypeIcon = (type: string): string => {
-  const typeMap: Record<string, string> = {
-    dream: "/post_icons/dream_mini.svg",
-    problem: "/post_icons/problem_mini.svg",
-    idea: "/post_icons/idea_mini.svg"
-  };
-  return typeMap[type.toLowerCase()] || "/post_icons/dream_mini.svg";
+// Post type icon function is now imported from utils/postIcons.ts
+
+// Helper function to get initials from name
+const getInitials = (name: string): string => {
+  if (!name || name.trim().length === 0) return "?";
+  const parts = name.trim().split(" ");
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name[0].toUpperCase();
 };
 
 // Map BE data to FE format
 const mapPostData = (post: Record<string, unknown>): DonorPost => {
+  const authorName = (post.author_name || post.user?.name || post.authorName || "Unknown") as string;
+  // Use unified avatar utility function - check multiple possible fields from BE
+  const authorPicture = getUserAvatarUrl(
+    post.user as { profile_picture?: string | null; [key: string]: unknown } | null,
+    {
+      author_picture: (post.author_picture || post.user?.profile_picture || null) as string | null,
+      authorAvatarUrl: (post.authorAvatarUrl || null) as string | null,
+      user: post.user as { profile_picture?: string | null; [key: string]: unknown } | null
+    }
+  ) || "";
+
+  // Get authorId for navigation - BE now sends user_id directly
+  const authorId = (post.user_id || post.author_id || post.user?.id || null) as number | null;
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development") {
+    if (!authorPicture) {
+      console.log("🔍 No avatar found for post:", {
+        post_id: post.id || post.post_id,
+        author_name: authorName,
+        has_user: !!post.user,
+        user_profile_picture: (post.user as { profile_picture?: string | null } | null)?.profile_picture,
+        author_picture: post.author_picture
+      });
+    }
+    if (!authorId) {
+      console.warn("⚠️ No authorId found in feed post:", {
+        post_id: post.id || post.post_id,
+        author_name: authorName,
+        has_author_id: !!post.author_id,
+        has_user_id: !!post.user_id,
+        has_user: !!post.user,
+        user_id: post.user?.id,
+        full_post: post
+      });
+    }
+  }
+
+  const images = post.images as string[] | undefined;
+  const firstImage = images && Array.isArray(images) && images.length > 0 ? images[0] : null;
+
   return {
     id: post.id || post.post_id || 0,
     backendPostId: post.id || post.post_id || 0,
     tab: activeTab.value, // Use current active tab
     type: (post.type || "dream") as "dream" | "problem" | "idea", // Post type for icon
-    authorName: post.author_name || post.user?.name || post.authorName || "Unknown",
-    authorAvatarUrl: post.author_picture || post.user?.profile_picture || post.authorAvatarUrl || "",
+    authorId,
+    authorName,
+    // Use real avatar URL if available, otherwise empty string (template will show initials)
+    authorAvatarUrl: authorPicture || "",
     authorBadgeLabel: post.author_badge_label || post.authorBadgeLabel || "User",
     dreamTitle: post.title || post.dreamTitle || "Untitled",
     categoryLabel: post.fe_category ? getCategoryDisplayName(post.fe_category) : (post.category_name || post.categoryLabel || "General"),
     tokenReward: post.tokens || post.tokenReward || 0,
     previewText: post.description || post.previewText || "",
-    location: post.location || post.location_city || "Unknown",
+    location: (() => {
+      // Build location string from author's location (city, country, continent)
+      const parts = [];
+      if (post.author_city) {
+        const translatedCity = translateCityName(post.author_city, locale.value as string);
+        parts.push(translatedCity);
+      }
+      if (post.author_country) {
+        const translatedCountry = translateCountryName(post.author_country, locale.value as string);
+        parts.push(translatedCountry);
+      }
+      if (post.author_continent && !parts.length) parts.push(post.author_continent);
+      const locationStr = parts.length > 0 ? parts.join(", ") : (post.location || "Unknown");
+      if (process.env.NODE_ENV === "development" && parts.length === 0) {
+        console.log("⚠️ PostsPage: No location data for post:", {
+          post_id: post.post_id || post.id,
+          author_city: post.author_city,
+          author_country: post.author_country,
+          author_continent: post.author_continent,
+          full_post: post
+        });
+      }
+      return locationStr;
+    })(),
     createdAt: post.date_created || post.created_at || post.createdAt || new Date().toISOString(),
-    imageUrl: post.images?.[0] || post.image_url || post.imageUrl || ""
+    // Use real cover image from BE, fallback to default if not available
+    imageUrl: firstImage || post.image_url || post.imageUrl || "/images/Auth/postBackground.png",
+    // Pass images array for carousel
+    images: images && Array.isArray(images) ? images : (firstImage ? [firstImage] : null)
   };
 };
 
@@ -316,7 +412,29 @@ const handleOpenFilters = () => {
 // Reset filters handler
 const handleResetFilters = async () => {
   postsStore.resetFilters();
+  preferencesStore.clearLastUsedFeedFilters();
   await postsStore.fetchPosts({ sort: activeTab.value });
+};
+
+const applyInitialFiltersFromPreferences = () => {
+  const lastUsed = preferencesStore.lastUsedFeedFilters;
+  if (lastUsed) {
+    postsStore.setFilters({
+      type: lastUsed.postType,
+      feCategory: lastUsed.subcategory,
+      continentId: lastUsed.location.continentId,
+      countryId: lastUsed.location.countryId,
+      cityId: lastUsed.location.cityId
+    });
+    return;
+  }
+  postsStore.setFilters({
+    type: preferencesStore.preferredPostType,
+    feCategory: preferencesStore.preferredSubcategory,
+    continentId: preferencesStore.preferredFeedLocation.continentId,
+    countryId: preferencesStore.preferredFeedLocation.countryId,
+    cityId: preferencesStore.preferredFeedLocation.cityId
+  });
 };
 
 // Format date from MM/DD/YYYY to DD/MM/YYYY
@@ -339,9 +457,18 @@ const emitOpenPost = (post: DonorPost) => {
   });
 };
 
+const goToUserProfile = (userId: number | null) => {
+  if (!userId) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("No authorId to navigate");
+    }
+    return;
+  }
+  router.push({ name: "donor-user-profile", params: { userId } });
+};
+
 const emitOpenAuthor = (post: DonorPost) => {
-  console.log("TODO: Open author profile for", post.authorName);
-  // router.push({ name: 'donor-author-profile', params: { username: post.authorName } })
+  goToUserProfile(post.authorId);
 };
 </script>
 
@@ -519,14 +646,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   position: relative;
   height: 240px;
   overflow: hidden;
-  border-radius: 24px 24px 0 0; // Top radius matching detail screen
-}
-
-.postCard-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  border-radius: 1.25rem; // podľa existujúceho dizajnu
 }
 
 .postCard-authorBadge {
@@ -566,6 +686,12 @@ const emitOpenAuthor = (post: DonorPost) => {
   font-size: 0.65rem; // Smaller badge label
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.2;
+}
+
+.postCard-avatarInitials {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
 }
 
 .postCard-titleRow {
@@ -619,42 +745,69 @@ const emitOpenAuthor = (post: DonorPost) => {
   padding: 16px;
   padding-bottom: 18px; // Bottom padding 16-20px
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .postCard-title {
-  margin: 0 0 6px;
+  margin: 0;
+  margin-bottom: 8px;
+  padding: 0;
   font-size: 1.15rem; // Slightly larger, bold
   font-weight: 700;
   color: #fff;
   line-height: 1.3;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .postCard-meta {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  margin-bottom: 10px;
+  margin: 0;
+  margin-bottom: 8px;
+  margin-left: -4px;
+  padding: 0;
+  padding-left: 0;
   font-size: 0.72rem; // Fine-tuned font size
   color: rgba(255, 255, 255, 0.55); // Fine-tuned color
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .postCard-location,
 .postCard-date {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  margin: 0;
+  margin-left: 0;
+  padding: 0;
+  padding-left: 0;
+  vertical-align: baseline;
 
   i {
     font-size: 11px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    display: inline-block;
+    width: auto;
   }
 }
 
 .postCard-preview {
   margin: 0;
+  padding: 0;
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
   text-align: left;
+  width: 100%;
+  box-sizing: border-box;
   display: -webkit-box;
   -webkit-line-clamp: 3; // Max 3 lines
   line-clamp: 3;

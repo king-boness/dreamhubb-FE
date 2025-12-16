@@ -227,7 +227,8 @@ onBeforeUnmount(() => {
 }
 .footer--hidden {
   box-shadow: none;
-  transform: translate3d(0, 110%, 0);
+  // Move the entire footer (including FAB) fully outside the viewport when hidden
+  transform: translate3d(0, 160%, 0);
 }
 
 // Hide footer when splash screen is active
@@ -298,5 +299,80 @@ body:has(.splash-overlay) {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: top;
+}
+
+// Aggressive footer button styling to remove white squares
+.footer {
+  position: fixed !important;
+  bottom: -4px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2000 !important; // Higher z-index to ensure footer is above content
+
+  :deep(.button-footer) {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-width: 0 !important;
+    outline: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      background: none !important;
+      background-color: transparent !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    :deep(.q-btn__wrapper) {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    :deep(.q-btn__content) {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+  }
 }
 </style>

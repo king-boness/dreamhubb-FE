@@ -1,18 +1,18 @@
 <template>
   <div class="settingsAbout-page">
     <div class="settingsAbout-header">
-      <span class="settingsAbout-heading">Terms and Conditions</span>
+      <span class="settingsAbout-heading">{{ t("aboutApp") }}</span>
     </div>
-    <div class="settingsAbout-conditions">
-      <span class="conditionsText"
-        >Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda nam
-        natus id unde vero doloremque officia iure molestiae accusamus
-        quibusdam.</span
-      >
+    <div class="settingsAbout-content">
+      <p class="aboutAppText">{{ t("aboutAppText") }}</p>
     </div>
   </div>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+</script>
 <style scoped lang="scss">
 .settingsAbout-page {
   padding: 0 1.2rem;
@@ -32,10 +32,13 @@
     }
   }
 
-  .settingsAbout-conditions {
-    .conditionsText {
+  .settingsAbout-content {
+    .aboutAppText {
       font-family: inter;
       color: #d0dcd8;
+      white-space: pre-line;
+      line-height: 1.6;
+      font-size: 0.95rem;
     }
   }
 }

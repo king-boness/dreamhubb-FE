@@ -15,13 +15,34 @@ export function formatNumber(num: number): string {
 }
 
 export function maskEmail(input: string): string {
-  if (input.length < 4) {
+  if (!input || input.length === 0) {
+    return "";
+  }
+
+  // If email is too short, return as is
+  if (input.length < 3) {
     return input;
   }
 
-  const asterisks = "*".repeat(4);
-  const replaced = asterisks + input.slice(4);
+  // Check if input contains @ (email format)
+  const atIndex = input.indexOf("@");
 
-  return replaced;
+  if (atIndex === -1) {
+    // Not a valid email format, just show first 3 chars + fixed asterisks
+    return input.slice(0, 3) + "********";
+  }
+
+  // Extract parts before and after @
+  const localPart = input.slice(0, atIndex);
+  const domainPart = input.slice(atIndex + 1);
+
+  // Show first 3 characters of local part
+  const visibleChars = localPart.slice(0, 3);
+
+  // Fixed number of asterisks (doesn't reveal actual length)
+  const asterisks = "********";
+
+  // Return: first 3 chars + fixed asterisks + @ + domain
+  return visibleChars + asterisks + "@" + domainPart;
 }
 </script>

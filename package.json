@@ -1,9 +1,9 @@
 {
   "name": "dreamhubb",
   "version": "0.0.1",
-  "description": "Dreamhubb Application",
-  "productName": "Dreamhubb",
-  "author": "tomigar <tomas.gardlik@gmail.com>",
+  "description": "dreamhubb Application",
+  "productName": "dreamhubb",
+  "author": "mattvieww <matej.kostun@gmail.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",

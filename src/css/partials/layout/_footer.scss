@@ -19,6 +19,13 @@
     opacity: 0 !important;
     pointer-events: none !important;
   }
+
+  // Hide footer when bottom sheet is open
+  body.bottom-sheet-open & {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
   .exploreIcon {
     opacity: 0.4;
   }
@@ -56,11 +63,18 @@
     padding: 0 !important;
     margin: 0 !important;
     background: transparent !important;
+    background-color: transparent !important;
     box-shadow: none !important;
     border: none !important;
+    border-width: 0 !important;
     outline: none !important;
     min-width: auto !important;
     min-height: auto !important;
+    width: auto !important;
+    height: auto !important;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease !important;
+    cursor: pointer;
+    will-change: transform, opacity;
 
     &::before,
     &::after {
@@ -68,16 +82,25 @@
       content: none !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
       background: none !important;
+      background-color: transparent !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
     }
 
     :deep(.q-btn__wrapper) {
       padding: 0 !important;
       min-height: auto !important;
       min-width: auto !important;
+      width: auto !important;
+      height: auto !important;
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
 
       &::before,
       &::after {
@@ -85,25 +108,133 @@
         content: none !important;
         box-shadow: none !important;
         border: none !important;
+        border-width: 0 !important;
         background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
       }
     }
 
-    &:hover,
-    &:active,
-    &:focus {
+    :deep(.q-btn__content) {
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      min-width: auto !important;
+      min-height: auto !important;
+      width: auto !important;
+      height: auto !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    :deep(.q-focus-helper) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    :deep(.q-ripple) {
+      display: none !important;
+    }
+
+    // Smooth image transitions
+    img {
+      transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      will-change: opacity, transform;
+    }
+
+    // Smooth text transitions
+    .footer-pageName {
+      transition: opacity 0.25s ease, color 0.25s ease !important;
+      will-change: opacity, color;
+    }
+
+    &:hover {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+      transform: translateY(-2px) scale(1.05);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+      img {
+        transform: scale(1.1);
+        opacity: 0.9;
+      }
+
+      .footer-pageName {
+        opacity: 0.8;
+      }
+    }
+
+    &:active {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+      transform: translateY(0) scale(0.95);
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+      img {
+        transform: scale(0.95);
+      }
+    }
+
+    &:focus,
+    &:focus-visible {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
       outline: none !important;
     }
 
     &.active,
     &.activeProfile {
       background: transparent !important;
+      background-color: transparent !important;
       box-shadow: none !important;
       border: none !important;
+      border-width: 0 !important;
       outline: none !important;
+      width: auto !important;
+      height: auto !important;
+      transform: translateY(-1px) scale(1.02);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+      img {
+        transform: scale(1.05);
+        opacity: 1;
+        transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      }
+
+      .footer-pageName {
+        opacity: 1;
+        color: #bd0043;
+        transition: opacity 0.3s ease, color 0.3s ease !important;
+      }
 
       &::before,
       &::after {
@@ -111,13 +242,26 @@
         content: none !important;
         box-shadow: none !important;
         border: none !important;
+        border-width: 0 !important;
         background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
       }
 
       :deep(.q-btn__wrapper) {
         background: transparent !important;
+        background-color: transparent !important;
         box-shadow: none !important;
         border: none !important;
+        border-width: 0 !important;
+        outline: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-width: auto !important;
+        min-height: auto !important;
+        width: auto !important;
+        height: auto !important;
 
         &::before,
         &::after {
@@ -125,8 +269,50 @@
           content: none !important;
           box-shadow: none !important;
           border: none !important;
+          border-width: 0 !important;
           background: none !important;
+          background-color: transparent !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
         }
+      }
+
+      :deep(.q-btn__content) {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        outline: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-width: auto !important;
+        min-height: auto !important;
+        width: auto !important;
+        height: auto !important;
+
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+          box-shadow: none !important;
+          border: none !important;
+          border-width: 0 !important;
+          background: none !important;
+          background-color: transparent !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+        }
+      }
+
+      :deep(.q-focus-helper) {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      :deep(.q-ripple) {
+        display: none !important;
       }
     }
   }
@@ -165,4 +351,52 @@
     width: 30rem;
     height: 10rem;
   }
+}
+
+// Global aggressive rules for all footer buttons to remove white squares
+.footer .q-btn,
+.footer .button-footer,
+.footer .q-btn__wrapper,
+.footer .q-btn__content {
+  &::before,
+  &::after {
+    display: none !important;
+    content: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-width: 0 !important;
+    background: none !important;
+    background-color: transparent !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
+
+.footer .q-btn,
+.footer .button-footer {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+}
+
+.footer .q-btn__wrapper,
+.footer .q-btn__content {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+}
+
+.footer .q-focus-helper,
+.footer .q-ripple {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }

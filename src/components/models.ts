@@ -18,11 +18,13 @@ export interface Category{
 }
 
 export interface Post{
+  post_id?: number,
   description: string,
   goalName: string,
   goalImage: string,
   karma: number,
   image: string,
+  images?: string[] | null,
   user: {
     userName: string,
     userPicture: string,
@@ -48,6 +50,14 @@ export interface PostDetail {
   author_id?: number;
   author_name: string;
   author_picture?: string | null;
+  author_city?: string | null;
+  author_country?: string | null;
+  author_continent?: string | null;
+  user_id?: number | null;
+  user?: {
+    profile_picture?: string | null;
+    [key: string]: unknown;
+  } | null;
 
   images: string[];
 }

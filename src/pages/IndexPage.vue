@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md">
-    <h2>Dreamhubb – API Test</h2>
+    <h2>dreamhubb – API Test</h2>
     <p v-if="apiResponse">✅ API odpoveď: {{ apiResponse }}</p>
     <p v-else>🔄 Čakám na odpoveď z API...</p>
   </q-page>

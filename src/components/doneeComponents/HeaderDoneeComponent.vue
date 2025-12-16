@@ -186,6 +186,8 @@
 <script setup lang="ts">
 import { defineProps, ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { usePreferencesStore } from "src/stores/preferences";
+import { usePostsStore } from "src/stores/posts";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 
@@ -212,6 +214,8 @@ const props: Props = defineProps({
 
 const router = useRouter();
 const isSwitchingRole = ref(false);
+const preferencesStore = usePreferencesStore();
+const postsStore = usePostsStore();
 
 // Logo imports
 const logoImageLight = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
@@ -225,19 +229,36 @@ const logoImage = computed(() => {
 });
 
 const handleLogoClick = async () => {
-  console.log("Donee logo clicked! Switching to Donor mode...");
-  // Add class to body to hide footer
+  preferencesStore.setCurrentSide("donor");
+  applyFiltersFromPreferences();
   document.body.classList.add("splash-active");
-  // Show splash screen
   isSwitchingRole.value = true;
-  // Wait a bit for splash to show, then navigate
   await new Promise(resolve => setTimeout(resolve, 500));
-  // Switch to Donor interface (role switch)
   await router.push({ name: "donor-posts" });
-  // Hide splash after navigation
   setTimeout(() => {
     isSwitchingRole.value = false;
     document.body.classList.remove("splash-active");
   }, 300);
+};
+
+const applyFiltersFromPreferences = () => {
+  const lastUsed = preferencesStore.lastUsedFeedFilters;
+  if (lastUsed) {
+    postsStore.setFilters({
+      type: lastUsed.postType,
+      feCategory: lastUsed.subcategory,
+      continentId: lastUsed.location.continentId,
+      countryId: lastUsed.location.countryId,
+      cityId: lastUsed.location.cityId
+    });
+    return;
+  }
+  postsStore.setFilters({
+    type: preferencesStore.preferredPostType,
+    feCategory: preferencesStore.preferredSubcategory,
+    continentId: preferencesStore.preferredFeedLocation.continentId,
+    countryId: preferencesStore.preferredFeedLocation.countryId,
+    cityId: preferencesStore.preferredFeedLocation.cityId
+  });
 };
 </script>

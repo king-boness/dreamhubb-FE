@@ -1,37 +1,57 @@
 <template>
   <div class="settingsLang-page">
     <div class="settingsLang-header">
-      <span class="settingsLang-title">Change Language</span>
+      <span class="settingsLang-title">{{ t("changeLanguage") }}</span>
     </div>
     <div class="settingsLang-selection">
       <div
         class="lang-englishUK langCategory"
         v-for="(lang, i) in languages"
         :key="i"
+        @click="selectLanguage(lang)"
       >
         <div class="lang-preview">
-          <img class="langIcon" :src="lang.icon" alt="" />
-          <span class="langName">{{ lang.title }}</span>
+          <img class="langIcon" :src="lang.flagIcon" alt="" />
+          <span class="langName">{{ lang.name }}</span>
         </div>
-        <q-radio v-model="shape" :val="lang.title" :dark="!isBodyLight" size="lg" />
+        <q-radio
+          v-model="selectedLanguageCode"
+          :val="lang.code"
+          :dark="!isBodyLight"
+          size="lg"
+          @update:model-value="onLanguageChange"
+        />
       </div>
       <div class="confirmationButton-div">
-        <q-btn class="confirmButton" @click="$router.go(-1)">
-          Save changes
+        <q-btn class="confirmButton" @click="saveLanguage">
+          {{ t("saveChanges") }}
         </q-btn>
       </div>
     </div>
     <div class="pageFooter-div">
-      <q-btn class="cancelButton" @click="$router.go(-1)"> Cancel </q-btn>
+      <q-btn class="cancelButton" @click="handleBack"> {{ t("cancel") }} </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { useQuasar } from "quasar";
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { useQuasar, Notify } from "quasar";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const $q = useQuasar();
-const shape = ref("English (UK)");
+const router = useRouter();
+const { locale, t } = useI18n();
+
+const LANGUAGE_STORAGE_KEY = "dreamhubb_language";
+
+interface Language {
+  code: string;
+  name: string;
+  flagIcon: string;
+}
+
+const selectedLanguageCode = ref<string>("en-US");
 
 // Check if light mode is enabled
 const isBodyLight = ref(false);
@@ -51,6 +71,15 @@ onMounted(() => {
     attributes: true,
     attributeFilter: ["class"]
   });
+
+  // Load saved language from localStorage
+  const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (savedLanguage) {
+    selectedLanguageCode.value = savedLanguage;
+  } else {
+    // Fallback to current i18n locale
+    selectedLanguageCode.value = locale.value || "en-US";
+  }
 });
 
 onBeforeUnmount(() => {
@@ -59,190 +88,299 @@ onBeforeUnmount(() => {
   }
 });
 
-const languages = [
+const selectLanguage = (lang: Language) => {
+  selectedLanguageCode.value = lang.code;
+  onLanguageChange();
+};
+
+const onLanguageChange = () => {
+  // Update i18n locale immediately for UI feedback
+  if (selectedLanguageCode.value) {
+    // Map language codes to i18n locale codes
+    const localeMap: Record<string, string> = {
+      sk: "sk",
+      "en-US": "en-US",
+      "en-GB": "en-US" // Use en-US as fallback for en-GB
+    };
+    const i18nLocale = localeMap[selectedLanguageCode.value] || selectedLanguageCode.value;
+    locale.value = i18nLocale;
+  }
+};
+
+const saveLanguage = () => {
+  if (selectedLanguageCode.value) {
+    // Map language codes to i18n locale codes
+    const localeMap: Record<string, string> = {
+      sk: "sk",
+      "en-US": "en-US",
+      "en-GB": "en-US" // Use en-US as fallback for en-GB
+    };
+
+    const i18nLocale = localeMap[selectedLanguageCode.value] || selectedLanguageCode.value;
+
+    // Save to localStorage
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, selectedLanguageCode.value);
+    // Update i18n locale
+    locale.value = i18nLocale;
+
+    Notify.create({
+      type: "positive",
+      message: t("languageSaved"),
+      position: "top",
+      timeout: 2000
+    });
+
+    // Navigate back after a short delay
+    setTimeout(() => {
+      handleBack();
+    }, 500);
+  }
+};
+
+const handleBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    // Fallback navigation
+    const routeName = router.currentRoute.value.name?.toString() || "";
+    if (routeName.startsWith("donee")) {
+      router.push({ name: "donee-settings" });
+    } else {
+      router.push({ name: "donor-settings" });
+    }
+  }
+};
+
+const languages: Language[] = [
   {
-    icon: "/icons/Flags/albania.svg",
-    title: "Albanian"
+    code: "sq",
+    name: "Albanian",
+    flagIcon: "/icons/Flags/albania.svg"
   },
   {
-    icon: "/icons/Flags/arab league.svg",
-    title: "Arabic"
+    code: "ar",
+    name: "Arabic",
+    flagIcon: "/icons/Flags/arab league.svg"
   },
   {
-    icon: "/icons/Flags/armenia.svg",
-    title: "Armenian"
+    code: "hy",
+    name: "Armenian",
+    flagIcon: "/icons/Flags/armenia.svg"
   },
   {
-    icon: "/icons/Flags/azerbaijan.svg",
-    title: "Azerbaijani"
+    code: "az",
+    name: "Azerbaijani",
+    flagIcon: "/icons/Flags/azerbaijan.svg"
   },
   {
-    icon: "/icons/Flags/bangladesh.svg",
-    title: "Bengali"
+    code: "bn",
+    name: "Bengali",
+    flagIcon: "/icons/Flags/bangladesh.svg"
   },
   {
-    icon: "/icons/Flags/bulgaria.svg",
-    title: "Bulgarian"
+    code: "bg",
+    name: "Bulgarian",
+    flagIcon: "/icons/Flags/bulgaria.svg"
   },
   {
-    icon: "/icons/Flags/china.svg",
-    title: "Chinese"
+    code: "zh",
+    name: "Chinese",
+    flagIcon: "/icons/Flags/china.svg"
   },
   {
-    icon: "/icons/Flags/croatia.svg",
-    title: "Croatian"
+    code: "hr",
+    name: "Croatian",
+    flagIcon: "/icons/Flags/croatia.svg"
   },
   {
-    icon: "/icons/Flags/czech republic.svg",
-    title: "Czech"
+    code: "cs",
+    name: "Czech",
+    flagIcon: "/icons/Flags/czech republic.svg"
   },
   {
-    icon: "/icons/Flags/denmark.svg",
-    title: "Danish"
+    code: "da",
+    name: "Danish",
+    flagIcon: "/icons/Flags/denmark.svg"
   },
   {
-    icon: "/icons/Flags/netherlands.svg",
-    title: "Dutch"
+    code: "nl",
+    name: "Dutch",
+    flagIcon: "/icons/Flags/netherlands.svg"
   },
   {
-    icon: "/icons/Flags/estonia.svg",
-    title: "Estonian"
+    code: "et",
+    name: "Estonian",
+    flagIcon: "/icons/Flags/estonia.svg"
   },
   {
-    icon: "/icons/Flags/united kingdom.svg",
-    title: "English (UK)"
+    code: "en-GB",
+    name: "English (UK)",
+    flagIcon: "/icons/Flags/united kingdom.svg"
   },
   {
-    icon: "/icons/Flags/united states.svg",
-    title: "English (US)"
+    code: "en-US",
+    name: "English (US)",
+    flagIcon: "/icons/Flags/united states.svg"
   },
   {
-    icon: "/icons/Flags/finland.svg",
-    title: "Finnish"
+    code: "fi",
+    name: "Finnish",
+    flagIcon: "/icons/Flags/finland.svg"
   },
   {
-    icon: "/icons/Flags/france.svg",
-    title: "French"
+    code: "fr",
+    name: "French",
+    flagIcon: "/icons/Flags/france.svg"
   },
   {
-    icon: "/icons/Flags/georgia.svg",
-    title: "Georgian"
+    code: "ka",
+    name: "Georgian",
+    flagIcon: "/icons/Flags/georgia.svg"
   },
   {
-    icon: "/icons/Flags/germany.svg",
-    title: "German"
+    code: "de",
+    name: "German",
+    flagIcon: "/icons/Flags/germany.svg"
   },
   {
-    icon: "/icons/Flags/greece.svg",
-    title: "Greek"
+    code: "el",
+    name: "Greek",
+    flagIcon: "/icons/Flags/greece.svg"
   },
   {
-    icon: "/icons/Flags/israel.svg",
-    title: "Hebrew"
+    code: "he",
+    name: "Hebrew",
+    flagIcon: "/icons/Flags/israel.svg"
   },
   {
-    icon: "/icons/Flags/hungary.svg",
-    title: "Hungarian"
+    code: "hu",
+    name: "Hungarian",
+    flagIcon: "/icons/Flags/hungary.svg"
   },
   {
-    icon: "/icons/Flags/india.svg",
-    title: "Hindi"
+    code: "hi",
+    name: "Hindi",
+    flagIcon: "/icons/Flags/india.svg"
   },
   {
-    icon: "/icons/Flags/indonesia.svg",
-    title: "Indonesian"
+    code: "id",
+    name: "Indonesian",
+    flagIcon: "/icons/Flags/indonesia.svg"
   },
   {
-    icon: "/icons/Flags/italy.svg",
-    title: "Italian"
+    code: "it",
+    name: "Italian",
+    flagIcon: "/icons/Flags/italy.svg"
   },
   {
-    icon: "/icons/Flags/japan.svg",
-    title: "Japanese"
+    code: "ja",
+    name: "Japanese",
+    flagIcon: "/icons/Flags/japan.svg"
   },
   {
-    icon: "/icons/Flags/kazakhstan.svg",
-    title: "Kazakh"
+    code: "kk",
+    name: "Kazakh",
+    flagIcon: "/icons/Flags/kazakhstan.svg"
   },
   {
-    icon: "/icons/Flags/south korea.svg",
-    title: "Korean"
+    code: "ko",
+    name: "Korean",
+    flagIcon: "/icons/Flags/south korea.svg"
   },
   {
-    icon: "/icons/Flags/laos.svg",
-    title: "Lao"
+    code: "lo",
+    name: "Lao",
+    flagIcon: "/icons/Flags/laos.svg"
   },
   {
-    icon: "/icons/Flags/latvia.svg",
-    title: "Latvian"
+    code: "lv",
+    name: "Latvian",
+    flagIcon: "/icons/Flags/latvia.svg"
   },
   {
-    icon: "/icons/Flags/lithuania.svg",
-    title: "Lithuanian"
+    code: "lt",
+    name: "Lithuanian",
+    flagIcon: "/icons/Flags/lithuania.svg"
   },
   {
-    icon: "/icons/Flags/republic of macedonia.svg",
-    title: "Macedonian"
+    code: "mk",
+    name: "Macedonian",
+    flagIcon: "/icons/Flags/republic of macedonia.svg"
   },
   {
-    icon: "/icons/Flags/nepal.svg",
-    title: "Nepali"
+    code: "ne",
+    name: "Nepali",
+    flagIcon: "/icons/Flags/nepal.svg"
   },
   {
-    icon: "/icons/Flags/norway.svg",
-    title: "Norwegian"
+    code: "no",
+    name: "Norwegian",
+    flagIcon: "/icons/Flags/norway.svg"
   },
   {
-    icon: "/icons/Flags/iran.svg",
-    title: "Persian"
+    code: "fa",
+    name: "Persian",
+    flagIcon: "/icons/Flags/iran.svg"
   },
   {
-    icon: "/icons/Flags/poland.svg",
-    title: "Polish"
+    code: "pl",
+    name: "Polish",
+    flagIcon: "/icons/Flags/poland.svg"
   },
   {
-    icon: "/icons/Flags/portugal.svg",
-    title: "Portuguese"
+    code: "pt",
+    name: "Portuguese",
+    flagIcon: "/icons/Flags/portugal.svg"
   },
   {
-    icon: "/icons/Flags/romania.svg",
-    title: "Romanian"
+    code: "ro",
+    name: "Romanian",
+    flagIcon: "/icons/Flags/romania.svg"
   },
   {
-    icon: "/icons/Flags/russia.svg",
-    title: "Russian"
+    code: "ru",
+    name: "Russian",
+    flagIcon: "/icons/Flags/russia.svg"
   },
   {
-    icon: "/icons/Flags/serbia.svg",
-    title: "Serbian"
+    code: "sr",
+    name: "Serbian",
+    flagIcon: "/icons/Flags/serbia.svg"
   },
   {
-    icon: "/icons/Flags/slovakia.svg",
-    title: "Slovak"
+    code: "sk",
+    name: "Slovak",
+    flagIcon: "/icons/Flags/slovakia.svg"
   },
   {
-    icon: "/icons/Flags/spain.svg",
-    title: "Spanish"
+    code: "es",
+    name: "Spanish",
+    flagIcon: "/icons/Flags/spain.svg"
   },
   {
-    icon: "/icons/Flags/sweden.svg",
-    title: "Swedish"
+    code: "sv",
+    name: "Swedish",
+    flagIcon: "/icons/Flags/sweden.svg"
   },
   {
-    icon: "/icons/Flags/thailand.svg",
-    title: "Thai"
+    code: "th",
+    name: "Thai",
+    flagIcon: "/icons/Flags/thailand.svg"
   },
   {
-    icon: "/icons/Flags/turkey.svg",
-    title: "Turkish"
+    code: "tr",
+    name: "Turkish",
+    flagIcon: "/icons/Flags/turkey.svg"
   },
   {
-    icon: "/icons/Flags/ukraine.svg",
-    title: "Ukrainian"
+    code: "uk",
+    name: "Ukrainian",
+    flagIcon: "/icons/Flags/ukraine.svg"
   },
   {
-    icon: "/icons/Flags/pakistan.svg",
-    title: "Urdu"
+    code: "ur",
+    name: "Urdu",
+    flagIcon: "/icons/Flags/pakistan.svg"
   }
 ];
 </script>
@@ -252,17 +390,18 @@ const languages = [
 
   .settingsLang-header {
     display: flex;
-    width: 24rem;
-    justify-content: start;
-    align-items: start;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
     margin: 1.5rem 0;
-    flex-direction: column;
+    padding: 0;
 
     .settingsLang-title {
       font-size: 1.4rem;
       font-family: poppinsSemiBold;
-
       color: white;
+      text-align: left;
+      width: 100%;
     }
   }
 
@@ -275,6 +414,13 @@ const languages = [
       display: flex;
       align-items: center;
       justify-content: space-between;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 0.5rem;
+      }
 
       .lang-preview {
         display: flex;

@@ -122,6 +122,12 @@ const routes: RouteRecordRaw[] = [
         name: "donor-post-detail"
       },
       {
+        path: "user/:userId",
+        meta: { requiresAuth: true, side: "donor" },
+        component: () => import("src/pages/Common/UserPublicProfilePage.vue"),
+        name: "donor-user-profile"
+      },
+      {
         path: "filters",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/FiltersPage.vue"),
@@ -362,7 +368,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import("src/layouts/Donee/DoneeMainLayout.vue"),
     children: [
       {
-        path: "post",
+        path: "posts",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/PostPage.vue"),
         name: "donee-posts"
@@ -518,6 +524,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/DonatorReviewPage.vue"),
         name: "donee-post-details-review"
+      },
+      {
+        path: "user/:userId",
+        meta: { requiresAuth: true, side: "donee" },
+        component: () => import("src/pages/Common/UserPublicProfilePage.vue"),
+        name: "donee-user-profile"
       },
       {
         path: "postCreation",
