@@ -27,10 +27,54 @@ export default boot(({ app }) => {
   const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
 
   // Map language codes to i18n locale codes
+  // If locale exists in messages, use it; otherwise fallback to en-US
   const localeMap: Record<string, string> = {
     sk: "sk",
     "en-US": "en-US",
-    "en-GB": "en-US" // Use en-US as fallback for en-GB
+    "en-GB": "en-US", // Use en-US as fallback for en-GB
+    es: "es",
+    cs: "cs",
+    da: "da",
+    zh: "zh",
+    ar: "ar",
+    hi: "hi",
+    ru: "ru",
+    ro: "ro",
+    uk: "uk",
+    de: "de",
+    fr: "fr",
+    it: "it",
+    pl: "pl",
+    hu: "hu",
+    ja: "ja",
+    ko: "ko",
+    sq: "sq",
+    hy: "hy",
+    az: "az",
+    bn: "bn",
+    bg: "bg",
+    hr: "hr",
+    et: "et",
+    fi: "fi",
+    ka: "ka",
+    el: "el",
+    he: "he",
+    id: "id",
+    kk: "kk",
+    lo: "lo",
+    lv: "lv",
+    lt: "lt",
+    mk: "mk",
+    ne: "ne",
+    no: "no",
+    fa: "fa",
+    pt: "pt",
+    sr: "sr",
+    sv: "sv",
+    th: "th",
+    tr: "tr",
+    ur: "ur",
+    nl: "nl"
   };
 
   const mappedLocale = savedLanguage ? (localeMap[savedLanguage] || savedLanguage) : "en-US";
