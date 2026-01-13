@@ -87,7 +87,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
-  (e: "image-click"): void;
+  (e: "image-click", index: number): void;
 }>();
 
 // Auto-slide constants and state
@@ -202,7 +202,7 @@ const onTouchEnd = (e: TouchEvent) => {
 };
 
 const handleImageClick = () => {
-  emit("image-click");
+  emit("image-click", currentImageIndex.value);
 };
 
 // Watch for images changes

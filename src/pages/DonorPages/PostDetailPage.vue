@@ -33,117 +33,64 @@
 
   <!-- Post content -->
   <div v-else class="postDetail">
-    <div class="postDetail-inner">
+    <!-- TOP IMAGE - Full-bleed hero (outside postDetail-inner for full width) -->
+    <div class="postDetailBg">
+        <PostHeader
+          :images="post?.images || []"
+          :cover-image="coverImage"
+          :auto-slide="true"
+          :show-progress="true"
+          :show-arrows="true"
+          :show-dots="true"
+          :image-wrapper-style="heroStyle"
+          :image-style="{ cursor: 'pointer' }"
+          :title="displayTitle"
+          :date="displayDate"
+          :location="displayLocation"
+          :views="viewsCount"
+          :category-name="categoryDisplayName"
+          :category-icon="categoryIcon"
+          :is-liked="isLiked"
+          @close="handleClose"
+          @share="handleShare"
+          @like="handleLike"
+          @image-click="openLightbox"
+        />
 
-      <!-- TOP IMAGE -->
-      <div class="postDetailBg">
-        <div class="postDetail-imageWrapper" :style="heroStyle">
-          <PostImagesCarousel
-            :images="post?.images"
-            :auto-slide="true"
-            :show-progress="true"
-            :show-arrows="true"
-            :show-dots="true"
-            alt="Post image"
-            :image-style="{ cursor: 'pointer' }"
-            @image-click="openLightbox"
-          />
-        </div>
-
-        <!-- GRADIENT -->
-        <div class="postDetail-blurContainer"></div>
-
-      <!-- TOP ICONS -->
-        <div class="postDetail-topIcons">
-          <q-btn
-            round
-            flat
-            dense
-            class="iconBtn iconBtn-left"
-            :icon="'img:/assets/icons/post/icon-close.svg'"
-            @click="handleClose"
-          />
-
-          <div class="postDetail-topIconsRight">
+        <!-- COMMENT ICON / BACK BUTTON (bottom right) -->
+        <div class="postDetail-commentWrapper">
+          <!-- Back button when comments are shown -->
+          <transition name="comment-icon-switch" mode="out-in">
             <q-btn
+              v-if="showComments"
+              key="back"
               round
               flat
               dense
-              class="iconBtn"
-              :icon="'img:/assets/icons/post/icon-share.svg'"
-              @click="handleShare"
+              class="postDetail-commentBtn postDetail-commentBtn--back"
+              icon="chevron_left"
+              @click="handleComments"
             />
-            <button
-              class="postDetail-heartBtn"
-              :class="{ 'postDetail-heartBtn--liked': isLiked }"
-              @click.stop="handleLike"
-            >
-              <img
-                :src="isLiked ? '/post_icons/hearth_s.svg' : '/header_icons/hearth_ns.svg'"
-                alt="Like"
-                class="postDetail-heartIcon"
+            <!-- Comment icon when comments are hidden -->
+            <div v-else key="comment" class="postDetail-commentBtn-wrapper">
+              <q-btn
+                round
+                flat
+                dense
+                class="postDetail-commentBtn"
+                :icon="'img:/assets/icons/post/icon-comment.svg'"
+                @click="handleComments"
               />
-            </button>
-          </div>
-        </div>
-
-        <!-- CATEGORY CHIP -->
-        <div class="postDetail-chipRow">
-          <div class="postDetail-categoryPill">
-            <img
-              :src="getPostTypeIcon(post.type)"
-              class="postDetail-categoryIcon"
-              alt=""
-            />
-            <span class="postDetail-categoryText">
-              {{ post.fe_category ? getCategoryDisplayName(post.fe_category) : (post.category_name || "General") }}
-            </span>
-          </div>
-        </div>
-
-        <!-- COMMENT ICON (bottom right) -->
-        <div class="postDetail-commentWrapper">
-          <q-btn
-            round
-            flat
-            dense
-            class="postDetail-commentBtn"
-            :icon="'img:/assets/icons/post/icon-comment.svg'"
-            @click="handleComments"
-          />
-          <span v-if="commentsCount !== null && commentsCount > 0" class="postDetail-commentCount">
-            {{ commentsCount }}
-          </span>
-        </div>
-
-        <!-- TITLE + META OVERLAY -->
-        <div class="postDetail-infoOverlay">
-          <h1 class="postTitleOnImage">{{ displayTitle }}</h1>
-          <div class="postDetail-metaRow">
-            <div class="postDetail-metaItem">
-              <q-icon
-                class="postDetail-metaIcon"
-                :name="'img:/assets/icons/ui/icon-date.svg'"
-              />
-              <span>{{ displayDate }}</span>
+              <span v-if="commentsCount !== null && commentsCount > 0" class="postDetail-commentCount">
+                {{ commentsCount }}
+              </span>
             </div>
-            <div class="postDetail-metaItem">
-              <q-icon
-                class="postDetail-metaIcon"
-                :name="'img:/assets/icons/ui/icon-location.svg'"
-              />
-              <span>{{ displayLocation }}</span>
-            </div>
-            <div class="postDetail-metaItem">
-              <q-icon
-                class="postDetail-metaIcon"
-                :name="'img:/assets/icons/ui/icon-views.svg'"
-              />
-              <span>{{ viewsCount }}</span>
-            </div>
-          </div>
+          </transition>
         </div>
       </div>
+
+    <!-- Rest of content inside postDetail-inner -->
+    <div class="postDetail-inner">
 
       <!-- BODY CONTENT -->
       <div class="postDetailContent">
@@ -151,12 +98,22 @@
         <!-- CTA BUTTON -->
         <div class="postCTA">
           <button
+            v-if="!isAuthor"
             class="primaryCtaBtn"
             :disabled="postsStore.donateLoading"
             @click="openContributeSheet"
           >
             <div class="primaryCtaMain">
               {{ postsStore.donateLoading ? t("processing") : t("contribute") }}
+            </div>
+          </button>
+          <button
+            v-else
+            class="primaryCtaBtn"
+            @click="handleEditPost"
+          >
+            <div class="primaryCtaMain">
+              {{ t("editMyPost") }}
             </div>
           </button>
           <!-- Error message display -->
@@ -173,55 +130,69 @@
           <span class="postDetail-rewardLabel">REWARD: {{ displayTokens }} tokens</span>
         </div>
 
-      <!-- ABOUT DREAM/PROBLEM/IDEA -->
-      <div class="aboutPost">
-        <h2>{{ aboutSectionTitle }}</h2>
-          <p>{{ post.description }}</p>
-      </div>
+        <!-- Comments Section -->
+        <template v-if="showComments">
+          <PostComments
+            v-if="post?.post_id"
+            :post-id="post.post_id"
+            :post-owner-id="postOwnerId"
+            v-model="activeCommentsTab"
+          />
+        </template>
 
-        <!-- ABOUT AUTHOR -->
-        <div class="aboutAuthor">
-        <h2>{{ t("aboutAuthor") }}</h2>
-
-          <div
-            class="authorCard"
-            role="button"
-            tabindex="0"
-            @click.prevent="goToAuthorProfile"
-            @keyup.enter="goToAuthorProfile"
-          >
-            <div class="authorCard-avatarWrapper" @click.prevent="goToAuthorProfile">
-              <UserAvatar
-                :image-url="displayAuthorAvatar"
-                :name="displayAuthorName"
-                size="32px"
-              />
-            </div>
-            <div class="authorInfo" @click.prevent="goToAuthorProfile">
-              <p class="authorName">{{ displayAuthorName }}</p>
-              <p class="authorRole">{{ displayAuthorLocation }}</p>
-            </div>
+        <!-- Original Content (About Dream/Problem/Idea, About Author, Report) -->
+        <template v-else>
+          <!-- ABOUT DREAM/PROBLEM/IDEA -->
+          <div class="aboutPost">
+            <h2>{{ aboutSectionTitle }}</h2>
+            <p>{{ post.description }}</p>
           </div>
 
-          <!-- TODO: Replace with API data from author.bio when BE endpoint is ready -->
-          <p v-if="authorBio" class="authorStory">{{ authorBio }}</p>
-          <p v-else class="authorStory">{{ t("noBioYet") }}</p>
-        </div>
+          <!-- ABOUT AUTHOR -->
+          <div class="aboutAuthor">
+            <h2>{{ t("aboutAuthor") }}</h2>
 
-        <!-- REPORT POST BUTTON (moved to bottom) -->
-        <div class="postDetail-reportSection">
-          <button
-            type="button"
-            class="postDetail-reportBtn"
-            @click="handleReportDream"
-          >
-            <q-icon
-              class="postDetail-reportIcon"
-              :name="'img:/assets/icons/ui/icon-report.svg'"
-            />
-            <span>REPORT A POST</span>
-          </button>
-        </div>
+            <div
+              class="authorCard"
+              role="button"
+              tabindex="0"
+              @click.prevent="goToAuthorProfile"
+              @keyup.enter="goToAuthorProfile"
+            >
+              <div class="authorCard-avatarWrapper" @click.prevent="goToAuthorProfile">
+                <UserAvatar
+                  :image-url="displayAuthorAvatar"
+                  :name="displayAuthorName"
+                  size="32px"
+                />
+              </div>
+              <div class="authorInfo" @click.prevent="goToAuthorProfile">
+                <p class="authorName">{{ displayAuthorName }}</p>
+                <p class="authorRole">{{ displayAuthorLocation }}</p>
+              </div>
+            </div>
+
+            <!-- TODO: Replace with API data from author.bio when BE endpoint is ready -->
+            <p v-if="authorBio" class="authorStory">{{ authorBio }}</p>
+            <p v-else class="authorStory">{{ t("noBioYet") }}</p>
+          </div>
+
+          <!-- REPORT POST BUTTON (moved to bottom) -->
+          <div class="postDetail-reportSection">
+            <button
+              type="button"
+              class="postDetail-reportBtn"
+              @click="handleReportDream"
+            >
+              <img
+                src="/other_icons/report.svg"
+                alt="Report"
+                class="postDetail-reportIcon"
+              />
+              <span>REPORT A POST</span>
+            </button>
+          </div>
+        </template>
 
       </div>
     </div>
@@ -231,7 +202,15 @@
         class="contributeSheet-backdrop"
         @click.self="closeContributeSheet"
       >
-        <div class="contributeSheet">
+        <div
+          class="contributeSheet"
+          :class="{ dragging: contributeIsDragging }"
+          :style="{ transform: `translateY(${contributeDragOffset}px)` }"
+          @touchstart.passive="onContributeTouchStart"
+          @touchmove.passive="onContributeTouchMove"
+          @touchend.passive="onContributeTouchEnd"
+          @mousedown="onContributeMouseDown"
+        >
           <div class="contributeSheet-handle"></div>
           <h2 class="contributeSheet-title">How do you want to contribute?</h2>
 
@@ -244,35 +223,20 @@
           <button
             class="contributeSheet-btn tertiary"
             :disabled="postsStore.donateLoading"
-            @click="onContributeOption('topup')"
+            @click="openTopUpModal"
           >
-            {{ postsStore.donateLoading ? t("processing") : t("topUpTheDream") }}
+            {{ postsStore.donateLoading ? t("processing") : t("topUpThePost") }}
           </button>
         </div>
       </div>
     </transition>
 
-    <!-- Lightbox Modal -->
-    <q-dialog v-model="isLightboxOpen" maximized class="lightbox-dialog">
-      <q-card class="lightbox-card">
-        <q-btn
-          flat
-          round
-          dense
-          icon="close"
-          class="lightbox-close"
-          @click="isLightboxOpen = false"
-        />
-        <div class="lightbox-content">
-          <img
-            v-if="post?.images && post.images.length > 0"
-            :src="post.images[0]"
-            :alt="`Post image`"
-            class="lightbox-image"
-          />
-        </div>
-      </q-card>
-    </q-dialog>
+    <!-- Image Preview Modal -->
+    <ImagePreviewModal
+      v-model="isLightboxOpen"
+      :images="post?.images || []"
+      :initial-index="lightboxInitialIndex"
+    />
 
     <!-- Share Post Sheet -->
     <ShareProfileSheet
@@ -280,8 +244,90 @@
       :profile-url="currentPostUrl"
       :profile-title="sharePostTitle"
       :profile-text="sharePostText"
-      :post-type="post?.type || null"
+      :post-type="(normalizedPost?.category?.slug as 'dream' | 'problem' | 'idea' | null) || null"
     />
+
+    <!-- Top Up Post Modal -->
+    <transition name="sheet-fade">
+      <div
+        v-if="isTopUpModalOpen"
+        class="contributeSheet-backdrop"
+        @click.self="closeTopUpModal"
+      >
+        <div
+          class="contributeSheet topUpModal"
+          :class="{ dragging: topUpIsDragging }"
+          :style="{ transform: `translateY(${topUpDragOffset}px)` }"
+          @touchstart.passive="onTopUpTouchStart"
+          @touchmove.passive="onTopUpTouchMove"
+          @touchend.passive="onTopUpTouchEnd"
+          @mousedown="onTopUpMouseDown"
+        >
+          <div class="contributeSheet-handle"></div>
+          <h2 class="contributeSheet-title">{{ t("topUpThePost") }}</h2>
+
+          <!-- Tokens Input + Slider -->
+          <div class="topUpModal-content">
+            <div class="topUpModal-inputWrapper">
+              <label class="topUpModal-label">{{ t("tokensToAdd") }}</label>
+              <q-input
+                v-model.number="selectedTokens"
+                type="number"
+                :min="1"
+                :max="maxTokens"
+                dark
+                outlined
+                class="topUpModal-input"
+                :error="hasTokenError"
+                :error-message="tokenErrorMessage"
+                @update:model-value="handleTokenInputChange"
+              >
+                <template #append>
+                  <q-icon name="img:/icons/karma-icon.svg" />
+                </template>
+              </q-input>
+            </div>
+
+            <div class="topUpModal-sliderWrapper">
+              <q-slider
+                v-model="selectedTokens"
+                :min="1"
+                :max="maxTokens"
+                :step="1"
+                :disable="maxTokens <= 0"
+                track-color="brand"
+                class="topUpModal-slider"
+                @update:model-value="handleSliderChange"
+              />
+            </div>
+
+            <div class="topUpModal-info">
+              <span class="topUpModal-balance">
+                {{ t("funds") }}: {{ remainingTokens }} tokens
+              </span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="topUpModal-actions">
+            <button
+              class="contributeSheet-btn secondary"
+              @click="closeTopUpModal"
+              :disabled="postsStore.donateLoading"
+            >
+              {{ t("cancel") }}
+            </button>
+            <button
+              class="contributeSheet-btn primary"
+              :disabled="!canDonate || postsStore.donateLoading"
+              @click="handleConfirmDonate"
+            >
+              {{ postsStore.donateLoading ? t("processing") : t("contribute") }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 
 </template>
@@ -289,31 +335,58 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { translateCityName, translateCountryName } from "src/utils/cityNames";
-import { usePostsStore } from "src/stores/posts";
+import { getLocationLabel } from "src/utils/cityNames";
+import { usePostsStore, type PostDetail } from "src/stores/posts";
 import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
 import { useRoute, useRouter } from "vue-router";
 import AppSplash from "src/components/common/AppSplash.vue";
-import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
+import PostHeader from "src/components/post/PostHeader.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
+import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
+import PostComments from "src/components/post/PostComments.vue";
 import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
-import { getCategoryDisplayName } from "src/data/categoryNames";
+import { normalizePost } from "src/utils/normalizePost";
+import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { getPostTypeIcon } from "src/utils/postIcons";
 import { getUserAvatarUrl } from "src/utils/avatar";
+import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import { Notify } from "quasar";
+import { useCommentsStore } from "src/stores/comments";
 
 const { t, locale } = useI18n();
-
-// Post type icon function is now imported from utils/postIcons.ts
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
 
+// Helper computed properties for category display (using normalized post)
+const categoryDisplayName = computed(() => {
+  const norm = normalizedPost.value;
+  if (!norm?.subcategory?.slug) {
+    const translated = t("subcategories.other") || "Other";
+    return formatSubcategoryLabel(translated);
+  }
+  // Use i18n key: subcategories.traveling, subcategories.health, etc.
+  const i18nKey = `subcategories.${norm.subcategory.slug}`;
+  const translated = t(i18nKey);
+  // If translation doesn't exist, return capitalized slug, then apply formatSubcategoryLabel
+  const finalText = translated !== i18nKey ? translated : norm.subcategory.slug.charAt(0).toUpperCase() + norm.subcategory.slug.slice(1);
+  return formatSubcategoryLabel(finalText);
+});
+
+const categoryIcon = computed(() => {
+  const norm = normalizedPost.value;
+  if (!norm?.category?.slug) {
+    return "/post_icons/dream_mini.svg";
+  }
+  return getPostTypeIcon(norm.category.slug);
+});
+
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
+const commentsStore = useCommentsStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -343,8 +416,23 @@ const scrollTarget = ref<ScrollEventTarget | null>(null);
 const cleanupFns: Array<() => void> = [];
 const isContributeSheetOpen = ref(false);
 const isLightboxOpen = ref(false);
+const lightboxInitialIndex = ref(0);
 const isShareSheetOpen = ref(false);
+const isTopUpModalOpen = ref(false);
+const selectedTokens = ref(10);
+const showComments = ref(false);
+const activeCommentsTab = ref<"help" | "accomplish">("help");
 let errorTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+// Swipe-down gesture state for contribute sheet
+const contributeTouchStartY = ref<number | null>(null);
+const contributeDragOffset = ref(0);
+const contributeIsDragging = ref(false);
+
+// Swipe-down gesture state for top up modal
+const topUpTouchStartY = ref<number | null>(null);
+const topUpDragOffset = ref(0);
+const topUpIsDragging = ref(false);
 
 const readScrollPosition = () => {
   // Always use window.scrollY for consistency with Quasar QLayout
@@ -356,7 +444,10 @@ const handleScroll = () => {
   scrollY.value = newScrollY;
   // Debug: log scroll position to verify it's working
   if (newScrollY > 0 && newScrollY % 50 === 0) {
-    console.log("📜 Scroll position:", newScrollY, "| Blur progress:", Math.min(newScrollY / 220, 1).toFixed(2));
+    // Scroll position tracking (debug only in development)
+    if (process.env.NODE_ENV === "development") {
+      console.log("📜 Scroll position:", newScrollY, "| Blur progress:", Math.min(newScrollY / 220, 1).toFixed(2));
+    }
   }
 };
 
@@ -378,7 +469,10 @@ const heroStyle = computed(() => {
 
   // Debug: log computed style when scroll changes significantly
   if (progress > 0 && scrollY.value % 100 === 0) {
-    console.log("🎨 heroStyle computed:", styles, "| progress:", progress.toFixed(2));
+    // Hero style computed (debug only in development)
+    if (process.env.NODE_ENV === "development") {
+      console.log("🎨 heroStyle computed:", styles, "| progress:", progress.toFixed(2));
+    }
   }
 
   return styles;
@@ -386,6 +480,14 @@ const heroStyle = computed(() => {
 
 // Computed properties from store
 const post = computed(() => postsStore.currentPost);
+
+// Normalize post data to ensure category and subcategory objects exist
+const normalizedPost = computed(() => {
+  const p = post.value;
+  if (!p) return null;
+  return normalizePost(p as Parameters<typeof normalizePost>[0]);
+});
+
 const loading = computed(() => postsStore.detailLoading);
 const error = computed(() => postsStore.detailError);
 
@@ -416,10 +518,21 @@ const displayAuthorName = computed(() => {
 
 // Computed property to get author avatar (fallback to default)
 const displayAuthorAvatar = computed(() => {
+  const p = post.value;
+  if (!p) return null;
+  const postData = p as PostDetail & {
+    user?: { profile_picture?: string | null };
+    author_picture?: string | null;
+    authorAvatarUrl?: string | null;
+  };
   // Use unified avatar utility function
   const avatarUrl = getUserAvatarUrl(
-    post.value?.user as { profile_picture?: string | null } | null,
-    post.value as { author_picture?: string | null; authorAvatarUrl?: string | null; user?: { profile_picture?: string | null } } | null
+    postData.user || undefined,
+    {
+      author_picture: postData.author_picture || null,
+      authorAvatarUrl: postData.authorAvatarUrl || null,
+      user: postData.user || undefined
+    }
   );
 
   // Debug logging in development
@@ -427,9 +540,9 @@ const displayAuthorAvatar = computed(() => {
     console.log("🔍 No avatar found for post detail:", {
       post_id: post.value.post_id,
       author_name: post.value.author_name,
-      has_user: !!post.value.user,
-      user_profile_picture: post.value.user?.profile_picture,
-      author_picture: post.value.author_picture
+      has_user: !!postData.user,
+      user_profile_picture: postData.user?.profile_picture,
+      author_picture: postData.author_picture
     });
   }
 
@@ -439,15 +552,18 @@ const displayAuthorAvatar = computed(() => {
 
 const authorId = computed(() => {
   // BE now sends user_id directly in response
-  const id = (post.value?.user_id || post.value?.author_id || post.value?.user?.id || null) as number | null;
+  const p = post.value;
+  if (!p) return null;
+  const postData = p as PostDetail & { user_id?: number; author_id?: number; user?: { id?: number } };
+  const id = (postData.user_id || postData.author_id || postData.user?.id || null) as number | null;
   if (process.env.NODE_ENV === "development" && !id && post.value) {
     console.warn("⚠️ No authorId found in post:", {
       post_id: post.value.post_id,
       author_name: post.value.author_name,
-      has_author_id: !!post.value.author_id,
-      has_user_id: !!post.value.user_id,
-      has_user: !!post.value.user,
-      user_id: post.value.user?.id
+      has_author_id: !!postData.author_id,
+      has_user_id: !!postData.user_id,
+      has_user: !!postData.user,
+      user_id: postData.user?.id
     });
   }
   return id;
@@ -457,37 +573,39 @@ const authorId = computed(() => {
 const displayAuthorLocation = computed(() => {
   const p = post.value;
   if (!p) return "Unknown";
-
-  // Build location string from author's location (city, country, continent)
-  const parts = [];
-  if (p.author_city) parts.push(p.author_city);
-  if (p.author_country) parts.push(p.author_country);
-  if (p.author_continent && !parts.length) parts.push(p.author_continent);
-
-  return parts.length > 0 ? parts.join(", ") : "Unknown";
+  return getLocationLabel(p, locale.value as string) || "Unknown";
 });
 
 const authorBio = computed(() => {
   const p = post.value;
   if (!p) return null;
   // Prefer explicit author_bio from BE, fallback to nested user.bio if present
-  return (p as any).author_bio || (p as any).user?.bio || null;
+  const postWithBio = p as PostDetail & { user?: { bio?: string | null } };
+  return postWithBio.author_bio || postWithBio.user?.bio || null;
 });
 
-// Computed property to get post type (dream/problem/idea)
-const postType = computed(() => {
+// Post owner ID for reply functionality
+const postOwnerId = computed(() => {
   const p = post.value;
-  if (!p) return "dream"; // Default fallback
+  if (!p) return null;
+  const postData = p as PostDetail & { user_id?: number; author_id?: number; user?: { id?: number } };
+  return (postData.user_id || postData.author_id || postData.user?.id || null) as number | null;
+});
 
-  // BE posiela type pole
-  const type = p.type || "dream";
+// Check if current user is the author of the post
+const isAuthor = computed(() => {
+  const p = post.value;
+  if (!p || !authStore.user?.id) return false;
+  const postData = p as PostDetail & { user_id?: number; author_id?: number; user?: { id?: number } };
+  const ownerId = postData.user_id || postData.author_id || postData.user?.id || null;
+  return ownerId === authStore.user.id;
+});
 
-  if (["dream", "problem", "idea"].includes(type)) {
-    return type;
-  }
-
-  // Default to "dream" if type is not valid
-  return "dream";
+// Computed property to get post category (dream/problem/idea) - using new API
+const postType = computed(() => {
+  const norm = normalizedPost.value;
+  if (!norm) return "dream"; // Default fallback
+  return norm.category?.slug || "dream";
 });
 
 // Computed property for "About" section title
@@ -578,6 +696,18 @@ onMounted(async () => {
 
   await nextTick();
 
+  // Check for commentType query parameter (from notification click)
+  const commentType = route.query.commentType as string | undefined;
+  if (commentType === "help" || commentType === "accomplish") {
+    // Set active tab based on query param
+    activeCommentsTab.value = commentType;
+    // Open comments section if post is loaded
+    if (post.value && post.value.post_id) {
+      showComments.value = true;
+      commentsStore.fetchComments(post.value.post_id, true);
+    }
+  }
+
   // Always use window as scroll target for Quasar QLayout compatibility
   scrollTarget.value = window;
   if (process.env.NODE_ENV === "development") {
@@ -609,8 +739,9 @@ onBeforeUnmount(() => {
   });
 });
 
-const openLightbox = () => {
+const openLightbox = (imageIndex?: number) => {
   if (post.value?.images && post.value.images.length > 0) {
+    lightboxInitialIndex.value = imageIndex ?? 0;
     isLightboxOpen.value = true;
   }
 };
@@ -619,44 +750,26 @@ const formattedDate = computed(() => {
   if (!post.value?.date_created) return "";
   const d = new Date(post.value.date_created);
   if (Number.isNaN(d.getTime())) return post.value.date_created;
-  return d.toLocaleDateString("sk-SK", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
+  // Format as DD/MM/YYYY
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
 });
 
 const locationLabel = computed(() => {
   const p = post.value;
   if (!p) return "Unknown";
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("📍 PostDetailPage locationLabel:", {
-      post_id: p.post_id,
-      author_city: p.author_city,
-      author_country: p.author_country,
-      author_continent: p.author_continent,
-      full_post: p
-    });
-  }
-
-  // Build location string from author's location (city, country, continent)
-  const parts = [];
-  if (p.author_city) {
-    const translatedCity = translateCityName(p.author_city, locale.value as string);
-    parts.push(translatedCity);
-  }
-  if (p.author_country) {
-    const translatedCountry = translateCountryName(p.author_country, locale.value as string);
-    parts.push(translatedCountry);
-  }
-  if (p.author_continent && !parts.length) parts.push(p.author_continent);
-
-  return parts.length > 0 ? parts.join(", ") : "Unknown";
+  return getLocationLabel(p, locale.value as string) || "Unknown";
 });
 
 const viewsCount = computed(() => {
   return post.value?.views ?? 0;
+});
+
+const coverImage = computed(() => {
+  const images = post.value?.images || [];
+  return images.length > 0 ? images[0] : null;
 });
 
 const goToAuthorProfile = () => {
@@ -711,6 +824,16 @@ const handleClose = () => {
     return;
   }
   router.push({ name: "donor-posts" });
+};
+
+const handleEditPost = () => {
+  const postId = post.value?.post_id;
+  if (!postId) {
+    console.warn("Cannot edit: missing post id");
+    return;
+  }
+  // Navigate to edit post page
+  router.push({ name: "donee-post-edit", params: { id: String(postId) } });
 };
 
 const handleRetry = async () => {
@@ -798,33 +921,26 @@ const handleReportDream = () => {
   const postId = post.value?.post_id;
   if (!postId) return;
 
-  console.log("TODO: open report dream flow for post", postId);
-  // TODO: neskôr nahradiť reálnym modalom / route
+  router.push({
+    name: "donor-post-report",
+    params: { id: String(postId) }
+  });
 };
 
 const handleComments = () => {
-  const postId = post.value?.post_id ?? (Array.isArray(route.params.id) ? route.params.id[0] : route.params.id);
+  const postId = post.value?.post_id;
   if (!postId) {
     console.warn("Chýba postId, nedá sa otvoriť komentárový thread");
     return;
   }
 
-  const postIdValue: number | string = typeof postId === "string" ? (Number(postId) || postId) : postId;
+  // Toggle comments mode
+  showComments.value = !showComments.value;
 
-  // 1. emit event pre parent (do budúcna, ak budeme riešiť modaly):
-  emit("open-comments-thread", { postId: postIdValue });
-
-  // 2. zároveň pripravíme skeleton pre route na screen
-  // "Dream Detail - Thread - Contribution" (TODO - route sa doplní neskôr)
-  try {
-    router.push({
-      name: "donor-post-comments", // TODO: prispôsobiť skutočnému názvu route, keď bude vytvorená
-      params: { id: String(postIdValue) }
-    });
-  } catch (error) {
-    console.log("Route na komentáre zatiaľ neexistuje - TODO", error);
+  // If opening comments, fetch them (force refresh to get latest)
+  if (showComments.value) {
+    commentsStore.fetchComments(postId, true);
   }
-  // Do implementácie komentárov budú tieto kroky slúžiť ako pripravený skeleton
 };
 
 const openContributeSheet = () => {
@@ -835,6 +951,232 @@ const openContributeSheet = () => {
 
 const closeContributeSheet = () => {
   isContributeSheetOpen.value = false;
+  // Reset drag state
+  contributeDragOffset.value = 0;
+  contributeIsDragging.value = false;
+  contributeTouchStartY.value = null;
+};
+
+// Top Up Modal functions
+const openTopUpModal = () => {
+  // Get user's token balance
+  const userTokens = authStore.user?.tokens ?? 0;
+  // Set default value: min(10, maxTokens)
+  selectedTokens.value = Math.min(10, Math.max(1, userTokens));
+  isTopUpModalOpen.value = true;
+};
+
+const closeTopUpModal = () => {
+  isTopUpModalOpen.value = false;
+  // Reset to default when closing
+  const userTokens = authStore.user?.tokens ?? 0;
+  selectedTokens.value = Math.min(10, Math.max(1, userTokens));
+  // Reset drag state
+  topUpDragOffset.value = 0;
+  topUpIsDragging.value = false;
+  topUpTouchStartY.value = null;
+};
+
+// Swipe-down handlers for contribute sheet
+const onContributeTouchStart = (e: TouchEvent) => {
+  contributeTouchStartY.value = e.touches[0]?.clientY ?? null;
+  contributeIsDragging.value = true;
+};
+
+const onContributeTouchMove = (e: TouchEvent) => {
+  if (contributeTouchStartY.value === null) return;
+  const currentY = e.touches[0]?.clientY ?? contributeTouchStartY.value;
+  const deltaY = currentY - contributeTouchStartY.value;
+  // Only allow downward dragging
+  if (deltaY > 0) {
+    contributeDragOffset.value = deltaY;
+  }
+};
+
+const onContributeTouchEnd = () => {
+  const THRESHOLD = 100; // pixels to trigger close
+  if (contributeDragOffset.value > THRESHOLD) {
+    closeContributeSheet();
+  } else {
+    // Snap back
+    contributeDragOffset.value = 0;
+  }
+  contributeIsDragging.value = false;
+  contributeTouchStartY.value = null;
+};
+
+const onContributeMouseDown = (e: MouseEvent) => {
+  contributeTouchStartY.value = e.clientY;
+  contributeIsDragging.value = true;
+
+  const onMouseMove = (moveEvent: MouseEvent) => {
+    if (contributeTouchStartY.value === null) return;
+    const deltaY = moveEvent.clientY - contributeTouchStartY.value;
+    if (deltaY > 0) {
+      contributeDragOffset.value = deltaY;
+    }
+  };
+
+  const onMouseUp = () => {
+    const THRESHOLD = 100;
+    if (contributeDragOffset.value > THRESHOLD) {
+      closeContributeSheet();
+    } else {
+      contributeDragOffset.value = 0;
+    }
+    contributeIsDragging.value = false;
+    contributeTouchStartY.value = null;
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  };
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+};
+
+// Swipe-down handlers for top up modal
+const onTopUpTouchStart = (e: TouchEvent) => {
+  topUpTouchStartY.value = e.touches[0]?.clientY ?? null;
+  topUpIsDragging.value = true;
+};
+
+const onTopUpTouchMove = (e: TouchEvent) => {
+  if (topUpTouchStartY.value === null) return;
+  const currentY = e.touches[0]?.clientY ?? topUpTouchStartY.value;
+  const deltaY = currentY - topUpTouchStartY.value;
+  if (deltaY > 0) {
+    topUpDragOffset.value = deltaY;
+  }
+};
+
+const onTopUpTouchEnd = () => {
+  const THRESHOLD = 100;
+  if (topUpDragOffset.value > THRESHOLD) {
+    closeTopUpModal();
+  } else {
+    topUpDragOffset.value = 0;
+  }
+  topUpIsDragging.value = false;
+  topUpTouchStartY.value = null;
+};
+
+const onTopUpMouseDown = (e: MouseEvent) => {
+  topUpTouchStartY.value = e.clientY;
+  topUpIsDragging.value = true;
+
+  const onMouseMove = (moveEvent: MouseEvent) => {
+    if (topUpTouchStartY.value === null) return;
+    const deltaY = moveEvent.clientY - topUpTouchStartY.value;
+    if (deltaY > 0) {
+      topUpDragOffset.value = deltaY;
+    }
+  };
+
+  const onMouseUp = () => {
+    const THRESHOLD = 100;
+    if (topUpDragOffset.value > THRESHOLD) {
+      closeTopUpModal();
+    } else {
+      topUpDragOffset.value = 0;
+    }
+    topUpIsDragging.value = false;
+    topUpTouchStartY.value = null;
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  };
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+};
+
+// Computed properties for Top Up Modal
+const userTokensBalance = computed(() => {
+  return authStore.user?.tokens ?? 0;
+});
+
+const maxTokens = computed(() => {
+  return Math.max(0, userTokensBalance.value);
+});
+
+// Remaining tokens after spending (using composable)
+const { remainingTokens } = useRemainingFunds(
+  userTokensBalance,
+  selectedTokens
+);
+
+const hasTokenError = computed(() => {
+  return selectedTokens.value > maxTokens.value || selectedTokens.value < 1;
+});
+
+const tokenErrorMessage = computed(() => {
+  if (selectedTokens.value > maxTokens.value) {
+    return t("youDontHaveEnoughTokens");
+  }
+  if (selectedTokens.value < 1) {
+    return t("pleaseEnterValueBetween", { min: 1, max: maxTokens.value });
+  }
+  return "";
+});
+
+const canDonate = computed(() => {
+  return (
+    selectedTokens.value >= 1 &&
+    selectedTokens.value <= maxTokens.value &&
+    maxTokens.value > 0
+  );
+});
+
+// Handle token input change
+const handleTokenInputChange = (value: number | string | null) => {
+  if (value === null) return;
+  const numValue = typeof value === "string" ? parseInt(value, 10) || 0 : value;
+  if (numValue > maxTokens.value) {
+    selectedTokens.value = maxTokens.value;
+  } else if (numValue < 1) {
+    selectedTokens.value = 1;
+  } else {
+    selectedTokens.value = numValue;
+  }
+};
+
+// Handle slider change
+const handleSliderChange = (value: number | null) => {
+  if (value === null) return;
+  selectedTokens.value = value;
+};
+
+// Handle confirm donate
+const handleConfirmDonate = async () => {
+  const postId = post.value?.post_id;
+  if (!postId || !canDonate.value) {
+    return;
+  }
+
+  try {
+    // Reset error state before donation
+    postsStore.donateError = null;
+    await postsStore.donateToPost(postId, selectedTokens.value);
+
+    // Success notification
+    Notify.create({
+      type: "positive",
+      message: `Successfully donated ${selectedTokens.value} tokens!`,
+      position: "top",
+      timeout: 3000
+    });
+
+    // Close modal
+    closeTopUpModal();
+  } catch (error) {
+    // Error notification (error message is already set in store)
+    const errorMessage = postsStore.donateError || "Failed to process donation. Please try again.";
+    Notify.create({
+      type: "negative",
+      message: errorMessage,
+      position: "top",
+      timeout: 5000
+    });
+  }
 };
 
 const onContributeOption = async (option: ContributeOption | string) => {
@@ -848,20 +1190,36 @@ const onContributeOption = async (option: ContributeOption | string) => {
   const optionType = typeof option === "string" ? option : option.type;
 
   switch (optionType) {
-    case "tokens":
     case "accomplish":
-      emit("open-contribute-tokens", { postId });
+      // Navigate to Accomplish contribution form with contribution_type
+      router.push({
+        name: "donor-help",
+        query: {
+          postId: String(postId),
+          contributionType: "accomplish"
+        }
+      });
       break;
+    case "help":
+      // Navigate to Help contribution form with contribution_type
+      router.push({
+        name: "donor-help",
+        query: {
+          postId: String(postId),
+          contributionType: "help"
+        }
+      });
+      break;
+    case "topup":
+      // Open Top Up modal (handled by openTopUpModal)
+      openTopUpModal();
+      break;
+    case "tokens":
     case "share":
       handleShare();
       break;
     case "mentoring":
-    case "help":
       emit("open-contribute-mentoring", { postId });
-      break;
-    case "topup":
-      // Handle token donation
-      await handleDonateTokens(postId);
       break;
     default:
       console.log("TODO: ďalšie typy contribute option", option);
@@ -869,40 +1227,6 @@ const onContributeOption = async (option: ContributeOption | string) => {
   }
 
   closeContributeSheet();
-};
-
-// Handle token donation
-const handleDonateTokens = async (postId: number) => {
-  if (!post.value) {
-    return;
-  }
-
-  // For now, use a simple fixed amount (e.g., 10 tokens)
-  // TODO: In the future, this could open a modal to select amount
-  const tokensToDonate = 10;
-
-  try {
-    // Reset error state before donation
-    postsStore.donateError = null;
-    await postsStore.donateToPost(postId, tokensToDonate);
-
-    // Success notification
-    Notify.create({
-      type: "positive",
-      message: `Successfully donated ${tokensToDonate} tokens!`,
-      position: "top",
-      timeout: 3000
-    });
-  } catch (error) {
-    // Error notification (error message is already set in store)
-    const errorMessage = postsStore.donateError || "Failed to process donation. Please try again.";
-    Notify.create({
-      type: "negative",
-      message: errorMessage,
-      position: "top",
-      timeout: 5000
-    });
-  }
 };
 
 watch(

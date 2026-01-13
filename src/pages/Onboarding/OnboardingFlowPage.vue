@@ -231,30 +231,56 @@ const handleFinish = async () => {
 
   // Apply initial feed filters for donor side
   const applyInitialFeedFilters = () => {
-    postsStore.filters.type = onboardingStore.goalType || null;
-    postsStore.filters.feCategory = onboardingStore.category || null;
-    // Apply location filters: if city is selected, use city; otherwise use country; otherwise use continent
+    // Determine location filters: if city is selected, use city; otherwise use country; otherwise use continent
+    let locationFilters: {
+      continentId: number | null;
+      countryId: number | null;
+      cityId: number | null;
+    };
+
     if (onboardingStore.feedCityId) {
       // City is selected - filter by city
-      postsStore.filters.cityId = onboardingStore.feedCityId;
-      postsStore.filters.countryId = null;
-      postsStore.filters.continentId = null;
+      locationFilters = {
+        continentId: null,
+        countryId: null,
+        cityId: onboardingStore.feedCityId
+      };
     } else if (onboardingStore.feedCountryId) {
       // Country is selected but no city - filter by country
-      postsStore.filters.countryId = onboardingStore.feedCountryId;
-      postsStore.filters.cityId = null;
-      postsStore.filters.continentId = null;
+      locationFilters = {
+        continentId: null,
+        countryId: onboardingStore.feedCountryId,
+        cityId: null
+      };
     } else if (onboardingStore.feedContinentId) {
       // Only continent is selected - filter by continent
-      postsStore.filters.continentId = onboardingStore.feedContinentId;
-      postsStore.filters.countryId = null;
-      postsStore.filters.cityId = null;
+      locationFilters = {
+        continentId: onboardingStore.feedContinentId,
+        countryId: null,
+        cityId: null
+      };
     } else {
       // No location filters
-      postsStore.filters.continentId = null;
-      postsStore.filters.countryId = null;
-      postsStore.filters.cityId = null;
+      locationFilters = {
+        continentId: null,
+        countryId: null,
+        cityId: null
+      };
     }
+
+    // Apply filters using setFilters method
+    postsStore.setFilters({
+      type: onboardingStore.goalType || null,
+      feCategory: onboardingStore.category || null,
+      ...locationFilters
+    });
+
+    // Save to lastUsedFeedFilters so PostsPage will use them
+    preferencesStore.setLastUsedFeedFilters({
+      postType: onboardingStore.goalType || null,
+      subcategory: onboardingStore.category || null,
+      location: locationFilters
+    });
   };
 
   if (initialSide === "donee") {

@@ -1,23 +1,11 @@
 // src/stores/posts.ts
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { normalizePost, type NormalizedPost } from "src/utils/normalizePost";
+import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
 
-// Type for post detail (matches BE response structure)
-export type PostDetail = {
-  post_id: number;
-  title: string;
-  description: string;
-  date_created: string;
-  date_deadline: string | null;
-  tokens: number;
-  views: number;
-  type: string | null; // dream/problem/idea
-  fe_category: string | null; // FE category name (traveling, health, etc.)
-  category_name: string; // BE category name (pre kompatibilitu)
-  author_name: string;
-  author_bio?: string | null;
-  images: string[];
-};
+// Type for post detail - using normalized format
+export type PostDetail = NormalizedPost;
 
 export const usePostsStore = defineStore("posts", {
   state: () => ({
@@ -47,11 +35,10 @@ export const usePostsStore = defineStore("posts", {
     recentlyAccomplishedDreams: [] as Record<string, unknown>[],
     recentlyAccomplishedLoading: false,
     recentlyAccomplishedError: null as string | null,
-    // Filters state
+    // Filters state - using new API (category/subcategory slugs)
     filters: {
-      type: null as "dream" | "problem" | "idea" | null,
-      categoryId: null as number | null, // BE category_id (fallback)
-      feCategory: null as string | null, // FE category name (traveling, health, etc.) - preferované
+      categorySlug: null as CategorySlug | null,
+      subcategorySlug: null as SubcategorySlug | null,
       continentId: null as number | null,
       countryId: null as number | null,
       cityId: null as number | null
@@ -59,25 +46,34 @@ export const usePostsStore = defineStore("posts", {
   }),
 
   actions: {
-    // Nastavenie filtrov
+    // Nastavenie filtrov - using new API (category/subcategory slugs)
     setFilters(partial: Partial<typeof this.filters>) {
       // Explicitne nastaviť hodnoty - ak je null, nastaviť na null (nie zachovať starú hodnotu)
-      this.filters = {
-        type: partial.type !== undefined ? partial.type : this.filters.type,
-        categoryId: partial.categoryId !== undefined ? partial.categoryId : this.filters.categoryId,
-        feCategory: partial.feCategory !== undefined ? partial.feCategory : this.filters.feCategory,
-        continentId: partial.continentId !== undefined ? partial.continentId : this.filters.continentId,
-        countryId: partial.countryId !== undefined ? partial.countryId : this.filters.countryId,
-        cityId: partial.cityId !== undefined ? partial.cityId : this.filters.cityId
-      };
+      // If categorySlug changes, reset subcategorySlug
+      if (partial.categorySlug !== undefined && partial.categorySlug !== this.filters.categorySlug) {
+        this.filters = {
+          categorySlug: partial.categorySlug,
+          subcategorySlug: null, // Reset subcategory when category changes
+          continentId: partial.continentId !== undefined ? partial.continentId : this.filters.continentId,
+          countryId: partial.countryId !== undefined ? partial.countryId : this.filters.countryId,
+          cityId: partial.cityId !== undefined ? partial.cityId : this.filters.cityId
+        };
+      } else {
+        this.filters = {
+          categorySlug: partial.categorySlug !== undefined ? partial.categorySlug : this.filters.categorySlug,
+          subcategorySlug: partial.subcategorySlug !== undefined ? partial.subcategorySlug : this.filters.subcategorySlug,
+          continentId: partial.continentId !== undefined ? partial.continentId : this.filters.continentId,
+          countryId: partial.countryId !== undefined ? partial.countryId : this.filters.countryId,
+          cityId: partial.cityId !== undefined ? partial.cityId : this.filters.cityId
+        };
+      }
     },
 
     // Reset filtrov
     resetFilters() {
       this.filters = {
-        type: null,
-        categoryId: null,
-        feCategory: null,
+        categorySlug: null,
+        subcategorySlug: null,
         continentId: null,
         countryId: null,
         cityId: null
@@ -97,20 +93,14 @@ export const usePostsStore = defineStore("posts", {
         // Pridať sort parameter (ak je v params)
         // sort už funguje v FE, BE ho zatiaľ ignoruje, ale FE logika je pripravená
 
-        // Pridať type filter (ak je nastavený a nie je null)
-        if (this.filters.type !== null && this.filters.type !== undefined) {
-          queryParams.type = this.filters.type;
+        // Pridať category filter (ak je nastavený a nie je null) - using new API
+        if (this.filters.categorySlug !== null && this.filters.categorySlug !== undefined) {
+          queryParams.category = this.filters.categorySlug;
         }
 
-        // Pridať fe_category filter (FE category name - traveling, health, etc.)
-        // Toto je presnejšie ako category_id, pretože viacero FE kategórií sa mapuje na rovnaké BE category_id
-        // fe_category sa nastaví v FiltersPage pri aplikovaní filtrov
-        if (this.filters.feCategory) {
-          queryParams.fe_category = this.filters.feCategory;
-        } else if (this.filters.categoryId !== null && this.filters.categoryId !== undefined) {
-          // Fallback: Pridať category_id filter (ak fe_category nie je nastavené)
-          // Zabezpečiť, že category_id je číslo
-          queryParams.category_id = Number(this.filters.categoryId);
+        // Pridať subcategory filter (ak je nastavený a nie je null) - using new API
+        if (this.filters.subcategorySlug !== null && this.filters.subcategorySlug !== undefined) {
+          queryParams.subcategory = this.filters.subcategorySlug;
         }
 
         // Location filtre (ids) - priority: city > country > continent
@@ -164,21 +154,13 @@ export const usePostsStore = defineStore("posts", {
         if (process.env.NODE_ENV === "development") {
           console.log("📦 Posts received from BE:", this.posts.length, "posts");
           if (this.posts.length > 0) {
-            const firstPost = this.posts[0];
+            const firstPost = this.posts[0] as NormalizedPost;
             console.log("📦 First post details:", {
-              post_id: firstPost.post_id || firstPost.id,
+              post_id: firstPost.post_id,
               title: firstPost.title,
-              type: firstPost.type,
-              category_id: firstPost.category_id,
-              category_name: firstPost.category_name,
-              author_name: firstPost.author_name,
-              has_user: !!firstPost.user,
-              user_profile_picture: firstPost.user?.profile_picture,
-              author_picture: firstPost.author_picture,
-              author_city: firstPost.author_city,
-              author_country: firstPost.author_country,
-              author_continent: firstPost.author_continent,
-              full_user_object: firstPost.user
+              category: firstPost.category,
+              subcategory: firstPost.subcategory,
+              author_name: firstPost.author_name
             });
           }
         }
@@ -201,71 +183,96 @@ export const usePostsStore = defineStore("posts", {
       this.currentPost = post;
     },
 
+    // Helper: Update post in all relevant cache arrays
+    // This ensures that after an update, the post is updated everywhere (detail, feed lists, my-posts, etc.)
+    upsertPostEverywhere(normalizedPost: NormalizedPost) {
+      const postId = normalizedPost.post_id;
+
+      // Update in main posts array (feed)
+      const postIndex = this.posts.findIndex(
+        (p) => (p.post_id || p.id) === postId
+      );
+      if (postIndex !== -1) {
+        this.posts[postIndex] = normalizedPost;
+      } else {
+        this.posts.push(normalizedPost);
+      }
+
+      // Update in myDreams if exists
+      const myDreamsIndex = this.myDreams.findIndex(
+        (p) => (p.post_id || p.id) === postId
+      );
+      if (myDreamsIndex !== -1) {
+        this.myDreams[myDreamsIndex] = normalizedPost;
+      }
+
+      // Update in myProblems if exists
+      const myProblemsIndex = this.myProblems.findIndex(
+        (p) => (p.post_id || p.id) === postId
+      );
+      if (myProblemsIndex !== -1) {
+        this.myProblems[myProblemsIndex] = normalizedPost;
+      }
+
+      // Update in myIdeas if exists
+      const myIdeasIndex = this.myIdeas.findIndex(
+        (p) => (p.post_id || p.id) === postId
+      );
+      if (myIdeasIndex !== -1) {
+        this.myIdeas[myIdeasIndex] = normalizedPost;
+      }
+
+      // Update in recentlyAccomplishedDreams if exists
+      const recentlyIndex = this.recentlyAccomplishedDreams.findIndex(
+        (p) => (p.post_id || p.id) === postId
+      );
+      if (recentlyIndex !== -1) {
+        this.recentlyAccomplishedDreams[recentlyIndex] = normalizedPost;
+      }
+
+      // Update currentPost if it's the same post
+      if (this.currentPost && (this.currentPost.post_id || this.currentPost.id) === postId) {
+        this.currentPost = normalizedPost;
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("📦 [upsertPostEverywhere] Updated post in all caches:", postId);
+      }
+    },
+
     // Načítanie detailu postu podľa ID
-    async fetchPostById(id: number) {
+    async fetchPostById(id: number, options?: { force?: boolean }) {
       this.detailLoading = true;
       this.detailError = null;
 
       try {
-        // Najprv skús nájsť post v už načítanom zozname (cache)
-        const cachedPost = this.posts.find(
-          (p) => (p.post_id || p.id) === id
-        );
+        // Ak force=true, vždy refetch z BE (napr. po update)
+        const forceRefetch = options?.force === true;
 
-        if (cachedPost) {
-          // Mapovať cached post na PostDetail typ
-          const mappedPost: PostDetail = {
-            post_id: (cachedPost.post_id || cachedPost.id) as number,
-            title: (cachedPost.title || "") as string,
-            description: (cachedPost.description || "") as string,
-            date_created: (cachedPost.date_created || cachedPost.created_at || "") as string,
-            date_deadline: (cachedPost.date_deadline || null) as string | null,
-            tokens: (cachedPost.tokens || 0) as number,
-            views: (cachedPost.views || 0) as number,
-            type: (cachedPost.type || "dream") as string | null,
-            fe_category: (cachedPost.fe_category || null) as string | null,
-            category_name: (cachedPost.category_name || "") as string,
-            // BE now sends user_id directly in response - map from cache too
-            author_id: (cachedPost.user_id || cachedPost.author_id || cachedPost.user?.id || null) as number | null,
-            user_id: (cachedPost.user_id || null) as number | null,
-            author_name: (cachedPost.author_name || "") as string,
-            author_picture: (cachedPost.author_picture || cachedPost.user?.profile_picture || null) as string | null,
-            user: (cachedPost.user || null) as { profile_picture?: string | null; [key: string]: unknown } | null,
-            images: Array.isArray(cachedPost.images)
-              ? (cachedPost.images as string[])
-              : [],
-            // Add author location data from cache
-            author_city: (cachedPost.author_city || null) as string | null,
-            author_country: (cachedPost.author_country || null) as string | null,
-            author_continent: (cachedPost.author_continent || null) as string | null,
-            author_bio: (cachedPost.author_bio || null) as string | null
-          };
-          this.currentPost = mappedPost;
+        if (!forceRefetch) {
+          // Najprv skús nájsť post v už načítanom zozname (cache)
+          const cachedPost = this.posts.find(
+            (p) => (p.post_id || p.id) === id
+          );
 
-          // Pridať minimálne oneskorenie, aby sa splash screen stihol zobraziť
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          this.detailLoading = false;
+          if (cachedPost) {
+            // Normalize cached post using normalizePost() - handles legacy and new formats
+            this.currentPost = normalizePost(cachedPost);
 
-          if (process.env.NODE_ENV === "development") {
-            console.log("📦 Post loaded from cache:", id);
-            console.log("📦 Cached post mapping:", {
-              post_id: mappedPost.post_id,
-              author_id: mappedPost.author_id,
-              user_id: mappedPost.user_id,
-              author_name: mappedPost.author_name,
-              raw_cachedPost: {
-                user_id: cachedPost.user_id,
-                author_id: cachedPost.author_id,
-                user: cachedPost.user
-              }
-            });
+            // Pridať minimálne oneskorenie, aby sa splash screen stihol zobraziť
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            this.detailLoading = false;
+
+            if (process.env.NODE_ENV === "development") {
+              console.log("📦 Post loaded from cache:", id);
+            }
+            return;
           }
-          return;
         }
 
-        // Ak nie je v cache, načítaj z BE
+        // Ak nie je v cache alebo force=true, načítaj z BE
         if (process.env.NODE_ENV === "development") {
-          console.log("📦 Fetching post detail from BE:", id);
+          console.log("📦 Fetching post detail from BE:", id, forceRefetch ? "(force)" : "");
         }
 
         const { data } = await api.get(`/posts/${id}`);
@@ -277,44 +284,22 @@ export const usePostsStore = defineStore("posts", {
           throw new Error("Post not found");
         }
 
-        // Normalize images field (BE môže vrátiť JSON string alebo array)
-        let images: string[] = [];
-        if (Array.isArray(postData.images)) {
-          images = postData.images;
-        } else if (typeof postData.images === "string") {
-          try {
-            const decoded = JSON.parse(postData.images);
-            images = Array.isArray(decoded) ? decoded : [];
-          } catch {
-            images = [];
-          }
-        }
+        // Normalize post data using normalizePost() - handles legacy and new formats
+        const normalizedPost = normalizePost(postData);
+        this.currentPost = normalizedPost;
 
-        this.currentPost = {
-          post_id: postData.post_id || postData.id,
-          title: postData.title || "",
-          description: postData.description || "",
-          date_created: postData.date_created || postData.created_at || "",
-          date_deadline: postData.date_deadline || null,
-          tokens: postData.tokens || 0,
-          views: postData.views || 0,
-          type: postData.type || "dream",
-          fe_category: postData.fe_category || null,
-          category_name: postData.category_name || "",
-          // BE now sends user_id directly in response
-          author_id: postData.user_id || postData.author_id || postData.user?.id || null,
-          user_id: postData.user_id || null, // Store user_id separately for easier access
-          author_name: postData.author_name || "",
-          images,
-          // Add user/author data for avatar - BE now sends author_picture directly
-          user: postData.user || null,
-          author_picture: postData.author_picture || postData.user?.profile_picture || null,
-          // Add author location data
-          author_city: postData.author_city || null,
-          author_country: postData.author_country || null,
-          author_continent: postData.author_continent || null,
-          author_bio: postData.author_bio || null
-        };
+        // IMPORTANT: Update cache (posts array) with fresh data
+        // This ensures that subsequent calls to fetchPostById will return updated data
+        const postIndex = this.posts.findIndex(
+          (p) => (p.post_id || p.id) === id
+        );
+        if (postIndex !== -1) {
+          // Update existing post in cache
+          this.posts[postIndex] = normalizedPost;
+        } else {
+          // Add to cache if not present
+          this.posts.push(normalizedPost);
+        }
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 Post detail fetched:", {
@@ -382,10 +367,25 @@ export const usePostsStore = defineStore("posts", {
         }
 
         // ✅ Update user tokens in auth store if BE returns updated user tokens
+        const { useAuthStore } = await import("src/stores/auth");
+        const authStore = useAuthStore();
+
         if (data.user?.tokens !== undefined) {
-          const { useAuthStore } = await import("src/stores/auth");
-          const authStore = useAuthStore();
           authStore.updateTokens(data.user.tokens);
+          if (process.env.NODE_ENV === "development") {
+            console.log("💰 Updated user tokens from response:", data.user.tokens);
+          }
+        } else {
+          // If BE doesn't return tokens, refresh from API
+          // This ensures UI always shows correct balance
+          try {
+            await authStore.refreshTokenBalance();
+          } catch (error) {
+            // Don't block UX if refresh fails
+            if (process.env.NODE_ENV === "development") {
+              console.warn("⚠️ Failed to refresh token balance after contribute:", error);
+            }
+          }
         }
 
         return data;
@@ -439,9 +439,9 @@ export const usePostsStore = defineStore("posts", {
       try {
         const queryParams: Record<string, unknown> = { ...params };
 
-        // Filter by type if specified (default to 'dream' for "My Dreams")
-        if (!queryParams.type) {
-          queryParams.type = "dream";
+        // Filter by category if specified (default to 'dream' for "My Dreams") - using new API
+        if (!queryParams.category) {
+          queryParams.category = "dream";
         }
 
         if (process.env.NODE_ENV === "development") {
@@ -450,8 +450,11 @@ export const usePostsStore = defineStore("posts", {
 
         const { data } = await api.get("/my-posts", { params: queryParams });
 
-        // Robustný fallback pre rôzne BE štruktúry
-        this.myDreams = data.data || data.posts || data || [];
+        // Normalize posts from API - using new API format
+        const rawPosts = data.data || data.posts || data || [];
+        this.myDreams = Array.isArray(rawPosts)
+          ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
+          : [];
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 My dreams received from BE:", this.myDreams.length, "posts");
@@ -466,7 +469,7 @@ export const usePostsStore = defineStore("posts", {
       }
     },
 
-    // 🟣 Fetch my problems (posts of logged-in user with type=problem)
+    // 🟣 Fetch my problems (posts of logged-in user with category=problem)
     async fetchMyProblems(params: Record<string, unknown> = {}) {
       this.myProblemsLoading = true;
       this.myProblemsError = null;
@@ -474,9 +477,9 @@ export const usePostsStore = defineStore("posts", {
       try {
         const queryParams: Record<string, unknown> = { ...params };
 
-        // Filter by type if specified (default to 'problem' for "My Problems")
-        if (!queryParams.type) {
-          queryParams.type = "problem";
+        // Filter by category slug (default to 'problem' for "My Problems") - using new API
+        if (!queryParams.category) {
+          queryParams.category = "problem";
         }
 
         if (process.env.NODE_ENV === "development") {
@@ -485,8 +488,11 @@ export const usePostsStore = defineStore("posts", {
 
         const { data } = await api.get("/my-posts", { params: queryParams });
 
-        // Robustný fallback pre rôzne BE štruktúry
-        this.myProblems = data.data || data.posts || data || [];
+        // Normalize posts from API
+        const rawPosts = data.data || data.posts || data || [];
+        this.myProblems = Array.isArray(rawPosts)
+          ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
+          : [];
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 My problems received from BE:", this.myProblems.length, "posts");
@@ -501,7 +507,7 @@ export const usePostsStore = defineStore("posts", {
       }
     },
 
-    // 🟣 Fetch my ideas (posts of logged-in user with type=idea)
+    // 🟣 Fetch my ideas (posts of logged-in user with category=idea)
     async fetchMyIdeas(params: Record<string, unknown> = {}) {
       this.myIdeasLoading = true;
       this.myIdeasError = null;
@@ -509,9 +515,9 @@ export const usePostsStore = defineStore("posts", {
       try {
         const queryParams: Record<string, unknown> = { ...params };
 
-        // Filter by type if specified (default to 'idea' for "My Ideas")
-        if (!queryParams.type) {
-          queryParams.type = "idea";
+        // Filter by category slug (default to 'idea' for "My Ideas") - using new API
+        if (!queryParams.category) {
+          queryParams.category = "idea";
         }
 
         if (process.env.NODE_ENV === "development") {
@@ -520,8 +526,11 @@ export const usePostsStore = defineStore("posts", {
 
         const { data } = await api.get("/my-posts", { params: queryParams });
 
-        // Robustný fallback pre rôzne BE štruktúry
-        this.myIdeas = data.data || data.posts || data || [];
+        // Normalize posts from API
+        const rawPosts = data.data || data.posts || data || [];
+        this.myIdeas = Array.isArray(rawPosts)
+          ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
+          : [];
 
         if (process.env.NODE_ENV === "development") {
           console.log("📦 My ideas received from BE:", this.myIdeas.length, "posts");
@@ -542,20 +551,24 @@ export const usePostsStore = defineStore("posts", {
       this.recentlyAccomplishedError = null;
 
       try {
-        // For now, we'll use my-posts endpoint with type=dream
+        // For now, we'll use my-posts endpoint with category=dream - using new API
         // TODO: When BE adds is_accomplished or status column, filter by that
         // For now, return empty array or filter by some criteria (e.g., tokens reached a threshold)
         const { data } = await api.get("/my-posts", {
-          params: { type: "dream" }
+          params: { category: "dream" }
         });
 
-        const allDreams = data.data || data.posts || data || [];
+        // Normalize posts from API
+        const rawPosts = data.data || data.posts || data || [];
+        const allDreams = Array.isArray(rawPosts)
+          ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
+          : [];
 
         // TODO: Filter accomplished dreams when BE supports it
         // For now, we'll return empty array or filter by high tokens as a placeholder
         // Filter dreams with tokens >= 1000 as "accomplished" (placeholder logic)
         this.recentlyAccomplishedDreams = allDreams.filter(
-          (post: Record<string, unknown>) => (post.tokens as number) >= 1000
+          (post: NormalizedPost) => (post.tokens as number) >= 1000
         ).slice(0, 10); // Limit to 10 most recent
 
         if (process.env.NODE_ENV === "development") {

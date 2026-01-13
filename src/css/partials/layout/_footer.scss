@@ -173,7 +173,8 @@
       border: none !important;
       border-width: 0 !important;
       outline: none !important;
-      transform: translateY(-2px) scale(1.05);
+      // Note: Individual button transforms are defined in FooterComponent.vue
+      // Hover effects will be applied on top of base transforms
       transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
       img {
@@ -193,7 +194,8 @@
       border: none !important;
       border-width: 0 !important;
       outline: none !important;
-      transform: translateY(0) scale(0.95);
+      // Note: Individual button transforms are defined in FooterComponent.vue
+      // Active effects will be applied on top of base transforms
       transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
       img {
@@ -221,7 +223,8 @@
       outline: none !important;
       width: auto !important;
       height: auto !important;
-      transform: translateY(-1px) scale(1.02);
+      // Note: Individual button transforms are defined in FooterComponent.vue
+      // Active state effects should not override base transforms
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
       img {
@@ -399,4 +402,83 @@
   visibility: hidden !important;
   background: transparent !important;
   background-color: transparent !important;
+}
+
+/* Position adjustments for footer icons on donor side */
+/* Home icon: 5px down, 1px right */
+.footer > .button-footer:first-child,
+.footer > .q-btn:first-child,
+.footer .button-footer:first-of-type {
+  transform: translateX(1px) translateY(5px) !important;
+  
+  &:hover {
+    transform: translateX(1px) translateY(3px) scale(1.05) !important;
+  }
+  
+  &:active {
+    transform: translateX(1px) translateY(5px) scale(0.95) !important;
+  }
+  
+  &.active {
+    transform: translateX(1px) translateY(4px) scale(1.02) !important;
+  }
+}
+
+/* Inspirations icon: 4px down */
+.footer > .button-footer:nth-child(2),
+.footer > .q-btn:nth-child(2),
+.footer .button-footer:nth-of-type(2) {
+  transform: translateX(0px) translateY(4px) !important;
+  
+  &:hover {
+    transform: translateX(0px) translateY(2px) scale(1.05) !important;
+  }
+  
+  &:active {
+    transform: translateX(0px) translateY(4px) scale(0.95) !important;
+  }
+  
+  &.active {
+    transform: translateX(0px) translateY(3px) scale(1.02) !important;
+  }
+}
+
+/* Notifications icon: 4px down, 3px left (2px more left from -1px) */
+.footer > .button-footer.red,
+.footer > .q-btn.red,
+.footer .button-footer.red,
+.footer .q-btn.button-footer.red {
+  transform: translateX(-3px) translateY(4px) !important;
+  
+  &:hover {
+    transform: translateX(-3px) translateY(2px) scale(1.05) !important;
+  }
+  
+  &:active {
+    transform: translateX(-3px) translateY(4px) scale(0.95) !important;
+  }
+  
+  &.active {
+    transform: translateX(-3px) translateY(3px) scale(1.02) !important;
+  }
+}
+
+/* Profile icon: 9px down, 2px left (1px more left from -1px) */
+.footer > .button-footer.profileIcon,
+.footer > .q-btn.profileIcon,
+.footer .button-footer.profileIcon,
+.footer .q-btn.button-footer.profileIcon {
+  transform: translateX(-2px) translateY(9px) !important;
+  
+  &:hover {
+    transform: translateX(-2px) translateY(7px) scale(1.05) !important;
+  }
+  
+  &:active {
+    transform: translateX(-2px) translateY(9px) scale(0.95) !important;
+  }
+  
+  &.activeProfile {
+    transform: translateX(-2px) translateY(8px) scale(1.02) !important;
+  }
 }

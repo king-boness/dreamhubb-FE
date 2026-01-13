@@ -160,8 +160,9 @@ import { useI18n } from "vue-i18n";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
 import { usePostsStore } from "src/stores/posts";
+import { getLocationLabel } from "src/utils/cityNames";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 // Reactive state for dismissed hint
 const hintDismissed = ref(false);
@@ -238,7 +239,7 @@ const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
     },
     postInfo: {
       dateCreated: (post.date_created || "") as string,
-      location: "Unknown",
+      location: getLocationLabel(post, locale.value as string) || "Unknown",
       viewed: (post.views || 0) as number
     }
   };
@@ -449,6 +450,10 @@ onActivated(async () => {
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.4);
   z-index: 9999;
   animation: fadeInUp 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes fadeInUp {
@@ -489,6 +494,14 @@ onActivated(async () => {
 .firstPostHint-content {
   color: white;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0;
+  margin-top: -4px;
+  transform: translateY(-4px);
 }
 
 .firstPostHint-title {
@@ -496,6 +509,7 @@ onActivated(async () => {
   font-size: 1rem;
   margin: 0 0 0.5rem 0;
   color: white;
+  text-align: center;
 }
 
 .firstPostHint-text {
@@ -504,6 +518,7 @@ onActivated(async () => {
   margin: 0;
   color: rgba(255, 255, 255, 0.95);
   line-height: 1.4;
+  text-align: center;
 }
 
 .firstPostHint-arrow {

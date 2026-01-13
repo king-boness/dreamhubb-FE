@@ -206,10 +206,10 @@ const routes: RouteRecordRaw[] = [
         name: "donor-settings-privacy"
       },
       {
-        path: "post-detail/report",
+        path: "post/:id/report",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/SettingsReportPage.vue"),
-        name: "donor-settings-report"
+        name: "donor-post-report"
       },
       {
         path: "settings/language",
@@ -508,6 +508,12 @@ const routes: RouteRecordRaw[] = [
         name: "donee-post-detail-topUp"
       },
       {
+        path: "post-edit/:id",
+        meta: { requiresAuth: true, hideMainHeader: true },
+        component: () => import("src/pages/DoneePages/TopDreamPage.vue"),
+        name: "donee-post-edit"
+      },
+      {
         path: "post-detail/details",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/DreamDetailPage.vue"),
@@ -536,7 +542,20 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/PostCreationPage.vue"),
         name: "submit-postCreation"
-      }, {
+      },
+      {
+        path: "postCreation/goal",
+        meta: { requiresAuth: true, hideMainHeader: true },
+        component: () => import("src/pages/DoneePages/PostGoalPickerPage.vue"),
+        name: "donee-postCreation-goal"
+      },
+      {
+        path: "postCreation/category",
+        meta: { requiresAuth: true, hideMainHeader: true },
+        component: () => import("src/pages/DoneePages/PostCategoryPickerPage.vue"),
+        name: "donee-postCreation-category"
+      },
+      {
         path: "settings",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/AppSettingsPage.vue"),

@@ -15,6 +15,7 @@
     </div>
     <div class="submit-routerContainer">
       <RouterView
+        :key="route.fullPath"
         :next-page="nextSubmit"
         @changedHoriz="handleChangedHoriz"
         :category="categories"
@@ -56,7 +57,7 @@
       <q-btn
         v-else
         class="submit-nextButton"
-        @click="$router.push({ name: 'submit-postCreation' })"
+        @click="nextSubmit"
         >Next step</q-btn
       >
     </div>
@@ -65,6 +66,9 @@
 <style scoped lang="scss">
 .submit-layout {
   padding-top: 1.7rem !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 
   .submit-header {
     display: flex;
@@ -89,6 +93,11 @@
       margin-left: 15%;
       height: 0.3rem;
     }
+  }
+  .submit-routerContainer {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
   }
   .categoryTitleContainer {
     display: flex;
@@ -129,31 +138,62 @@
 }
 </style>
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, watch, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Category } from "src/components/models";
 const router = useRouter();
-const currentIndex = String(router.currentRoute.value.name).substring(7);
-const onSubmitIndex = ref(parseInt(currentIndex));
-const progress = ref(onSubmitIndex.value * 0.35);
+const route = useRoute();
 
-let horizontalSwiper = ref(false);
+// Initialize onSubmitIndex from route name
+const getInitialIndex = () => {
+  const routeName = String(route.name || "");
+  if (routeName.startsWith("submit-")) {
+    const indexStr = routeName.substring(7);
+    const index = parseInt(indexStr);
+    return isNaN(index) ? 1 : index;
+  }
+  return 1;
+};
+
+// Initialize with current route
+const initialIndex = getInitialIndex();
+const onSubmitIndex = ref(initialIndex);
+const progress = ref(initialIndex * 0.35);
+
+const horizontalSwiper = ref(false);
 const selectedGoal = ref();
 const selectedCategory = ref();
+
+// Watch for route changes to update index
+watch(() => route.name, (newName) => {
+  if (newName && String(newName).startsWith("submit-")) {
+    const indexStr = String(newName).substring(7);
+    const index = parseInt(indexStr);
+    if (!isNaN(index) && index !== onSubmitIndex.value) {
+      onSubmitIndex.value = index;
+      progress.value = index * 0.35;
+      horizontalSwiper.value = false;
+    }
+  }
+}, { immediate: true });
+
 const nextSubmit = async () => {
-  if (onSubmitIndex.value !== 2) {
+  if (onSubmitIndex.value === 1) {
+    // Step 1: Goal selection -> navigate to step 2 (category selection)
     progress.value += 0.35;
     onSubmitIndex.value++;
-    horizontalSwiper = ref(false);
+    horizontalSwiper.value = false;
     await router.push({ name: `submit-${onSubmitIndex.value}` });
-  } else {
+  } else if (onSubmitIndex.value === 2) {
+    // Step 2: Category selection -> save and navigate to post creation page
     // Save selected values to localStorage before navigating
     if (selectedGoal.value) {
-      localStorage.setItem("postCreation_goal", selectedGoal.value);
+      localStorage.setItem("donee_postCreation_goal", selectedGoal.value);
     }
     if (selectedCategory.value) {
-      localStorage.setItem("postCreation_category", selectedCategory.value);
+      localStorage.setItem("donee_postCreation_category", selectedCategory.value);
     }
+    // Navigate directly to post creation page (skip subcategory picker in onboarding flow)
     router.push({ name: "submit-postCreation" });
   }
 };
@@ -172,13 +212,13 @@ const handleChangedHoriz = (data: { horiz: boolean; selectedItemId: any }) => {
   // If we're on step 1, save as goal; if on step 2, save as category
   if (onSubmitIndex.value === 1) {
     selectedGoal.value = selectedItemId;
-    // Save to localStorage immediately
+    // Save to localStorage immediately (onboarding flow uses old keys for compatibility)
     if (selectedItemId) {
       localStorage.setItem("postCreation_goal", selectedItemId);
     }
   } else if (onSubmitIndex.value === 2) {
     selectedCategory.value = selectedItemId;
-    // Save to localStorage immediately
+    // Save to localStorage immediately (onboarding flow uses old keys for compatibility)
     if (selectedItemId) {
       localStorage.setItem("postCreation_category", selectedItemId);
     }

@@ -148,6 +148,32 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    // Refresh token balance from API
+    // This is a shared action that can be called after token-deducting operations
+    // (e.g., after creating a post or contributing tokens)
+    async refreshTokenBalance() {
+      if (!this.token) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("⚠️ [refreshTokenBalance] No token, skipping refresh");
+        }
+        return;
+      }
+
+      try {
+        // Use existing fetchUser() which calls /api/user and updates this.user
+        await this.fetchUser();
+        if (process.env.NODE_ENV === "development") {
+          console.log("✅ [refreshTokenBalance] Token balance refreshed:", this.user?.tokens);
+        }
+      } catch (error) {
+        // Don't block UX if refresh fails - just log it
+        if (process.env.NODE_ENV === "development") {
+          console.warn("⚠️ [refreshTokenBalance] Failed to refresh token balance:", error);
+        }
+        // Don't throw - allow the operation to continue
+      }
+    },
+
     async updateBio(newBio: string) {
       if (!this.token) return;
 

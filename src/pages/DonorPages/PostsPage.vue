@@ -138,16 +138,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, onActivated } from "vue";
+import { ref, computed, onMounted, nextTick, onActivated, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { translateCityName, translateCountryName } from "src/utils/cityNames";
+import { getLocationLabel } from "src/utils/cityNames";
 import { useRouter, useRoute } from "vue-router";
 import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
-import { getCategoryDisplayName } from "src/data/categoryNames";
+import { useAuthStore } from "src/stores/auth";
 import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
 import { getPostTypeIcon } from "src/utils/postIcons";
 import { getUserAvatarUrl } from "src/utils/avatar";
+import { normalizePost } from "src/utils/normalizePost";
+import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 
 const { t, locale } = useI18n();
@@ -156,6 +158,7 @@ const router = useRouter();
 const route = useRoute();
 const postsStore = usePostsStore();
 const preferencesStore = usePreferencesStore();
+const authStore = useAuthStore();
 
 // Tab interface
 interface DonorTab {
@@ -236,18 +239,119 @@ const setTab = (value: "help" | "pay" | "top") => {
   postsStore.fetchPosts({ sort: value });
 };
 
+// Function to apply initial filters from preferences (must be defined before watcher)
+const applyInitialFiltersFromPreferences = () => {
+  // Ensure filters are loaded from storage first
+  preferencesStore.loadDonorFiltersFromStorage();
+  const lastUsed = preferencesStore.lastUsedFeedFilters;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 applyInitialFiltersFromPreferences:", {
+      lastUsed,
+      postType: lastUsed?.postType,
+      subcategory: lastUsed?.subcategory,
+      location: lastUsed?.location
+    });
+  }
+
+  if (lastUsed) {
+    postsStore.setFilters({
+      type: lastUsed.postType,
+      feCategory: lastUsed.subcategory,
+      continentId: lastUsed.location.continentId,
+      countryId: lastUsed.location.countryId,
+      cityId: lastUsed.location.cityId
+    });
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 Applied filters from lastUsed:", {
+        type: lastUsed.postType,
+        feCategory: lastUsed.subcategory,
+        filters: postsStore.filters
+      });
+    }
+    return;
+  }
+  postsStore.setFilters({
+    type: preferencesStore.preferredPostType,
+    feCategory: preferencesStore.preferredSubcategory,
+    continentId: preferencesStore.preferredFeedLocation.continentId,
+    countryId: preferencesStore.preferredFeedLocation.countryId,
+    cityId: preferencesStore.preferredFeedLocation.cityId
+  });
+};
+
+// Watch for user changes and reload filters
+watch(
+  () => authStore.user?.id,
+  (newId, oldId) => {
+    // DEBUG: Log user change
+    console.log("[DEBUG] [PostsPage watch user] User changed", { oldId, newId });
+
+    if (!newId) return;
+
+    // Pri zmene usera vždy resetni store a načítaj jeho uložené filtre
+    // (on user change, always reset the store and load its saved filters)
+    // immediate: true zabezpečí, že pri prvom mountnutí (už prihlásený user) sa filtre hneď načítajú z jeho kľúča
+    if (newId !== oldId) {
+      // Reset to defaults first (only on user change, not on first mount)
+      // NOTE: resetToDefaults() only resets in memory, NOT in localStorage
+      preferencesStore.resetDonorFiltersToDefaults();
+    }
+    // Migrate legacy filters if needed (always check)
+    preferencesStore.migrateLegacyDonorFiltersIfNeeded();
+    // Load user-specific filters (always load)
+    preferencesStore.loadDonorFiltersFromStorage();
+
+    // DEBUG: Log loaded data after user change
+    const key = `dreamhubb_donor_filters_${newId ?? "guest"}`;
+    console.log("[DEBUG] [PostsPage watch user] storageKey:", key);
+    console.log("[DEBUG] [PostsPage watch user] loaded data:", preferencesStore.lastUsedFeedFilters);
+
+    // Aplikovať načítané filtre
+    applyInitialFiltersFromPreferences();
+    // Načítať posty s novými filtrami (len ak už máme user ID a došlo k zmene)
+    if (newId && newId !== oldId) {
+      postsStore.fetchPosts({ sort: activeTab.value });
+    }
+  },
+  { immediate: true }
+);
+
 // Update indicator position on mount and fetch initial posts
 onMounted(() => {
   nextTick(() => {
     // Indicator position will be computed automatically via computed property
   });
+
+  // DEBUG: Log storage key and loaded data
+  const authStore = useAuthStore();
+  const userId = authStore.user?.id;
+  const key = `dreamhubb_donor_filters_${userId ?? "guest"}`;
+  console.log("[DEBUG] [PostsPage onMounted] storageKey:", key);
+
+  // Load filters from storage first, then apply them
+  preferencesStore.loadDonorFiltersFromStorage();
+
+  // DEBUG: Log loaded data
+  console.log("[DEBUG] [PostsPage onMounted] loaded data:", preferencesStore.lastUsedFeedFilters);
+
   applyInitialFiltersFromPreferences();
+
   // Fetch initial posts with default "help" sort (filters sa automaticky použijú z store)
   postsStore.fetchPosts({ sort: activeTab.value });
 });
 
 // Reload posts when returning from filters page (kept-alive component)
 onActivated(() => {
+  // Načítať filtre z localStorage a aplikovať ich
+  preferencesStore.loadDonorFiltersFromStorage();
+  applyInitialFiltersFromPreferences();
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 onActivated: Filters after applying:", postsStore.filters);
+  }
+
   // Načítať posty s aktuálnymi filtrami pri návrate na stránku
   postsStore.fetchPosts({ sort: activeTab.value });
 });
@@ -257,11 +361,11 @@ const posts = computed(() => postsStore.posts);
 const loading = computed(() => postsStore.loading);
 const error = computed(() => postsStore.error);
 
-// Check if any filters are active
+// Check if any filters are active - using new API
 const hasActiveFilters = computed(() => {
   return !!(
-    postsStore.filters.type ||
-    postsStore.filters.categoryId
+    postsStore.filters.categorySlug ||
+    postsStore.filters.subcategorySlug
     // TODO: Keď BE podporí location filtre, pridať:
     // postsStore.filters.continentId ||
     // postsStore.filters.countryId ||
@@ -290,102 +394,85 @@ interface DonorPost {
 
 // Post type icon function is now imported from utils/postIcons.ts
 
-// Helper function to get initials from name
-const getInitials = (name: string): string => {
-  if (!name || name.trim().length === 0) return "?";
-  const parts = name.trim().split(" ");
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  }
-  return name[0].toUpperCase();
-};
-
-// Map BE data to FE format
+// Map BE data to FE format - using normalized post data
 const mapPostData = (post: Record<string, unknown>): DonorPost => {
-  const authorName = (post.author_name || post.user?.name || post.authorName || "Unknown") as string;
+  // Normalize post to ensure category and subcategory objects exist
+  const normalized = normalizePost(post as Parameters<typeof normalizePost>[0]);
+
+  const authorName = normalized.author_name || "Unknown";
   // Use unified avatar utility function - check multiple possible fields from BE
   const authorPicture = getUserAvatarUrl(
-    post.user as { profile_picture?: string | null; [key: string]: unknown } | null,
+    normalized.user,
     {
-      author_picture: (post.author_picture || post.user?.profile_picture || null) as string | null,
-      authorAvatarUrl: (post.authorAvatarUrl || null) as string | null,
-      user: post.user as { profile_picture?: string | null; [key: string]: unknown } | null
+      author_picture: normalized.author_picture,
+      authorAvatarUrl: null,
+      user: normalized.user
     }
   ) || "";
 
-  // Get authorId for navigation - BE now sends user_id directly
-  const authorId = (post.user_id || post.author_id || post.user?.id || null) as number | null;
+  // Get authorId for navigation
+  const authorId = normalized.author_id || normalized.user_id || null;
 
   // Debug logging in development
   if (process.env.NODE_ENV === "development") {
     if (!authorPicture) {
       console.log("🔍 No avatar found for post:", {
-        post_id: post.id || post.post_id,
+        post_id: normalized.post_id,
         author_name: authorName,
-        has_user: !!post.user,
-        user_profile_picture: (post.user as { profile_picture?: string | null } | null)?.profile_picture,
-        author_picture: post.author_picture
+        has_user: !!normalized.user,
+        user_profile_picture: normalized.user?.profile_picture,
+        author_picture: normalized.author_picture
       });
     }
     if (!authorId) {
       console.warn("⚠️ No authorId found in feed post:", {
-        post_id: post.id || post.post_id,
+        post_id: normalized.post_id,
         author_name: authorName,
-        has_author_id: !!post.author_id,
-        has_user_id: !!post.user_id,
-        has_user: !!post.user,
-        user_id: post.user?.id,
-        full_post: post
+        has_author_id: !!normalized.author_id,
+        has_user_id: !!normalized.user_id,
+        has_user: !!normalized.user
       });
     }
   }
 
-  const images = post.images as string[] | undefined;
-  const firstImage = images && Array.isArray(images) && images.length > 0 ? images[0] : null;
+  const images = normalized.images || [];
+  const firstImage = images.length > 0 ? images[0] : null;
+
+  // Get category slug for type icon
+  const categorySlug = normalized.category?.slug || "dream";
+
+  // Get subcategory label using i18n
+  const subcategorySlug = normalized.subcategory?.slug;
+  let categoryLabel = t("common.unknown") || "Unknown";
+  if (subcategorySlug) {
+    const i18nKey = `subcategories.${subcategorySlug}`;
+    const translated = t(i18nKey);
+    const finalText = translated !== i18nKey ? translated : subcategorySlug.charAt(0).toUpperCase() + subcategorySlug.slice(1);
+    categoryLabel = formatSubcategoryLabel(finalText);
+  } else {
+    categoryLabel = formatSubcategoryLabel(categoryLabel);
+  }
 
   return {
-    id: post.id || post.post_id || 0,
-    backendPostId: post.id || post.post_id || 0,
+    id: normalized.post_id,
+    backendPostId: normalized.post_id,
     tab: activeTab.value, // Use current active tab
-    type: (post.type || "dream") as "dream" | "problem" | "idea", // Post type for icon
+    type: categorySlug as "dream" | "problem" | "idea", // Category slug for icon
     authorId,
     authorName,
     // Use real avatar URL if available, otherwise empty string (template will show initials)
     authorAvatarUrl: authorPicture || "",
-    authorBadgeLabel: post.author_badge_label || post.authorBadgeLabel || "User",
-    dreamTitle: post.title || post.dreamTitle || "Untitled",
-    categoryLabel: post.fe_category ? getCategoryDisplayName(post.fe_category) : (post.category_name || post.categoryLabel || "General"),
-    tokenReward: post.tokens || post.tokenReward || 0,
-    previewText: post.description || post.previewText || "",
-    location: (() => {
-      // Build location string from author's location (city, country, continent)
-      const parts = [];
-      if (post.author_city) {
-        const translatedCity = translateCityName(post.author_city, locale.value as string);
-        parts.push(translatedCity);
-      }
-      if (post.author_country) {
-        const translatedCountry = translateCountryName(post.author_country, locale.value as string);
-        parts.push(translatedCountry);
-      }
-      if (post.author_continent && !parts.length) parts.push(post.author_continent);
-      const locationStr = parts.length > 0 ? parts.join(", ") : (post.location || "Unknown");
-      if (process.env.NODE_ENV === "development" && parts.length === 0) {
-        console.log("⚠️ PostsPage: No location data for post:", {
-          post_id: post.post_id || post.id,
-          author_city: post.author_city,
-          author_country: post.author_country,
-          author_continent: post.author_continent,
-          full_post: post
-        });
-      }
-      return locationStr;
-    })(),
-    createdAt: post.date_created || post.created_at || post.createdAt || new Date().toISOString(),
+    authorBadgeLabel: "User", // TODO: Get from normalized post if available
+    dreamTitle: normalized.title || "Untitled",
+    categoryLabel,
+    tokenReward: normalized.tokens || 0,
+    previewText: normalized.description || "",
+    location: getLocationLabel(normalized, locale.value as string) || "Unknown",
+    createdAt: normalized.date_created || new Date().toISOString(),
     // Use real cover image from BE, fallback to default if not available
-    imageUrl: firstImage || post.image_url || post.imageUrl || "/images/Auth/postBackground.png",
+    imageUrl: firstImage || "/images/Auth/postBackground.png",
     // Pass images array for carousel
-    images: images && Array.isArray(images) ? images : (firstImage ? [firstImage] : null)
+    images: images.length > 0 ? images : null
   };
 };
 
@@ -416,35 +503,23 @@ const handleResetFilters = async () => {
   await postsStore.fetchPosts({ sort: activeTab.value });
 };
 
-const applyInitialFiltersFromPreferences = () => {
-  const lastUsed = preferencesStore.lastUsedFeedFilters;
-  if (lastUsed) {
-    postsStore.setFilters({
-      type: lastUsed.postType,
-      feCategory: lastUsed.subcategory,
-      continentId: lastUsed.location.continentId,
-      countryId: lastUsed.location.countryId,
-      cityId: lastUsed.location.cityId
-    });
-    return;
-  }
-  postsStore.setFilters({
-    type: preferencesStore.preferredPostType,
-    feCategory: preferencesStore.preferredSubcategory,
-    continentId: preferencesStore.preferredFeedLocation.continentId,
-    countryId: preferencesStore.preferredFeedLocation.countryId,
-    cityId: preferencesStore.preferredFeedLocation.cityId
-  });
-};
-
-// Format date from MM/DD/YYYY to DD/MM/YYYY
+// Format date as DD/MM/YYYY
 const formatDate = (dateString: string): string => {
-  const dateParts = dateString.split("/");
-  if (dateParts.length === 3) {
-    const [month, day, year] = dateParts;
-    return `${day}/${month}/${year}`;
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) {
+    // Fallback: if it's already in MM/DD/YYYY format, convert to DD/MM/YYYY
+    const dateParts = dateString.split("/");
+    if (dateParts.length === 3) {
+      const [month, day, year] = dateParts;
+      return `${day}/${month}/${year}`;
+    }
+    return dateString;
   }
-  return dateString;
+  // Format as DD/MM/YYYY
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
 };
 
 const emitOpenPost = (post: DonorPost) => {
@@ -651,7 +726,7 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 .postCard-authorBadge {
   position: absolute;
-  top: 12px;
+  top: 27px; /* Posun nadol o ďalších 7px (z 20px na 27px) */
   left: 12px;
   display: flex;
   align-items: center;

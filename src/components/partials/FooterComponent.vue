@@ -216,4 +216,6 @@ const props: Props = defineProps({
 .profileName {
   margin-bottom: 0.01rem;
 }
+
+/* Position adjustments for footer icons are now in _footer.scss */
 </style>

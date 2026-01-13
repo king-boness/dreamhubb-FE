@@ -242,6 +242,127 @@ const handleLogoClick = async () => {
 };
 
 const applyFiltersFromPreferences = () => {
+  // Priority 1: Use stored preferences from registration (they are saved in preferences store during onboarding)
+  // These include postType, subcategory, and location preferences
+  const storedPostType = preferencesStore.preferredPostType;
+  const storedSubcategory = preferencesStore.preferredSubcategory;
+  const location = preferencesStore.preferredFeedLocation;
+
+  // If we have stored preferences from registration, use them
+  if (storedPostType && storedSubcategory) {
+    // Determine location filters: if city is selected, use city; otherwise use country; otherwise use continent
+    let locationFilters: {
+      continentId: number | null;
+      countryId: number | null;
+      cityId: number | null;
+    };
+
+    if (location.cityId) {
+      // City is selected - filter by city
+      locationFilters = {
+        continentId: null,
+        countryId: null,
+        cityId: location.cityId
+      };
+    } else if (location.countryId) {
+      // Country is selected but no city - filter by country
+      locationFilters = {
+        continentId: null,
+        countryId: location.countryId,
+        cityId: null
+      };
+    } else if (location.continentId) {
+      // Only continent is selected - filter by continent
+      locationFilters = {
+        continentId: location.continentId,
+        countryId: null,
+        cityId: null
+      };
+    } else {
+      // No location filters
+      locationFilters = {
+        continentId: null,
+        countryId: null,
+        cityId: null
+      };
+    }
+
+    // Apply filters
+    postsStore.setFilters({
+      type: storedPostType,
+      feCategory: storedSubcategory,
+      ...locationFilters
+    });
+
+    // Save to lastUsedFeedFilters so PostsPage will use them
+    preferencesStore.setLastUsedFeedFilters({
+      postType: storedPostType,
+      subcategory: storedSubcategory,
+      location: locationFilters
+    });
+
+    return;
+  }
+
+  // Priority 2: Check if we have preferences from registration in localStorage (fallback)
+  // These are set during registration and should be used when switching from donee to donor
+  const registrationGoal = localStorage.getItem("postCreation_goal");
+  const registrationCategory = localStorage.getItem("postCreation_category");
+
+  // If we have registration preferences in localStorage, use them
+  if (registrationGoal && registrationCategory) {
+    // Map goal to postType (dream, problem, idea)
+    const postType = registrationGoal as "dream" | "problem" | "idea";
+    // Category is already the subcategory name (traveling, health, etc.)
+    const subcategory = registrationCategory;
+
+    // Save to preferences store for future use
+    preferencesStore.setPreferredPostType(postType);
+    preferencesStore.setPreferredSubcategory(subcategory);
+
+    // Apply filters using registration preferences with location
+    // Apply location filters: if city is selected, use city; otherwise use country; otherwise use continent
+    if (location.cityId) {
+      // City is selected - filter by city
+      postsStore.setFilters({
+        type: postType,
+        feCategory: subcategory,
+        continentId: null,
+        countryId: null,
+        cityId: location.cityId
+      });
+    } else if (location.countryId) {
+      // Country is selected but no city - filter by country
+      postsStore.setFilters({
+        type: postType,
+        feCategory: subcategory,
+        continentId: null,
+        countryId: location.countryId,
+        cityId: null
+      });
+    } else if (location.continentId) {
+      // Only continent is selected - filter by continent
+      postsStore.setFilters({
+        type: postType,
+        feCategory: subcategory,
+        continentId: location.continentId,
+        countryId: null,
+        cityId: null
+      });
+    } else {
+      // No location filters
+      postsStore.setFilters({
+        type: postType,
+        feCategory: subcategory,
+        continentId: null,
+        countryId: null,
+        cityId: null
+      });
+    }
+    return;
+  }
+
+  // Priority 2: Use last used feed filters if available
   const lastUsed = preferencesStore.lastUsedFeedFilters;
   if (lastUsed) {
     postsStore.setFilters({
@@ -253,12 +374,41 @@ const applyFiltersFromPreferences = () => {
     });
     return;
   }
-  postsStore.setFilters({
-    type: preferencesStore.preferredPostType,
-    feCategory: preferencesStore.preferredSubcategory,
-    continentId: preferencesStore.preferredFeedLocation.continentId,
-    countryId: preferencesStore.preferredFeedLocation.countryId,
-    cityId: preferencesStore.preferredFeedLocation.cityId
-  });
+
+  // Priority 3: Use stored preferences (or defaults)
+  // Apply location filters: if city is selected, use city; otherwise use country; otherwise use continent
+  if (location.cityId) {
+    postsStore.setFilters({
+      type: preferencesStore.preferredPostType,
+      feCategory: preferencesStore.preferredSubcategory,
+      continentId: null,
+      countryId: null,
+      cityId: location.cityId
+    });
+  } else if (location.countryId) {
+    postsStore.setFilters({
+      type: preferencesStore.preferredPostType,
+      feCategory: preferencesStore.preferredSubcategory,
+      continentId: null,
+      countryId: location.countryId,
+      cityId: null
+    });
+  } else if (location.continentId) {
+    postsStore.setFilters({
+      type: preferencesStore.preferredPostType,
+      feCategory: preferencesStore.preferredSubcategory,
+      continentId: location.continentId,
+      countryId: null,
+      cityId: null
+    });
+  } else {
+    postsStore.setFilters({
+      type: preferencesStore.preferredPostType,
+      feCategory: preferencesStore.preferredSubcategory,
+      continentId: null,
+      countryId: null,
+      cityId: null
+    });
+  }
 };
 </script>

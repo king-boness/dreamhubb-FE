@@ -1,7 +1,8 @@
 .postDetail {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column; // Stack hero and content vertically
+  justify-content: flex-start;
   padding: 0 0 4rem;
   background: radial-gradient(ellipse at top, #12192f 0, #050710 60%, #020307 100%);
 
@@ -12,15 +13,32 @@
     padding: 0 16px;
   }
 
-  /* HEADER IMAGE / SLIDER - Hero Card */
+  /* HEADER IMAGE / SLIDER - Hero Card (Full-bleed) */
   .postDetailBg {
     position: relative;
-    width: 100%;
+    width: 100vw; // Full viewport width
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
     height: 360px;
     overflow: hidden;
     border-radius: 0 0 24px 24px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
     margin-bottom: 0;
+    margin-top: 0; // Ensure no top margin
+
+    // Ensure PostHeader component fits within postDetailBg
+    :deep(.post-header) {
+      width: 100%;
+      height: 100%;
+
+      .post-header-bg {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+      }
+    }
 
     .postDetail-imageWrapper {
       position: absolute;
@@ -149,7 +167,7 @@
       transform: translateY(-50%);
       width: 40px;
       height: 40px;
-      border-radius: 50%;
+        border-radius: 50%;
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -189,7 +207,7 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
+        display: flex;
       gap: 8px;
       z-index: 12;
       pointer-events: auto;
@@ -356,6 +374,45 @@
           animation: heartLike 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
       }
+    }
+
+    .postDetail-commentBtn-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .postDetail-commentBtn--back {
+      :deep(.q-icon) {
+        animation: heartLike 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+    }
+
+    // Transition animation for comment icon switch
+    .comment-icon-switch-enter-active,
+    .comment-icon-switch-leave-active {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .comment-icon-switch-enter-from {
+      opacity: 0;
+      transform: scale(0.5) rotate(-90deg);
+    }
+
+    .comment-icon-switch-enter-to {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .comment-icon-switch-leave-from {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .comment-icon-switch-leave-to {
+      opacity: 0;
+      transform: scale(0.5) rotate(90deg);
     }
 
     @keyframes heartLike {
@@ -773,6 +830,14 @@
     padding: 1.3rem 1.5rem 2rem;
     box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(14px);
+    transition: transform 0.2s ease-out;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &.dragging {
+      transition: none;
+    }
   }
 
   .contributeSheet-handle {
@@ -816,6 +881,102 @@
   .contributeSheet-btn.tertiary {
     background: rgba(255, 255, 255, 0.1);
     color: #f4f4f6;
+  }
+
+  // Top Up Modal specific styles
+  .topUpModal {
+    .topUpModal-content {
+      margin: 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .topUpModal-inputWrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .topUpModal-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+    }
+
+    .topUpModal-input {
+      width: 100%;
+      :deep(.q-field__control) {
+        background: rgba(23, 23, 23, 0.72);
+        border-radius: 0.625rem;
+      }
+      :deep(.q-field__native) {
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: right;
+        padding-right: 0.5rem;
+      }
+      :deep(.q-field__append) {
+        padding-left: 0.3rem;
+      }
+      :deep(.q-icon) {
+        color: $primary;
+        font-size: 1.2rem;
+      }
+    }
+
+    .topUpModal-sliderWrapper {
+      width: 100%;
+      padding: 0.5rem 0;
+    }
+
+    .topUpModal-slider {
+      width: 100%;
+      :deep(.q-slider__track) {
+        height: 0.6rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+      }
+      :deep(.q-slider__track-fill) {
+        background: linear-gradient(95deg, #ff007a, #ff8a00);
+      }
+      :deep(.q-slider__thumb) {
+        width: 22px;
+        height: 30px;
+        background: url("/icons/sliderHand.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        border: none;
+        box-shadow: none;
+      }
+    }
+
+    .topUpModal-info {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .topUpModal-balance {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+    }
+
+    .topUpModal-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+
+      .contributeSheet-btn {
+        flex: 1;
+        margin-top: 0;
+      }
+    }
   }
 
   .sheet-fade-enter-active,

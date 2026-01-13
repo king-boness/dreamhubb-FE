@@ -24,6 +24,11 @@ export default route(function ({ store }) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   });
 
+  // Debug: Check if postCreation picker routes exist
+  if (process.env.NODE_ENV === "development") {
+    console.log("[ROUTER] has postCreation category route:", Router.getRoutes().some(r => r.path === "/donee/postCreation/category" || r.name === "donee-postCreation-category"));
+  }
+
   Router.beforeEach((to, from, next) => {
     try {
       // Použiť authStore.isAuthenticated

@@ -1,0 +1,95 @@
+import enUS from "../en-US/auth";
+
+// Hindi - use en-US as base, all keys available
+export default {
+  ...enUS,
+  changeLanguage: "\u092d\u093e\u0937\u093e \u092c\u0926\u0932\u0947\u0902",
+  saveChanges: "\u092c\u0926\u0932\u093e\u0935 \u0938\u0939\u0947\u091c\u0947\u0902",
+  cancel: "\u0930\u0926\u094d\u0926 \u0915\u0930\u0947\u0902",
+  languageSaved: "\u092d\u093e\u0937\u093e \u0938\u092b\u0932\u0924\u093e\u092a\u0942\u0930\u094d\u0935\u0915 \u0938\u0939\u0947\u091c\u093e \u0917\u092f\u093e",
+  accountSettings: "\u0916\u093e\u0924\u093e \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938",
+  appSettings: "\u090f\u092a \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938",
+  language: "\u092d\u093e\u0937\u093e",
+  nickname: "\u0909\u092a\u0928\u093e\u092e",
+  nameShown: "\u0926\u093f\u0916\u093e\u092f\u093e \u0917\u092f\u093e \u0928\u093e\u092e",
+  realName: "\u0905\u0938\u0932\u0940 \u0928\u093e\u092e",
+  changePassword: "\u092a\u093e\u0938\u094d\u0935\u0930\u094d\u0921 \u092c\u0926\u0932\u0947\u0902",
+  changeEmailAddress: "\u0907\u092e\u0947\u0932 \u092a\u0924\u093e \u092c\u0926\u0932\u0947\u0902",
+  changeBio: "\u091c\u0940\u0935\u0928\u0940 \u092c\u0926\u0932\u0947\u0902",
+  privacySettings: "\u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938",
+  helpAndSupport: "\u092e\u0926\u0926 \u0914\u0930 \u0938\u0939\u093e\u092f\u0924\u093e",
+  faq: "\u0905\u0915\u094d\u0938\u0930 \u092a\u0942\u091b\u0947 \u091c\u093e\u0928\u0947 \u0935\u093e\u0932\u0947 \u0938\u0935\u093e\u0932",
+  aboutApp: "\u090f\u092a \u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902",
+  banList: "\u092a\u094d\u0930\u0924\u093f\u092c\u0902\u0927\u093f\u0924 \u0938\u0942\u091a\u0940",
+  comingSoon: "\u091c\u0932\u094d\u0926\u0940 \u0906 \u0930\u0939\u093e \u0939\u0948",
+  notifications: "\u0938\u0942\u091a\u0928\u093e\u090f\u0901",
+  sources: "\u0938\u094d\u0930\u094b\u0924",
+  screenMode: "\u0938\u094d\u0915\u094d\u0930\u0940\u0928 \u092e\u094b\u0921",
+  appearance: "\u0926\u093f\u0916\u093e\u0935\u091f",
+  privacy: "\u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e",
+  logOut: "\u0932\u0949\u0917 \u0906\u0909\u091f",
+  languages: {
+    ...enUS.languages,
+    // Override with Hindi translations for all languages
+    "en-US": { name: "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u0940 (\u092f\u0942.\u090f.)" }, // अंग्रेजी (यू.ए.)
+    "en-GB": { name: "\u0905\u0902\u0917\u094d\u0930\u0947\u091c\u0940 (\u092f\u0942.\u0915\u0947.)" }, // अंग्रेजी (यू.के.)
+    sk: { name: "\u0938\u094d\u0932\u094b\u0935\u093e\u0915" }, // स्लोवाक
+    cs: { name: "\u091a\u0947\u0915" }, // चेक
+    de: { name: "\u091c\u0930\u094d\u092e\u0928" }, // जर्मन
+    fr: { name: "\u092b\u094d\u0930\u0947\u0902\u091a" }, // फ्रेंच
+    es: { name: "\u0938\u094d\u092a\u0947\u0928\u093f\u0936" }, // स्पेनिश
+    it: { name: "\u0907\u0924\u093e\u0932\u0940" }, // इताली
+    pl: { name: "\u092a\u094b\u0932\u093f\u0936" }, // पोलिश
+    hu: { name: "\u0939\u0902\u0917\u0947\u0930\u093f\u092f\u0928" }, // हंगेरियन
+    ro: { name: "\u0930\u094b\u092e\u093e\u0928\u093f\u092f\u0928" }, // रोमानियन
+    ru: { name: "\u0930\u0941\u0938\u0940" }, // रूसी
+    uk: { name: "\u092f\u0941\u0915\u094d\u0930\u0947\u0928\u093f\u092f\u0928" }, // यूक्रेनियन
+    zh: { name: "\u091a\u0940\u0928\u0940" }, // चीनी
+    hi: { name: "\u0939\u093f\u0928\u094d\u0926\u0940" }, // हिन्दी
+    ar: { name: "\u0905\u0930\u092c\u0940" }, // अरबी
+    ja: { name: "\u091c\u093e\u092a\u093e\u0928\u0940" }, // जापानी
+    ko: { name: "\u0915\u094b\u0930\u093f\u092f\u0928" }, // कोरियन
+    sq: { name: "\u0905\u0932\u094d\u092c\u093e\u0928\u093f\u092f\u0928" }, // अल्बानियन
+    hy: { name: "\u0905\u0930\u094d\u092e\u0947\u0928\u093f\u092f\u0928" }, // आर्मेनियन
+    az: { name: "\u0905\u091c\u0930\u092c\u0948\u091c\u093e\u0928\u0940" }, // अजरबैजानी
+    bn: { name: "\u092c\u0902\u0917\u0932\u093e" }, // बंगला
+    bg: { name: "\u092c\u0932\u094d\u0917\u093e\u0930\u093f\u092f\u0928" }, // बल्गारियन
+    hr: { name: "\u0915\u094d\u0930\u094b\u090f\u0936\u093f\u092f\u0928" }, // क्रोएशियन
+    da: { name: "\u0921\u0947\u0928\u093f\u0936" }, // डेनिश
+    et: { name: "\u090f\u0938\u094d\u0924\u094b\u0928\u093f\u092f\u0928" }, // एस्टोनियन
+    fi: { name: "\u092b\u093f\u0928\u093f\u0936" }, // फिनिश
+    ka: { name: "\u0917\u0947\u0930\u094d\u091c\u093f\u092f\u0928" }, // जॉर्जियन
+    el: { name: "\u0917\u094d\u0930\u0940\u0915" }, // ग्रीक
+    he: { name: "\u0939\u0940\u092c\u094d\u0930\u0942" }, // हिब्रू
+    id: { name: "\u0907\u0902\u0921\u094b\u0928\u0947\u0936\u093f\u092f\u0928" }, // इंडोनेशियन
+    kk: { name: "\u0915\u091c\u093e\u0916" }, // कजाख
+    lo: { name: "\u0932\u093e\u0913" }, // लाओ
+    lv: { name: "\u0932\u093e\u0924\u094d\u0935\u093f\u092f\u0928" }, // लातवियन
+    lt: { name: "\u0932\u093f\u0925\u0941\u0906\u0928\u093f\u092f\u0928" }, // लिथुआनियन
+    mk: { name: "\u092e\u0947\u0915\u0947\u0921\u094b\u0928\u093f\u092f\u0928" }, // मेकेदोनियन
+    ne: { name: "\u0928\u0947\u092a\u093e\u0932\u0940" }, // नेपाली
+    no: { name: "\u0928\u094b\u0930\u094d\u0935\u0947\u091c\u093f\u092f\u0928" }, // नॉर्वेजियन
+    fa: { name: "\u092b\u093e\u0930\u0938\u0940" }, // फारसी
+    pt: { name: "\u092a\u094b\u0930\u094d\u0924\u0941\u0917\u093e\u0932\u0940" }, // पुर्तगाली
+    sr: { name: "\u0938\u0930\u094d\u092c\u093f\u092f\u0928" }, // सर्बियन
+    sv: { name: "\u0938\u094d\u0935\u0947\u0926\u093f\u0936" }, // स्वीडिश
+    th: { name: "\u0925\u093e\u0908" }, // थाई
+    tr: { name: "\u0924\u0941\u0930\u094d\u0915\u093f\u0936" }, // तुर्की
+    ur: { name: "\u0909\u0930\u094d\u0926\u0942" }, // उर्दू
+    nl: { name: "\u0921\u091a" }, // डच
+    // New languages - exonymá (Hindi names)
+    "pa-PK": { name: "\u092a\u0902\u091c\u093e\u092c\u0940", nativeName: "\u067e\u0646\u062c\u0627\u0628\u06cc" },
+    "mr-IN": { name: "\u092e\u0930\u093e\u0920\u0940 (\u092d\u093e\u0930\u0924)", nativeName: "\u092e\u0930\u093e\u0920\u0940" },
+    "te-IN": { name: "\u0924\u0947\u0932\u0941\u0917\u0941 (\u092d\u093e\u0930\u0924)", nativeName: "\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41" },
+    "ta-IN": { name: "\u0924\u092e\u093f\u0932 (\u092d\u093e\u0930\u0924)", nativeName: "\u0ba4\u0bae\u0bbf\u0bb4\u0bcd" },
+    "vi-VN": { name: "\u0935\u093f\u092f\u0924\u0928\u093e\u092e\u0940", nativeName: "Ti\u1ebfng Vi\u1ec7t" },
+    "fil-PH": { name: "\u092b\u093f\u0932\u093f\u092a\u094d\u092a\u0940\u0928\u094b", nativeName: "Filipino" },
+    "sw-TZ": { name: "\u0938\u094d\u0935\u093e\u0939\u093f\u0932\u0940", nativeName: "Kiswahili" },
+    "ha-NE": { name: "\u0939\u094c\u0938\u093e", nativeName: "Hausa" },
+    "yue-HK": { name: "\u091a\u0940\u0928\u0940 (\u0915\u093e\u0902\u091f\u094b\u0928\u0940) (\u0939\u094b\u0902\u0917 \u0915\u094b\u0902\u0917)", nativeName: "\u7cb5\u8a9e" },
+    "wuu-CN": { name: "\u091a\u0940\u0928\u0940 (\u0935\u0942)", nativeName: "\u5434\u8bed" },
+    "jv-ID": { name: "\u091c\u093e\u0935\u093e\u0928\u0940", nativeName: "Basa Jawa" },
+    "gu-IN": { name: "\u0917\u0941\u091c\u0930\u093e\u0924\u0940 (\u092d\u093e\u0930\u0924)", nativeName: "\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4\u0ac0" },
+    "kn-IN": { name: "\u0915\u0928\u094d\u0928\u0921\u093e (\u092d\u093e\u0930\u0924)", nativeName: "\u0c95\u0ca8\u0ccd\u0ca8\u0ca1" }
+  }
+};

@@ -1,0 +1,225 @@
+<template>
+  <q-dialog v-model="isOpen" maximized class="image-preview-dialog">
+    <q-card class="image-preview-card">
+      <q-btn
+        flat
+        round
+        dense
+        icon="close"
+        class="image-preview-close"
+        @click="close"
+      />
+
+      <!-- Navigation arrows (only if multiple images) -->
+      <q-btn
+        v-if="images.length > 1"
+        flat
+        round
+        dense
+        icon="chevron_left"
+        class="image-preview-nav image-preview-nav-left"
+        @click="previousImage"
+      />
+      <q-btn
+        v-if="images.length > 1"
+        flat
+        round
+        dense
+        icon="chevron_right"
+        class="image-preview-nav image-preview-nav-right"
+        @click="nextImage"
+      />
+
+      <!-- Image counter (only if multiple images) -->
+      <div v-if="images.length > 1" class="image-preview-counter">
+        {{ currentIndex + 1 }} / {{ images.length }}
+      </div>
+
+      <div class="image-preview-content">
+        <img
+          v-if="currentImageUrl"
+          :src="currentImageUrl"
+          :alt="`Image ${currentIndex + 1}`"
+          class="image-preview-image"
+        />
+      </div>
+    </q-card>
+  </q-dialog>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from "vue";
+
+interface Props {
+  modelValue: boolean;
+  images: string[];
+  initialIndex?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  initialIndex: 0
+});
+
+const emit = defineEmits<{
+  "update:modelValue": [value: boolean];
+}>();
+
+const currentIndex = ref(props.initialIndex);
+
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value) => emit("update:modelValue", value)
+});
+
+const currentImageUrl = computed(() => {
+  if (props.images.length === 0) return null;
+  return props.images[currentIndex.value] || props.images[0];
+});
+
+// Watch for initialIndex changes
+watch(() => props.initialIndex, (newIndex) => {
+  if (newIndex >= 0 && newIndex < props.images.length) {
+    currentIndex.value = newIndex;
+  }
+});
+
+// Watch for images array changes
+watch(() => props.images, () => {
+  if (currentIndex.value >= props.images.length) {
+    currentIndex.value = Math.max(0, props.images.length - 1);
+  }
+});
+
+const nextImage = () => {
+  if (props.images.length > 1) {
+    currentIndex.value = (currentIndex.value + 1) % props.images.length;
+  }
+};
+
+const previousImage = () => {
+  if (props.images.length > 1) {
+    currentIndex.value = currentIndex.value === 0
+      ? props.images.length - 1
+      : currentIndex.value - 1;
+  }
+};
+
+const close = () => {
+  isOpen.value = false;
+};
+
+// Keyboard navigation
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!isOpen.value) return;
+
+  if (event.key === "ArrowLeft") {
+    previousImage();
+  } else if (event.key === "ArrowRight") {
+    nextImage();
+  } else if (event.key === "Escape") {
+    close();
+  }
+};
+
+// Add keyboard event listener when modal is open
+watch(isOpen, (open) => {
+  if (open) {
+    window.addEventListener("keydown", handleKeydown);
+  } else {
+    window.removeEventListener("keydown", handleKeydown);
+  }
+});
+</script>
+
+<style lang="scss" scoped>
+.image-preview-dialog {
+  z-index: 10000 !important; // Ensure lightbox is above other dialogs
+
+  :deep(.q-dialog__inner) {
+    padding: 0;
+  }
+}
+
+.image-preview-card {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.image-preview-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  backdrop-filter: blur(8px);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.image-preview-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  backdrop-filter: blur(8px);
+  width: 48px;
+  height: 48px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.image-preview-nav-left {
+  left: 1rem;
+}
+
+.image-preview-nav-right {
+  right: 1rem;
+}
+
+.image-preview-counter {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.image-preview-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.image-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 8px; // Match profile photo lightbox border-radius
+}
+</style>

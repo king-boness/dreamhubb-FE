@@ -32,7 +32,7 @@
             alt="category"
             class="component-postCategoryImg"
           />
-          <span class="component-postTitle">{{ category }}</span>
+          <span class="component-postTitle">{{ categoryDisplayName }}</span>
         </div>
 
         <div class="component-karmaContainer">
@@ -58,6 +58,12 @@
 import { defineProps, PropType, computed } from "vue";
 import { Post } from "src/stores/api-calls-store";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
+import { normalizePost } from "src/utils/normalizePost";
+import { useI18n } from "vue-i18n";
+import { getCategoryIcon } from "src/domain/categories";
+import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
+
+const { t } = useI18n();
 
 const props = defineProps({
   post: {
@@ -66,33 +72,49 @@ const props = defineProps({
   }
 });
 
+// Normalize post data to ensure category and subcategory objects exist
+const normalizedPost = computed(() => normalizePost(props.post as Parameters<typeof normalizePost>[0]));
+
 /* FE MAPPING */
 const headerImage = computed(() => {
-  return props.post.images?.length
-    ? props.post.images[0]
+  return normalizedPost.value.images?.length
+    ? normalizedPost.value.images[0]
     : "/images/Auth/postBackground.png";
 });
 
 const authorName = computed(() => {
-  return props.post.author_name || "Unknown User";
+  return normalizedPost.value.author_name || "Unknown User";
 });
 
 const authorPicture = computed(() => {
-  return props.post.author_picture || "/images/Auth/profilePicture.jpeg";
+  return normalizedPost.value.author_picture || "/images/Auth/profilePicture.jpeg";
 });
 
 const badge = computed(() => "verified");
 
-const category = computed(() => {
-  return props.post.category_name || "Unknown";
+// Display subcategory name (traveling/health/etc.) using i18n
+const categoryDisplayName = computed(() => {
+  const subcategorySlug = normalizedPost.value.subcategory?.slug;
+  if (!subcategorySlug) {
+    const translated = t("subcategories.other") || "Other";
+    return formatSubcategoryLabel(translated);
+  }
+  // Use i18n key: subcategories.traveling, subcategories.health, etc.
+  const i18nKey = `subcategories.${subcategorySlug}`;
+  const translated = t(i18nKey);
+  // If translation doesn't exist, return capitalized slug, then apply formatSubcategoryLabel
+  const finalText = translated !== i18nKey ? translated : subcategorySlug.charAt(0).toUpperCase() + subcategorySlug.slice(1);
+  return formatSubcategoryLabel(finalText);
 });
 
+// Category icon - use category icon (dream/problem/idea), NOT subcategory icon
 const categoryImage = computed(() => {
-  return props.post.category_image || "/images/Auth/goalPicture.png";
+  const categorySlug = normalizedPost.value.category?.slug;
+  return getCategoryIcon(categorySlug);
 });
 
 const tokens = computed(() => {
-  return props.post.tokens || 0;
+  return normalizedPost.value.tokens || 0;
 });
 </script>
 
