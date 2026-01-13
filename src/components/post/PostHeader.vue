@@ -1,0 +1,408 @@
+<template>
+  <div class="post-header">
+    <div class="post-header-bg">
+      <div class="post-header-imageWrapper" :style="imageWrapperStyle">
+        <PostImagesCarousel
+          v-if="images && images.length > 0"
+          :images="images"
+          :auto-slide="autoSlide"
+          :show-progress="showProgress"
+          :show-arrows="showArrows"
+          :show-dots="showDots"
+          alt="Post image"
+          :image-style="imageStyle"
+          @image-click="$emit('image-click', $event)"
+        />
+        <div
+          v-else-if="coverImage"
+          class="post-header-img"
+          :style="{ backgroundImage: `url(${coverImage})` }"
+        ></div>
+      </div>
+
+      <!-- GRADIENT -->
+      <div class="post-header-blurContainer"></div>
+
+      <!-- TOP ICONS -->
+      <div class="post-header-topIcons">
+        <q-btn
+          round
+          flat
+          dense
+          class="post-header-iconBtn post-header-iconBtn--left"
+          :icon="closeIcon"
+          @click="$emit('close')"
+        />
+
+        <div v-if="showShareAndLike" class="post-header-topIconsRight">
+          <q-btn
+            round
+            flat
+            dense
+            class="post-header-iconBtn"
+            :icon="shareIcon"
+            @click="$emit('share')"
+          />
+          <button
+            class="post-header-heartBtn"
+            :class="{ 'post-header-heartBtn--liked': isLiked }"
+            @click.stop="$emit('like')"
+          >
+            <img
+              :src="isLiked ? '/post_icons/hearth_s.svg' : '/header_icons/hearth_ns.svg'"
+              alt="Like"
+              class="post-header-heartIcon"
+            />
+          </button>
+        </div>
+      </div>
+
+      <!-- TITLE + META OVERLAY -->
+      <div class="post-header-infoOverlay">
+        <!-- CATEGORY CHIP - moved above title -->
+        <div class="post-header-chipRow">
+          <div class="post-header-categoryPill">
+            <img
+              v-if="categoryIcon"
+              :src="categoryIcon"
+              class="post-header-categoryIcon"
+              alt=""
+            />
+            <span class="post-header-categoryText">
+              {{ categoryName }}
+            </span>
+          </div>
+        </div>
+        <h1 class="post-header-title">{{ title }}</h1>
+        <div class="post-header-metaRow">
+          <div class="post-header-metaItem">
+            <q-icon
+              class="post-header-metaIcon"
+              :name="'img:/assets/icons/ui/icon-date.svg'"
+            />
+            <span>{{ date }}</span>
+          </div>
+          <div class="post-header-metaItem">
+            <q-icon
+              class="post-header-metaIcon"
+              :name="'img:/assets/icons/ui/icon-location.svg'"
+            />
+            <span>{{ location }}</span>
+          </div>
+          <div class="post-header-metaItem">
+            <q-icon
+              class="post-header-metaIcon"
+              :name="'img:/assets/icons/ui/icon-views.svg'"
+            />
+            <span>{{ views }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import PostImagesCarousel from "./PostImagesCarousel.vue";
+
+interface Props {
+  // Images
+  images?: string[];
+  coverImage?: string | null;
+  // Carousel options
+  autoSlide?: boolean;
+  showProgress?: boolean;
+  showArrows?: boolean;
+  showDots?: boolean;
+  imageStyle?: Record<string, unknown>;
+  imageWrapperStyle?: Record<string, unknown>;
+  // Content
+  title: string;
+  date: string;
+  location: string;
+  views: number | string;
+  categoryName: string;
+  categoryIcon?: string | null;
+  // Icons
+  closeIcon?: string;
+  shareIcon?: string;
+  // State
+  isLiked?: boolean;
+  // Show/hide share and like buttons
+  showShareAndLike?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  images: () => [],
+  coverImage: null,
+  autoSlide: true,
+  showProgress: true,
+  showArrows: true,
+  showDots: true,
+  imageStyle: () => ({}),
+  imageWrapperStyle: () => ({}),
+  categoryIcon: null,
+  closeIcon: "img:/assets/icons/post/icon-close.svg",
+  shareIcon: "img:/assets/icons/post/icon-share.svg",
+  isLiked: false,
+  showShareAndLike: true
+});
+
+defineEmits<{
+  close: [];
+  share: [];
+  like: [];
+  "image-click": [index: number];
+}>();
+</script>
+
+<style lang="scss" scoped>
+.post-header {
+  // Scoped styles to prevent affecting PostDetailPage
+  width: 100%;
+  height: 100%;
+
+  .post-header-bg {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 360px;
+    overflow: hidden;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+    margin-bottom: 0;
+
+    .post-header-imageWrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0 0 24px 24px;
+      overflow: hidden;
+      will-change: transform, filter, opacity;
+      transition:
+        transform 0.15s ease-out,
+        filter 0.15s ease-out,
+        opacity 0.15s ease-out;
+    }
+
+    .post-header-img {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .post-header-blurContainer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 175px;
+      border-radius: 0 0 24px 24px;
+      background: linear-gradient(
+        to bottom,
+        rgba(1, 3, 16, 0) 0%,
+        rgba(1, 3, 16, 0.9) 60%,
+        rgba(1, 3, 16, 1) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .post-header-topIcons {
+      position: absolute;
+      top: calc(3rem - 21px); // Moved up by 21px (was 3rem, now calc(3rem - 21px) to move icons 21px higher)
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0 1rem;
+      z-index: 15;
+      pointer-events: none;
+
+      > * {
+        pointer-events: auto;
+      }
+
+      .post-header-topIconsRight {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+    }
+
+    .post-header-iconBtn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45) !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(14px);
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        background: rgba(0, 0, 0, 0.6) !important;
+      }
+
+      &:active {
+        transform: scale(0.95);
+        background: rgba(0, 0, 0, 0.75) !important;
+      }
+    }
+
+    .post-header-heartBtn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45) !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(14px);
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        background: rgba(0, 0, 0, 0.6) !important;
+      }
+
+      &:active {
+        transform: scale(0.95);
+        background: rgba(0, 0, 0, 0.75) !important;
+      }
+
+      &--liked {
+        .post-header-heartIcon {
+          animation: heartLike 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+      }
+    }
+
+    @keyframes heartLike {
+      0% {
+        transform: scale(1);
+      }
+      25% {
+        transform: scale(1.3);
+      }
+      50% {
+        transform: scale(0.9);
+      }
+      75% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .post-header-heartIcon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .post-header-chipRow {
+      position: relative;
+      margin-bottom: 0.75rem; // Spacing above title
+      padding: 0;
+      z-index: 12;
+      pointer-events: none;
+      width: 100%;
+    }
+
+    .post-header-categoryPill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(14px);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      pointer-events: auto;
+    }
+
+    .post-header-categoryIcon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+    }
+
+    .post-header-categoryText {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #ffffff;
+      /* text-transform removed - formatting is handled by formatSubcategoryLabel() in JavaScript */
+    }
+
+    .post-header-infoOverlay {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 16px 20px; // Match feed card body padding (16px horizontal, same as .postCard-body)
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      box-sizing: border-box;
+      align-items: flex-start; // Align category chip to left (same as title)
+    }
+
+    .post-header-title {
+      margin: 0;
+      margin-bottom: 8px; // Match feed card title margin (exactly as .postCard-title)
+      padding: 0; // Match feed card title padding (exactly as .postCard-title)
+      font-size: 1.15rem; // Match feed card title size (exactly as .postCard-title)
+      font-weight: 700; // Match feed card title weight (exactly as .postCard-title)
+      color: #ffffff; // Match feed card title color (exactly as .postCard-title)
+      line-height: 1.3; // Match feed card title line-height (exactly as .postCard-title)
+      text-align: left; // Match feed card title alignment (exactly as .postCard-title)
+      width: 100%; // Match feed card title width (exactly as .postCard-title)
+      box-sizing: border-box; // Match feed card title box-sizing (exactly as .postCard-title)
+    }
+
+    .post-header-metaRow {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .post-header-metaItem {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .post-header-metaIcon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        opacity: 0.7;
+      }
+
+      span {
+        line-height: 1.2;
+      }
+    }
+  }
+}
+</style>
