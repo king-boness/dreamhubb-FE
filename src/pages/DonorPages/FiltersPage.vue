@@ -16,7 +16,7 @@
       <!-- STEP 1: What is Your Goal (problem/dream/idea) -->
       <WhatIsYourGoal
         v-if="currentStep === 1"
-        v-model="filterGoal"
+        v-model="filterCategory"
         :hide-header="true"
         :hide-footer="true"
         @next="handleNext"
@@ -27,9 +27,10 @@
       <!-- STEP 2: What Kind of Dream (category) -->
       <WhatKindOfDream
         v-else-if="currentStep === 2"
-        v-model="filterCategory"
+        :model-value="filterSubcategory"
         :hide-header="true"
         :hide-footer="true"
+        @update:modelValue="handleCategoryUpdate"
         @next="handleNext"
         @search="handleSearch"
         @back="handleBack"
@@ -74,11 +75,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
+import { useAuthStore } from "src/stores/auth";
 import { api } from "boot/axios";
+import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
@@ -91,9 +94,9 @@ const preferencesStore = usePreferencesStore();
 // Current step (1-3)
 const currentStep = ref(1);
 
-// Filter values - synced with store
-const filterGoal = ref<"problem" | "dream" | "idea" | null>(postsStore.filters.type);
-const filterCategory = ref<string | null>(null);
+// Filter values - synced with store - using new API
+const filterCategory = ref<CategorySlug | null>(postsStore.filters.categorySlug);
+const filterSubcategory = ref<SubcategorySlug | null>(postsStore.filters.subcategorySlug);
 const filterContinent = ref("");
 const filterCountry = ref("");
 const filterCityId = ref<number | null>(null); // Changed from filterCity (string) to filterCityId (number)
@@ -116,31 +119,50 @@ const currentNextLabel = computed(() => {
 });
 
 const handleNext = () => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 handleNext called:", {
+      currentStep: currentStep.value,
+      filterCategory: filterCategory.value,
+      filterSubcategory: filterSubcategory.value
+    });
+  }
+
   if (currentStep.value < 3) {
+    // Ensure filterSubcategory is saved before moving to next step
+    if (currentStep.value === 2) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 Moving from step 2 to step 3. filterSubcategory:", filterSubcategory.value);
+        if (!filterSubcategory.value) {
+          console.error("❌ filterSubcategory is null when moving from step 2 to step 3!");
+        }
+      }
+    }
     currentStep.value++;
   } else {
     // Apply filters and go back to posts page
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 handleNext: About to call applyFilters from step 3");
+    }
     applyFilters();
   }
 };
 
-// Handle search from step 1 (only type selected, no category)
+// Handle search from step 1 (only category selected, no subcategory) - using new API
 const handleSearchFromStep1 = () => {
-  // Ak sme v kroku 1, resetovať categoryId na null (len typ sa aplikuje)
+  // Ak sme v kroku 1, resetovať subcategorySlug na null (len category sa aplikuje)
   if (currentStep.value === 1) {
     if (process.env.NODE_ENV === "development") {
-      console.log("🔍 Applying filters from step 1 (type only):", {
-        type: filterGoal.value,
-        categoryId: null
+      console.log("🔍 Applying filters from step 1 (category only):", {
+        categorySlug: filterCategory.value,
+        subcategorySlug: null
       });
     }
     postsStore.setFilters({
-      type: filterGoal.value,
-      categoryId: null, // Explicitne nastaviť na null, ak nie je vybraná podkategória
-      feCategory: null // Explicitne nastaviť na null, ak nie je vybraná podkategória
+      categorySlug: filterCategory.value,
+      subcategorySlug: null // Explicitne nastaviť na null, ak nie je vybraná podkategória
     });
     preferencesStore.setLastUsedFeedFilters({
-      postType: filterGoal.value,
+      postType: filterCategory.value, // Legacy key for preferences store
       subcategory: null,
       location: {
         continentId: null,
@@ -153,6 +175,15 @@ const handleSearchFromStep1 = () => {
   } else {
     // Ak sme v kroku 2 alebo 3, použiť normálny applyFilters
     applyFilters();
+  }
+};
+
+// Handle subcategory update from WhatKindOfDream component - using new API
+const handleCategoryUpdate = (value: string) => {
+  filterSubcategory.value = value;
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 handleCategoryUpdate called with value:", value);
+    console.log("🔍 filterCategory.value after update:", filterCategory.value);
   }
 };
 
@@ -171,7 +202,7 @@ const handleBack = (event?: Event) => {
     currentStep.value = previousStep;
     // Reset values for the step we're going back to
     if (previousStep === 1) {
-      filterCategory.value = null;
+      filterSubcategory.value = null; // Reset subcategory when going back to step 1
       filterContinent.value = "";
       filterCountry.value = "";
       filterCityId.value = null;
@@ -186,8 +217,12 @@ const handleBack = (event?: Event) => {
 const applyFilters = async () => {
   if (process.env.NODE_ENV === "development") {
     console.log("🔍 Applying filters:", {
-      type: filterGoal.value,
-      feCategory: filterCategory.value,
+      categorySlug: filterCategory.value,
+      subcategorySlug: filterSubcategory.value,
+      filterSubcategory_type: typeof filterSubcategory.value,
+      filterSubcategory_isNull: filterSubcategory.value === null,
+      filterSubcategory_isUndefined: filterSubcategory.value === undefined,
+      filterSubcategory_value: filterSubcategory.value,
       currentStep: currentStep.value,
       location: {
         continent: filterContinent.value,
@@ -197,16 +232,35 @@ const applyFilters = async () => {
     });
   }
 
+  // Ensure filterSubcategory is set if we're on step 2 or 3 - using new API
+  if ((currentStep.value === 2 || currentStep.value === 3) && !filterSubcategory.value) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("❌ filterSubcategory is null but we're on step 2 or 3. This should not happen.");
+      console.error("❌ Current step:", currentStep.value, "filterSubcategory:", filterSubcategory.value);
+      console.error("❌ filterCategory:", filterCategory.value);
+    }
+    // Don't proceed if subcategory is required but not set
+    return;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 applyFilters: About to set filters with:", {
+      categorySlug: filterCategory.value,
+      subcategorySlug: filterSubcategory.value,
+      filterSubcategory_type: typeof filterSubcategory.value,
+      filterSubcategory_value: filterSubcategory.value
+    });
+  }
+
   // Get country and continent IDs if needed (only if city is not selected)
   let countryId: number | null = null;
   let continentId: number | null = null;
 
-  // If city is selected, use it directly (no lookup needed)
+  // If city is selected, use it directly (no lookup needed) - using new API
   if (filterCityId.value && filterCityId.value > 0) {
     postsStore.setFilters({
-      type: filterGoal.value,
-      categoryId: null,
-      feCategory: filterCategory.value,
+      categorySlug: filterCategory.value,
+      subcategorySlug: filterSubcategory.value,
       cityId: Number(filterCityId.value),
       countryId: null,
       continentId: null
@@ -227,18 +281,16 @@ const applyFilters = async () => {
 
         if (countryId && countryId > 0) {
           postsStore.setFilters({
-            type: filterGoal.value,
-            categoryId: null,
-            feCategory: filterCategory.value,
+            categorySlug: filterCategory.value,
+            subcategorySlug: filterSubcategory.value,
             countryId: Number(countryId),
             cityId: null,
             continentId: null
           });
         } else if (continentId && continentId > 0) {
           postsStore.setFilters({
-            type: filterGoal.value,
-            categoryId: null,
-            feCategory: filterCategory.value,
+            categorySlug: filterCategory.value,
+            subcategorySlug: filterSubcategory.value,
             continentId: Number(continentId),
             countryId: null,
             cityId: null
@@ -249,22 +301,51 @@ const applyFilters = async () => {
       if (process.env.NODE_ENV === "development") {
         console.error("❌ Failed to fetch location IDs:", error);
       }
+      // Fallback: apply filters without location - using new API
+      postsStore.setFilters({
+        categorySlug: filterCategory.value,
+        subcategorySlug: filterSubcategory.value
+      });
     }
   } else {
-    // No location filters
+    // No location filters - using new API
     postsStore.setFilters({
-      type: filterGoal.value,
-      categoryId: null,
-      feCategory: filterCategory.value,
-      continentId: null,
-      countryId: null,
-      cityId: null
+      categorySlug: filterCategory.value,
+      subcategorySlug: filterSubcategory.value
     });
   }
 
-  preferencesStore.setLastUsedFeedFilters({
-    postType: filterGoal.value,
-    subcategory: filterCategory.value,
+  // Ensure filterSubcategory is set before saving - but only if we're actually on step 2 or 3
+  // If we're on step 1, filterSubcategory can be null (user only selected category)
+  if (currentStep.value >= 2 && !filterSubcategory.value) {
+    console.error("❌ filterSubcategory is null when applying filters from step 2 or 3!");
+    console.error("❌ This should not happen. filterSubcategory:", filterSubcategory.value);
+    console.error("❌ currentStep:", currentStep.value);
+    console.error("❌ filterCategory:", filterCategory.value);
+    // Don't proceed if subcategory is required but not set
+    return;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 Saving filters to preferences:", {
+      postType: filterCategory.value, // Legacy key for preferences store
+      subcategory: filterSubcategory.value,
+      location: {
+        continentId,
+        countryId,
+        cityId: filterCityId.value
+      }
+    });
+  }
+
+  // DEBUG: Log filters before saving
+  console.log("🔍 DEBUG filters before save to localStorage", {
+    postType: filterCategory.value, // Legacy key for preferences store
+    subcategory: filterSubcategory.value,
+    subcategory_type: typeof filterSubcategory.value,
+    subcategory_isNull: filterSubcategory.value === null,
+    subcategory_value: filterSubcategory.value,
+    currentStep: currentStep.value,
     location: {
       continentId,
       countryId,
@@ -272,7 +353,67 @@ const applyFilters = async () => {
     }
   });
 
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 About to save filters to preferences:", {
+      postType: filterCategory.value, // Legacy key for preferences store
+      subcategory: filterSubcategory.value,
+      subcategory_type: typeof filterSubcategory.value,
+      subcategory_isNull: filterSubcategory.value === null,
+      location: {
+        continentId,
+        countryId,
+        cityId: filterCityId.value
+      }
+    });
+  }
+
+  // DEBUG: Log what we're about to save
+  console.log("[DEBUG] [applyFilters] About to save to localStorage", {
+    postType: filterCategory.value, // Legacy key for preferences store
+    subcategory: filterSubcategory.value,
+    subcategory_type: typeof filterSubcategory.value,
+    subcategory_value: filterSubcategory.value,
+    location: {
+      continentId,
+      countryId,
+      cityId: filterCityId.value
+    }
+  });
+
+  preferencesStore.setLastUsedFeedFilters({
+    postType: filterCategory.value, // Legacy key for preferences store
+    subcategory: filterSubcategory.value,
+    location: {
+      continentId,
+      countryId,
+      cityId: filterCityId.value
+    }
+  });
+
+  // DEBUG: Verify what was actually saved
+  const authStore = useAuthStore();
+  const userId = authStore.user?.id;
+  const key = `dreamhubb_donor_filters_${userId ?? "guest"}`;
+  const saved = localStorage.getItem(key);
+  console.log("[DEBUG] [applyFilters] What was actually saved to localStorage:", saved);
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 Filters saved. Current postsStore filters:", postsStore.filters);
+    console.log("🔍 About to navigate to donor-posts. Filters in store:", {
+      categorySlug: postsStore.filters.categorySlug,
+      subcategorySlug: postsStore.filters.subcategorySlug
+    });
+    // Verify what was actually saved to localStorage
+    const authStore2 = useAuthStore();
+    const userId2 = authStore2.user?.id;
+    const key2 = `dreamhubb_donor_filters_${userId2 ?? "guest"}`;
+    const saved2 = localStorage.getItem(key2);
+    console.log("🔍 What was actually saved to localStorage:", saved2);
+  }
+
   // Navigovať späť na posts page a načítať posty s filtrami
+  // Use nextTick to ensure filters are saved before navigation
+  await nextTick();
   router.push({ name: "donor-posts" });
   // PostsPage automaticky načíta posty pri mount alebo zmene tabu s filtrami zo store
 };
@@ -288,22 +429,45 @@ const handleSearch = () => {
   }
 };
 
-// Sync filter values with store on mount
+// Sync filter values with store on mount - using new API
 onMounted(() => {
   // Načítať existujúce filtre zo store
-  filterGoal.value = postsStore.filters.type;
-  // categoryId sa musí mapovať späť na category name - TODO keď bude endpoint
-  // filterCategory.value = getCategoryName(postsStore.filters.categoryId);
+  filterCategory.value = postsStore.filters.categorySlug;
+  filterSubcategory.value = postsStore.filters.subcategorySlug;
   currentStep.value = 1;
 });
 
-// Watch filter changes and update store immediately (for real-time updates)
-watch(filterGoal, (newVal) => {
-  postsStore.setFilters({ type: newVal });
-  // Ak sa zmení typ, resetovať categoryId (ak nie je vybraná podkategória)
-  if (!filterCategory.value) {
-    postsStore.setFilters({ categoryId: null });
+// Watch filterCategory changes to ensure it's synced
+watch(filterCategory, (newVal, oldVal) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 filterCategory changed:", {
+      old: oldVal,
+      new: newVal,
+      type: typeof newVal,
+      isNull: newVal === null,
+      isUndefined: newVal === undefined,
+      currentStep: currentStep.value
+    });
   }
+}, { immediate: true });
+
+// Watch currentStep to see when it changes and what filterCategory value is
+watch(currentStep, (newStep, oldStep) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 currentStep changed:", {
+      old: oldStep,
+      new: newStep,
+      filterCategory: filterCategory.value,
+      filterSubcategory: filterSubcategory.value
+    });
+  }
+});
+
+// Watch filterCategory changes and update store immediately (for real-time updates) - using new API
+watch(filterCategory, (newVal) => {
+  postsStore.setFilters({ categorySlug: newVal });
+  // Ak sa zmení category, resetovať subcategory
+  filterSubcategory.value = null;
 });
 
 // Odstránený watch - filtre sa aplikujú len cez applyFilters() alebo handleSearchFromStep1()

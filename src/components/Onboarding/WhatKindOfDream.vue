@@ -16,9 +16,11 @@
         <!-- Flicking carousel -->
         <div class="dream-carousel-wrapper">
           <Flicking
+            ref="flickingInstance"
             :options="flickingOptions"
             :plugins="flickingPlugins"
             @changed="handleFlickingChanged"
+            @ready="handleFlickingReady"
             class="dream-flicking"
           >
             <div
@@ -52,9 +54,11 @@
         <!-- Flicking carousel -->
       <div class="dream-carousel-wrapper">
         <Flicking
+          ref="flickingInstance"
           :options="flickingOptions"
           :plugins="flickingPlugins"
           @changed="handleFlickingChanged"
+          @ready="handleFlickingReady"
           class="dream-flicking"
         >
           <div
@@ -105,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch, nextTick, onMounted } from "vue";
 import { Fade, Perspective } from "@egjs/flicking-plugins";
 import Flicking from "@egjs/vue3-flicking";
 import InfoModal from "./InfoModal.vue";
@@ -146,8 +150,96 @@ const categories: Category[] = [
   { id: "other", label: "other", icon: "more_horiz", iconFile: "other" }
 ];
 
-const localValue = ref<string>(props.modelValue || categories[0].id);
+// Initialize localValue with modelValue, but don't default to first category if modelValue is null
+// This allows the parent to control the initial value
+const localValue = ref<string>(props.modelValue ?? categories[0].id);
 const showInfoModal = ref(false);
+const flickingInstance = ref<InstanceType<typeof Flicking> | null>(null);
+const isFlickingReady = ref(false);
+
+// Watch for flickingInstance changes and synchronize when it becomes available
+watch(() => flickingInstance.value, async (newInstance) => {
+  if (newInstance && !isFlickingReady.value) {
+    // Check if it's a Vue component wrapper
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const instance = (newInstance as any)?.flicking || newInstance;
+    if (instance && typeof instance.moveTo === "function") {
+      isFlickingReady.value = true;
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await syncFlickingToValue();
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 WhatKindOfDream: flickingInstance watch - Synchronized to value:", localValue.value);
+      }
+    }
+  }
+}, { immediate: true });
+
+// Synchronize Flicking position with selected value
+const syncFlickingToValue = async () => {
+  if (!flickingInstance.value || !isFlickingReady.value) return;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const instance = (flickingInstance.value as any)?.flicking || flickingInstance.value;
+  if (!instance || typeof instance.moveTo !== "function") return;
+
+  const targetIndex = categories.findIndex(cat => cat.id === localValue.value);
+  if (targetIndex >= 0) {
+    try {
+      instance.moveTo(targetIndex, 0);
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 WhatKindOfDream: Synchronized Flicking to index", targetIndex, "for value", localValue.value);
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("⚠️ WhatKindOfDream: Failed to sync Flicking:", error);
+      }
+    }
+  }
+};
+
+// Watch for changes to modelValue prop and update localValue immediately (but only if different)
+// IMPORTANT: We don't sync Flicking here on initial mount if value is already correct
+// This prevents animation when returning to the page
+watch(() => props.modelValue, async (newVal, oldVal) => {
+  // Skip if this is the initial watch call (oldVal is undefined) and value matches
+  if (oldVal === undefined && newVal === localValue.value) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 WhatKindOfDream: Initial watch skipped - value already matches:", newVal);
+    }
+    return;
+  }
+
+  if (newVal !== null && newVal !== undefined && newVal !== localValue.value) {
+    localValue.value = newVal;
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 WhatKindOfDream: modelValue prop changed, updating localValue to:", newVal);
+    }
+    // Only sync Flicking if it's ready (not on initial mount if value is correct)
+    if (isFlickingReady.value) {
+      await nextTick();
+      await syncFlickingToValue();
+    }
+  }
+}, { immediate: true });
+
+// Handle Flicking ready event
+const handleFlickingReady = async () => {
+  isFlickingReady.value = true;
+  await nextTick();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await syncFlickingToValue();
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatKindOfDream: Flicking ready - Synchronized to value:", localValue.value);
+  }
+};
+
+// Try to sync on mount as well
+onMounted(async () => {
+  await nextTick();
+  await new Promise(resolve => setTimeout(resolve, 200));
+  await syncFlickingToValue();
+});
 
 const progressWidth = computed(() => {
   return `${props.progress ?? 60}%`;
@@ -159,10 +251,6 @@ const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
 const handleSearch = () => {
   emit("search");
 };
-
-const currentCategory = computed(() => {
-  return categories.find(cat => cat.id === localValue.value) || categories[0];
-});
 
 const currentInfo = computed(() => {
   // Map category id to config key (some might differ)
@@ -201,6 +289,11 @@ const flickingPlugins = [
 const handleFlickingChanged = (e: { index: number }) => {
   const selectedCategory = categories[e.index];
   localValue.value = selectedCategory.id;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatKindOfDream: handleFlickingChanged - emitting:", localValue.value);
+  }
+
   emit("update:modelValue", localValue.value);
 };
 
@@ -214,8 +307,27 @@ const handleInfoCta = () => {
 };
 
 const handleNext = () => {
+  // Ensure we emit the current value before proceeding
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatKindOfDream: handleNext called - before emit", {
+      localValue: localValue.value,
+      modelValue: props.modelValue
+    });
+  }
+
+  // Always emit update:modelValue first
   emit("update:modelValue", localValue.value);
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatKindOfDream: handleNext - after emit update:modelValue, emitting next event");
+  }
+
+  // Then emit next event
   emit("next");
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatKindOfDream: handleNext - next event emitted");
+  }
 };
 </script>
 
@@ -248,6 +360,7 @@ const handleNext = () => {
   gap: 16px;
   margin-bottom: 20px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .dream-backBtn {
@@ -274,8 +387,12 @@ const handleNext = () => {
 }
 
 .dream-progress {
-  flex: 1;
-  height: 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  max-width: calc(100% - 120px);
+  height: 3px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;

@@ -16,9 +16,11 @@
         <!-- Flicking carousel -->
         <div class="goal-carousel-wrapper">
           <Flicking
+            ref="flickingInstance"
             :options="flickingOptions"
             :plugins="flickingPlugins"
             @changed="handleFlickingChanged"
+            @ready="handleFlickingReady"
             class="goal-flicking"
           >
             <div
@@ -50,13 +52,15 @@
     <template v-else>
       <div class="goal-content">
         <!-- Flicking carousel -->
-        <div class="goal-carousel-wrapper">
-          <Flicking
-            :options="flickingOptions"
-            :plugins="flickingPlugins"
-            @changed="handleFlickingChanged"
-            class="goal-flicking"
-          >
+      <div class="goal-carousel-wrapper">
+        <Flicking
+          ref="flickingInstance"
+          :options="flickingOptions"
+          :plugins="flickingPlugins"
+          @changed="handleFlickingChanged"
+          @ready="handleFlickingReady"
+          class="goal-flicking"
+        >
             <div
               v-for="option in options"
               :key="option.id"
@@ -105,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch, nextTick, onMounted } from "vue";
 import { Fade, Perspective } from "@egjs/flicking-plugins";
 import Flicking from "@egjs/vue3-flicking";
 import InfoModal from "./InfoModal.vue";
@@ -128,8 +132,114 @@ const emit = defineEmits<{
   search: [];
 }>();
 
+// Initialize with "dream" as default (index 1 in options array)
 const localValue = ref<"problem" | "dream" | "idea">(props.modelValue || "dream");
 const showInfoModal = ref(false);
+const flickingInstance = ref<InstanceType<typeof Flicking> | null>(null);
+const isFlickingReady = ref(false);
+
+// Watch for flickingInstance changes and synchronize when it becomes available
+watch(() => flickingInstance.value, async (newInstance) => {
+  if (newInstance && !isFlickingReady.value) {
+    // Check if it's a Vue component wrapper
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const instance = (newInstance as any)?.flicking || newInstance;
+    if (instance && typeof instance.moveTo === "function") {
+      isFlickingReady.value = true;
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await syncFlickingToValue();
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 WhatIsYourGoal: flickingInstance watch - Synchronized to value:", localValue.value);
+      }
+    }
+  }
+}, { immediate: true });
+
+// Synchronize Flicking position with selected value
+const syncFlickingToValue = async () => {
+  if (!flickingInstance.value) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 WhatIsYourGoal: syncFlickingToValue - instance not available");
+    }
+    return;
+  }
+
+  const targetIndex = options.findIndex(opt => opt.value === localValue.value);
+  if (targetIndex < 0) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ WhatIsYourGoal: targetIndex not found for value:", localValue.value);
+    }
+    return;
+  }
+
+  try {
+    // Get the actual Flicking instance (might be wrapped in Vue component)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const flicking = (flickingInstance.value as any)?.flicking || flickingInstance.value;
+
+    // Check if moveTo method exists
+    if (typeof flicking?.moveTo !== "function") {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("⚠️ WhatIsYourGoal: moveTo method not found on Flicking instance", flicking);
+      }
+      return;
+    }
+
+    // Use moveTo to synchronize position without animation (duration: 0)
+    // Use requestAnimationFrame to ensure DOM is ready
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    flicking.moveTo(targetIndex, 0);
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 WhatIsYourGoal: Synchronized Flicking to index", targetIndex, "for value", localValue.value);
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ WhatIsYourGoal: Error synchronizing Flicking:", error);
+    }
+  }
+};
+
+// Watch for changes to modelValue prop and update localValue immediately (but only if different)
+// IMPORTANT: We don't sync Flicking here on initial mount if value is already correct
+// This prevents animation when returning to the page
+watch(() => props.modelValue, async (newVal, oldVal) => {
+  // Skip if this is the initial watch call (oldVal is undefined) and value matches
+  if (oldVal === undefined && newVal === localValue.value) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 WhatIsYourGoal: Initial watch skipped - value already matches:", newVal);
+    }
+    return;
+  }
+
+  if (newVal !== null && newVal !== undefined && newVal !== localValue.value) {
+    localValue.value = newVal;
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 WhatIsYourGoal: modelValue prop changed, updating localValue to:", newVal);
+    }
+    // Only sync Flicking if it's ready (not on initial mount if value is correct)
+    if (isFlickingReady.value) {
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 50));
+      await syncFlickingToValue();
+    }
+  } else if (newVal === null || newVal === undefined) {
+    // If modelValue is null/undefined, default to "dream"
+    if (localValue.value !== "dream") {
+      localValue.value = "dream";
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 WhatIsYourGoal: modelValue is null, defaulting to dream");
+      }
+      // Only sync Flicking if it's ready
+      if (isFlickingReady.value) {
+        await nextTick();
+        await new Promise(resolve => setTimeout(resolve, 50));
+        await syncFlickingToValue();
+      }
+    }
+  }
+}, { immediate: true });
 
 const progressWidth = computed(() => {
   return `${props.progress ?? 40}%`;
@@ -150,8 +260,17 @@ const options = [
 ];
 
 const flickingOptions = computed(() => {
-  // Default to dream (index 1) if no value set
-  const defaultIdx = localValue.value === "problem" ? 0 : localValue.value === "dream" ? 1 : 2;
+  // Default to dream (index 1) if no value set or if value is null/undefined
+  let defaultIdx = 1; // dream is default (index 1)
+  if (localValue.value === "problem") {
+    defaultIdx = 0;
+  } else if (localValue.value === "dream") {
+    defaultIdx = 1;
+  } else if (localValue.value === "idea") {
+    defaultIdx = 2;
+  }
+  // If localValue is null/undefined, defaultIdx stays 1 (dream)
+
   return {
     horizontal: false, // Vertical scrolling
     inputType: ["mouse", "touch", "pointer"],
@@ -178,6 +297,57 @@ const handleFlickingChanged = (e: { index: number }) => {
   emit("update:modelValue", localValue.value);
 };
 
+// Handle Flicking ready event - synchronize position when component is ready
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handleFlickingReady = async (e: any) => {
+  // The @ready event passes the Flicking instance directly
+  // Store it for later use
+  if (e) {
+    // Check if it's the Flicking instance or a wrapper
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const instance = (e as any).flicking || e;
+    if (instance && typeof instance.moveTo === "function") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      flickingInstance.value = instance as any;
+      isFlickingReady.value = true;
+
+      // Wait for next tick and a small delay to ensure Flicking is fully initialized
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Synchronize position with current value
+      await syncFlickingToValue();
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 WhatIsYourGoal: Flicking ready, synchronized to value:", localValue.value);
+      }
+    }
+  }
+};
+
+// Also synchronize on mount (in case @ready event doesn't fire or component is re-mounted)
+onMounted(async () => {
+  // Wait for Flicking to initialize - use multiple delays to ensure it's ready
+  await nextTick();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await nextTick();
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Try to get Flicking instance from ref
+  if (flickingInstance.value) {
+    // Check if it's a Vue component wrapper
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const instance = (flickingInstance.value as any)?.flicking || flickingInstance.value;
+    if (instance && typeof instance.moveTo === "function") {
+      isFlickingReady.value = true;
+      await syncFlickingToValue();
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔍 WhatIsYourGoal: onMounted - Synchronized to value:", localValue.value);
+      }
+    }
+  }
+});
+
 const currentInfo = computed(() => {
   return goalInfo[localValue.value] || goalInfo.dream;
 });
@@ -198,8 +368,26 @@ const handleInfoCta = () => {
 };
 
 const handleNext = () => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatIsYourGoal: handleNext called - before emit", {
+      localValue: localValue.value,
+      modelValue: props.modelValue
+    });
+  }
+
+  // Always emit update:modelValue first
   emit("update:modelValue", localValue.value);
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatIsYourGoal: handleNext - after emit update:modelValue, emitting next event");
+  }
+
+  // Then emit next event
   emit("next");
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 WhatIsYourGoal: handleNext - next event emitted");
+  }
 };
 </script>
 
@@ -232,6 +420,7 @@ const handleNext = () => {
   gap: 16px;
   margin-bottom: 20px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .goal-backBtn {
@@ -258,8 +447,12 @@ const handleNext = () => {
 }
 
 .goal-progress {
-  flex: 1;
-  height: 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  max-width: calc(100% - 120px);
+  height: 3px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;

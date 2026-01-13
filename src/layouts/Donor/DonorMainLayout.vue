@@ -177,6 +177,7 @@ import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
+import { useNotificationsStore } from "src/stores/notifications";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 
 const { t } = useI18n();
@@ -184,6 +185,7 @@ const { t } = useI18n();
 const $q = useQuasar();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
+const notificationsStore = useNotificationsStore();
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
@@ -235,7 +237,8 @@ const onScroll = () => {
 
 // Token balance from auth store (falls back to 30 if not loaded)
 const tokenBalance = computed(() => authStore.user?.tokens ?? 50);
-const notificationCount = ref(1);
+// Notification count from notifications store
+const notificationCount = computed(() => notificationsStore.unreadCount);
 const isSwitchingRole = ref(false);
 
 // Active navigation state
@@ -249,30 +252,37 @@ const checkBodyClass = () => {
 };
 
 // Computed for footer icons
-const navIconHome = computed(() => activeNav.value === "home" ? "/footer_icons/home_s.svg" : "/footer_icons/home.svg");
+const navIconHome = computed(() => {
+  // If selected, always use _s version
+  if (activeNav.value === "home") {
+    return "/footer_icons/home_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/home_lm.svg" : "/footer_icons/home_ns.svg";
+});
 const navIconDiscover = computed(() => {
   // If selected, always use _s version
   if (activeNav.value === "discover") {
     return "/footer_icons/compass_s.svg";
   }
-  // If not selected: light mode uses _lm, dark mode uses normal
-  return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass.svg";
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass_ns.svg";
 });
 const navIconNotifications = computed(() => {
   // If selected, always use _s version
   if (activeNav.value === "notifications") {
     return "/footer_icons/bell_s.svg";
   }
-  // If not selected: light mode uses _lm, dark mode uses normal
-  return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell.svg";
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell_ns.svg";
 });
 const navIconProfile = computed(() => {
   // If selected, always use _s version
   if (activeNav.value === "profile") {
     return "/footer_icons/profile_s.svg";
   }
-  // If not selected: light mode uses _lm, dark mode uses normal
-  return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile.svg";
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile_ns.svg";
 });
 
 // Check if we're on a settings sub-page
@@ -284,11 +294,12 @@ const isSettingsSubPage = computed(() => {
 // Header/Footer visibility logic
 const shouldShowHeader = computed(() => {
   const routeName = route.name?.toString() || "";
-  // Hide header on detail pages, search, etc.
+  // Hide header on detail pages, search, help page, etc.
   // Show header on all settings pages (main and sub-settings), same as donee side
   const hideOnRoute = (
     routeName === "donor-post-detail" ||
     routeName === "donor-search" ||
+    routeName === "donor-help" ||
     routeName.startsWith("donor-onBoarding")
   );
   // Hide header if on specific routes, badge drawer is fully open, or scrolling down
@@ -297,12 +308,13 @@ const shouldShowHeader = computed(() => {
 
 const shouldShowFooter = computed(() => {
   const routeName = route.name?.toString() || "";
-  // Hide footer on detail pages, search, sub-settings pages, filters, etc.
+  // Hide footer on detail pages, search, sub-settings pages, filters, help page, etc.
   // Show footer on main settings page (donor-settings), hide on sub-settings (donor-settings-*)
   const hideOnRoute = (
     routeName === "donor-post-detail" ||
     routeName === "donor-search" ||
     routeName === "donor-filters" ||
+    routeName === "donor-help" ||
     (routeName.startsWith("donor-settings") && routeName !== "donor-settings") ||
     routeName.startsWith("donor-onBoarding")
   );
@@ -329,7 +341,9 @@ const handleNavInspirations = () => {
   router.push({ name: "donor-inspirations" });
 };
 
-const handleNavNotifications = () => {
+const handleNavNotifications = async () => {
+  // Mark all notifications as read when user clicks on notifications icon
+  await notificationsStore.markAllAsRead();
   activeNav.value = "notifications";
   router.push({ name: "donor-notifications" });
 };
@@ -420,6 +434,19 @@ onMounted(async () => {
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.warn("Failed to fetch user data:", error);
+      }
+    }
+  }
+
+  // Fetch notifications if user is authenticated
+  if (authStore.isAuthenticated) {
+    try {
+      await notificationsStore.fetchUnreadCount();
+      // Optionally fetch full notifications list (for badge)
+      // await notificationsStore.fetchNotifications();
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Failed to fetch notifications:", error);
       }
     }
   }
@@ -1006,8 +1033,9 @@ onBeforeUnmount(() => {
     padding-bottom: 0 !important;
   }
 
-  // Remove padding-top for post-detail page
-  .q-page-container:has(.postDetail) {
+  // Remove padding-top for post-detail page and help page
+  .q-page-container:has(.postDetail),
+  .q-page-container:has(.help-page) {
     padding-top: 0 !important;
   }
 
@@ -1046,17 +1074,21 @@ onBeforeUnmount(() => {
     margin-bottom: 0rem !important;
   }
 
+  .button-footer.red {
+    position: relative;
+  }
+
   .donor-footer_badge {
     position: absolute;
     top: -4px;
-    right: -8px;
-    min-width: 18px;
-    height: 18px;
+    right: 10px;
+    min-width: 16px;
+    height: 16px;
     padding: 0 4px;
-    border-radius: 9px;
+    border-radius: 999px;
     background: #ff2c2c;
     color: #fff;
-    font-size: 0.7rem;
+    font-size: 10px;
     font-weight: 700;
     display: flex;
     align-items: center;

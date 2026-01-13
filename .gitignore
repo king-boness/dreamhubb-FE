@@ -38,3 +38,6 @@ resources/android/**/*
 
 # Build artifacts (do not commit)
 /ios/App/App/public 2/
+
+# Temporary/debug files
+exit

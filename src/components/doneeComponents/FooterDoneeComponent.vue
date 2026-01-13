@@ -10,7 +10,7 @@
       :class="{ active: $route.name === 'donee-posts' }"
     >
       <img
-        :src="$route.name === 'donee-posts' ? '/footer_icons/home_s.svg' : '/footer_icons/home.svg'"
+        :src="homeIcon"
         :alt="t('home')"
         class="footer-marginClass"
       />
@@ -29,7 +29,7 @@
       />
       <span class="footer-pageName">{{ t("inspirations") }}</span>
     </q-btn>
-    <q-btn class="circle" @click="$router.push('submit/1')">
+    <q-btn class="circle" @click="handlePostCreationClick">
       <img src="/footer_icons/post.svg" :alt="t('addPost')" />
     </q-btn>
     <q-btn
@@ -55,24 +55,22 @@
           $route.name == 'donee-myprofile' || $route.name == 'donee-settings'
       }"
     >
-      <UserAvatar
-        :image-url="authStore.avatarUrl"
-        :name="authStore.name"
-        size="24px"
-      />
-      <span class="footer-pageName profileName">{{ t("profile") }}</span>
+      <img :src="authStore.avatarUrl" class="profileImg" alt="" />
+      <span class="footer-pageName">{{ t("profile") }}</span>
     </q-btn>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
-import UserAvatar from "src/components/common/UserAvatar.vue";
+import { usePostCreationStore } from "src/stores/postCreation";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
+const router = useRouter();
+const postCreationStore = usePostCreationStore();
 
 const route = useRoute();
 const isBodyLight = ref(false);
@@ -102,13 +100,22 @@ onBeforeUnmount(() => {
 });
 
 // Computed properties for icons based on light mode
+const homeIcon = computed(() => {
+  // If selected, always use _s version
+  if (route.name === "donee-posts") {
+    return "/footer_icons/home_s.svg";
+  }
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/home_lm.svg" : "/footer_icons/home_ns.svg";
+});
+
 const compassIcon = computed(() => {
   // If selected, always use _s version
   if (route.name === "donee-inspirations") {
     return "/footer_icons/compass_s.svg";
   }
-  // If not selected: light mode uses _lm, dark mode uses normal
-  return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass.svg";
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/compass_lm.svg" : "/footer_icons/compass_ns.svg";
 });
 
 const bellIcon = computed(() => {
@@ -116,26 +123,26 @@ const bellIcon = computed(() => {
   if (route.name === "donee-notifications") {
     return "/footer_icons/bell_s.svg";
   }
-  // If not selected: light mode uses _lm, dark mode uses normal
-  return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell.svg";
+  // If not selected: light mode uses _lm, dark mode uses _ns
+  return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell_ns.svg";
 });
 
-const profileIcon = computed(() => {
-  // If selected, always use _s version
-  if (route.name === "donee-myprofile" || route.name === "donee-settings") {
-    return "/footer_icons/profile_s.svg";
-  }
-  // If not selected: light mode uses _lm, dark mode uses normal
-  return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile.svg";
-});
+// Reset post creation flow when starting a new post
+const handlePostCreationClick = () => {
+  // Reset store
+  postCreationStore.reset();
+
+  // Reset localStorage
+  localStorage.setItem("donee_postCreation_goal", "dream");
+  localStorage.removeItem("donee_postCreation_category");
+  localStorage.removeItem("donee_postCreation_subcategory");
+
+  // Navigate to goal picker
+  router.push({ name: "donee-postCreation-goal" });
+};
 </script>
 <style lang="scss" scoped>
 .body--light {
-  .wheelIcon {
-    * {
-      z-index: 111;
-    }
-  }
   .active {
     transition: none !important;
     * {
@@ -499,14 +506,16 @@ const profileIcon = computed(() => {
     will-change: opacity, color;
   }
 
-  &:hover {
+  // Hover and active states are now defined per icon for better control
+  // Individual icon transforms are defined below
+  // Only apply default hover/active for left-side icons (Home, Inspirations)
+  &:hover:not(.red):not(.profileIcon).footer-left {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
     border: none !important;
     border-width: 0 !important;
     outline: none !important;
-    transform: translateY(-2px) scale(1.05);
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
     img {
@@ -530,14 +539,13 @@ const profileIcon = computed(() => {
     }
   }
 
-  &:active {
+  &:active:not(.red):not(.profileIcon).footer-left {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
     border: none !important;
     border-width: 0 !important;
     outline: none !important;
-    transform: translateY(0) scale(0.95);
     transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
     img {
@@ -554,6 +562,17 @@ const profileIcon = computed(() => {
       outline: none !important;
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+  }
+
+  // Disable default hover/active transforms for right-side icons (Notifications, Profile)
+  &.red.footer-right:hover,
+  &.profileIcon.footer-right:hover {
+    transform: none !important;
+  }
+
+  &.red.footer-right:active,
+  &.profileIcon.footer-right:active {
+    transform: none !important;
   }
 
   &:focus {
@@ -602,8 +621,12 @@ const profileIcon = computed(() => {
   border: none !important;
   border-width: 0 !important;
   outline: none !important;
-  transform: translateY(-1px) scale(1.02);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+  // Only apply default transform for left-side icons (Home, Inspirations) that don't have specific transforms
+  &:not(.red):not(.profileIcon):not(.footer-right) {
+    transform: translateY(-1px) scale(1.02);
+  }
 
   img {
     transform: scale(1.05);
@@ -690,9 +713,24 @@ const profileIcon = computed(() => {
   display: block;
 }
 
-.profileIcon .footer-marginClass {
-  height: 2.4rem !important;
-  width: 2.4rem !important;
+.profileIcon {
+  position: relative;
+
+  .footer-marginClass {
+    height: 2.4rem !important;
+    width: 2.4rem !important;
+  }
+
+  .profileImg {
+    height: 1.8rem;
+    width: 1.8rem;
+    border-radius: 100%;
+    border: 0.1rem solid transparent;
+    padding: 0.1rem;
+    margin-bottom: 0.02rem;
+    object-fit: cover;
+    display: block;
+  }
 }
 
 .activeProfile {
@@ -700,6 +738,12 @@ const profileIcon = computed(() => {
 
   .profileImg {
     border: 0.16rem solid #bd0043 !important;
+  }
+
+  .footer-pageName {
+    opacity: 1;
+    color: #bd0043;
+    transition: opacity 0.3s ease, color 0.3s ease !important;
   }
 }
 .footer-pageName {
@@ -712,15 +756,47 @@ const profileIcon = computed(() => {
   text-align: center;
   width: 100%;
 }
-.profileName {
-  margin-bottom: 0rem !important;
-}
 
 .footer-left {
   margin-left: -1.5rem !important;
   pointer-events: auto;
   position: relative;
   z-index: 1;
+  transform: translateX(-5px);
+}
+
+/* Inspirations icon specific positioning - 2px more right (from -2px to 0px) and 4px down */
+.footer-left:nth-child(2) {
+  transform: translateX(0px) translateY(4px) !important;
+
+  &:hover {
+    transform: translateX(0px) translateY(2px) scale(1.05) !important;
+  }
+
+  &:active {
+    transform: translateX(0px) translateY(4px) scale(0.95) !important;
+  }
+
+  &.active {
+    transform: translateX(0px) translateY(3px) scale(1.02) !important;
+  }
+}
+
+/* Home icon specific positioning - 1px more right (from -4px to -3px) and 5px down */
+.footer-left:first-child {
+  transform: translateX(-3px) translateY(5px) !important;
+
+  &:hover {
+    transform: translateX(-3px) translateY(3px) scale(1.05) !important;
+  }
+
+  &:active {
+    transform: translateX(-3px) translateY(5px) scale(0.95) !important;
+  }
+
+  &.active {
+    transform: translateX(-3px) translateY(4px) scale(1.02) !important;
+  }
 }
 
 .footer-right {
@@ -728,6 +804,69 @@ const profileIcon = computed(() => {
   pointer-events: auto;
   position: relative;
   z-index: 1;
+  // Transform is now defined per icon below
+}
+
+/* Notifications icon specific positioning - 1px more right (from 1px to 2px) and 4px down */
+/* Notifications is 4th child (after Home, Inspirations, Post Creation circle) */
+.footer > .q-btn.button-footer.red.footer-right:nth-child(4),
+.footer > .button-footer.red.footer-right:nth-child(4),
+.footer .q-btn.button-footer.red.footer-right,
+.footer .button-footer.red.footer-right {
+  transform: translateX(2px) translateY(4px) !important;
+}
+
+.footer > .q-btn.button-footer.red.footer-right:nth-child(4):hover,
+.footer > .button-footer.red.footer-right:nth-child(4):hover,
+.footer .q-btn.button-footer.red.footer-right:hover,
+.footer .button-footer.red.footer-right:hover {
+  transform: translateX(2px) translateY(2px) scale(1.05) !important;
+}
+
+.footer > .q-btn.button-footer.red.footer-right:nth-child(4):active,
+.footer > .button-footer.red.footer-right:nth-child(4):active,
+.footer .q-btn.button-footer.red.footer-right:active,
+.footer .button-footer.red.footer-right:active {
+  transform: translateX(2px) translateY(4px) scale(0.95) !important;
+}
+
+.footer > .q-btn.button-footer.red.footer-right:nth-child(4).active,
+.footer > .button-footer.red.footer-right:nth-child(4).active,
+.footer .q-btn.button-footer.red.footer-right.active,
+.footer .button-footer.red.footer-right.active,
+.footer .active.button-footer.red.footer-right {
+  transform: translateX(2px) translateY(3px) scale(1.02) !important;
+}
+
+/* Profile icon specific positioning - 4px right and 1px up (from 5px down to 4px down) */
+/* Profile is 5th child (last) */
+.footer > .q-btn.button-footer.profileIcon.footer-right:nth-child(5),
+.footer > .button-footer.profileIcon.footer-right:nth-child(5),
+.footer .q-btn.button-footer.profileIcon.footer-right,
+.footer .button-footer.profileIcon.footer-right {
+  transform: translateX(4px) translateY(4px) !important;
+}
+
+.footer > .q-btn.button-footer.profileIcon.footer-right:nth-child(5):hover,
+.footer > .button-footer.profileIcon.footer-right:nth-child(5):hover,
+.footer .q-btn.button-footer.profileIcon.footer-right:hover,
+.footer .button-footer.profileIcon.footer-right:hover {
+  transform: translateX(4px) translateY(2px) scale(1.05) !important;
+}
+
+.footer > .q-btn.button-footer.profileIcon.footer-right:nth-child(5):active,
+.footer > .button-footer.profileIcon.footer-right:nth-child(5):active,
+.footer .q-btn.button-footer.profileIcon.footer-right:active,
+.footer .button-footer.profileIcon.footer-right:active {
+  transform: translateX(4px) translateY(4px) scale(0.95) !important;
+}
+
+.footer > .q-btn.button-footer.profileIcon.footer-right:nth-child(5).activeProfile,
+.footer > .button-footer.profileIcon.footer-right:nth-child(5).activeProfile,
+.footer .q-btn.button-footer.profileIcon.footer-right.activeProfile,
+.footer .button-footer.profileIcon.footer-right.activeProfile,
+.footer .activeProfile.button-footer.profileIcon.footer-right {
+  transform: translateX(4px) translateY(3px) scale(1.02) !important;
 }
 
 .circle {
@@ -757,7 +896,8 @@ const profileIcon = computed(() => {
   z-index: 1000;
   // Position: 1/3 above footer (translate up by 33.33% of button height)
   // Button height is 6rem, so 1/3 = 2rem = 33.33%
-  transform: translateX(-50%) translateY(-33.33%);
+  // Additional 6px down (10px + 4px - 3px - 2px - 2px - 1px adjustment)
+  transform: translateX(-50%) translateY(calc(-33.33% + 6px));
 
   &::before,
   &::after {

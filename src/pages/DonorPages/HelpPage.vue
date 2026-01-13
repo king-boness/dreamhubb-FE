@@ -1,147 +1,450 @@
 <template>
-  <div class="help-page">
-    <div class="topDream-imageSwiperContainer">
-      <div class="detailIconDiv" :class="{ iphoneDevice: $q.platform.is.ios }">
-        <q-btn
-          class="PostDetail-btn PostDetail-closeBtn"
-          @click="$router.go(-1)"
-          ><img src="/icons/closeIcon.svg" alt="" class="closeIcon" />
-        </q-btn>
-        <div class="detailIconDivRight">
-          <q-btn class="PostDetail-btn"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                d="M12 14.6667C11.4444 14.6667 10.9722 14.4723 10.5833 14.0834C10.1944 13.6945 10 13.2223 10 12.6667C10 12.5889 10.0056 12.5083 10.0167 12.4247C10.0278 12.3416 10.0444 12.2667 10.0667 12.2L5.36667 9.46671C5.17778 9.63337 4.96667 9.76382 4.73333 9.85804C4.5 9.95271 4.25556 10 4 10C3.44444 10 2.97222 9.8056 2.58333 9.41671C2.19444 9.02782 2 8.5556 2 8.00004C2 7.44449 2.19444 6.97226 2.58333 6.58337C2.97222 6.19449 3.44444 6.00004 4 6.00004C4.25556 6.00004 4.5 6.04715 4.73333 6.14137C4.96667 6.23604 5.17778 6.36671 5.36667 6.53337L10.0667 3.80004C10.0444 3.73337 10.0278 3.65849 10.0167 3.57537C10.0056 3.49182 10 3.41115 10 3.33337C10 2.77782 10.1944 2.3056 10.5833 1.91671C10.9722 1.52782 11.4444 1.33337 12 1.33337C12.5556 1.33337 13.0278 1.52782 13.4167 1.91671C13.8056 2.3056 14 2.77782 14 3.33337C14 3.88893 13.8056 4.36115 13.4167 4.75004C13.0278 5.13893 12.5556 5.33337 12 5.33337C11.7444 5.33337 11.5 5.28604 11.2667 5.19137C11.0333 5.09715 10.8222 4.96671 10.6333 4.80004L5.93333 7.53337C5.95556 7.60004 5.97222 7.67493 5.98333 7.75804C5.99444 7.8416 6 7.92226 6 8.00004C6 8.07782 5.99444 8.15826 5.98333 8.24137C5.97222 8.32493 5.95556 8.40004 5.93333 8.46671L10.6333 11.2C10.8222 11.0334 11.0333 10.9027 11.2667 10.808C11.5 10.7138 11.7444 10.6667 12 10.6667C12.5556 10.6667 13.0278 10.8612 13.4167 11.25C13.8056 11.6389 14 12.1112 14 12.6667C14 13.2223 13.8056 13.6945 13.4167 14.0834C13.0278 14.4723 12.5556 14.6667 12 14.6667Z"
-                fill="#FCFCFC"
-              /></svg
-          ></q-btn>
-          <q-btn
-            class="PostDetail-btn"
-            @click="isLiked = !isLiked"
-            :class="{ liked: isLiked }"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                d="M7.99992 14.2333L7.03325 13.3533C3.59992 10.24 1.33325 8.18 1.33325 5.66667C1.33325 3.60667 2.94659 2 4.99992 2C6.15992 2 7.27325 2.54 7.99992 3.38667C8.72659 2.54 9.83992 2 10.9999 2C13.0533 2 14.6666 3.60667 14.6666 5.66667C14.6666 8.18 12.3999 10.24 8.96659 13.3533L7.99992 14.2333Z"
-                fill="#FCFCFC"
-              /></svg
-          ></q-btn>
-        </div>
-      </div>
-      <ImageIndexSlider
-        :count="postDetail.images.length"
-        :images="postDetail.images"
-      ></ImageIndexSlider>
-      <div class="topDream-titleContainer">
-        <img
-          class="topDream-postCategoryImage"
-          :src="postDetail.goalImage"
-          alt=""
-        />
-        <span class="topDream-postTitle">{{ postDetail.name }}</span>
-      </div>
+  <!-- Loading state -->
+  <div v-if="loading" class="help-page-loading">
+    <AppSplash />
+  </div>
+
+  <!-- Error state -->
+  <div v-else-if="error" class="help-page-error">
+    <div class="help-page-errorContent">
+      <h2>Unable to load post</h2>
+      <p>{{ error }}</p>
+      <button class="primaryCtaBtn" @click="router.go(-1)">Go Back</button>
     </div>
-    <div class="helpPage-details">
-      <div class="helpPage-date helpPage-datas">
-        <img src="/icons/calendarIcon.svg" alt="" /><span>{{
-          postDetail.date
-        }}</span>
-      </div>
-      <q-separator vertical inset class="postCreation-separator" />
-      <div class="helpPage-location helpPage-datas">
-        <img src="/icons/locationIcon.svg" alt="" />
-        <span>{{ postDetail.location }}</span>
-      </div>
-      <q-separator vertical inset class="postCreation-separator" />
-      <div class="helpPage-views helpPage-datas">
-        <img src="/icons/viewIcon.svg" alt="" />
-        <span>{{ postDetail.views }}</span>
-      </div>
+  </div>
+
+  <!-- Main content -->
+  <div v-else-if="post" class="help-page">
+    <!-- Header with post image and title - Using shared PostHeader component -->
+    <div class="help-page-headerWrapper" style="margin-top: 0; padding-top: 0;">
+      <PostHeader
+        :images="post.images || []"
+        :cover-image="coverImage"
+        :auto-slide="true"
+        :show-progress="true"
+        :show-arrows="false"
+        :show-dots="false"
+        :title="post.title"
+        :date="formattedDate"
+        :location="locationLabel"
+        :views="viewsCount"
+        :category-name="categoryName"
+        :category-icon="postTypeIcon"
+        :is-liked="isLiked"
+        @close="router.go(-1)"
+        @share="handleShare"
+        @like="handleLike"
+      />
     </div>
+    <!-- Private Contribution Toggle -->
     <div class="helpPage-privateDiv">
       <div class="helpPage-privateButtonDiv">
         <q-toggle size="md" v-model="privacy" class="tracking-toggle toggle" />
         <img src="/icons/privateConnect-icon.svg" alt="" />
-        <span>Private Contribution</span>
+        <span>{{ t("privateContribution") }}</span>
       </div>
       <div class="helpPage-privateQuestionDiv">
-        <q-btn class="questionButton"
-          ><img src="/icons/questionIcon.svg" alt=""
-        /></q-btn>
+        <q-btn class="questionButton">
+          <img src="/icons/questionIcon.svg" alt="" />
+        </q-btn>
       </div>
     </div>
-    <div class="topDream-sliderContainer">
-      <div class="topDream-sliderTitleContainer">
-        <span class="topDream-sliderTitle">Help Top Up the Dream</span>
+
+    <!-- Conditional layouts based on contributionType -->
+    <div v-if="contributionType === 'accomplish'" class="helpPage-content">
+      <!-- Accomplish Dream Layout -->
+      <div class="helpPage-donorInputsDiv">
+        <q-input
+          v-model="message"
+          borderless
+          dark
+          hide-bottom-space
+          bottom-slots
+          placeholder="Type your message for a donee..."
+          class="registerDatas registerSecrete donorHelpMessage messageInput"
+          type="textarea"
+        >
+        </q-input>
       </div>
-      <TokenSlider
-        :user-karma="450"
-        :max-value="1000"
-        :review="false"
-      ></TokenSlider>
+      <div class="helpPage-imageUploadDiv">
+        <ImageUploader class="helpPage-imageUploadComponent" :max="2" upload-msg="add image"></ImageUploader>
+      </div>
+
+      <!-- Sticky Footer CTA - placed immediately after "add image" -->
+      <div class="helpPage-footer">
+        <q-btn
+          class="helpPage-footerButton"
+          :loading="submitting"
+          :disable="submitting || !message.trim()"
+          @click="handleSubmit"
+        >
+          <img src="/icons/giftIcon.svg" alt="" />
+          <span>{{ t("helpAccomplish") }}</span>
+        </q-btn>
+      </div>
     </div>
-    <div class="helpPage-donorInputsDiv">
-      <q-input
-        borderless
-        dark
-        hide-bottom-space
-        bottom-slots
-        v-model="helpMessage"
-        label="Type your message for a Donee..."
-        class="registerDatas registerSecrete donorHelpMessage messageInput"
-        type="textarea"
-      >
-      </q-input>
+
+    <div v-else-if="contributionType === 'help'" class="helpPage-content">
+      <!-- Help to Fulfill Layout -->
+      <!-- Heading: "How you can help and what you want in return." -->
+      <div class="helpPage-helpHeading">
+        <h2>{{ t("howYouCanHelp") }}</h2>
+      </div>
+
+      <!-- Segmented Toggle: "I'll help with" / "In return, I want" -->
+      <div class="helpPage-switcherContainer">
+        <SegmentedToggle
+          v-model="helpMode"
+          :options="[t('illHelpWith'), t('inReturnIWant')]"
+        />
+      </div>
+
+      <!-- Single text field (switched by switcher) -->
+      <div class="helpPage-donorInputsDiv">
+        <q-input
+          v-model="activeText"
+          borderless
+          dark
+          hide-bottom-space
+          bottom-slots
+          :placeholder="currentPlaceholder"
+          class="registerDatas registerSecrete donorHelpMessage messageInput"
+          type="textarea"
+        >
+        </q-input>
+      </div>
+      <div class="helpPage-imageUploadDiv">
+        <ImageUploader class="helpPage-imageUploadComponent" :max="2" upload-msg="add image"></ImageUploader>
+      </div>
+
+      <!-- Sticky Footer CTA - placed immediately after "add image" -->
+      <div class="helpPage-footer">
+        <q-btn
+          class="helpPage-footerButton"
+          :loading="submitting"
+          :disable="submitting || (contributionType === 'accomplish' ? !message.trim() : !helpWithText.trim())"
+          @click="handleSubmit"
+        >
+          <img src="/icons/giftIcon.svg" alt="" />
+          <span>{{ contributionType === 'accomplish' ? t("helpAccomplish") : t("helpToFulfill") }}</span>
+        </q-btn>
+      </div>
     </div>
-    <div class="helpPage-imageUploadDiv">
-      <ImageUploader
-        class="helpPage-imageUploadComponent"
-        :max="2"
-      ></ImageUploader>
-    </div>
-    <div class="topDream-buttonContainer">
-      <q-btn
-        class="topDream-topUpButton"
-        @click="$router.push({ name: 'donor-posts' })"
-        ><img src="/icons/giftIcon.svg" alt="" />
-        <span>help to fullfil</span>
-      </q-btn>
-    </div>
+
+    <!-- Share Sheet -->
+    <ShareProfileSheet
+      v-if="post"
+      v-model="isShareSheetOpen"
+      :profile-url="sharePostUrl"
+      :profile-title="sharePostTitle"
+      :profile-text="sharePostText"
+      :post-type="(post?.type as 'dream' | 'problem' | 'idea' | null) || null"
+    />
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
-import TokenSlider from "../../components/partials/CustomThumb.vue";
+import { ref, computed, onMounted, nextTick } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { usePostsStore } from "src/stores/posts";
+import { useCommentsStore } from "src/stores/comments";
 import ImageUploader from "../../components/partials/UploadImgComponent.vue";
-import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
+import PostHeader from "src/components/post/PostHeader.vue";
+import { getPostTypeIcon } from "src/utils/postIcons";
+import { getLocationLabel } from "src/utils/cityNames";
+import { normalizePost } from "src/utils/normalizePost";
+import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
+import { Notify } from "quasar";
+import AppSplash from "src/components/common/AppSplash.vue";
+import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
+import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
 
-const helpMessage = ref("");
-const privacy = ref(true);
+const { t, locale } = useI18n();
+const route = useRoute();
+const router = useRouter();
+const postsStore = usePostsStore();
+const commentsStore = useCommentsStore();
+
+// State for active mode in Help to Fulfill
+const activeMode = ref<"help" | "return">("help"); // Default to "I'll help with"
+
+// Two reactive variables for content
+const helpWithText = ref(""); // Text for "I'll help with"
+const returnText = ref(""); // Text for "In return, I want"
+
+// Computed property for v-model of single text field
+const activeText = computed({
+  get: () => (activeMode.value === "help" ? helpWithText.value : returnText.value),
+  set: (val: string) => {
+    if (activeMode.value === "help") {
+      helpWithText.value = val;
+    } else {
+      returnText.value = val;
+    }
+  }
+});
+
+// Map activeMode to translated string for SegmentedToggle
+// FIX: SegmentedToggle has reversed logic - when modelValue === options[0], the circle moves right (second option is active)
+// When activeMode is "help" → "I'll help with" should be active (but SegmentedToggle shows second option when modelValue === options[0])
+// When activeMode is "return" → "In return, I want" should be active (but SegmentedToggle shows first option when modelValue === options[1])
+// So we need to reverse the mapping:
+// When activeMode is "help" → return options[1] ("In return, I want") so that SegmentedToggle shows first option as active
+// When activeMode is "return" → return options[0] ("I'll help with") so that SegmentedToggle shows second option as active
+const helpMode = computed({
+  get: () => {
+    // FIX: Reverse the mapping because SegmentedToggle has reversed logic
+    // When activeMode is "help" (we want "I'll help with" active), return "In return, I want" (options[1])
+    // When activeMode is "return" (we want "In return, I want" active), return "I'll help with" (options[0])
+    return activeMode.value === "help" ? t("inReturnIWant") : t("illHelpWith");
+  },
+  set: (val: string) => {
+    // Map translated string back to activeMode
+    // FIX: Reverse the mapping because SegmentedToggle has reversed logic
+    // When "In return, I want" is clicked (val === t("inReturnIWant"), which is options[1]) → set activeMode to "help" (we want "I'll help with" active)
+    // When "I'll help with" is clicked (val === t("illHelpWith"), which is options[0]) → set activeMode to "return" (we want "In return, I want" active)
+    if (val === t("inReturnIWant")) {
+      activeMode.value = "help";
+    } else if (val === t("illHelpWith")) {
+      activeMode.value = "return";
+    }
+  }
+});
+
+// Computed property for placeholder text
+// When "I'll help with" is active (activeMode === "help") → "Type your message for a donee..."
+// When "In return, I want" is active (activeMode === "return") → "Describe what you want in return..."
+const currentPlaceholder = computed(() => {
+  // Use activeMode directly as the source of truth
+  // activeMode === "help" means "I'll help with" is active
+  // activeMode === "return" means "In return, I want" is active
+  if (activeMode.value === "help") {
+    // "I'll help with" is active → show "Type your message for a donee..."
+    return t("typeYourMessageForDonee");
+  }
+  // "In return, I want" is active → show "Describe what you want in return..."
+  return t("describeWhatYouWantInReturn");
+});
+
+// Get postId and contributionType from route query
+const postId = computed(() => {
+  const id = route.query.postId;
+  if (typeof id === "string") {
+    return Number(id);
+  }
+  return null;
+});
+
+const contributionType = computed(() => {
+  const type = route.query.contributionType;
+  if (type === "accomplish" || type === "help") {
+    return type;
+  }
+  return "help"; // Default to help
+});
+
+// Post data - check if current post matches the requested postId
+const post = computed(() => {
+  const current = postsStore.currentPost;
+  if (!current || !postId.value) return null;
+  // Ensure we have the correct post
+  if (current.post_id === postId.value) {
+    return current;
+  }
+  return null;
+});
+const loading = computed(() => postsStore.detailLoading);
+const error = computed(() => postsStore.detailError);
+
+// Form state
+const privacy = ref(false);
 const isLiked = ref(false);
+const message = ref("");
+const submitting = ref(false);
 
-const postDetail = ref({
-  name: "Aurora Expedition",
-  goalImage: "/images/Auth/goalPicture.png",
-  images: [
-    "https://images.unsplash.com/photo-1528155124528-06c125d81e89?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=689&q=80",
-    "https://images.unsplash.com/photo-1568607689150-17e625c1586e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    "https://i.etsystatic.com/32050623/r/il/76af79/4305610002/il_fullxfull.4305610002_2o9t.jpg",
-    "https://images.unsplash.com/photo-1686890121573-5feec595490e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
-  ],
-  date: "09/15/2023",
-  location: "Island, Reykjavik",
-  views: 156
+// Computed properties for post display
+const formattedDate = computed(() => {
+  if (!post.value?.date_created) return "";
+  const d = new Date(post.value.date_created);
+  if (Number.isNaN(d.getTime())) return post.value.date_created;
+  // Format as DD/MM/YYYY
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+});
+
+const locationLabel = computed(() => {
+  const p = post.value;
+  if (!p) return "Unknown";
+  // Use getLocationLabel helper for consistent formatting
+  return getLocationLabel(p, locale.value as string) || "Unknown";
+});
+
+const viewsCount = computed(() => {
+  return post.value?.views ?? 0;
+});
+
+const coverImage = computed(() => {
+  const images = post.value?.images || [];
+  return images.length > 0 ? images[0] : null;
+});
+
+// Normalize post data to ensure category and subcategory objects exist
+const normalizedPost = computed(() => {
+  if (!post.value) return null;
+  return normalizePost(post.value as Parameters<typeof normalizePost>[0]);
+});
+
+const postTypeIcon = computed(() => {
+  return getPostTypeIcon(post.value?.type || null);
+});
+
+const categoryName = computed(() => {
+  const norm = normalizedPost.value;
+  if (!norm?.subcategory?.slug) {
+    const translated = t("subcategories.other") || "Other";
+    return formatSubcategoryLabel(translated);
+  }
+  // Use i18n key: subcategories.traveling, subcategories.health, etc.
+  const i18nKey = `subcategories.${norm.subcategory.slug}`;
+  const translated = t(i18nKey);
+  // If translation doesn't exist, return capitalized slug, then apply formatSubcategoryLabel
+  const finalText = translated !== i18nKey ? translated : norm.subcategory.slug.charAt(0).toUpperCase() + norm.subcategory.slug.slice(1);
+  return formatSubcategoryLabel(finalText);
+});
+
+// Note: Placeholders are now explicitly set in template for both textarea fields
+// Note: currentMessage computed property removed - using helpMessage and returnMessage directly
+
+// Load post data
+const loadPost = async (id: number) => {
+  postsStore.detailLoading = true;
+  await postsStore.fetchPostById(id);
+};
+
+// Submit contribution
+const handleSubmit = async () => {
+  if (!postId.value || !post.value) {
+    Notify.create({
+      type: "negative",
+      message: "Post not found",
+      position: "top"
+    });
+    return;
+  }
+
+  // Validate message based on contribution type
+  if (contributionType.value === "accomplish") {
+    if (!message.value.trim()) {
+      Notify.create({
+        type: "negative",
+        message: "Please enter a message",
+        position: "top"
+      });
+      return;
+    }
+  } else {
+    // For "help" type, validate helpWithText (required)
+    if (!helpWithText.value.trim()) {
+      Notify.create({
+        type: "negative",
+        message: "Please enter a message for 'I'll help with'",
+        position: "top"
+      });
+      return;
+    }
+    // returnText is optional for "help" type
+  }
+
+  submitting.value = true;
+
+  try {
+    await commentsStore.addComment(postId.value, {
+      type: contributionType.value,
+      message: contributionType.value === "accomplish" ? message.value : helpWithText.value, // help part from helpWithText
+      return_message: contributionType.value === "help" ? returnText.value : null, // return part from returnText
+      is_private: privacy.value
+    });
+
+    Notify.create({
+      type: "positive",
+      message: "Contribution submitted successfully",
+      position: "top"
+    });
+
+    // Redirect back to post detail
+    router.push({
+      name: "donor-post-detail",
+      params: { id: String(postId.value) }
+    });
+  } catch (error: unknown) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Failed to submit contribution:", error);
+    }
+    Notify.create({
+      type: "negative",
+      message: "Failed to submit contribution. Please try again.",
+      position: "top"
+    });
+  } finally {
+    submitting.value = false;
+  }
+};
+
+// Share functionality
+const isShareSheetOpen = ref(false);
+const sharePostUrl = computed(() => {
+  if (!post.value || !postId.value) {
+    const base = window.location.origin || "https://app.dreamhubb.com";
+    return base;
+  }
+  return `${window.location.origin || "https://app.dreamhubb.com"}/donor/post-detail/${postId.value}`;
+});
+
+const sharePostText = computed(() => {
+  return post.value?.description || "Check out this post on dreamhubb";
+});
+
+const sharePostTitle = computed(() => {
+  return post.value?.title || "Check out this post on dreamhubb";
+});
+
+const handleShare = () => {
+  isShareSheetOpen.value = true;
+};
+
+// Like functionality
+const handleLike = async () => {
+  isLiked.value = !isLiked.value;
+  // TODO: Implement actual like API call if needed
+};
+
+// Load post on mount
+onMounted(async () => {
+  const id = postId.value;
+  if (id && !Number.isNaN(id)) {
+    await loadPost(id);
+  } else {
+    Notify.create({
+      type: "negative",
+      message: "Invalid post ID",
+      position: "top"
+    });
+    router.push({ name: "donor-posts" });
+  }
+
+  // Ensure activeMode is set to "help" when component mounts (for Help to Fulfill)
+  // This ensures "I'll help with" is selected by default
+  if (contributionType.value === "help") {
+    // Reset to "help" mode to ensure "I'll help with" is selected
+    activeMode.value = "help";
+    // Wait for next tick to ensure DOM is updated and SegmentedToggle receives the correct value
+    await nextTick();
+    // Force update by accessing helpMode to trigger computed property
+    // This ensures SegmentedToggle shows "I'll help with" (first option) as active
+    const _ = helpMode.value; // Trigger computed getter to ensure proper initialization
+  }
 });
 </script>
 <style lang="scss">
@@ -162,162 +465,225 @@ const postDetail = ref({
     opacity: 1 !important;
   }
 }
-.help-page {
-  .topDream-imageSwiperContainer {
-    height: 19rem;
-    position: relative;
+.help-page-loading,
+.help-page-error {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .detailIconDiv {
-      position: absolute;
-      top: 2.5rem;
-      width: 100%;
-      z-index: 11;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      padding: 0 0.5rem;
-      .detailIconDivRight {
-        display: flex;
-        margin-left: 50%;
-      }
-      .PostDetail-btn {
-        margin: 0 0.4rem;
-        width: 2.8rem;
-        height: 2.8rem;
-        border-radius: 6.1875rem;
-        background: linear-gradient(
-          135deg,
-          rgba(106, 105, 105, 0.656) 0%,
-          rgba(0, 0, 0, 0.483) 100%
-        );
-        backdrop-filter: blur(1rem);
-        svg {
-          scale: 1.3;
-        }
-      }
-    }
-    .topDream-titleContainer {
-      position: absolute;
+.help-page-errorContent {
+  text-align: center;
+  color: white;
+  padding: 2rem;
 
-      top: 70%;
-      z-index: 11;
-      left: 5%;
-      background: linear-gradient(
-        108.46deg,
-        rgba(0, 0, 0, 0.786) 1%,
-        rgba(23, 23, 23, 0.789) 100%
-      );
-      width: auto;
-      padding: 0.9rem 0.7rem;
-      border-radius: 1.3rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      .topDream-postCategoryImage {
-        height: 1.2rem;
-      }
-      .topDream-postTitle {
-        font-size: 1.4rem;
-        font-family: poppinsSemiBold;
-        color: white;
-      }
-    }
-  }
-  .helpPage-details {
-    color: white;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    border-top: 0.01rem solid rgba(252, 252, 252, 0.1);
-    border-bottom: 0.01rem solid rgba(252, 252, 252, 0.1);
+  h2 {
     margin-bottom: 1rem;
-    .postCreation-separator {
-      background-color: rgba(255, 255, 255, 0.19);
-      height: 1.3rem;
-    }
-    .helpPage-datas {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+  }
+}
+
+.help-page {
+  min-height: 100vh;
+  padding-bottom: 6rem !important; // Space for sticky footer (increased to ensure content is not hidden)
+  background: radial-gradient(ellipse at top, #12192f 0, #050710 60%, #020307 100%);
+  display: flex;
+  flex-direction: column;
+  margin-top: 0 !important; // Start from top of screen - override any layout padding
+  padding-top: 0 !important; // No top padding - override any layout padding
+  position: relative;
+
+  // Header wrapper - scoped to help-page to prevent affecting PostDetail
+  .help-page-headerWrapper {
+    width: 100%;
+    margin-top: 0 !important; // Start from top of screen
+    margin-bottom: 0;
+    padding-top: 0 !important;
+    position: relative;
+    top: 0;
+
+    // PostHeader component has its own scoped styles
+    :deep(.post-header) {
+      width: 100%;
+      height: 100%;
+
+      .post-header-bg {
+        border-radius: 0; // Remove border radius on help page - start from top
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        position: relative;
+        top: 0;
+      }
+
+      .post-header-imageWrapper {
+        top: 0;
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      // Ensure title has exact same positioning as feed card
+      .post-header-infoOverlay {
+        padding-left: 16px; // Match .postCard-body padding-left exactly
+        padding-right: 16px; // Match .postCard-body padding-right exactly
+        padding-bottom: 20px; // Keep bottom padding for overlay
+        padding-top: 0; // No top padding
+      }
+
+      .post-header-title {
+        // All styles already match .postCard-title exactly
+        // No additional overrides needed - using same values as feed card
+      }
     }
   }
+  // postDetailBg, postDetail-infoOverlay, postDetail-metaRow are global styles
 
   .helpPage-privateDiv {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    padding-left: 0.5rem;
+    padding: 1rem 20px; // Consistent padding with content sections
+    margin-bottom: 0.5rem; // Reduced spacing (was 1rem)
 
     .helpPage-privateButtonDiv {
       display: flex;
       color: white;
       align-items: center;
+      gap: 0.5rem;
       img {
         height: 1.3rem;
-        margin-right: 0.4rem;
-        margin-left: 0.2rem;
       }
       span {
         font-family: poppins;
         font-size: 0.9rem;
       }
     }
+
+    .helpPage-privateQuestionDiv {
+      .questionButton {
+        img {
+          height: 1.5rem;
+        }
+      }
+    }
   }
-  .topDream-sliderContainer {
-    margin-top: 1.2rem;
-    padding: 0 1.3rem;
+
+  // Content wrapper with consistent padding (20-24px as per spec)
+  .helpPage-content {
+    padding: 0 20px; // Consistent horizontal padding (20-24px range)
+    padding-bottom: 1rem; // Space for sticky footer
+    max-width: 390px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  // Heading: "How you can help and what you want in return."
+  .helpPage-helpHeading {
+    margin-top: -4px; // Moved up by 3px (was -1px, now -4px to move text 3px higher)
+    margin-bottom: 28px; // Compensated spacing to keep other elements in place (was 25px, now 28px)
+    padding: 0;
+    width: 100%; // Full width of parent container
+    max-width: 100%; // Prevent text from going to edges
+    margin-left: auto;
+    margin-right: auto;
+
+    h2 {
+      color: #ffffff; // White text (same as other primary texts)
+      font-family: poppinsSemiBold;
+      font-size: 1rem; // H5/H6 size
+      font-weight: 600;
+      line-height: 1.4;
+      text-align: center; // Centered text
+      margin: 0;
+      padding: 0 20px; // Horizontal padding to prevent text from going to edges
+      box-sizing: border-box;
+    }
+  }
+
+  // Switcher container - wider container with proper spacing
+  .helpPage-switcherContainer {
     display: flex;
-    flex-direction: column;
     justify-content: center;
-    .topDream-sliderTitleContainer {
-      margin-bottom: -1.6rem;
-      .topDream-sliderTitle {
-        color: white;
-        font-family: poppinsSemiBold;
-        font-size: 1.1rem;
-      }
-      .topDream-questiobButton {
-        width: 1.5rem;
-        border-radius: 100%;
-        padding: 0;
-        margin-left: 0.5rem;
-      }
-      .topDream-questionImg {
-        height: 1.5em;
-      }
+    align-items: center;
+    margin-top: 8px; // 8-12px spacing from heading (reduced for compact layout)
+    margin-bottom: 12px; // Reduced spacing before textarea (was 16px)
+    padding: 0;
+    width: 100%; // Full width to allow wider switcher
+
+    // Make the switcher wider (80-90% of available space)
+    :deep(.segmented-toggle-container) {
+      width: 90% !important;
+      max-width: 320px; // Reasonable max width
     }
   }
-  .helpPage-privateQuestionDiv {
-    .questionButton {
-      img {
-        height: 1.5rem;
-      }
-    }
-  }
-  .helpPage-amountDiv {
-    color: white !important;
-  }
+
+  // Textarea - full width with consistent padding
   .helpPage-donorInputsDiv {
-    display: flex;
-    justify-content: center;
-    padding: 0 1rem;
+    width: 100%;
+    margin-top: 12px; // Reduced spacing from switcher (was 16px, now 12px for compact layout)
+    margin-bottom: 1rem;
 
     .donorHelpMessage {
       width: 100%;
-      height: 9.2rem;
-      padding-bottom: 1rem;
+      min-height: 9.2rem;
+      padding: 0.4rem 1rem; // Further reduced padding-top to move placeholder higher (was 0.5rem)
       border: 0.08rem solid rgba(255, 255, 255, 0.118);
-      margin-bottom: 0.1rem;
       background-color: rgba(23, 23, 23, 0.72);
+      border-radius: 0.5rem;
+
+      // Move placeholder text higher
+      :deep(.q-field__native) {
+        padding-top: 0.4rem; // Further reduced padding-top for placeholder alignment
+        line-height: 1.5; // Adjust line-height for better visual alignment
+      }
+
+      :deep(.q-field__label) {
+        top: 0.4rem; // Align label/placeholder with reduced padding
+        padding-top: 0.4rem; // Additional padding-top for better visual alignment
+      }
     }
   }
-  .topDream-buttonContainer {
-    display: flex;
-    justify-content: center;
-    padding: 0 1rem;
+
+  // Image upload - full width with consistent padding
+  .helpPage-imageUploadDiv {
+    width: 100%;
+    margin-bottom: 0.5rem; // Reduced spacing before footer (was 1rem)
+
+    .helpPage-imageUploadComponent {
+      width: 100%;
+    }
   }
-  .topDream-topUpButton {
+
+  // Sticky Footer CTA - placed immediately after "add image"
+  .helpPage-footer {
+    position: sticky; // Changed from fixed to sticky
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    background: linear-gradient(
+      to top,
+      rgba(2, 3, 7, 0.95) 0%,
+      rgba(2, 3, 7, 0.98) 50%,
+      rgba(2, 3, 7, 1) 100%
+    );
+    backdrop-filter: blur(20px);
+    padding: 1rem 20px; // Same horizontal padding as content
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 0.5rem; // Reasonable spacing from "add image" block
+    width: 100%;
+    max-width: 390px; // Same max-width as content
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .helpPage-footerButton {
     background-color: $primary;
     color: white;
     border: none;
@@ -326,17 +692,22 @@ const postDetail = ref({
     width: 100%;
     font-family: montseraatSemiBold;
     border-radius: 0.5rem !important;
-    margin-bottom: 0.8rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 390px;
+    margin: 0 auto;
 
     img {
-      margin-right: 0.5rem;
+      height: 1.2rem;
+      width: auto;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
-}
-.helpPage-imageUploadDiv {
-  display: flex;
-  justify-content: center;
-  padding: 0 1rem;
-  margin-bottom: 0.4rem;
 }
 </style>

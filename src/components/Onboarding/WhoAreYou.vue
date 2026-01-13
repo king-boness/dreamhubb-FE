@@ -66,7 +66,6 @@
             class="who-genderSelect"
             :class="{ 'who-genderSelect--open': isGenderDropdownOpen }"
             @click="toggleGenderDropdown"
-            @blur="closeGenderDropdown"
             tabindex="0"
           >
             <span class="who-genderValue" :class="{ 'who-genderValue--placeholder': !localGender }">
@@ -80,14 +79,13 @@
             <div
               v-if="isGenderDropdownOpen"
               class="who-genderDropdown"
-              @click.stop
             >
               <button
                 v-for="option in genderOptions"
                 :key="option"
                 class="who-genderOption"
                 :class="{ 'who-genderOption--selected': localGender === option }"
-                @click="selectGender(option)"
+                @mousedown.prevent="selectGender(option)"
               >
                 {{ option }}
               </button>
@@ -116,7 +114,7 @@
             class="who-input"
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
-            name="new-password"
+            name="password"
             :error="!!passwordError"
             :error-message="passwordError || ''"
             @focus="handlePasswordFocus"
@@ -132,16 +130,11 @@
           </q-input>
 
           <!-- Password requirements bubble -->
-          <template v-if="showPasswordRulesDialog">
-            <div
-              class="who-passwordRulesBackdrop"
-              @click="closePasswordRulesDialog"
-            ></div>
-            <div
-              class="who-passwordRulesBubble"
-              :style="{ top: `${bubblePosition.top}px`, left: `${bubblePosition.left}px` }"
-              @click.stop
-            >
+          <div
+            v-if="showPasswordRulesDialog"
+            class="who-passwordRulesBubble"
+            @click.stop
+          >
               <button
                 class="who-passwordRulesClose"
                 @click="closePasswordRulesDialog"
@@ -168,9 +161,13 @@
               </div>
               <div class="who-passwordRulesArrow"></div>
             </div>
-          </template>
         </div>
 
+        <!--
+          Poznámka: Biele okno "Sila hesla - Nízká" pri tomto poli nie je súčasťou našej aplikácie,
+          ale je generované prehliadačom, antivírusom alebo správcom hesiel.
+          Nemôžeme ho priamo deaktivovať alebo presmerovať.
+        -->
         <q-input
           v-model="localRepeatPassword"
           label="Repeat Password"
@@ -178,6 +175,7 @@
           outlined
           class="who-input"
           :type="showRepeatPassword ? 'text' : 'password'"
+          name="password_confirmation"
           autocomplete="off"
           data-lpignore="true"
           :error="!!repeatPasswordError"
@@ -202,6 +200,10 @@
             outlined
             class="who-input"
             fit
+            behavior="menu"
+            :options-dense="true"
+            :input-debounce="0"
+            :hide-dropdown-icon="false"
             @update:model-value="handleProfileContinentChange"
           />
           <q-select
@@ -215,6 +217,8 @@
             use-input
             input-debounce="0"
             fit
+            behavior="menu"
+            :options-dense="true"
             @filter="filterProfileCountries"
             @update:model-value="handleProfileCountryChange"
           >
@@ -229,16 +233,44 @@
           <q-select
             v-model="localProfileCity"
             :options="filteredProfileCityOptions"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
             label="City"
             dark
             outlined
             class="who-input"
             :disable="!localProfileCountry"
             use-input
-            input-debounce="300"
+            input-debounce="0"
             fit
+            behavior="menu"
+            :options-dense="true"
+            fill-input
+            hide-selected
             @filter="filterProfileCities"
+            @update:model-value="handleProfileCityChange"
           >
+            <template v-slot:option="scope">
+              <q-item
+                v-if="scope.opt.disabled && scope.opt.value === '__divider__'"
+                class="cities-divider"
+                :clickable="false"
+                v-ripple="false"
+              >
+                <q-separator />
+              </q-item>
+            <q-item
+              v-else
+              v-bind="scope.itemProps"
+              v-on="scope.itemEvents || {}"
+            >
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
@@ -275,7 +307,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, withDefault
 import { useOnboardingStore } from "src/stores/onboarding";
 import { Notify } from "quasar";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
-import { getCitiesByCountryCode, getCitySuggestions } from "src/data/citiesData";
+import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 
 const onboardingStore = useOnboardingStore();
 
@@ -318,7 +350,8 @@ const localPassword = ref(props.password || "");
 const localRepeatPassword = ref(props.repeatPassword || "");
 const localProfileContinent = ref(props.profileContinent || "");
 const localProfileCountry = ref(props.profileCountry || "");
-const localProfileCity = ref(props.profileCity || "");
+// Initialize with the prop value, but allow it to be number (ID) or string (name)
+const localProfileCity = ref<string | number>(props.profileCity ? (typeof props.profileCity === "string" && !isNaN(Number(props.profileCity)) ? Number(props.profileCity) : props.profileCity) : "");
 
 // Sync local values with store
 watch(localUsername, (val) => {
@@ -341,13 +374,24 @@ let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 
 // Check if email exists on backend
 const checkEmailExists = async (email: string) => {
-  if (!email || !emailRegex.test(email.trim())) {
+  const trimmedEmail = email?.trim() || "";
+
+  // Validate email format before making API call
+  if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("📧 Skipping email check - invalid format:", trimmedEmail);
+    }
     return; // Don't check invalid emails
   }
 
   try {
     const { api } = await import("boot/axios");
-    const { data } = await api.post("/check-email", { email: email.trim() });
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("📧 Checking email:", trimmedEmail);
+    }
+
+    const { data } = await api.post("/check-email", { email: trimmedEmail });
 
     if (data.exists) {
       // Email exists - set field error
@@ -362,11 +406,36 @@ const checkEmailExists = async (email: string) => {
         delete onboardingStore.fieldErrors.email;
       }
     }
-  } catch (error) {
-    // Silently fail - don't show error if check fails
+  } catch (error: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorResponse = (error as any).response;
+
+    // Log error details for debugging
     if (process.env.NODE_ENV === "development") {
       console.warn("Failed to check email:", error);
+      if (errorResponse) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.warn("Response status:", errorResponse.status);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.warn("Response data:", errorResponse.data);
+      }
     }
+
+    // Handle 429 (Too Many Requests) - rate limiting
+    // Silently fail - don't block user from continuing with registration
+    // Frontend validation will handle email format validation
+    if (errorResponse?.status === 429) {
+      // Rate limit reached - silently ignore, user can still register
+      // The email will be validated on the backend during registration
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Email check rate limit reached - skipping check");
+      }
+      // No need to return here - function naturally ends
+    }
+
+    // Silently fail for all other errors (including 422 validation errors)
+    // Frontend validation will handle email format validation
+    // Don't block user from continuing with registration
   }
 };
 
@@ -383,11 +452,11 @@ watch(localEmail, (val) => {
     clearTimeout(emailCheckTimeout);
   }
 
-  // Debounce email check - wait 500ms after user stops typing
+  // Debounce email check - wait 800ms after user stops typing to reduce API calls
   if (val && val.trim()) {
     emailCheckTimeout = setTimeout(() => {
       checkEmailExists(val);
-    }, 500);
+    }, 800);
   }
 
   emit("update:email", val);
@@ -410,26 +479,16 @@ watch(localRepeatPassword, (val) => {
   emit("update:repeatPassword", val);
 });
 
-watch(localProfileContinent, (val) => {
-  onboardingStore.setStepData("profileContinent", val);
-  emit("update:profileContinent", val);
-});
-
-watch(localProfileCountry, (val) => {
-  onboardingStore.setStepData("profileCountry", val);
-  emit("update:profileCountry", val);
-});
-
+// Watch only for city changes (continent and country are handled in their change handlers)
 watch(localProfileCity, (val) => {
-  onboardingStore.setStepData("profileCity", val);
-  emit("update:profileCity", val);
+  onboardingStore.setStepData("profileCity", String(val || ""));
+  emit("update:profileCity", String(val || ""));
 });
 
 const showPassword = ref(false);
 const showRepeatPassword = ref(false);
 const showPasswordRulesDialog = ref(false);
 const passwordFieldRef = ref<HTMLElement | null>(null);
-const bubblePosition = ref({ top: 0, left: 0 });
 const avatarInput = ref<HTMLInputElement | null>(null);
 const avatarPreview = ref<string | null>(null);
 const avatarFile = ref<File | null>(null);
@@ -524,15 +583,23 @@ const continentOptions = continents;
 const allProfileCountriesForContinent = ref<string[]>([]);
 const profileCountryOptions = ref<string[]>([]);
 const profileCountryFilter = ref("");
-const allProfileCitiesForCountry = ref<string[]>([]);
-const filteredProfileCityOptions = ref<string[]>([]);
+const allProfileCitiesForCountry = ref<CityOption[]>([]);
+const filteredProfileCityOptions = ref<CityOption[]>([]);
 const profileCityFilter = ref("");
 
-// Get country code from country name
+// Pre-load all countries once for faster lookups
+const allCountriesList = getAllCountries();
+const countryCodeMap = new Map<string, string>();
+
+// Build country code map once
+allCountriesList.forEach(country => {
+  countryCodeMap.set(country.name, country.code);
+});
+
+// Get country code from country name - optimized with pre-built map
 const getCountryCode = (countryName: string): string | undefined => {
-  const allCountries = getAllCountries();
-  const country = allCountries.find(c => c.name === countryName);
-  return country?.code;
+  if (!countryName) return undefined;
+  return countryCodeMap.get(countryName);
 };
 
 // Update profile country options when continent changes
@@ -559,8 +626,15 @@ const updateProfileCityOptions = () => {
   const countryCode = getCountryCode(localProfileCountry.value);
   if (countryCode) {
     const cities = getCitiesByCountryCode(countryCode);
-    allProfileCitiesForCountry.value = cities;
-    filteredProfileCityOptions.value = cities;
+    // Convert string array to CityFromBackend format
+    const citiesMapped: CityFromBackend[] = cities.map((name: string, index: number) => ({
+      id: index,
+      name
+    }));
+    // Use buildCityOptionsForCountry to get TOP 10 + divider + alphabetical
+    const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+    allProfileCitiesForCountry.value = cityOptions;
+    filteredProfileCityOptions.value = cityOptions;
   } else {
     allProfileCitiesForCountry.value = [];
     filteredProfileCityOptions.value = [];
@@ -589,30 +663,65 @@ const filterProfileCities = (val: string, update: (callback: () => void) => void
     if (val === "") {
       filteredProfileCityOptions.value = allProfileCitiesForCountry.value;
     } else {
-      const countryCode = getCountryCode(localProfileCountry.value);
-      if (countryCode) {
-        filteredProfileCityOptions.value = getCitySuggestions(countryCode, val);
-      } else {
-        filteredProfileCityOptions.value = allProfileCitiesForCountry.value.filter(
-          v => v.toLowerCase().includes(val.toLowerCase())
-        );
-      }
+      const needle = val.toLowerCase();
+      // Filter out dividers and match city labels
+      filteredProfileCityOptions.value = allProfileCitiesForCountry.value.filter(
+        (item) => {
+          // Skip disabled dividers
+          if (item.disabled && item.value === "__divider__") {
+            return false;
+          }
+          // Filter by label
+          return item.label.toLowerCase().includes(needle);
+        }
+      );
     }
   });
 };
 
-// Handle profile continent change
-const handleProfileContinentChange = () => {
+// Handle profile continent change - optimized for instant response
+const handleProfileContinentChange = (val: string) => {
+  // Update store and emit immediately
+  onboardingStore.setStepData("profileContinent", val);
+  emit("update:profileContinent", val);
+
+  // Clear dependent fields immediately
   localProfileCountry.value = "";
   localProfileCity.value = "";
+
+  // Update options synchronously - no async operations
   updateProfileCountryOptions();
   updateProfileCityOptions();
 };
 
-// Handle profile country change
-const handleProfileCountryChange = () => {
+// Handle profile country change - optimized for instant response
+const handleProfileCountryChange = (val: string) => {
+  // Update store and emit immediately
+  onboardingStore.setStepData("profileCountry", val);
+  emit("update:profileCountry", val);
+
+  // Clear dependent field immediately
   localProfileCity.value = "";
+  onboardingStore.setStepData("profileCity", "");
+  emit("update:profileCity", "");
+
+  // Update options synchronously - no async operations
   updateProfileCityOptions();
+};
+
+// Handle profile city change - prevent selecting divider
+const handleProfileCityChange = (value: string | number) => {
+  if (value === "__divider__") {
+    // Ignore divider selection
+    localProfileCity.value = "";
+    onboardingStore.setStepData("profileCity", "");
+    emit("update:profileCity", "");
+    return;
+  }
+  // Store the value (ID) - q-select will map it to label automatically
+  localProfileCity.value = value;
+  onboardingStore.setStepData("profileCity", String(value));
+  emit("update:profileCity", String(value));
 };
 
 // Initialize location options on mount
@@ -707,16 +816,49 @@ const toggleGenderDropdown = () => {
 };
 
 const closeGenderDropdown = () => {
-  // Delay to allow click event to fire first
-  setTimeout(() => {
-    isGenderDropdownOpen.value = false;
-  }, 150);
+  isGenderDropdownOpen.value = false;
 };
 
 const selectGender = (option: string) => {
   localGender.value = option;
-  isGenderDropdownOpen.value = false;
+  // Use requestAnimationFrame to ensure the value is set before closing
+  requestAnimationFrame(() => {
+    isGenderDropdownOpen.value = false;
+  });
 };
+
+// Handle click outside to close gender dropdown
+const handleGenderClickOutside = (event: MouseEvent) => {
+  if (!isGenderDropdownOpen.value) return;
+
+  const target = event.target as HTMLElement;
+  const genderSelect = document.querySelector(".who-genderSelect");
+  const genderWrapper = document.querySelector(".who-genderWrapper");
+
+  // Don't close if clicking inside gender select or wrapper
+  if (genderSelect && genderSelect.contains(target)) {
+    return;
+  }
+  if (genderWrapper && genderWrapper.contains(target)) {
+    return;
+  }
+
+  // Close if clicking outside
+  closeGenderDropdown();
+};
+
+// Watch for gender dropdown state changes
+watch(isGenderDropdownOpen, (isOpen) => {
+  if (isOpen) {
+    // Add click listener after a small delay to avoid immediate close
+    setTimeout(() => {
+      document.addEventListener("click", handleGenderClickOutside);
+    }, 100);
+  } else {
+    // Remove click listener when dropdown closes
+    document.removeEventListener("click", handleGenderClickOutside);
+  }
+});
 
 const handleAvatarClick = () => {
   avatarInput.value?.click();
@@ -793,31 +935,9 @@ const isFormValid = computed(() => {
   return isValid;
 });
 
-// Calculate bubble position above password field
-const calculateBubblePosition = () => {
-  if (!passwordFieldRef.value) return;
-  const rect = passwordFieldRef.value.getBoundingClientRect();
-  // Position bubble above the password field, centered horizontally
-  // We'll position it so the bottom of bubble is 1rem above the top of the field
-  const bubbleHeight = 220; // Approximate height of bubble with content
-  bubblePosition.value = {
-    top: rect.top - bubbleHeight - 26, // 26px above field (10px higher than before)
-    left: rect.left + rect.width / 2 // Centered horizontally
-  };
-
-  // Ensure bubble doesn't go off screen
-  if (bubblePosition.value.top < 20) {
-    bubblePosition.value.top = 20; // Minimum 20px from top
-  }
-};
-
-// Handle password field focus - show dialog and calculate position
+// Handle password field focus - show dialog
 const handlePasswordFocus = () => {
   showPasswordRulesDialog.value = true;
-  // Calculate position after DOM update
-  nextTick(() => {
-    calculateBubblePosition();
-  });
 };
 
 // Close password rules dialog
@@ -845,22 +965,22 @@ const handleClickOutside = (event: MouseEvent) => {
 
   const target = event.target as HTMLElement;
   const bubble = document.querySelector(".who-passwordRulesBubble");
-  const backdrop = document.querySelector(".who-passwordRulesBackdrop");
   const passwordInput = passwordFieldRef.value?.querySelector("input");
   const passwordWrapper = passwordFieldRef.value;
 
-  // Don't close if clicking on password input or wrapper
+  // Don't close if clicking on password input, wrapper, or bubble
   if (passwordInput && (target === passwordInput || passwordInput.contains(target))) {
     return;
   }
   if (passwordWrapper && passwordWrapper.contains(target)) {
     return;
   }
-
-  // Close if clicking on backdrop or outside bubble
-  if (target === backdrop || (bubble && !bubble.contains(target))) {
-    closePasswordRulesDialog();
+  if (bubble && bubble.contains(target)) {
+    return;
   }
+
+  // Close if clicking outside
+  closePasswordRulesDialog();
 };
 
 // Watch for clicks outside when dialog is open
@@ -951,9 +1071,11 @@ const handleNextStep = () => {
 .who-header {
   display: flex;
   align-items: flex-start;
+  justify-content: flex-start;
   gap: 16px;
   margin-bottom: 12px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .who-backBtn {
@@ -980,8 +1102,12 @@ const handleNextStep = () => {
 }
 
 .who-progress {
-  flex: 1;
-  height: 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  max-width: calc(100% - 120px);
+  height: 3px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;
@@ -1344,53 +1470,38 @@ const handleNextStep = () => {
 }
 
 /* Password field wrapper for positioning bubble */
+/* Password field wrapper - relative positioning for popup */
 .who-passwordFieldWrapper {
   position: relative;
   width: 100%;
 }
 
-/* Password requirements backdrop */
-.who-passwordRulesBackdrop {
-  position: fixed;
-  inset: 0;
-  background: transparent;
-  z-index: 9999;
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 /* Password requirements bubble */
 .who-passwordRulesBubble {
-  position: fixed;
-  transform: translate(-50%, 0);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, rgba(189, 0, 67, 0.5), rgba(255, 0, 110, 0.5));
   backdrop-filter: blur(8px);
   border-radius: 1rem;
   padding: 1rem 1.5rem;
   max-width: 320px;
-  width: calc(100vw - 3rem);
+  width: 100%;
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.4);
-  z-index: 10000;
-  animation: fadeInUp 0.3s ease-out;
-  margin: 0;
+  z-index: 10;
+  animation: fadeInScale 0.2s ease-out;
 }
 
-@keyframes fadeInUp {
+@keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: translate(-50%, 10px);
+    transform: translateX(-50%) translateY(-5px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateX(-50%) translateY(-5px) scale(1);
   }
 }
 

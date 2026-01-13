@@ -1,17 +1,7 @@
 <template>
   <div class="postCreation-page">
-    <div
-      class="postCreation-header"
-      :class="{ 'iphoneDevice-postCreation': $q.platform.is.ios }"
-    >
-      <q-btn
-        class="postCreation-btn"
-        @click="$router.go(-1)"
-        :class="[
-          uploadedImages.images.length != 0 ? 'postCreation-swiperButton' : ''
-        ]"
-        ><img src="/icons/closeIcon.svg" alt="" class="closeIcon" />
-      </q-btn>
+    <div class="postCreation-headerWrapper">
+      <CloseOverlayButton @click="handleClose" />
     </div>
     <div class="postCreation-uploadedImgContainer">
       <ImageIndexSlider
@@ -65,17 +55,20 @@
             <img
               :src="categories.goalImg"
               alt=""
-              class="postCreation-goalImage"
+              class="postCreation-goalImage postCreation-clickable"
+              @click="$router.push({ name: 'donee-postCreation-goal' })"
             />
             <img
               :src="categories.specificGoalImg"
               alt=""
-              class="postCreation-goalImage"
+              class="postCreation-goalImage postCreation-clickable"
+              @click="handleCategoryClick"
             />
+            <!-- Subcategory picker removed - category and subcategory are the same in post creation flow -->
           </div>
           <q-btn
             class="postCreation-changeTypeButton"
-            @click="$router.push({ name: 'submit-2' })"
+            @click="$router.push({ name: 'donee-postCreation-goal' })"
             >Change Post Type</q-btn
           >
         </div>
@@ -87,7 +80,7 @@
           label-color="grey-6"
           dense
           v-model="postTitle"
-          :label="`${selectedGoalLabel} Title`"
+          :label="postTitleLabel"
           class="registerDatas registerSecrete postCreation-postTitleInput"
         >
         </q-input>
@@ -115,7 +108,7 @@
       <q-btn class="postCreation-addFeatureButton">+ Add Feature</q-btn>
     </div>
     <div class="postCreation-aboutDreamContainer">
-      <span class="postCreation-dreamTitle">About {{ selectedGoalLabel }}</span>
+      <span class="postCreation-dreamTitle">{{ "About " + selectedGoalLabel }}</span>
       <q-input
         borderless
         dark
@@ -123,19 +116,48 @@
         bottom-slots
         label-color="grey-7"
         v-model="aboutDream"
-        :label="`${selectedGoalLabel} Description`"
+        :label="postDescriptionLabel"
         class="registerDatas registerSecrete postCreation-dreamDescription"
         type="textarea"
       >
       </q-input>
       <div class="postCreation-rewardContainer">
         <span class="postCreation-rewardTitle">Initial Reward</span>
-        <TokenSlider
-          :user-karma="1001"
-          :max-value="100000000"
-          :review="false"
-          v-model="tokens"
-        ></TokenSlider>
+        <div class="postCreation-tokenInputWrapper">
+          <q-input
+            v-model.number="tokens"
+            type="number"
+            :min="0"
+            :max="maxTokens"
+            dark
+            outlined
+            class="postCreation-tokenInput"
+            :error="hasTokenError"
+            :error-message="tokenErrorMessage"
+            @update:model-value="(val: string | number | null) => handleTokenInputChange(val ?? 0)"
+          >
+            <template #append>
+              <q-icon name="img:/icons/karma-icon.svg" />
+            </template>
+          </q-input>
+        </div>
+        <div class="postCreation-sliderWrapper">
+          <q-slider
+            v-model.number="tokens"
+            :min="0"
+            :max="maxTokens"
+            :step="1"
+            :disable="maxTokens <= 0"
+            color="primary"
+            track-size="10px"
+            thumb-size="22px"
+            class="tokens-slider q-mt-md"
+            @update:model-value="handleSliderChange"
+          />
+        </div>
+        <div v-if="maxTokens > 0" class="postCreation-tokenBalance">
+          {{ t("funds") }}: {{ remainingTokens }} tokens
+        </div>
       </div>
     </div>
     <div class="postCreation-submitDreamContainer">
@@ -157,21 +179,36 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onActivated, computed, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { usePostCreationStore } from "src/stores/postCreation";
 import { usePostsStore } from "src/stores/posts";
 import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore } from "src/stores/preferences";
 import { Notify } from "quasar";
 import UploadPostImgComponent from "src/components/partials/UploadPostImgComponent.vue";
 import { PostCategories } from "src/components/models";
-import TokenSlider from "../../components/partials/CustomThumb.vue";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import type { UploadedImage } from "src/composables/useUpload";
 import { useUpload } from "src/composables/useUpload";
+import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
+import { useRemainingFunds } from "src/composables/useRemainingFunds";
+
+const { t } = useI18n();
 
 const router = useRouter();
 const postCreationStore = usePostCreationStore();
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
+const preferencesStore = usePreferencesStore();
+
+// Handle close button click - same behavior as PostDetailPage
+const handleClose = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push({ name: "donee-posts" });
+  }
+};
 const { uploadMultipleImages } = useUpload();
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -186,34 +223,94 @@ const hasUploadedImages = computed(() => {
   return uploadedImages.value.images && uploadedImages.value.images.length > 0;
 });
 
-// Computed properties from store
+// Computed properties from store - using new API
 const aboutDream = computed({
   get: () => postCreationStore.description,
-  set: (value) => postCreationStore.setField("description", value)
+  set: (value) => postCreationStore.setDescription(value)
 });
 
 const postTitle = computed({
   get: () => postCreationStore.title,
-  set: (value) => postCreationStore.setField("title", value)
+  set: (value) => postCreationStore.setTitle(value)
 });
 
 const tokens = computed({
   get: () => postCreationStore.tokens,
-  set: (value) => postCreationStore.setField("tokens", value)
+  set: (value) => postCreationStore.setTokens(value)
 });
+
+// Token balance and validation
+const userTokensBalance = computed(() => {
+  return authStore.user?.tokens ?? 0;
+});
+
+const maxTokens = computed(() => {
+  return Math.max(0, userTokensBalance.value);
+});
+
+// Remaining tokens after spending (using composable)
+const { remainingTokens } = useRemainingFunds(
+  userTokensBalance,
+  () => tokens.value
+);
+
+const hasTokenError = computed(() => {
+  return tokens.value > maxTokens.value || tokens.value < 0;
+});
+
+const tokenErrorMessage = computed(() => {
+  if (tokens.value > maxTokens.value) {
+    return t("youDontHaveEnoughTokens");
+  }
+  if (tokens.value < 0) {
+    return t("pleaseEnterValueBetween", { min: 0, max: maxTokens.value });
+  }
+  return "";
+});
+
+// Handle token input change - only update store, no heavy operations
+const handleTokenInputChange = (value: number | string | null) => {
+  if (value === null) return;
+  const numValue = typeof value === "string" ? parseInt(value, 10) || 0 : value;
+  // Clamp value but don't do heavy validation here - let computed properties handle it
+  const clampedValue = Math.max(0, Math.min(numValue, maxTokens.value));
+  postCreationStore.setTokens(clampedValue);
+};
+
+// Handle slider change - direct update for immediate response
+const handleSliderChange = (value: number | null) => {
+  if (value === null) return;
+  if (value > maxTokens.value) {
+    tokens.value = maxTokens.value;
+  } else {
+    tokens.value = value;
+  }
+};
 
 // Get selected goal from localStorage
 const selectedGoal = ref<string | null>(null);
 
 // Get label for selected goal
 const selectedGoalLabel = computed(() => {
-  if (!selectedGoal.value) return "Dream";
+  if (!selectedGoal.value || typeof selectedGoal.value !== "string") return "Dream";
   const goalMap: Record<string, string> = {
     problem: "Problem",
     dream: "Dream",
     idea: "Idea"
   };
-  return goalMap[selectedGoal.value.toLowerCase()] || "Dream";
+  const goalLower = selectedGoal.value.toLowerCase();
+  return goalMap[goalLower] || "Dream";
+});
+
+// Computed properties for labels to avoid template literal issues
+const postTitleLabel = computed(() => {
+  const label = selectedGoalLabel.value || "Dream";
+  return label + " Title";
+});
+
+const postDescriptionLabel = computed(() => {
+  const label = selectedGoalLabel.value || "Dream";
+  return label + " Description";
 });
 
 // Map goal names to icon file names (use original CategoryIcons)
@@ -248,72 +345,75 @@ const getCategoryIcon = (category: string | null): string => {
   return `/icons/CategoryIcons/${iconName}.svg`;
 };
 
-// Map numeric IDs to category names (for backward compatibility with old localStorage values)
-const goalIdToName: Record<string, string> = {
-  1: "problem",
-  2: "dream",
-  3: "idea"
+// Legacy ID mappings removed - we now use slugs directly
+
+// Handle category click - navigate to category picker
+const handleCategoryClick = () => {
+  router.push({ name: "donee-postCreation-category" });
 };
 
-const categoryIdToName: Record<string, string> = {
-  1: "learning",
-  2: "health",
-  3: "traveling",
-  4: "possessions",
-  5: "relationships",
-  6: "profession",
-  7: "events",
-  8: "other"
-};
-
-// Load selected values from localStorage and set icons
+// Load selected values from postCreationStore, localStorage, with fallback to defaults
+// IMPORTANT: Do NOT use preferencesStore for post creation flow - it's for onboarding only
 const loadSelectedCategories = () => {
-  let goal = localStorage.getItem("postCreation_goal");
-  let selectedCategory = localStorage.getItem("postCreation_category");
+  // Priority 1: Use values from postCreationStore (post creation flow) - using new API: category and subcategory
+  let goal = postCreationStore.category || null;
+  let selectedSubcategory = postCreationStore.subcategory || null;
+
+  // Priority 2: Fallback to localStorage (post creation flow) - legacy keys for backward compatibility
+  if (!goal) {
+    goal = localStorage.getItem("donee_postCreation_goal");
+  }
+  if (!selectedSubcategory) {
+    selectedSubcategory = localStorage.getItem("donee_postCreation_category");
+  }
+
+  // DO NOT use preferencesStore - it's for onboarding, not post creation
+  // This ensures "dream" is always the default for post creation flow
+
+  // Priority 3: Fallback to defaults
+  if (!goal) {
+    goal = "dream";
+  }
+  if (!selectedSubcategory) {
+    selectedSubcategory = "traveling";
+  }
 
   if (process.env.NODE_ENV === "development") {
-    console.log("📝 Raw values from localStorage:", {
-      goal,
-      selectedCategory
-    });
-  }
-
-  // Konvertovať číselné ID na názvy (pre kompatibilitu so starými hodnotami v localStorage)
-  // localStorage vracia stringy, takže musíme porovnať so stringmi
-  if (goal && goalIdToName[String(goal)]) {
-    goal = goalIdToName[String(goal)];
-  }
-  if (selectedCategory && categoryIdToName[String(selectedCategory)]) {
-    selectedCategory = categoryIdToName[String(selectedCategory)];
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 After conversion:", {
-      goal,
-      selectedCategory
+    console.log("📝 Raw values:", {
+      fromStore: {
+        category: postCreationStore.category,
+        subcategory: postCreationStore.subcategory
+      },
+      fromLocalStorage: {
+        goal: localStorage.getItem("donee_postCreation_goal"),
+        category: localStorage.getItem("donee_postCreation_category")
+      },
+      final: { goal, selectedSubcategory }
     });
   }
 
   selectedGoal.value = goal;
 
-  // Nastaviť hodnoty do store
+  // Nastaviť hodnoty do store - using new API
   if (goal) {
-    postCreationStore.setField("type", goal as "dream" | "problem" | "idea");
+    postCreationStore.setCategory(goal as import("src/domain/categories").CategorySlug);
   }
-  if (selectedCategory) {
-    postCreationStore.setField("category", selectedCategory);
+  if (selectedSubcategory) {
+    postCreationStore.setSubcategory(selectedSubcategory as import("src/domain/categories").SubcategorySlug);
   }
 
   // Aktualizovať ikony
   categories.value = {
     goalImg: getGoalIcon(goal),
-    specificGoalImg: getCategoryIcon(selectedCategory)
+    specificGoalImg: getCategoryIcon(selectedSubcategory)
   };
 
   if (process.env.NODE_ENV === "development") {
     console.log("📝 Categories loaded:", {
       goalImg: categories.value.goalImg,
-      specificGoalImg: categories.value.specificGoalImg
+      specificGoalImg: categories.value.specificGoalImg,
+      category: goal,
+      subcategory: selectedSubcategory
     });
   }
 };
@@ -328,10 +428,15 @@ onMounted(() => {
   loadSelectedCategories();
 });
 
-// Reload categories when component is activated (e.g., returning from submit-2 page)
+// Reload categories when component is activated (e.g., returning from submit-2 page or picker pages)
 onActivated(() => {
   loadSelectedCategories();
 });
+
+// Watch for changes to category and subcategory in store/localStorage
+watch(() => [postCreationStore.category, postCreationStore.subcategory], () => {
+  loadSelectedCategories();
+}, { deep: true });
 
 // Handle post submission - submit to BE
 const handleSubmitPost = async () => {
@@ -339,8 +444,8 @@ const handleSubmitPost = async () => {
     console.log("🔵 handleSubmitPost called", {
       isValid: postCreationStore.isValid,
       loading: postCreationStore.loading,
-      type: postCreationStore.type,
       category: postCreationStore.category,
+      subcategory: postCreationStore.subcategory,
       title: postCreationStore.title,
       description: postCreationStore.description
     });
@@ -357,8 +462,14 @@ const handleSubmitPost = async () => {
   }
 
   try {
+    // Debug log: before submitPost()
+    console.log("[SUBMIT] before submitPost()");
+
     // Submit post via store
-    const result = await postCreationStore.submit();
+    const result = await postCreationStore.createPost();
+
+    // Debug log: after submitPost() success
+    console.log("[SUBMIT] after submitPost()", result);
 
     if (process.env.NODE_ENV === "development") {
       console.log("✅ Submit result:", result);
@@ -368,7 +479,18 @@ const handleSubmitPost = async () => {
     if (result?.user?.tokens !== undefined) {
       authStore.updateTokens(result.user.tokens);
       if (process.env.NODE_ENV === "development") {
-        console.log("💰 Updated user tokens:", result.user.tokens);
+        console.log("💰 Updated user tokens from response:", result.user.tokens);
+      }
+    } else {
+      // If BE doesn't return tokens, refresh from API
+      // This ensures UI always shows correct balance
+      try {
+        await authStore.refreshTokenBalance();
+      } catch (error) {
+        // Don't block UX if refresh fails
+        if (process.env.NODE_ENV === "development") {
+          console.warn("⚠️ Failed to refresh token balance after post creation:", error);
+        }
       }
     }
 
@@ -379,21 +501,38 @@ const handleSubmitPost = async () => {
       position: "top"
     });
 
-    // Clear localStorage
-    localStorage.removeItem("postCreation_goal");
-    localStorage.removeItem("postCreation_category");
+    // Save registration preferences to preferences store before clearing localStorage
+    // This ensures they can be used when switching to donor side
+    const registrationGoal = localStorage.getItem("donee_postCreation_goal");
+    const registrationCategory = localStorage.getItem("donee_postCreation_category");
+    if (registrationGoal && registrationCategory) {
+      // Category (goal) is dream/problem/idea
+      const category = registrationGoal as "dream" | "problem" | "idea";
+      // Subcategory is traveling/health/etc.
+      const subcategory = registrationCategory;
 
-    // Refresh posts feed and my posts (for Donee home)
+      // Always save to preferences store (registration preferences take priority)
+      preferencesStore.setPreferredPostType(category);
+      preferencesStore.setPreferredSubcategory(subcategory);
+    }
+
+    // Clear localStorage
+    localStorage.removeItem("donee_postCreation_goal");
+    localStorage.removeItem("donee_postCreation_category");
+
+    // Refresh posts feed and my posts (for Donee home) - using new API
     await Promise.all([
       postsStore.fetchPosts({ sort: "help" }),
-      postsStore.fetchMyDreams({ type: "dream" }),
-      postsStore.fetchMyProblems({ type: "problem" }),
-      postsStore.fetchMyIdeas({ type: "idea" })
+      postsStore.fetchMyDreams({ category: "dream" }),
+      postsStore.fetchMyProblems({ category: "problem" }),
+      postsStore.fetchMyIdeas({ category: "idea" })
     ]);
 
     // Navigate to donee posts page (Donee home)
     router.push({ name: "donee-posts" });
   } catch (error: unknown) {
+    // Debug log: submitPost() threw
+    console.error("[SUBMIT] submitPost() threw:", error);
     // Error je už nastavený v store
     if (postCreationStore.error) {
       Notify.create({
@@ -412,8 +551,8 @@ const handleSubmitPost = async () => {
 };
 const deleteImg = () => {
   uploadedImages.value.images.splice(imgIndex.value, 1);
-  // Aktualizovať store
-  postCreationStore.setField("images", uploadedImages.value.images);
+  // Aktualizovať store - using new API
+  postCreationStore.setImages(uploadedImages.value.images);
 };
 const handleImagesFromChild = async (imgs: UploadedImage[]) => {
   // Konvertovať UploadedImage[] na string[] (použiť secure_url)
@@ -427,8 +566,8 @@ const handleImagesFromChild = async (imgs: UploadedImage[]) => {
   // Nastaviť obrázky reaktívne - použiť nový array pre lepšiu reaktivitu
   uploadedImages.value.images = [...imageUrls];
 
-  // Aktualizovať store
-  postCreationStore.setField("images", imageUrls);
+  // Aktualizovať store - using new API
+  postCreationStore.setImages(imageUrls);
 
   // Počkať na DOM update
   await nextTick();
@@ -463,7 +602,7 @@ const handleFileChange = async (event: Event) => {
   if (remainingSlots <= 0) {
     Notify.create({
       type: "negative",
-      message: `Maximum ${maxImages} images allowed.`,
+      message: "Maximum " + maxImages + " images allowed.",
       position: "top"
     });
     return;
@@ -480,8 +619,8 @@ const handleFileChange = async (event: Event) => {
     const newImageUrls = uploaded.map((img) => img.secure_url);
     uploadedImages.value.images = [...uploadedImages.value.images, ...newImageUrls];
 
-    // Aktualizovať store
-    postCreationStore.setField("images", uploadedImages.value.images);
+    // Aktualizovať store - using new API
+    postCreationStore.setImages(uploadedImages.value.images);
 
     if (process.env.NODE_ENV === "development") {
       console.log("📸 Additional images uploaded:", newImageUrls.length);
@@ -510,10 +649,8 @@ const handleFileChange = async (event: Event) => {
     height: 100%;
   }
 }
+
 .postCreation-page {
-  .postCreation-swiperButton {
-    margin-top: 1rem !important;
-  }
   .flicking-camera {
     height: 40rem;
     * {
@@ -574,27 +711,18 @@ const handleFileChange = async (event: Event) => {
 }
 // Removed ::after gradient to prevent visual split
 .postCreation-page {
-  .postCreation-header {
-    position: absolute;
+  .postCreation-headerWrapper {
+    position: relative;
     width: 100%;
-    z-index: 111;
-    padding: 0.6rem;
+    height: 0;
+    z-index: 15;
+    pointer-events: none;
 
-    .postCreation-btn {
-      position: fixed;
-      margin: 0 0.4rem;
-      width: 2.8rem;
-      height: 2.8rem;
-      border-radius: 2rem;
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.248) 0%,
-        rgba(0, 0, 0, 0.126) 100%
-      );
-
-      backdrop-filter: blur(1rem);
+    > * {
+      pointer-events: auto;
     }
   }
+
   .postCreation-uploadedImgContainer {
     position: relative;
     width: 100%;
@@ -667,7 +795,7 @@ const handleFileChange = async (event: Event) => {
     .postCreation-detailContainer {
       z-index: 111;
       width: 95%;
-      top: 31.5rem;
+      top: calc(31.5rem - 10px);
       margin: 0 auto;
       padding: 0 1rem;
       height: 8rem;
@@ -707,6 +835,20 @@ const handleFileChange = async (event: Event) => {
           height: 2.5rem;
           width: auto;
           margin: 0;
+
+          &.postCreation-clickable {
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+
+            &:hover {
+              opacity: 0.8;
+              transform: scale(1.05);
+            }
+
+            &:active {
+              transform: scale(0.95);
+            }
+          }
         }
         .postCreation-changeTypeButton {
           border: 0.1rem solid $primary;
@@ -796,14 +938,127 @@ const handleFileChange = async (event: Event) => {
     display: flex;
     flex-direction: column;
     width: 100%;
+    gap: 1rem;
 
     .postCreation-rewardTitle {
       font-family: poppinsSemiBold;
       color: white;
-      margin-bottom: -1.6rem;
       font-size: 1.1rem;
-      width: 40%;
-      margin-bottom: -2.6rem;
+      margin-bottom: 0;
+    }
+
+    .postCreation-tokenInputWrapper {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .postCreation-tokenInput {
+      width: 60%;
+      max-width: 200px;
+      :deep(.q-field__control) {
+        background: rgba(23, 23, 23, 0.72);
+        border-radius: 0.625rem;
+        height: 2.875rem;
+        display: flex;
+        align-items: center;
+      }
+      :deep(.q-field__native) {
+        color: $primary;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: right;
+        padding-right: 0.5rem;
+        font-family: poppinsBold;
+      }
+      :deep(.q-field__append) {
+        padding-left: 0.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      :deep(.q-icon) {
+        color: $primary;
+        font-size: 1.2rem;
+      }
+    }
+
+    .postCreation-tokenBalance {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .postCreation-sliderWrapper {
+      width: 100%;
+      padding: 0.5rem 0;
+    }
+
+    .tokens-slider {
+      margin-top: 12px;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      touch-action: pan-x;
+      -webkit-tap-highlight-color: transparent;
+
+      :deep(.q-slider__track-container) {
+        cursor: pointer;
+        touch-action: pan-x;
+        will-change: transform;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      :deep(.q-slider__thumb-container) {
+        transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+      }
+
+      :deep(.q-slider__thumb) {
+        cursor: grab;
+        will-change: transform;
+        transition: none;
+        -webkit-tap-highlight-color: transparent;
+        transform: translateZ(0) translateY(-5.5px) translateX(-3.5px);
+        -webkit-transform: translateZ(0) translateY(-5.5px) translateX(-3.5px);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        margin-top: -5.5px;
+        margin-left: -3.5px;
+
+        &:active {
+          cursor: grabbing;
+          transform: translateZ(0) translateY(-5.5px) translateX(-3.5px) scale(1.1);
+          -webkit-transform: translateZ(0) translateY(-5.5px) translateX(-3.5px) scale(1.1);
+        }
+
+        &:hover {
+          cursor: grab;
+        }
+      }
+
+      :deep(.q-slider__track) {
+        cursor: pointer;
+        will-change: width;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+      }
+
+      :deep(.q-slider__track-fill) {
+        will-change: width;
+        transition: none;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+      }
+
+      :deep(.q-slider__track-container),
+      :deep(.q-slider__thumb-container) {
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+      }
     }
   }
   .postCreation-submitDreamContainer {

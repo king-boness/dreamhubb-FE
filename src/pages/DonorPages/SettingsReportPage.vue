@@ -1,13 +1,13 @@
 <template>
   <div class="report-page">
     <div class="report-header">
-      <span class="report-title">Report a dream</span>
+      <span class="report-title">Report a post</span>
       <span class="report-description"
         >Adipiscing viverra netus ultricies lacus consectetur.
       </span>
     </div>
 
-    <div class="InnapprContent-report report-container">
+    <div class="InnapprContent-report report-container" @click="handleRadioClick('innaprContent')">
       <q-radio
         v-model="shape"
         val="innaprContent"
@@ -23,7 +23,7 @@
       />
       <span class="reportName">Inappropriate Content</span>
     </div>
-    <div class="Hate-report report-container">
+    <div class="Hate-report report-container" @click="handleRadioClick('hate')">
       <q-radio
         v-model="shape"
         val="hate"
@@ -39,7 +39,7 @@
       />
       <span class="reportName">Hate speech or Racism</span>
     </div>
-    <div class="WrongCategory-report report-container">
+    <div class="WrongCategory-report report-container" @click="handleRadioClick('wrongCategory')">
       <q-radio
         v-model="shape"
         val="wrongCategory"
@@ -55,7 +55,7 @@
       />
       <span class="reportName">Wrong Category</span>
     </div>
-    <div class="WrongSubCategory-report report-container">
+    <div class="WrongSubCategory-report report-container" @click="handleRadioClick('wrongSubCategory')">
       <q-radio
         v-model="shape"
         val="wrongSubCategory"
@@ -101,27 +101,90 @@
         dark
         class="registerDatas subCategorySelect"
         v-model="subCategorySelect"
-        :options="['Traveling', 'Health', 'Possesions']"
+        :options="subCategoryOptions"
         label="Select the Correct Subcategory"
         behavior="menu"
       />
     </div>
     <div class="reportPage-buttonContainer">
-      <q-btn class="report-button" @click="$router.go(-1)"
-        ><span>Send Report</span></q-btn
+      <q-btn
+        class="report-button"
+        :disabled="!canSendReport"
+        @click="handleSendReport"
       >
+        <span>Send Report</span>
+      </q-btn>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-const shape = ref("langinnaprContentk");
+import { ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Notify } from "quasar";
+
+const route = useRoute();
+const router = useRouter();
+
+const shape = ref("");
 const helpMessage = ref("");
 const subCategorySelect = ref("");
 const CategorySelect = ref("");
 const category = ref(false);
 const subCategory = ref(false);
+
+// All available subcategories
+const subCategoryOptions = [
+  "Traveling",
+  "Health",
+  "Possessions",
+  "Relationships",
+  "Learning",
+  "Events",
+  "Profession",
+  "Other"
+];
+
+// Handle click on report container (text or radio button)
+const handleRadioClick = (value: string) => {
+  shape.value = value;
+  if (value === "wrongCategory") {
+    category.value = true;
+    subCategory.value = false;
+  } else if (value === "wrongSubCategory") {
+    category.value = false;
+    subCategory.value = true;
+  } else {
+    category.value = false;
+    subCategory.value = false;
+  }
+};
+
+const postId = computed(() => {
+  return route.params.id ? String(route.params.id) : null;
+});
+
+const canSendReport = computed(() => {
+  return !!shape.value || !!helpMessage.value.trim();
+});
+
+const handleSendReport = async () => {
+  // TODO: Implement actual API call to report post
+  // For now, just show success and redirect back
+  Notify.create({
+    type: "positive",
+    message: "Report submitted successfully",
+    position: "top",
+    timeout: 3000
+  });
+
+  // Redirect back to post detail or previous page
+  if (postId.value) {
+    router.push({ name: "donor-post-detail", params: { id: postId.value } });
+  } else {
+    router.go(-1);
+  }
+};
 </script>
 <style scoped lang="scss">
 .report-page {
@@ -147,10 +210,24 @@ const subCategory = ref(false);
     }
   }
   .report-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
+    }
+
     .reportName {
       color: white;
       font-family: poppins;
       font-size: 1rem;
+      flex: 1;
+      user-select: none;
     }
   }
   .reportPage-InputsContainer {

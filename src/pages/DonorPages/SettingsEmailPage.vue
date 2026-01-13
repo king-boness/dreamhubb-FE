@@ -66,6 +66,7 @@ onMounted(async () => {
 <style scoped lang="scss">
 .settingsEmail-page {
   padding: 0 1.2rem;
+  padding-bottom: 3rem;
   .changeEmail-div {
     display: flex;
     width: 100%;
@@ -123,6 +124,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   margin-top: 2rem;
+  margin-bottom: 2rem;
 
   .cancelButton {
     background-color: rgba(221, 31, 97, 0.2) !important;

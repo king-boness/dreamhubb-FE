@@ -85,13 +85,23 @@
 }
 </style>
 <script setup lang="ts">
-import { PropType, ref, defineEmits } from "vue";
+import { PropType, ref, defineEmits, onMounted } from "vue";
 import SwiperComponent from "src/components/partials/SwiperComponent.vue";
 import { Category } from "src/components/models";
 const horiz = ref(false);
 const rerender = ref(1);
 const emit = defineEmits(["changedHoriz"]);
 const selectedItemIdFromChild = ref(null);
+
+onMounted(() => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("[SubmitPage1] onMounted", {
+      category: props.category,
+      categoryLength: props.category?.length || 0,
+      horiz: horiz.value
+    });
+  }
+});
 
 const changeSwiper = () => {
   horiz.value = !horiz.value;

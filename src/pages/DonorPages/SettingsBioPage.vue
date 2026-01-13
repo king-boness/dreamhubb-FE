@@ -69,6 +69,7 @@ const handleCancel = () => {
 <style scoped lang="scss">
 .settingsBio-page {
   padding: 0 1rem;
+  padding-bottom: 3rem;
   .settingsBio-main {
     display: flex;
     width: 100%;
@@ -116,6 +117,7 @@ const handleCancel = () => {
   align-items: center;
   justify-content: center;
   margin-top: 2rem;
+  margin-bottom: 2rem;
 
   .cancelButton {
     background-color: rgba(221, 31, 97, 0.2) !important;

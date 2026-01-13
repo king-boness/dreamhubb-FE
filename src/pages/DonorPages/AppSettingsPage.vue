@@ -31,16 +31,15 @@
     </div>
     <div class="screenMode-container">
       <span class="appSettings-name">{{ t("nameShown") }}</span>
-      <div class="btn-container name-ButtonContainer">
-        <div
-          class="toggle-btn name-button"
-          :class="nameShown ? 'active' : ' '"
-          @click="nameShown = !nameShown"
-        >
-          <span class="nickname-option">{{ t("nickname") }}</span>
-          <span class="realName-option">{{ t("realName") }}</span>
-          <div class="inner-circle name-buttonCircle"></div>
-        </div>
+      <div class="name-toggle-container">
+        <q-btn-toggle
+          v-model="nameShownValue"
+          toggle-color="primary"
+          :options="nameShownOptions.map(opt => ({ label: t(opt.label), value: opt.value }))"
+          class="name-toggle-buttons"
+          spread
+          no-caps
+        />
       </div>
     </div>
     <div class="acccoutSettings-div">
@@ -103,7 +102,7 @@
 
     <!-- Coming Soon Section -->
     <div class="acccoutSettings-div">
-      <span class="appSettings-title">Coming Soon</span>
+      <span class="appSettings-title">{{ t("comingSoon") }}</span>
       <div
         class="appSettings-content appSettings-content--disabled"
         v-for="(item, i) in comingSoonItems"
@@ -113,12 +112,12 @@
           <img :src="item.img" alt="" class="appSettings-img" />
           <span class="appSettings-name">{{ item.title }}</span>
         </div>
-        <span class="appSettings-comingSoon">Coming soon</span>
+        <span class="appSettings-comingSoon">{{ t("comingSoon") }}</span>
       </div>
     </div>
 
     <div class="screenMode-container">
-      <span class="appSettings-name">Screen Mode</span>
+      <span class="appSettings-name">{{ t("screenMode") }}</span>
       <div class="btn-container darkMode-toggle">
         <div
           class="toggle-btn"
@@ -145,7 +144,7 @@
       </div>
     </div>
     <div class="acccoutSettings-div">
-      <span class="appSettings-title">Sources</span>
+      <span class="appSettings-title">{{ t("sources") }}</span>
       <div
         class="appSettings-content"
         v-for="(source, i) in sources"
@@ -201,7 +200,7 @@
       class="appSettings-deleteButton appSettings-logOutButton text-capitalize"
       @click="logout"
     >
-      <span class="">Log out</span>
+      <span class="">{{ t("logOut") }}</span>
     </q-btn>
   </div>
 </template>
@@ -211,13 +210,23 @@ import { useRouter, useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import { useI18n } from "vue-i18n";
+import messages from "src/i18n";
 
 const $q = useQuasar();
 const router = useRouter();
 const auth = useAuthStore();
 const { t, locale } = useI18n();
 const lightMode = ref(false);
-const nameShown = ref(false);
+
+// Name shown toggle - 'nickname' or 'realName'
+const NAME_SHOWN_STORAGE_KEY = "dreamhubb_name_shown";
+const nameShownValue = ref<"nickname" | "realName">("nickname");
+
+// Options for q-btn-toggle - use plain array to avoid reactivity issues
+const nameShownOptions = [
+  { label: "nickname", value: "nickname" },
+  { label: "realName", value: "realName" }
+];
 
 // Watch for locale changes to trigger reactivity
 watch(() => locale.value, () => {
@@ -227,49 +236,146 @@ watch(() => locale.value, () => {
   }
 });
 
-// Get current language label from localStorage
+// Get current language label - display native name (in the language itself)
+// Use the language's own locale to get the native name
 const currentLanguageLabel = computed(() => {
   const savedLanguage = localStorage.getItem("dreamhubb_language") || "en-US";
-  // Map language codes to display names
-  const languageMap: Record<string, string> = {
-    sk: "Slovak",
-    "en-US": "English (US)",
-    "en-GB": "English (UK)",
-    de: "German",
-    fr: "French",
-    es: "Spanish",
-    it: "Italian",
-    pl: "Polish",
-    cs: "Czech",
-    hu: "Hungarian",
-    ro: "Romanian",
-    ru: "Russian",
-    uk: "Ukrainian"
+
+  // Map language code to i18n locale (for getting translations)
+  // If locale exists, use it; otherwise fallback to en-US
+  const localeMap: Record<string, string> = {
+    sk: "sk",
+    "en-US": "en-US",
+    "en-GB": "en-US", // Use en-US as fallback for en-GB
+    es: "es",
+    cs: "cs",
+    da: "da",
+    zh: "zh",
+    ar: "ar",
+    hi: "hi",
+    ru: "ru",
+    ro: "ro",
+    uk: "uk",
+    de: "de",
+    fr: "fr",
+    it: "it",
+    pl: "pl",
+    hu: "hu",
+    ja: "ja",
+    ko: "ko",
+    sq: "sq",
+    hy: "hy",
+    az: "az",
+    bn: "bn",
+    bg: "bg",
+    hr: "hr",
+    et: "et",
+    fi: "fi",
+    ka: "ka",
+    el: "el",
+    he: "he",
+    id: "id",
+    kk: "kk",
+    lo: "lo",
+    lv: "lv",
+    lt: "lt",
+    mk: "mk",
+    ne: "ne",
+    no: "no",
+    fa: "fa",
+    pt: "pt",
+    sr: "sr",
+    sv: "sv",
+    th: "th",
+    tr: "tr",
+    ur: "ur",
+    nl: "nl",
+    // New languages - now using their own i18n files
+    "pa-PK": "pa-PK",
+    "mr-IN": "mr-IN",
+    "te-IN": "te-IN",
+    "ta-IN": "ta-IN",
+    "vi-VN": "vi-VN",
+    "fil-PH": "fil-PH",
+    "sw-TZ": "sw-TZ",
+    "ha-NE": "ha-NE",
+    "yue-HK": "yue-HK",
+    "wuu-CN": "wuu-CN",
+    "jv-ID": "jv-ID",
+    "gu-IN": "gu-IN",
+    "kn-IN": "kn-IN"
   };
-  return languageMap[savedLanguage] || "English (US)";
+
+  const i18nLocale = localeMap[savedLanguage] || savedLanguage;
+
+  // Get native name from the language's own locale file
+  try {
+    const localeMessages = messages[i18nLocale as keyof typeof messages];
+    if (localeMessages && localeMessages.languages && localeMessages.languages[savedLanguage as keyof typeof localeMessages.languages]) {
+      const langData = localeMessages.languages[savedLanguage as keyof typeof localeMessages.languages] as { name: string; nativeName?: string };
+      // Prefer nativeName if available, otherwise use name
+      if (langData && (langData.nativeName || langData.name)) {
+        return langData.nativeName || langData.name;
+      }
+    }
+  } catch (e) {
+    // Fallback if translation fails
+  }
+
+  // Fallback to English name if native name not available
+  try {
+    const enMessages = messages["en-US"];
+    if (enMessages && enMessages.languages && enMessages.languages[savedLanguage as keyof typeof enMessages.languages]) {
+      const langData = enMessages.languages[savedLanguage as keyof typeof enMessages.languages] as { name: string; nativeName?: string };
+      // Prefer nativeName if available, otherwise use name
+      if (langData && (langData.nativeName || langData.name)) {
+        return langData.nativeName || langData.name;
+      }
+    }
+  } catch (e) {
+    // Final fallback
+  }
+
+  return "English (US)";
 });
 
 // Coming soon items
-const comingSoonItems = [
+const comingSoonItems = computed(() => [
   {
     img: "/icons/privacyIcon.svg",
-    title: "Notifications"
+    title: t("notifications")
   },
   {
     img: "/icons/privacyIcon.svg",
-    title: "Appearance"
+    title: t("appearance")
   },
   {
     img: "/icons/privacyIcon.svg",
-    title: "Privacy"
+    title: t("privacy")
   }
-];
+]);
 
 const checkBodyClass = () => {
   lightMode.value = document.body.classList.contains("body--light");
 };
+
+// Load saved name shown preference from localStorage
+const loadNameShownPreference = () => {
+  const saved = localStorage.getItem(NAME_SHOWN_STORAGE_KEY);
+  if (saved === "nickname" || saved === "realName") {
+    nameShownValue.value = saved;
+  }
+};
+
+// Watch for changes in nameShownValue and save to localStorage
+watch(nameShownValue, (newValue) => {
+  localStorage.setItem(NAME_SHOWN_STORAGE_KEY, newValue);
+  // TODO: Optionally save to API if needed
+}, { immediate: false });
+
 onMounted(() => {
   checkBodyClass();
+  loadNameShownPreference();
 });
 onBeforeUnmount(() => {
   checkBodyClass();
@@ -370,8 +476,14 @@ const routeCheck = (name: string) => {
       }
     }
   }
-  .name-ButtonContainer {
-    background-color: rgba(246, 246, 246, 0);
+  .name-toggle-container {
+    :deep(.name-toggle-buttons) {
+      border-color: rgba(119, 0, 0, 0.412);
+
+      .q-btn {
+        border-color: rgba(119, 0, 0, 0.412);
+      }
+    }
   }
 }
 .aboutAppSection {
@@ -503,6 +615,8 @@ const routeCheck = (name: string) => {
   align-items: center;
   flex-direction: row;
   padding-right: 0.6rem;
+  width: 100%;
+  gap: 1rem;
 }
 .btn-container {
   width: 5.2rem;
@@ -511,34 +625,86 @@ const routeCheck = (name: string) => {
   border-radius: 0.3rem;
 }
 
-.name-ButtonContainer {
-  width: 13rem !important;
-  border-radius: 6.25rem;
-}
-.name-buttonCircle {
-  width: 6.5rem !important;
-  border-radius: 6.25rem;
-}
-.name-button {
-  background-color: transparent !important;
-}
-.name-button.active > .name-buttonCircle {
-  margin-left: 6.4rem !important;
-}
-.nickname-option {
-  position: absolute;
-  z-index: 1;
-  color: white;
-  font-family: poppins;
-  top: 24%;
-  left: 8%;
-}
-.realName-option {
-  position: absolute;
-  color: white;
-  font-family: poppins;
-  top: 24%;
-  left: 56%;
+.name-toggle-container {
+  width: 100%;
+  max-width: 16rem;
+  min-width: 14rem;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  :deep(.name-toggle-buttons) {
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    width: 100%;
+    border-radius: 6.25rem;
+    overflow: hidden;
+    border: 0.1rem solid $primary;
+    background-color: transparent;
+
+    .q-btn-group {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      border-radius: 6.25rem;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    .q-btn {
+      flex: 1;
+      height: 100%;
+      min-height: 44px;
+      max-height: 44px;
+      border-radius: 0;
+      font-family: poppins;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      background-color: transparent;
+      border: none;
+      border-right: 0.1rem solid rgba($primary, 0.3);
+      margin: 0;
+      padding: 0;
+
+      &:last-child {
+        border-right: none;
+        border-top-right-radius: 6.25rem;
+        border-bottom-right-radius: 6.25rem;
+      }
+
+      &:first-child {
+        border-top-left-radius: 6.25rem;
+        border-bottom-left-radius: 6.25rem;
+      }
+
+      &.q-btn--active {
+        background-color: $primary;
+        color: white;
+      }
+
+      &:not(.q-btn--active) {
+        background-color: transparent;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .q-btn__content {
+        padding: 0 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+      }
+    }
+  }
 }
 .toggle-btn {
   width: 5rem;

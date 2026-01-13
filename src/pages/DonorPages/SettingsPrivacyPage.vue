@@ -100,6 +100,7 @@ const value2 = ref(false);
     display: flex;
     flex-direction: column;
     padding: 0 1rem;
+    padding-bottom: 3rem;
     margin: 1.5rem 0;
 
     .settingsPrivacy-title {
@@ -157,6 +158,7 @@ const value2 = ref(false);
     align-items: center;
     justify-content: center;
     margin-top: 2rem;
+    margin-bottom: 2rem;
 
     .cancelButton {
       background-color: rgba(221, 31, 97, 0.2) !important;

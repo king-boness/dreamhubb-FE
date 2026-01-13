@@ -68,6 +68,7 @@ const newPassword = ref("");
   justify-content: center;
   align-items: center;
   padding: 0 1.2rem;
+  padding-bottom: 3rem;
   .passwordPage-header {
     display: flex;
     width: 100%;
@@ -124,6 +125,7 @@ const newPassword = ref("");
   align-items: end;
   justify-content: center;
   margin-top: 2rem;
+  margin-bottom: 2rem;
   width: 100%;
   .cancelButton {
     background-color: rgba(221, 31, 97, 0.2) !important;

@@ -170,9 +170,11 @@ const handleNext = () => {
 .pick-header {
   display: flex;
   align-items: flex-start;
+  justify-content: flex-start;
   gap: 16px;
   margin-bottom: 20px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .pick-backBtn {
@@ -199,8 +201,12 @@ const handleNext = () => {
 }
 
 .pick-progress {
-  flex: 1;
-  height: 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  max-width: calc(100% - 120px);
+  height: 3px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;

@@ -1,180 +1,204 @@
 // src/stores/postCreation.ts
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
-// getCategoryId už nie je potrebné - používame priamo fe_category
+import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
+
+interface PostCreationState {
+  title: string;
+  description: string;
+  dateDeadline: string | null;
+  tokens: number;
+  // New format: using slugs
+  category: CategorySlug | null;
+  subcategory: SubcategorySlug | null;
+  images: string[];
+  loading: boolean;
+  error: string | null;
+}
 
 export const usePostCreationStore = defineStore("postCreation", {
-  state: () => ({
-    // Post type (dream/problem/idea)
-    type: null as "dream" | "problem" | "idea" | null,
-
-    // Category
-    category: null as string | null,
-    categoryId: null as number | null, // BE očakáva category_id
-
-    // Post content
-    title: "" as string,
-    description: "" as string,
-
-    // Tokens (initial reward)
-    tokens: 0 as number,
-
-    // Location (zatiaľ stringy - TODO: mapovať na IDs ak BE vyžaduje)
-    locationContinent: "" as string,
-    locationCountry: "" as string,
-    locationCity: "" as string,
-
-    // Deadline (optional)
-    dateDeadline: null as string | null,
-
-    // Images (pole stringov - base64 alebo URL)
-    // TODO: Reálny upload obrázkov cez /api/upload alebo FormData
-    images: [] as string[],
-
-    // UI state
+  state: (): PostCreationState => ({
+    title: "",
+    description: "",
+    dateDeadline: null,
+    tokens: 0,
+    category: null,
+    subcategory: null,
+    images: [],
     loading: false,
-    error: null as string | null
+    error: null
   }),
 
   getters: {
-    isValid(state): boolean {
+    // Check if all required fields are filled
+    isValid(): boolean {
       return !!(
-        state.type &&
-        state.category && // Kontrolujeme category (string), categoryId sa nastaví pri submit-e
-        state.title &&
-        state.description &&
-        state.title.trim().length > 0 &&
-        state.description.trim().length > 0 &&
-        state.tokens >= 1 // Musí byť vybraný aspoň 1 token
+        this.title.trim() &&
+        this.description.trim() &&
+        this.category &&
+        this.subcategory
       );
     }
   },
 
   actions: {
-    // Univerzálna metóda na nastavenie poľa
-    setField(fieldName: string, value: unknown) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this as any)[fieldName] = value;
+    // Set category (slug)
+    setCategory(category: CategorySlug | null) {
+      this.category = category;
     },
 
-    // Reset celého state
+    // Set subcategory (slug)
+    setSubcategory(subcategory: SubcategorySlug | null) {
+      this.subcategory = subcategory;
+    },
+
+    // Set title
+    setTitle(title: string) {
+      this.title = title;
+    },
+
+    // Set description
+    setDescription(description: string) {
+      this.description = description;
+    },
+
+    // Set date deadline
+    setDateDeadline(dateDeadline: string | null) {
+      this.dateDeadline = dateDeadline;
+    },
+
+    // Set tokens
+    setTokens(tokens: number) {
+      this.tokens = tokens;
+    },
+
+    // Set images
+    setImages(images: string[]) {
+      this.images = images;
+    },
+
+    // Add image
+    addImage(image: string) {
+      if (!this.images.includes(image)) {
+        this.images.push(image);
+      }
+    },
+
+    // Remove image
+    removeImage(image: string) {
+      this.images = this.images.filter((img) => img !== image);
+    },
+
+    // Reset form
     reset() {
-      this.type = null;
-      this.category = null;
-      this.categoryId = null;
       this.title = "";
       this.description = "";
-      this.tokens = 0;
-      this.locationContinent = "";
-      this.locationCountry = "";
-      this.locationCity = "";
       this.dateDeadline = null;
+      this.tokens = 0;
+      this.category = null;
+      this.subcategory = null;
       this.images = [];
-      this.loading = false;
       this.error = null;
     },
 
-    // Mapovať category name na category_id pomocou categoryMapping
-    async fetchCategoryId(categoryName: string): Promise<number | null> {
-      // Použiť rovnaké mapovanie ako v FiltersPage
-      // categoryId už nie je potrebné - používame priamo fe_category
-      const categoryId = null;
+    // Create post
+    async createPost(): Promise<{ post_id: number } | null> {
+      // Debug log: start
+      console.log("[submitPost] start", {
+        title: this.title,
+        description: this.description,
+        tokens: this.tokens,
+        category: this.category,
+        subcategory: this.subcategory,
+        images: this.images,
+        dateDeadline: this.dateDeadline
+      });
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("📝 Mapping category to ID:", {
-          categoryName,
-          categoryId
-        });
+      // Validate required fields
+      if (!this.isValid) {
+        this.error = "Please fill in all required fields (category, subcategory, title, description).";
+        return null;
       }
 
-      return categoryId;
-    },
-
-    // Submit post - volá POST /api/post-create na BE
-    async submit() {
-      if (!this.isValid) {
-        if (this.tokens < 1) {
-          this.error = "Please select at least 1 token as initial reward.";
-        } else {
-          this.error = "Please fill in all required fields (type, category, title, description).";
-        }
-        return;
+      // Fallback debug: check if category/subcategory are missing
+      if (!this.category || !this.subcategory) {
+        const error = new Error(
+          `[submitPost] Missing category or subcategory: category=${this.category}, subcategory=${this.subcategory}`
+        );
+        console.error("[submitPost] Missing required fields:", error);
+        throw error;
       }
 
       this.loading = true;
       this.error = null;
 
       try {
-        // fe_category je povinné - používame priamo FE category name
-        if (!this.category) {
-          throw new Error("Category is required. Please select a category.");
+        // Build payload using new API format
+        // Safely handle images - ensure it's always an array of strings
+        let safeImages: string[] = [];
+        if (Array.isArray(this.images)) {
+          safeImages = this.images
+            .map((img) => {
+              // Handle both string URLs and objects with url property
+              if (typeof img === "string") {
+                return img.trim() || null;
+              }
+              if (img && typeof img === "object" && "url" in img && typeof img.url === "string") {
+                return img.url.trim() || null;
+              }
+              return null;
+            })
+            .filter((img): img is string => Boolean(img) && img.length > 0);
         }
 
         const payload: Record<string, unknown> = {
-          title: this.title.trim(),
-          description: this.description.trim(),
-          fe_category: this.category, // FE category name (traveling, health, etc.) - povinné
-          tokens: this.tokens || 0, // Pridať tokens (initial reward)
-          type: this.type || "dream" // Post type (dream/problem/idea) - povinné
+          title: this.title,
+          description: this.description,
+          category: this.category, // New API: category slug
+          subcategory: this.subcategory, // New API: subcategory slug
+          tokens: this.tokens || 0
         };
 
-        // Pridať optional polia
         if (this.dateDeadline) {
           payload.date_deadline = this.dateDeadline;
         }
 
-        // Pridať obrázky (Cloudinary URL-y) ak existujú
-        // Limit na max 5 obrázkov
-        if (this.images && this.images.length > 0) {
-          payload.images = this.images.slice(0, 5);
+        if (safeImages.length > 0) {
+          payload.images = safeImages;
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("🚀 Post creation payload:", payload);
-        }
+        // Debug log: before axios call
+        console.log("[submitPost] about to call /api/post-create", payload);
 
-        // POST na /api/post-create (podľa routes je to POST /api/post-create)
         const { data } = await api.post("/post-create", payload);
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("✅ Post creation response:", data);
-        }
+        // Debug log: after axios call
+        console.log("[submitPost] /api/post-create response", data?.status, data);
 
-        if (data && data.status === "success") {
-          // Reset store po úspešnom submit-e
+        if (data.status === "success") {
+          // Debug log: success
+          console.log("[submitPost] success", { post_id: data.post_id, user: data.user });
+          // Reset form after successful creation
           this.reset();
-
-          return data;
+          return {
+            post_id: data.post_id,
+            user: data.user ? { tokens: data.user.tokens } : undefined
+          };
         } else {
-          throw new Error(data?.message || "Post creation failed");
+          throw new Error(data.message || "Post creation failed");
         }
       } catch (error: unknown) {
         if (process.env.NODE_ENV === "development") {
-          console.error("❌ Post creation error:", error);
+          console.error("❌ Post creation failed:", error);
         }
 
-        // Spracovať error response z BE
-        const errorResponse = error as {
-          response?: {
-            data?: {
-              message?: string;
-              errors?: Record<string, string[]>;
-            };
-          };
-        };
-
-        if (errorResponse.response?.data?.message) {
-          this.error = errorResponse.response.data.message;
-        } else if (errorResponse.response?.data?.errors) {
-          // Laravel validation errors
-          const errors = errorResponse.response.data.errors;
-          const firstError = Object.values(errors)[0];
-          this.error = Array.isArray(firstError) ? firstError[0] : "Validation error";
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as { response?: { data?: { message?: string } } };
+          this.error = axiosError.response?.data?.message || "Failed to create post.";
         } else {
-          this.error = "Failed to create post. Please try again.";
+          this.error = "Failed to create post.";
         }
-
-        throw error;
+        return null;
       } finally {
         this.loading = false;
       }

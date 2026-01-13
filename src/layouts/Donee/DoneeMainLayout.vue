@@ -14,12 +14,15 @@
         !(route.name === 'donee-help') &&
         !onBoarding &&
         !submit &&
-        !postDetail
+        !postDetail &&
+        !(route.meta?.hideMainHeader === true)
       "
       :class="{ 'navbar--hidden': !showNavbar }"
       class="navbar"
     />
-    <RouterView />
+    <q-page-container>
+      <RouterView />
+    </q-page-container>
     <FooterDoneeComponent
       v-if="
         !(route.name === 'donor-post-detail') &&
@@ -29,7 +32,9 @@
         !submit &&
         !postDetail &&
         !settings &&
-        !isDonorRoute
+        !isDonorRoute &&
+        !(route.name === 'donee-postCreation-goal') &&
+        !(route.name === 'donee-postCreation-category')
       "
       :class="{ 'footer--hidden': !showNavbar || isSwitchingRole || isDonorRoute || isBadgeDrawerOpen }"
       class="navbar"

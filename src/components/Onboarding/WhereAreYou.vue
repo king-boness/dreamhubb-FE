@@ -57,10 +57,10 @@
           <q-select
             v-model="localCity"
             :options="filteredCityOptions"
-            :option-label="emitCityId ? 'name' : undefined"
-            :option-value="emitCityId ? 'id' : undefined"
-            :emit-value="emitCityId"
-            :map-options="emitCityId"
+            option-label="label"
+            option-value="value"
+            emit-value
+            map-options
             label="Choose your city"
             dark
             outlined
@@ -69,8 +69,30 @@
             use-input
             input-debounce="300"
             fit
+            fill-input
+            hide-selected
             @filter="filterCities"
+            @update:model-value="handleCityChange"
           >
+            <template v-slot:option="scope">
+              <q-item
+                v-if="scope.opt.disabled && scope.opt.value === '__divider__'"
+                class="cities-divider"
+                :clickable="false"
+                v-ripple="false"
+              >
+                <q-separator />
+              </q-item>
+              <q-item
+                v-else
+                v-bind="scope.itemProps"
+                v-on="scope.itemEvents || {}"
+              >
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
@@ -128,10 +150,10 @@
         <q-select
           v-model="localCity"
           :options="filteredCityOptions"
-          :option-label="emitCityId ? 'name' : undefined"
-          :option-value="emitCityId ? 'id' : undefined"
-          :emit-value="emitCityId"
-          :map-options="emitCityId"
+          option-label="label"
+          option-value="value"
+          emit-value
+          map-options
           label="Choose your city"
           dark
           outlined
@@ -140,8 +162,30 @@
           use-input
           input-debounce="300"
           fit
+          fill-input
+          hide-selected
           @filter="filterCities"
+          @update:model-value="handleCityChange"
         >
+          <template v-slot:option="scope">
+            <q-item
+              v-if="scope.opt.disabled && scope.opt.value === '__divider__'"
+              class="cities-divider"
+              :clickable="false"
+              v-ripple="false"
+            >
+              <q-separator />
+            </q-item>
+            <q-item
+              v-else
+              v-bind="scope.itemProps"
+              v-on="scope.itemEvents || {}"
+            >
+              <q-item-section>
+                <q-item-label>{{ scope.opt.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
@@ -196,13 +240,8 @@ import { ref, computed, onMounted, watch, withDefaults } from "vue";
 import { Notify } from "quasar";
 import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
-import { getCitiesByCountryCode, getCitySuggestions } from "src/data/citiesData";
+import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
-
-interface CityOption {
-  id: number;
-  name: string;
-}
 
 const props = withDefaults(defineProps<{
   continent?: string;
@@ -232,7 +271,8 @@ const emit = defineEmits<{
 
 const localContinent = ref(props.continent || "");
 const localCountry = ref(props.country || "");
-const localCity = ref(props.city || "");
+// Initialize with the prop value, but allow it to be number (ID) or string (name)
+const localCity = ref<string | number>(props.city ? (typeof props.city === "string" && !isNaN(Number(props.city)) ? Number(props.city) : props.city) : "");
 
 const progressWidth = computed(() => {
   return `${props.progress ?? 80}%`;
@@ -241,7 +281,6 @@ const progressWidth = computed(() => {
 const title = computed(() => props.title ?? "you live in");
 const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
 const enableGeolocation = computed(() => props.enableGeolocation ?? true);
-const emitCityId = computed(() => props.emitCityId ?? false);
 
 // Geolocation
 const showGeolocationDialog = ref(false);
@@ -257,12 +296,11 @@ const countryOptions = ref<string[]>([]);
 const countryFilter = ref("");
 
 // City options with filtering
-// If emitCityId is true, use CityOption objects with id and name
-// Otherwise, use string array for backward compatibility
-const allCitiesForCountry = ref<string[] | CityOption[]>([]);
-const filteredCityOptions = ref<string[] | CityOption[]>([]);
+// Use CityOption[] from buildCityOptionsForCountry
+const allCitiesForCountry = ref<CityOption[]>([]);
+const filteredCityOptions = ref<CityOption[]>([]);
 const cityFilter = ref("");
-const cityOptionsWithIds = ref<CityOption[]>([]); // Cities with IDs from BE
+const citiesFromBackend = ref<CityFromBackend[]>([]); // Cities with IDs from BE
 const countryIdForCities = ref<number | null>(null); // Store country ID for fetching cities
 
 // Get country code from country name
@@ -290,7 +328,7 @@ const updateCityOptions = async () => {
   if (!localCountry.value) {
     allCitiesForCountry.value = [];
     filteredCityOptions.value = [];
-    cityOptionsWithIds.value = [];
+    citiesFromBackend.value = [];
     countryIdForCities.value = null;
     return;
   }
@@ -324,18 +362,25 @@ const updateCityOptions = async () => {
         }
 
         if (citiesData.status === "success" && citiesData.cities) {
-          cityOptionsWithIds.value = citiesData.cities.map((c: { id: number; name: string }) => ({
+          const citiesMapped: CityFromBackend[] = citiesData.cities.map((c: { id: number; name: string }) => ({
             id: c.id,
             name: c.name
           }));
-          allCitiesForCountry.value = cityOptionsWithIds.value;
-          filteredCityOptions.value = cityOptionsWithIds.value;
+          citiesFromBackend.value = citiesMapped;
 
-          if (process.env.NODE_ENV === "development") {
-            console.log("🔍 Cities mapped:", {
-              count: cityOptionsWithIds.value.length,
-              cities: cityOptionsWithIds.value
-            });
+          // Get country code for buildCityOptionsForCountry
+          const countryCode = getCountryCode(localCountry.value);
+          if (countryCode) {
+            const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+            allCitiesForCountry.value = cityOptions;
+            filteredCityOptions.value = cityOptions;
+
+            if (process.env.NODE_ENV === "development") {
+              console.log("🔍 Cities options:", {
+                count: cityOptions.length,
+                cities: cityOptions
+              });
+            }
           }
         } else {
           if (process.env.NODE_ENV === "development") {
@@ -349,8 +394,15 @@ const updateCityOptions = async () => {
       const countryCode = getCountryCode(localCountry.value);
       if (countryCode) {
         const cities = getCitiesByCountryCode(countryCode);
-        allCitiesForCountry.value = cities;
-        filteredCityOptions.value = cities;
+        // Convert string array to CityFromBackend format
+        const citiesMapped: CityFromBackend[] = cities.map((name: string, index: number) => ({
+          id: index,
+          name
+        }));
+        citiesFromBackend.value = citiesMapped;
+        const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+        allCitiesForCountry.value = cityOptions;
+        filteredCityOptions.value = cityOptions;
       }
     }
   } else {
@@ -358,11 +410,19 @@ const updateCityOptions = async () => {
     const countryCode = getCountryCode(localCountry.value);
     if (countryCode) {
       const cities = getCitiesByCountryCode(countryCode);
-      allCitiesForCountry.value = cities;
-      filteredCityOptions.value = cities;
+      // Convert string array to CityFromBackend format
+      const citiesMapped: CityFromBackend[] = cities.map((name: string, index: number) => ({
+        id: index,
+        name
+      }));
+      citiesFromBackend.value = citiesMapped;
+      const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+      allCitiesForCountry.value = cityOptions;
+      filteredCityOptions.value = cityOptions;
     } else {
       allCitiesForCountry.value = [];
       filteredCityOptions.value = [];
+      citiesFromBackend.value = [];
     }
   }
 };
@@ -389,23 +449,18 @@ const filterCities = (val: string, update: (callback: () => void) => void) => {
     if (val === "") {
       filteredCityOptions.value = allCitiesForCountry.value;
     } else {
-      if (props.emitCityId && Array.isArray(allCitiesForCountry.value)) {
-        // Filter CityOption objects
-        const needle = val.toLowerCase();
-        filteredCityOptions.value = (allCitiesForCountry.value as CityOption[]).filter(
-          (city: CityOption) => city.name.toLowerCase().includes(needle)
-        );
-      } else {
-        // Filter string array (backward compatibility)
-        const countryCode = getCountryCode(localCountry.value);
-        if (countryCode) {
-          filteredCityOptions.value = getCitySuggestions(countryCode, val);
-        } else {
-          filteredCityOptions.value = (allCitiesForCountry.value as string[]).filter(
-            (v: string) => v.toLowerCase().includes(val.toLowerCase())
-          );
+      const needle = val.toLowerCase();
+      // Filter out dividers and match city labels
+      filteredCityOptions.value = allCitiesForCountry.value.filter(
+        (item) => {
+          // Skip disabled dividers
+          if (item.disabled && item.value === "__divider__") {
+            return false;
+          }
+          // Filter by label
+          return item.label.toLowerCase().includes(needle);
         }
-      }
+      );
     }
   });
 };
@@ -422,6 +477,16 @@ const handleContinentChange = () => {
 const handleCountryChange = () => {
   localCity.value = "";
   updateCityOptions();
+};
+
+// Handle city change - prevent selecting divider
+const handleCityChange = (value: string | number) => {
+  if (value === "__divider__") {
+    // Ignore divider selection
+    localCity.value = "";
+    return;
+  }
+  localCity.value = value;
 };
 
 // Handle next
@@ -555,9 +620,11 @@ watch(localCity, (newVal) => {
 .location-header {
   display: flex;
   align-items: flex-start;
+  justify-content: flex-start;
   gap: 16px;
   margin-bottom: 20px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .location-backBtn {
@@ -584,8 +651,12 @@ watch(localCity, (newVal) => {
 }
 
 .location-progress {
-  flex: 1;
-  height: 4px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  max-width: calc(100% - 120px);
+  height: 3px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;
@@ -709,6 +780,17 @@ watch(localCity, (newVal) => {
 
   :deep(.q-icon) {
     color: rgba(255, 255, 255, 0.6);
+  }
+
+  :deep(.cities-divider) {
+    padding: 0.5rem 0;
+    min-height: auto;
+    cursor: default;
+
+    .q-separator {
+      margin: 0.5rem 0;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
   }
 }
 
