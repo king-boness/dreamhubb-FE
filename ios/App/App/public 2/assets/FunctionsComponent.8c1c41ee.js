@@ -1,1 +1,0 @@
-import { r } from "./index.7a90dd99.js"; r(); function o(e) { return e < 1e3 ? e.toString() : e < 1e6 ? (e / 1e3).toFixed(1) + "K" : e < 1e9 ? (e / 1e6).toFixed(1) + "M" : (e / 1e9).toFixed(1) + "B"; } function a(e) { return e.length < 4 ? e : "*".repeat(4) + e.slice(4); } export { o as f, a as m };
