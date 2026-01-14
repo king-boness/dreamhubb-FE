@@ -40,10 +40,10 @@
     >
       <img
         :src="bellIcon"
-        :alt="t('notifications')"
+        :alt="t('notificationsLabel')"
         class="footer-marginClass"
       />
-      <span class="footer-pageName">{{ t("notifications") }}</span>
+      <span class="footer-pageName">{{ t("notificationsLabel") }}</span>
     </q-btn>
 
     <q-btn

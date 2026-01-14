@@ -51,7 +51,7 @@ export default {
   // Notifications
   notifications: {
     topUpTitle: "{name} topped up your post by {amount} tokens",
-    topUpText: "on {postTitle}",
+    topUpText: "on {postTitle}"
   },
   language: "Language",
   nameShown: "Name shown",
@@ -78,7 +78,7 @@ export default {
   // Navigation
   home: "Home",
   inspirations: "Inspirations",
-  notifications: "Notifications",
+  notificationsLabel: "Notifications",
   profile: "profile",
   settings: "Settings",
   // Footer

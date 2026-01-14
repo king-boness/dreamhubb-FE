@@ -343,7 +343,7 @@ const currentLanguageLabel = computed(() => {
 const comingSoonItems = computed(() => [
   {
     img: "/icons/privacyIcon.svg",
-    title: t("notifications")
+    title: t("notificationsLabel")
   },
   {
     img: "/icons/privacyIcon.svg",

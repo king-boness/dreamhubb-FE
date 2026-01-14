@@ -51,7 +51,7 @@ export default {
   // Notifications
   notifications: {
     topUpTitle: "{name} ti prispel na príspevok {amount} tokenmi",
-    topUpText: "na {postTitle}",
+    topUpText: "na {postTitle}"
   },
   language: "Jazyk",
   nameShown: "Zobrazené meno",

@@ -144,11 +144,11 @@
       >
         <img
           :src="navIconNotifications"
-          :alt="t('notifications')"
+          :alt="t('notificationsLabel')"
           class="footer-marginClass"
         />
         <span v-if="notificationCount > 0" class="donor-footer_badge">{{ notificationCount }}</span>
-        <span class="footer-pageName">{{ t("notifications") }}</span>
+        <span class="footer-pageName">{{ t("notificationsLabel") }}</span>
       </q-btn>
       <q-btn
         :ripple="false"
