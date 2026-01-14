@@ -74,7 +74,7 @@ export default {
   // Navigation
   home: "Domov",
   inspirations: "Inšpirácie",
-  notifications: "Notifikácie",
+  notificationsLabel: "Notifikácie",
   profile: "profil",
   settings: "Nastavenia",
   // Footer
