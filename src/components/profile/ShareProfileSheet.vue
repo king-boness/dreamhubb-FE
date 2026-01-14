@@ -192,7 +192,7 @@ const onSheetTouchStart = (e: TouchEvent) => {
   if ((e.target as HTMLElement).closest(".shareProfileSheet-handle")) {
     return;
   }
-  
+
   startY.value = e.touches[0].clientY;
   startHeight.value = sheetHeight.value;
   dragStartY.value = e.touches[0].clientY;
@@ -210,7 +210,7 @@ const onSheetTouchMove = (e: TouchEvent) => {
   const verticalDelta = currentY - dragStartY.value;
   const absDelta = Math.abs(verticalDelta);
   const scrollContainer = (e.target as HTMLElement).closest(".shareProfileSheet-platforms");
-  
+
   // If user hasn't moved much, don't start dragging yet (allow scroll)
   if (!hasMoved.value && absDelta < DRAG_START_THRESHOLD) {
     return;
@@ -223,7 +223,7 @@ const onSheetTouchMove = (e: TouchEvent) => {
     const clientHeight = scrollContainer.clientHeight;
     const isAtTop = scrollTop === 0;
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1; // Allow 1px tolerance
-    
+
     // If scrolling down and not at top, or scrolling up and not at bottom, allow scroll
     if ((verticalDelta > 0 && !isAtTop) || (verticalDelta < 0 && !isAtBottom)) {
       // User is scrolling content, don't drag
@@ -241,7 +241,7 @@ const onSheetTouchMove = (e: TouchEvent) => {
     const heightDelta = startY.value - currentY; // Inverted: up = positive delta
     const newHeight = clampHeight(startHeight.value + heightDelta);
     sheetHeight.value = newHeight;
-    
+
     // Prevent default only when actually dragging
     if (e.cancelable) {
       e.preventDefault();
@@ -305,7 +305,7 @@ const onSheetMouseDown = (e: MouseEvent) => {
   if ((e.target as HTMLElement).closest(".shareProfileSheet-handle")) {
     return;
   }
-  
+
   startY.value = e.clientY;
   startHeight.value = sheetHeight.value;
   dragStartY.value = e.clientY;
