@@ -1,6 +1,6 @@
 <template>
   <q-page-sticky position="bottom" expand class="bottom-sticky-action">
-    <div 
+    <div
       class="bottom-sticky-action-wrapper q-px-md q-pb-xl q-pt-md q-mt-lg"
       :style="safeAreaStyle"
     >
@@ -35,7 +35,7 @@ interface Props {
   disabled?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   loading: false,
   loadingLabel: undefined,
   disabled: false
