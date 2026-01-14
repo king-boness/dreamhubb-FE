@@ -1716,7 +1716,7 @@ const route = useRoute();
 const router = useRouter();
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const $q = useQuasar();
 const { uploadMultipleImages } = useUpload();
 
@@ -2957,14 +2957,10 @@ const displayDate = computed(() => {
   const date = new Date(postsStore.currentPost.date_created);
   return date.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" });
 });
+// Use unified getLocationLabel helper for consistent location display
 const displayLocation = computed(() => {
   if (!postsStore.currentPost) return "";
-  const city = postsStore.currentPost.author_city || postsStore.currentPost.location_city_name;
-  const country = postsStore.currentPost.author_country || postsStore.currentPost.location_country_name;
-  if (city && country) {
-    return `${city}, ${country}`;
-  }
-  return city || country || "";
+  return getLocationLabel(postsStore.currentPost, locale.value as string);
 });
 const displayViews = computed(() => postsStore.currentPost?.views || 0);
 // Display subcategory name (traveling/health/etc.) using i18n
