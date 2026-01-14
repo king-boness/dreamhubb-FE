@@ -228,21 +228,13 @@
       </section>
 
       <!-- CTA "Save Changes" - sticky na spodku -->
-      <q-page-sticky position="bottom" expand class="edit-save-sticky">
-        <div class="post-edit_save-wrapper q-px-md q-pb-xl q-pt-md q-mt-lg">
-          <q-btn
-            class="full-width primary-cta edit-save-cta"
-            color="primary"
-            unelevated
-            no-caps
-            padding="14px 24px"
-            :disable="!hasChanges || isSaving"
-            @click="onSaveChanges"
-          >
-            SAVE CHANGES
-      </q-btn>
-    </div>
-      </q-page-sticky>
+      <BottomStickyAction
+        label="SAVE CHANGES"
+        :loading="isSaving"
+        loading-label="SAVING..."
+        :disabled="!hasChanges"
+        @click="onSaveChanges"
+      />
     </template>
 
     <!-- DIALOGS -->
@@ -1133,20 +1125,7 @@
 }
 
 /* CTA - Sticky save button */
-.edit-save-sticky {
-  background: transparent; // Zdedí pozadie z .postDetail
-}
-
-.primary-cta {
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 15px;
-  height: 60px; // Rovnaká výška ako TOP UP YOUR DREAM
-}
-
-.edit-save-cta.q-btn--disabled {
-  opacity: 0.45;
-}
+// BottomStickyAction component handles its own styling
 
 /* Dialog blur background */
 :deep(.q-dialog__backdrop) {
@@ -1726,6 +1705,7 @@ import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import PostHeader from "src/components/post/PostHeader.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
+import BottomStickyAction from "src/components/common/BottomStickyAction.vue";
 import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
 import { useQuasar } from "quasar";
@@ -2947,22 +2927,22 @@ const postDetail = computed(() => {
   }
   // Default data for top-up mode
   return {
-  name: "Aurora Expedition",
-  goalImage: "/images/Auth/goalPicture.png",
-  images: [
-    "https://images.unsplash.com/photo-1528155124528-06c125d81e89?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=689&q=80",
-    "https://images.unsplash.com/photo-1568607689150-17e625c1586e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    "https://i.etsystatic.com/32050623/r/il/76af79/4305610002/il_fullxfull.4305610002_2o9t.jpg",
-    "https://images.unsplash.com/photo-1686890121573-5feec595490e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
-  ],
-  date: "09/15/2023",
-  location: "Island, Reykjavik",
-  views: 156,
-  description:
-    "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci bibendum aenean morbi id. Bibendum semper viverra aenean turpis risus libero amet aliquam. ",
-  aboutDonee:
-    "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci bibendum aenean morbi id. Bibendum semper viverra aenean turpis risus libero amet aliquam. ",
-  doneeName: "John Doe",
+    name: "Aurora Expedition",
+    goalImage: "/images/Auth/goalPicture.png",
+    images: [
+      "https://images.unsplash.com/photo-1528155124528-06c125d81e89?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=689&q=80",
+      "https://images.unsplash.com/photo-1568607689150-17e625c1586e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+      "https://i.etsystatic.com/32050623/r/il/76af79/4305610002/il_fullxfull.4305610002_2o9t.jpg",
+      "https://images.unsplash.com/photo-1686890121573-5feec595490e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80"
+    ],
+    date: "09/15/2023",
+    location: "Island, Reykjavik",
+    views: 156,
+    description:
+      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci bibendum aenean morbi id. Bibendum semper viverra aenean turpis risus libero amet aliquam. ",
+    aboutDonee:
+      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim. Eu id nibh iaculis orci bibendum aenean morbi id. Bibendum semper viverra aenean turpis risus libero amet aliquam. ",
+    doneeName: "John Doe",
     karmaValue: 1584,
     category: null,
     subcategory: null,
