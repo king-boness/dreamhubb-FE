@@ -85,6 +85,7 @@ const sheetHeight = ref(0);
 const dragStartY = ref(0);
 const hasMoved = ref(false);
 const MIN_HEIGHT = 280; // Minimum height in pixels
+const INITIAL_HEIGHT = 400; // Initial height when opening (higher than min)
 const MAX_HEIGHT_PERCENT = 90; // 90% of viewport height
 const DRAG_THRESHOLD = 60; // Threshold to close sheet when dragging down
 const DRAG_START_THRESHOLD = 5; // Minimum movement to start dragging (prevents scroll interference)
@@ -105,8 +106,8 @@ watch(
   (isOpen) => {
     if (isOpen) {
       document.body.classList.add("bottom-sheet-open");
-      // Reset to min height when opening
-      sheetHeight.value = MIN_HEIGHT;
+      // Set to initial height when opening (higher than min)
+      sheetHeight.value = INITIAL_HEIGHT;
     } else {
       document.body.classList.remove("bottom-sheet-open");
       sheetHeight.value = MIN_HEIGHT;
