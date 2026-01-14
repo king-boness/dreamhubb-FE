@@ -276,7 +276,7 @@ const shareProfileText = computed(() => {
 // Get current role from route name
 const currentRole = computed(() => {
   const routeName = route.name?.toString() || "";
-  return routeName.startsWith("donee") ? "Donee" : "Donor";
+  return routeName.startsWith("donee") ? "donee" : "donor";
 });
 
 // Get user initials for avatar placeholder
@@ -314,19 +314,6 @@ const displayBio = computed(() => {
 const displayLocation = computed(() => {
   const user = authStore.user;
   if (!user) return null;
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("📍 ProfileContent displayLocation:", {
-      user_id: user.id,
-      username: user.username,
-      location_city: user.location_city,
-      location_country: user.location_country,
-      location_continent: user.location_continent,
-      location_city_id: user.location_city_id,
-      location_country_id: user.location_country_id,
-      location_continent_id: user.location_continent_id
-    });
-  }
 
   // Build location string from user's location (city, country, continent)
   const parts = [];
