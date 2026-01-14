@@ -34,7 +34,8 @@
         !settings &&
         !isDonorRoute &&
         !(route.name === 'donee-postCreation-goal') &&
-        !(route.name === 'donee-postCreation-category')
+        !(route.name === 'donee-postCreation-category') &&
+        !(route.meta?.hideFooter === true)
       "
       :class="{ 'footer--hidden': !showNavbar || isSwitchingRole || isDonorRoute || isBadgeDrawerOpen }"
       class="navbar"

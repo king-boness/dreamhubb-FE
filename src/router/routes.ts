@@ -509,7 +509,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "post-edit/:id",
-        meta: { requiresAuth: true, hideMainHeader: true },
+        meta: { requiresAuth: true, hideMainHeader: true, hideFooter: true },
         component: () => import("src/pages/DoneePages/TopDreamPage.vue"),
         name: "donee-post-edit"
       },
