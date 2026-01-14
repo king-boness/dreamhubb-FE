@@ -140,7 +140,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { translateCityName, translateCountryName } from "src/utils/cityNames";
+import { getLocationLabel } from "src/utils/cityNames";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
@@ -310,24 +310,14 @@ const displayBio = computed(() => {
   return authStore.user?.bio?.trim() || null;
 });
 
-// Display location
+// Display location - use unified helper function
 const displayLocation = computed(() => {
   const user = authStore.user;
   if (!user) return null;
 
-  // Build location string from user's location (city, country, continent)
-  const parts = [];
-  if (user.location_city) {
-    const translatedCity = translateCityName(user.location_city, locale.value as string);
-    parts.push(translatedCity);
-  }
-  if (user.location_country) {
-    const translatedCountry = translateCountryName(user.location_country, locale.value as string);
-    parts.push(translatedCountry);
-  }
-  if (user.location_continent && !parts.length) parts.push(user.location_continent);
-
-  return parts.length > 0 ? parts.join(", ") : null;
+  // Use unified getLocationLabel helper for consistent location display
+  const location = getLocationLabel(user, locale.value as string);
+  return location || null;
 });
 
 // Navigate to settings
