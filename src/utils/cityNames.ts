@@ -121,22 +121,5 @@ export function getLocationLabel(post: any, locale = "en-US"): string {
     post.country_name ||
     null;
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development" && (!city || !country)) {
-    console.log("📍 getLocationLabel - Post location data:", {
-      location_city_name: post.location_city_name,
-      location_city: post.location_city,
-      city: post.city,
-      author_city: post.author_city,
-      city_name: post.city_name,
-      location_country_name: post.location_country_name,
-      location_country: post.location_country,
-      country: post.country,
-      author_country: post.author_country,
-      country_name: post.country_name,
-      result: formatLocation(city, country, locale)
-    });
-  }
-
   return formatLocation(city, country, locale);
 }
