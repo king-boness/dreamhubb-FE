@@ -102,6 +102,9 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async fetchUnreadCount() {
       try {
+        if (process.env.NODE_ENV === "development") {
+          console.log("📡 Fetching unread count from:", "/notifications/unread-count");
+        }
         const { data } = await api.get("/notifications/unread-count");
 
         if (data.status === "success") {
@@ -110,6 +113,20 @@ export const useNotificationsStore = defineStore("notifications", {
       } catch (error: unknown) {
         if (process.env.NODE_ENV === "development") {
           console.error("❌ Failed to fetch unread count:", error);
+          if (error && typeof error === "object" && "response" in error) {
+            const axiosError = error as {
+              response?: {
+                status?: number;
+                statusText?: string;
+                config?: {
+                  url?: string;
+                  baseURL?: string;
+                };
+              };
+            };
+            console.error("  Status:", axiosError.response?.status);
+            console.error("  URL:", axiosError.response?.config?.baseURL + axiosError.response?.config?.url);
+          }
         }
         // Don't set error state for unread count failures
       }
