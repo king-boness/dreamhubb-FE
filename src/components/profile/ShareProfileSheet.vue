@@ -164,7 +164,7 @@ const onTouchMove = (e: TouchEvent) => {
     // Dragging up - can expand
     const viewportHeight = window.innerHeight;
     const maxHeight = (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-    const currentHeight = currentSnapPoint.value === "collapsed" 
+    const currentHeight = currentSnapPoint.value === "collapsed"
       ? (viewportHeight * COLLAPSED_HEIGHT_PERCENT) / 100
       : (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
     const newHeight = currentHeight - Math.abs(deltaY);
@@ -212,7 +212,7 @@ const onMouseMove = (e: MouseEvent) => {
   } else {
     const viewportHeight = window.innerHeight;
     const maxHeight = (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-    const currentHeight = currentSnapPoint.value === "collapsed" 
+    const currentHeight = currentSnapPoint.value === "collapsed"
       ? (viewportHeight * COLLAPSED_HEIGHT_PERCENT) / 100
       : (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
     const newHeight = currentHeight - Math.abs(deltaY);
