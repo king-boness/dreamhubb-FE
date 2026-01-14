@@ -7,20 +7,17 @@
     >
       <div
         class="shareProfileSheet"
-        :class="{ dragging: isDragging, expanded: currentSnapPoint === 'expanded' }"
+        :class="{ dragging: isDragging }"
         :style="{
-          transform: `translateY(${dragOffset}px)`,
-          maxHeight: currentSnapPoint === 'expanded' ? `${EXPANDED_HEIGHT_PERCENT}vh` : `${COLLAPSED_HEIGHT_PERCENT}vh`
+          height: `${sheetHeight}px`
         }"
-        @touchstart="onTouchStart"
-        @touchmove="onTouchMove"
-        @touchend="onTouchEnd"
-        @mousedown="onMouseDown"
       >
         <div
           class="shareProfileSheet-handle"
-          @touchstart="onTouchStart"
-          @mousedown="onMouseDown"
+          @touchstart="onHandleTouchStart"
+          @touchmove="onHandleTouchMove"
+          @touchend="onHandleTouchEnd"
+          @mousedown="onHandleMouseDown"
         ></div>
         <h2 class="shareProfileSheet-title">{{ shareTitle }}</h2>
 
@@ -77,14 +74,23 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
 }>();
 
-const dragOffset = ref(0);
 const startY = ref(0);
+const startHeight = ref(0);
 const isDragging = ref(false);
 const sheetHeight = ref(0);
-const currentSnapPoint = ref<"collapsed" | "expanded">("collapsed");
-const DRAG_THRESHOLD = 60;
-const COLLAPSED_HEIGHT_PERCENT = 40; // 40% of viewport height
-const EXPANDED_HEIGHT_PERCENT = 90; // 90% of viewport height
+const MIN_HEIGHT = 280; // Minimum height in pixels
+const MAX_HEIGHT_PERCENT = 90; // 90% of viewport height
+const DRAG_THRESHOLD = 60; // Threshold to close sheet when dragging down
+
+// Calculate max height based on viewport
+const maxHeight = computed(() => {
+  return (window.innerHeight * MAX_HEIGHT_PERCENT) / 100;
+});
+
+// Clamp height between min and max
+const clampHeight = (height: number) => {
+  return Math.max(MIN_HEIGHT, Math.min(height, maxHeight.value));
+};
 
 // Hide/show footer when sheet opens/closes
 watch(
@@ -92,14 +98,11 @@ watch(
   (isOpen) => {
     if (isOpen) {
       document.body.classList.add("bottom-sheet-open");
-      // Reset to collapsed when opening
-      currentSnapPoint.value = "collapsed";
-      dragOffset.value = 0;
-      sheetHeight.value = (window.innerHeight * COLLAPSED_HEIGHT_PERCENT) / 100;
+      // Reset to min height when opening
+      sheetHeight.value = MIN_HEIGHT;
     } else {
       document.body.classList.remove("bottom-sheet-open");
-      dragOffset.value = 0;
-      currentSnapPoint.value = "collapsed";
+      sheetHeight.value = MIN_HEIGHT;
     }
   },
   { immediate: true }
@@ -125,125 +128,87 @@ const closeSheet = () => {
   emit("update:modelValue", false);
 };
 
-// Calculate snap point based on drag direction and distance
-const calculateSnapPoint = (deltaY: number, isDownward: boolean) => {
-  const viewportHeight = window.innerHeight;
-  const collapsedHeight = (viewportHeight * COLLAPSED_HEIGHT_PERCENT) / 100;
-  const expandedHeight = (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-  const currentHeight = currentSnapPoint.value === "collapsed" ? collapsedHeight : expandedHeight;
-  const newHeight = currentHeight + (isDownward ? deltaY : -deltaY);
-
-  // Determine target snap point
-  const midPoint = (collapsedHeight + expandedHeight) / 2;
-  if (newHeight < midPoint) {
-    return { snapPoint: "collapsed" as const, targetHeight: collapsedHeight };
+// Calculate snap point based on current height
+const calculateSnapPoint = (currentHeight: number) => {
+  const midPoint = (MIN_HEIGHT + maxHeight.value) / 2;
+  if (currentHeight < midPoint) {
+    return MIN_HEIGHT;
   } else {
-    return { snapPoint: "expanded" as const, targetHeight: expandedHeight };
+    return maxHeight.value;
   }
 };
 
-// Touch handlers
-const onTouchStart = (e: TouchEvent) => {
+// Touch handlers - only on handle
+const onHandleTouchStart = (e: TouchEvent) => {
+  e.stopPropagation();
   startY.value = e.touches[0].clientY;
+  startHeight.value = sheetHeight.value;
   isDragging.value = true;
-  // Prevent scrolling while dragging
   e.preventDefault();
 };
 
-const onTouchMove = (e: TouchEvent) => {
+const onHandleTouchMove = (e: TouchEvent) => {
   if (!isDragging.value) return;
+  e.stopPropagation();
   const currentY = e.touches[0].clientY;
-  const deltaY = currentY - startY.value;
-  const isDownward = deltaY > 0;
-
-  // Allow dragging in both directions
-  if (isDownward) {
-    // Dragging down - can close or collapse
-    dragOffset.value = deltaY;
-  } else {
-    // Dragging up - can expand
-    const viewportHeight = window.innerHeight;
-    const maxHeight = (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-    const currentHeight = currentSnapPoint.value === "collapsed"
-      ? (viewportHeight * COLLAPSED_HEIGHT_PERCENT) / 100
-      : (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-    const newHeight = currentHeight - Math.abs(deltaY);
-    if (newHeight <= maxHeight) {
-      dragOffset.value = deltaY;
-    }
-  }
+  const deltaY = startY.value - currentY; // Inverted: up = positive delta
+  const newHeight = clampHeight(startHeight.value + deltaY);
+  sheetHeight.value = newHeight;
+  e.preventDefault();
 };
 
-const onTouchEnd = () => {
+const onHandleTouchEnd = () => {
   if (!isDragging.value) return;
   isDragging.value = false;
 
-  const deltaY = dragOffset.value;
-  const isDownward = deltaY > 0;
-
-  if (isDownward && Math.abs(deltaY) >= DRAG_THRESHOLD) {
-    // Close sheet if dragged down enough
+  // Check if dragged down enough to close
+  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
+  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
     closeSheet();
   } else {
     // Snap to nearest point
-    const { snapPoint, targetHeight } = calculateSnapPoint(Math.abs(deltaY), isDownward);
-    currentSnapPoint.value = snapPoint;
-    dragOffset.value = 0;
-    sheetHeight.value = targetHeight;
+    sheetHeight.value = calculateSnapPoint(sheetHeight.value);
   }
 };
 
-// Mouse handlers for desktop
-const onMouseDown = (e: MouseEvent) => {
+// Mouse handlers for desktop - only on handle
+const onHandleMouseDown = (e: MouseEvent) => {
+  e.stopPropagation();
   startY.value = e.clientY;
+  startHeight.value = sheetHeight.value;
   isDragging.value = true;
-  document.addEventListener("mousemove", onMouseMove);
-  document.addEventListener("mouseup", onMouseUp);
+  document.addEventListener("mousemove", onHandleMouseMove);
+  document.addEventListener("mouseup", onHandleMouseUp);
   e.preventDefault();
 };
 
-const onMouseMove = (e: MouseEvent) => {
+const onHandleMouseMove = (e: MouseEvent) => {
   if (!isDragging.value) return;
-  const deltaY = e.clientY - startY.value;
-  const isDownward = deltaY > 0;
-
-  if (isDownward) {
-    dragOffset.value = deltaY;
-  } else {
-    const viewportHeight = window.innerHeight;
-    const maxHeight = (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-    const currentHeight = currentSnapPoint.value === "collapsed"
-      ? (viewportHeight * COLLAPSED_HEIGHT_PERCENT) / 100
-      : (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
-    const newHeight = currentHeight - Math.abs(deltaY);
-    if (newHeight <= maxHeight) {
-      dragOffset.value = deltaY;
-    }
-  }
+  e.stopPropagation();
+  const deltaY = startY.value - e.clientY; // Inverted: up = positive delta
+  const newHeight = clampHeight(startHeight.value + deltaY);
+  sheetHeight.value = newHeight;
 };
 
-const onMouseUp = () => {
+const onHandleMouseUp = () => {
   if (!isDragging.value) return;
   isDragging.value = false;
-  document.removeEventListener("mousemove", onMouseMove);
-  document.removeEventListener("mouseup", onMouseUp);
+  document.removeEventListener("mousemove", onHandleMouseMove);
+  document.removeEventListener("mouseup", onHandleMouseUp);
 
-  const deltaY = dragOffset.value;
-  const isDownward = deltaY > 0;
-
-  if (isDownward && Math.abs(deltaY) >= DRAG_THRESHOLD) {
+  // Check if dragged down enough to close
+  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
+  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
     closeSheet();
   } else {
-    const { snapPoint, targetHeight } = calculateSnapPoint(Math.abs(deltaY), isDownward);
-    currentSnapPoint.value = snapPoint;
-    dragOffset.value = 0;
-    sheetHeight.value = targetHeight;
+    // Snap to nearest point
+    sheetHeight.value = calculateSnapPoint(sheetHeight.value);
   }
 };
 
 onBeforeUnmount(() => {
-  document.removeEventListener("mousemove", onMouseMove);
-  document.removeEventListener("mouseup", onMouseUp);
+  document.removeEventListener("mousemove", onHandleMouseMove);
+  document.removeEventListener("mouseup", onHandleMouseUp);
   document.body.classList.remove("bottom-sheet-open");
 });
 
@@ -433,15 +398,14 @@ const platforms = [
   max-width: 600px;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease-out;
-  max-height: 40vh;
+  min-height: 280px;
+  height: 280px;
   overflow-y: auto;
-  cursor: grab;
+  overflow-x: hidden;
   user-select: none;
-  transition: max-height 0.3s ease-out;
-
-  &:active {
-    cursor: grabbing;
-  }
+  transition: height 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 
   // Remove transition during drag for real-time tracking
   &.dragging {
@@ -450,11 +414,7 @@ const platforms = [
 
   // Add transition only when not dragging
   &:not(.dragging) {
-    transition: transform 0.2s ease-out, max-height 0.3s ease-out;
-  }
-
-  &.expanded {
-    max-height: 90vh;
+    transition: height 0.3s ease-out;
   }
 
   .shareProfileSheet-handle {
@@ -465,6 +425,7 @@ const platforms = [
     margin: 0 auto 1.5rem;
     cursor: grab;
     touch-action: none;
+    flex-shrink: 0;
 
     &:active {
       cursor: grabbing;
@@ -478,6 +439,7 @@ const platforms = [
     text-align: center;
     margin-bottom: 1.5rem;
     font-family: poppinsSemiBold;
+    flex-shrink: 0;
   }
 
   .shareProfileSheet-platforms {
@@ -485,6 +447,9 @@ const platforms = [
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-bottom: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     @media (max-width: 480px) {
       grid-template-columns: repeat(3, 1fr);
@@ -540,6 +505,7 @@ const platforms = [
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: montseraatSemiBold;
+    flex-shrink: 0;
 
     &--native {
       background: rgba(100, 150, 255, 0.2);
