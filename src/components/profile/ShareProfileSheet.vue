@@ -11,13 +11,17 @@
         :style="{
           height: `${sheetHeight}px`
         }"
+        @touchstart="onSheetTouchStart"
+        @touchmove="onSheetTouchMove"
+        @touchend="onSheetTouchEnd"
+        @mousedown="onSheetMouseDown"
       >
         <div
           class="shareProfileSheet-handle"
-          @touchstart="onHandleTouchStart"
-          @touchmove="onHandleTouchMove"
-          @touchend="onHandleTouchEnd"
-          @mousedown="onHandleMouseDown"
+          @touchstart.stop="onHandleTouchStart"
+          @touchmove.stop="onHandleTouchMove"
+          @touchend.stop="onHandleTouchEnd"
+          @mousedown.stop="onHandleMouseDown"
         ></div>
         <h2 class="shareProfileSheet-title">{{ shareTitle }}</h2>
 
@@ -78,9 +82,12 @@ const startY = ref(0);
 const startHeight = ref(0);
 const isDragging = ref(false);
 const sheetHeight = ref(0);
+const dragStartY = ref(0);
+const hasMoved = ref(false);
 const MIN_HEIGHT = 280; // Minimum height in pixels
 const MAX_HEIGHT_PERCENT = 90; // 90% of viewport height
 const DRAG_THRESHOLD = 60; // Threshold to close sheet when dragging down
+const DRAG_START_THRESHOLD = 5; // Minimum movement to start dragging (prevents scroll interference)
 
 // Calculate max height based on viewport
 const maxHeight = computed(() => {
@@ -138,13 +145,18 @@ const calculateSnapPoint = (currentHeight: number) => {
   }
 };
 
-// Touch handlers - only on handle
+// Touch handlers - handle area (always drag)
 const onHandleTouchStart = (e: TouchEvent) => {
   e.stopPropagation();
   startY.value = e.touches[0].clientY;
   startHeight.value = sheetHeight.value;
+  dragStartY.value = e.touches[0].clientY;
+  hasMoved.value = false;
   isDragging.value = true;
-  e.preventDefault();
+  // Prevent default immediately on handle
+  if (e.cancelable) {
+    e.preventDefault();
+  }
 };
 
 const onHandleTouchMove = (e: TouchEvent) => {
@@ -154,12 +166,15 @@ const onHandleTouchMove = (e: TouchEvent) => {
   const deltaY = startY.value - currentY; // Inverted: up = positive delta
   const newHeight = clampHeight(startHeight.value + deltaY);
   sheetHeight.value = newHeight;
-  e.preventDefault();
+  if (e.cancelable) {
+    e.preventDefault();
+  }
 };
 
 const onHandleTouchEnd = () => {
   if (!isDragging.value) return;
   isDragging.value = false;
+  hasMoved.value = false;
 
   // Check if dragged down enough to close
   const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
@@ -171,7 +186,85 @@ const onHandleTouchEnd = () => {
   }
 };
 
-// Mouse handlers for desktop - only on handle
+// Touch handlers - entire sheet (smart drag detection)
+const onSheetTouchStart = (e: TouchEvent) => {
+  // Ignore if touch started on handle (handle has its own handler)
+  if ((e.target as HTMLElement).closest(".shareProfileSheet-handle")) {
+    return;
+  }
+  
+  startY.value = e.touches[0].clientY;
+  startHeight.value = sheetHeight.value;
+  dragStartY.value = e.touches[0].clientY;
+  hasMoved.value = false;
+  // Don't prevent default yet - let scroll work if user wants to scroll
+};
+
+const onSheetTouchMove = (e: TouchEvent) => {
+  // Ignore if touch started on handle
+  if ((e.target as HTMLElement).closest(".shareProfileSheet-handle")) {
+    return;
+  }
+
+  const currentY = e.touches[0].clientY;
+  const verticalDelta = currentY - dragStartY.value;
+  const absDelta = Math.abs(verticalDelta);
+  const scrollContainer = (e.target as HTMLElement).closest(".shareProfileSheet-platforms");
+  
+  // If user hasn't moved much, don't start dragging yet (allow scroll)
+  if (!hasMoved.value && absDelta < DRAG_START_THRESHOLD) {
+    return;
+  }
+
+  // Check if user is trying to scroll content instead of dragging sheet
+  if (scrollContainer) {
+    const scrollTop = scrollContainer.scrollTop;
+    const scrollHeight = scrollContainer.scrollHeight;
+    const clientHeight = scrollContainer.clientHeight;
+    const isAtTop = scrollTop === 0;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1; // Allow 1px tolerance
+    
+    // If scrolling down and not at top, or scrolling up and not at bottom, allow scroll
+    if ((verticalDelta > 0 && !isAtTop) || (verticalDelta < 0 && !isAtBottom)) {
+      // User is scrolling content, don't drag
+      return;
+    }
+  }
+
+  // Start dragging if movement is significant and not scrolling content
+  if (!hasMoved.value) {
+    hasMoved.value = true;
+    isDragging.value = true;
+  }
+
+  if (isDragging.value) {
+    const heightDelta = startY.value - currentY; // Inverted: up = positive delta
+    const newHeight = clampHeight(startHeight.value + heightDelta);
+    sheetHeight.value = newHeight;
+    
+    // Prevent default only when actually dragging
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+  }
+};
+
+const onSheetTouchEnd = () => {
+  if (!isDragging.value) return;
+  isDragging.value = false;
+  hasMoved.value = false;
+
+  // Check if dragged down enough to close
+  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
+  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
+    closeSheet();
+  } else {
+    // Snap to nearest point
+    sheetHeight.value = calculateSnapPoint(sheetHeight.value);
+  }
+};
+
+// Mouse handlers for desktop - handle area (always drag)
 const onHandleMouseDown = (e: MouseEvent) => {
   e.stopPropagation();
   startY.value = e.clientY;
@@ -206,9 +299,51 @@ const onHandleMouseUp = () => {
   }
 };
 
+// Mouse handlers for desktop - entire sheet
+const onSheetMouseDown = (e: MouseEvent) => {
+  // Ignore if click started on handle
+  if ((e.target as HTMLElement).closest(".shareProfileSheet-handle")) {
+    return;
+  }
+  
+  startY.value = e.clientY;
+  startHeight.value = sheetHeight.value;
+  dragStartY.value = e.clientY;
+  hasMoved.value = false;
+  isDragging.value = true;
+  document.addEventListener("mousemove", onSheetMouseMove);
+  document.addEventListener("mouseup", onSheetMouseUp);
+};
+
+const onSheetMouseMove = (e: MouseEvent) => {
+  if (!isDragging.value) return;
+  const deltaY = startY.value - e.clientY; // Inverted: up = positive delta
+  const newHeight = clampHeight(startHeight.value + deltaY);
+  sheetHeight.value = newHeight;
+};
+
+const onSheetMouseUp = () => {
+  if (!isDragging.value) return;
+  isDragging.value = false;
+  hasMoved.value = false;
+  document.removeEventListener("mousemove", onSheetMouseMove);
+  document.removeEventListener("mouseup", onSheetMouseUp);
+
+  // Check if dragged down enough to close
+  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
+  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
+    closeSheet();
+  } else {
+    // Snap to nearest point
+    sheetHeight.value = calculateSnapPoint(sheetHeight.value);
+  }
+};
+
 onBeforeUnmount(() => {
   document.removeEventListener("mousemove", onHandleMouseMove);
   document.removeEventListener("mouseup", onHandleMouseUp);
+  document.removeEventListener("mousemove", onSheetMouseMove);
+  document.removeEventListener("mouseup", onSheetMouseUp);
   document.body.classList.remove("bottom-sheet-open");
 });
 
@@ -450,6 +585,7 @@ const platforms = [
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    touch-action: pan-y; // Allow vertical scrolling
 
     @media (max-width: 480px) {
       grid-template-columns: repeat(3, 1fr);
