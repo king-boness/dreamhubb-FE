@@ -271,19 +271,19 @@ onBeforeUnmount(() => {
   height: 3px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(84, 0, 29, 0.3);
+  background: rgba(255, 0, 110, 0.2);
   transition: background 0.2s ease;
   position: relative;
 
   &--active {
-    background: rgba(84, 0, 29, 0.5);
+    background: rgba(255, 0, 110, 0.3);
   }
 }
 
 .postCarousel-progress-fill {
   width: 0%;
   height: 100%;
-  background: rgba(84, 0, 29, 0.841);
+  background: linear-gradient(102deg, #ff006e, #ff8c00);
   animation: postCarouselFill 5s linear forwards;
 }
 
