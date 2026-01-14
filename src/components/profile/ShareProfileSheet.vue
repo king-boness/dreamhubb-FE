@@ -8,7 +8,7 @@
       <div
         class="shareProfileSheet"
         :class="{ dragging: isDragging, expanded: currentSnapPoint === 'expanded' }"
-        :style="{ 
+        :style="{
           transform: `translateY(${dragOffset}px)`,
           maxHeight: currentSnapPoint === 'expanded' ? `${EXPANDED_HEIGHT_PERCENT}vh` : `${COLLAPSED_HEIGHT_PERCENT}vh`
         }"
@@ -155,7 +155,7 @@ const onTouchMove = (e: TouchEvent) => {
   const currentY = e.touches[0].clientY;
   const deltaY = currentY - startY.value;
   const isDownward = deltaY > 0;
-  
+
   // Allow dragging in both directions
   if (isDownward) {
     // Dragging down - can close or collapse
@@ -177,10 +177,10 @@ const onTouchMove = (e: TouchEvent) => {
 const onTouchEnd = () => {
   if (!isDragging.value) return;
   isDragging.value = false;
-  
+
   const deltaY = dragOffset.value;
   const isDownward = deltaY > 0;
-  
+
   if (isDownward && Math.abs(deltaY) >= DRAG_THRESHOLD) {
     // Close sheet if dragged down enough
     closeSheet();
@@ -188,10 +188,6 @@ const onTouchEnd = () => {
     // Snap to nearest point
     const { snapPoint, targetHeight } = calculateSnapPoint(Math.abs(deltaY), isDownward);
     currentSnapPoint.value = snapPoint;
-    const viewportHeight = window.innerHeight;
-    const currentHeight = currentSnapPoint.value === "collapsed" 
-      ? (viewportHeight * COLLAPSED_HEIGHT_PERCENT) / 100
-      : (viewportHeight * EXPANDED_HEIGHT_PERCENT) / 100;
     dragOffset.value = 0;
     sheetHeight.value = targetHeight;
   }
@@ -210,7 +206,7 @@ const onMouseMove = (e: MouseEvent) => {
   if (!isDragging.value) return;
   const deltaY = e.clientY - startY.value;
   const isDownward = deltaY > 0;
-  
+
   if (isDownward) {
     dragOffset.value = deltaY;
   } else {
@@ -231,10 +227,10 @@ const onMouseUp = () => {
   isDragging.value = false;
   document.removeEventListener("mousemove", onMouseMove);
   document.removeEventListener("mouseup", onMouseUp);
-  
+
   const deltaY = dragOffset.value;
   const isDownward = deltaY > 0;
-  
+
   if (isDownward && Math.abs(deltaY) >= DRAG_THRESHOLD) {
     closeSheet();
   } else {
