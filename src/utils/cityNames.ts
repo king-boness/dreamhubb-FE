@@ -197,13 +197,13 @@ function extractCountryName(entity: any): string | null {
  * [A3] Get location label from Post or User object - unified location display logic
  * Handles various field names that might be used in API responses with multiple fallbacks
  * Works for both Post objects (from /api/posts) and User objects (from /api/user)
- * 
+ *
  * Why multiple fallbacks?
  * - Backend may return different field names depending on API version
  * - Some fields may be null/undefined in certain cases
  * - Objects vs strings may vary (location_city.name vs location_city)
  * - Ensures UI always displays location when available, even if field names change
- * 
+ *
  * @param entity - Post or User object (can have city/country in various formats)
  * @param locale - Current locale (e.g., "en-US", "sk")
  * @returns Formatted location string: "City, Country" if city exists, otherwise just "Country"
