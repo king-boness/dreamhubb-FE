@@ -137,10 +137,11 @@ const closeSheet = () => {
 };
 
 // Calculate snap point based on current height
-// Three snap points: MIN_HEIGHT (280px), INITIAL_HEIGHT (600px), MAX_HEIGHT (90vh)
+// Two snap points: INITIAL_HEIGHT (600px), MAX_HEIGHT (90vh)
+// MIN_HEIGHT is only used as a clamp limit, not as a snap point
 const calculateSnapPoint = (currentHeight: number) => {
-  // Find the nearest snap point
-  const snapPoints = [MIN_HEIGHT, INITIAL_HEIGHT, maxHeight.value];
+  // Only two snap points: INITIAL_HEIGHT and MAX_HEIGHT
+  const snapPoints = [INITIAL_HEIGHT, maxHeight.value];
   let nearest = snapPoints[0];
   let minDistance = Math.abs(currentHeight - snapPoints[0]);
 
@@ -186,12 +187,11 @@ const onHandleTouchEnd = () => {
   isDragging.value = false;
   hasMoved.value = false;
 
-  // Check if dragged down enough to close
-  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
-  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
+  // If dragged down below INITIAL_HEIGHT, close the sheet
+  if (sheetHeight.value < INITIAL_HEIGHT) {
     closeSheet();
   } else {
-    // Snap to nearest point
+    // Snap to nearest point (INITIAL_HEIGHT or MAX_HEIGHT)
     sheetHeight.value = calculateSnapPoint(sheetHeight.value);
   }
 };
@@ -264,12 +264,11 @@ const onSheetTouchEnd = () => {
   isDragging.value = false;
   hasMoved.value = false;
 
-  // Check if dragged down enough to close
-  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
-  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
+  // If dragged down below INITIAL_HEIGHT, close the sheet
+  if (sheetHeight.value < INITIAL_HEIGHT) {
     closeSheet();
   } else {
-    // Snap to nearest point
+    // Snap to nearest point (INITIAL_HEIGHT or MAX_HEIGHT)
     sheetHeight.value = calculateSnapPoint(sheetHeight.value);
   }
 };
@@ -299,12 +298,11 @@ const onHandleMouseUp = () => {
   document.removeEventListener("mousemove", onHandleMouseMove);
   document.removeEventListener("mouseup", onHandleMouseUp);
 
-  // Check if dragged down enough to close
-  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
-  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
+  // If dragged down below INITIAL_HEIGHT, close the sheet
+  if (sheetHeight.value < INITIAL_HEIGHT) {
     closeSheet();
   } else {
-    // Snap to nearest point
+    // Snap to nearest point (INITIAL_HEIGHT or MAX_HEIGHT)
     sheetHeight.value = calculateSnapPoint(sheetHeight.value);
   }
 };
@@ -339,12 +337,11 @@ const onSheetMouseUp = () => {
   document.removeEventListener("mousemove", onSheetMouseMove);
   document.removeEventListener("mouseup", onSheetMouseUp);
 
-  // Check if dragged down enough to close
-  const draggedDown = startHeight.value - sheetHeight.value > DRAG_THRESHOLD;
-  if (draggedDown && sheetHeight.value <= MIN_HEIGHT) {
+  // If dragged down below INITIAL_HEIGHT, close the sheet
+  if (sheetHeight.value < INITIAL_HEIGHT) {
     closeSheet();
   } else {
-    // Snap to nearest point
+    // Snap to nearest point (INITIAL_HEIGHT or MAX_HEIGHT)
     sheetHeight.value = calculateSnapPoint(sheetHeight.value);
   }
 };
