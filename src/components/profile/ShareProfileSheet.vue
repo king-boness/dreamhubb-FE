@@ -137,13 +137,22 @@ const closeSheet = () => {
 };
 
 // Calculate snap point based on current height
+// Three snap points: MIN_HEIGHT (280px), INITIAL_HEIGHT (600px), MAX_HEIGHT (90vh)
 const calculateSnapPoint = (currentHeight: number) => {
-  const midPoint = (MIN_HEIGHT + maxHeight.value) / 2;
-  if (currentHeight < midPoint) {
-    return MIN_HEIGHT;
-  } else {
-    return maxHeight.value;
+  // Find the nearest snap point
+  const snapPoints = [MIN_HEIGHT, INITIAL_HEIGHT, maxHeight.value];
+  let nearest = snapPoints[0];
+  let minDistance = Math.abs(currentHeight - snapPoints[0]);
+
+  for (let i = 1; i < snapPoints.length; i++) {
+    const distance = Math.abs(currentHeight - snapPoints[i]);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearest = snapPoints[i];
+    }
   }
+
+  return nearest;
 };
 
 // Touch handlers - handle area (always drag)
