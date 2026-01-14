@@ -48,6 +48,11 @@ export default {
   languageSaved: "Language saved successfully",
   accountSettings: "Account Settings",
   appSettings: "App Settings",
+  // Notifications
+  notifications: {
+    topUpTitle: "{name} topped up your post by {amount} tokens",
+    topUpText: "on {postTitle}",
+  },
   language: "Language",
   nameShown: "Name shown",
   realName: "Real Name",

@@ -6,9 +6,10 @@ export interface Notification {
   user_id: number;
   post_id: number;
   contribution_id: number | null;
-  type: "comment_help" | "comment_accomplish" | "comment_reply";
-  title: string;
-  body: string | null;
+  type: "comment_help" | "comment_accomplish" | "comment_reply" | "top_up";
+  amount?: number | null; // For top_up notifications
+  title?: string;
+  body?: string | null;
   is_read: boolean;
   created_at: string;
   comment_author_id?: number | null;
@@ -16,6 +17,15 @@ export interface Notification {
   comment_author_avatar?: string | null;
   post_title?: string | null;
   parent_comment_type?: "help" | "accomplish"; // For reply notifications
+  actor?: {
+    id: number;
+    name: string;
+    avatar_url: string | null;
+  } | null;
+  post?: {
+    id: number;
+    title: string | null;
+  } | null;
 }
 
 interface NotificationsState {
@@ -50,7 +60,7 @@ export const useNotificationsStore = defineStore("notifications", {
       this.error = null;
 
       try {
-        const { data } = await api.get("/donor/notifications", {
+        const { data } = await api.get("/notifications", {
           params: {
             per_page: 50, // Fetch enough for initial display
             page: 1
@@ -92,7 +102,7 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async fetchUnreadCount() {
       try {
-        const { data } = await api.get("/donor/notifications/unread-count");
+        const { data } = await api.get("/notifications/unread-count");
 
         if (data.status === "success") {
           this.unreadCount = data.unread_count || 0;
@@ -107,7 +117,7 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async markAsRead(notificationId: number) {
       try {
-        const { data } = await api.patch(`/donor/notifications/${notificationId}/read`);
+        const { data } = await api.patch(`/notifications/${notificationId}/read`);
 
         if (data.status === "success") {
           // Update local state
@@ -127,7 +137,7 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async markAllAsRead() {
       try {
-        const { data } = await api.patch("/donor/notifications/read-all");
+        const { data } = await api.patch("/notifications/read-all");
 
         if (data.status === "success") {
           // Update local state

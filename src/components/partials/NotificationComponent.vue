@@ -2,17 +2,17 @@
   <div class="notification-Component" @click="$emit('click')">
     <div
       class="notification-avatar-wrapper"
-      @click.stop="goToUserProfile(notification.comment_author_id)"
+      @click.stop="goToUserProfile(actorId)"
     >
       <UserAvatar
-        :image-url="notification.comment_author_avatar || null"
-        :name="notification.comment_author_name || 'Unknown'"
+        :image-url="actorAvatar || null"
+        :name="actorName || 'Unknown'"
         size="48px"
       />
     </div>
     <div class="nofication-Content">
-      <span class="nofitication-Heading">{{ notification.title }}</span>
-      <span class="nofitication-Text">{{ notification.body || "" }}</span>
+      <span class="nofitication-Heading">{{ displayTitle }}</span>
+      <span v-if="displayText" class="nofitication-Text">{{ displayText }}</span>
       <span v-if="timeAgo" class="nofitication-Time">{{ timeAgo }}</span>
     </div>
     <a href="#" @click.prevent="$emit('click')">
@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { Notification } from "src/stores/notifications";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 
@@ -32,10 +33,52 @@ interface Props {
 
 const props = defineProps<Props>();
 const router = useRouter();
+const { t } = useI18n();
 
 defineEmits<{
   click: [];
 }>();
+
+// Get actor info (for top_up) or comment author (for comments)
+const actorId = computed(() => {
+  if (props.notification.type === "top_up" && props.notification.actor) {
+    return props.notification.actor.id;
+  }
+  return props.notification.comment_author_id;
+});
+
+const actorName = computed(() => {
+  if (props.notification.type === "top_up" && props.notification.actor) {
+    return props.notification.actor.name;
+  }
+  return props.notification.comment_author_name;
+});
+
+const actorAvatar = computed(() => {
+  if (props.notification.type === "top_up" && props.notification.actor) {
+    return props.notification.actor.avatar_url;
+  }
+  return props.notification.comment_author_avatar;
+});
+
+// Display title based on notification type
+const displayTitle = computed(() => {
+  if (props.notification.type === "top_up") {
+    const actor = actorName.value || "Someone";
+    const amount = props.notification.amount || 0;
+    return t("notifications.topUpTitle", { name: actor, amount });
+  }
+  return props.notification.title || "";
+});
+
+// Display text based on notification type
+const displayText = computed(() => {
+  if (props.notification.type === "top_up") {
+    const postTitle = props.notification.post?.title || props.notification.post_title || "your post";
+    return t("notifications.topUpText", { postTitle });
+  }
+  return props.notification.body || "";
+});
 
 // Navigate to user profile
 const goToUserProfile = (userId: number | null | undefined) => {
@@ -47,9 +90,7 @@ const goToUserProfile = (userId: number | null | undefined) => {
       console.warn("No userId to navigate", {
         userId,
         numericUserId,
-        notification: props.notification,
-        comment_author_id: props.notification.comment_author_id,
-        type: typeof props.notification.comment_author_id
+        notification: props.notification
       });
     }
     return;

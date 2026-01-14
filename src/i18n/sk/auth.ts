@@ -48,6 +48,11 @@ export default {
   languageSaved: "Jazyk bol úspešne uložený",
   accountSettings: "Nastavenia účtu",
   appSettings: "Nastavenia aplikácie",
+  // Notifications
+  notifications: {
+    topUpTitle: "{name} ti prispel na príspevok {amount} tokenmi",
+    topUpText: "na {postTitle}",
+  },
   language: "Jazyk",
   nameShown: "Zobrazené meno",
   realName: "Skutočné meno",

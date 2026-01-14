@@ -50,6 +50,15 @@ const handleNotificationClick = async (notification: any) => {
     await notificationsStore.markAsRead(notification.id);
   }
 
+  // For top_up, navigate to post detail without comment type
+  if (notification.type === "top_up") {
+    router.push({
+      name: "donor-post-detail",
+      params: { id: String(notification.post_id) }
+    });
+    return;
+  }
+
   // Navigate to post detail with comment type query param
   let commentType: string | undefined;
   if (notification.type === "comment_help") {
