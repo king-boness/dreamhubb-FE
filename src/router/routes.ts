@@ -200,6 +200,12 @@ const routes: RouteRecordRaw[] = [
         name: "donor-settings-bio"
       },
       {
+        path: "settings/location",
+        meta: { requiresAuth: true },
+        component: () => import("src/pages/DonorPages/SettingsLocationPage.vue"),
+        name: "donor-settings-location"
+      },
+      {
         path: "settings/privacy",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/SettingsPrivacyPage.vue"),
@@ -584,6 +590,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/SettingsBioPage.vue"),
         name: "donee-settings-bio"
+      },
+      {
+        path: "settings/location",
+        meta: { requiresAuth: true },
+        component: () => import("src/pages/DonorPages/SettingsLocationPage.vue"),
+        name: "donee-settings-location"
       },
       {
         path: "settings/privacy",

@@ -410,6 +410,11 @@ const accountSettings = computed(() => [
     img: "/icons/bioIcon.svg",
     title: t("changeBio"),
     destination: "settings-bio"
+  },
+  {
+    img: "/icons/location-icon.svg",
+    title: t("changeLocation"),
+    destination: "settings-location"
   }
 ]);
 const appSettings = computed(() => [

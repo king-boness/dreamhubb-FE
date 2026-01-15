@@ -190,7 +190,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     // Generic profile update (supports location_city_id, etc.)
-    async updateProfile(payload: Partial<Pick<User, "username" | "date_birth" | "gender" | "bio" | "location_city_id">>) {
+    async updateProfile(payload: Partial<Pick<User, "username" | "date_birth" | "gender" | "bio" | "location_continent_id" | "location_country_id" | "location_city_id">>) {
       if (!this.token) return;
 
       const { data } = await api.put("/user/update", payload);
