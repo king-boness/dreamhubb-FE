@@ -201,7 +201,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "settings/location",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, hideFooter: true },
         component: () => import("src/pages/DonorPages/SettingsLocationPage.vue"),
         name: "donor-settings-location"
       },
@@ -593,7 +593,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "settings/location",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, hideFooter: true },
         component: () => import("src/pages/DonorPages/SettingsLocationPage.vue"),
         name: "donee-settings-location"
       },

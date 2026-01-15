@@ -107,6 +107,7 @@
 
     <!-- BOTTOM FOOTER with reveal -->
     <div
+      v-if="!$route.meta?.hideFooter"
       class="footer navbar row col-12"
       :class="{ 'footer--hidden': !shouldShowFooter, 'iphoneDevice-footer': $q.platform.is.ios }"
     >
