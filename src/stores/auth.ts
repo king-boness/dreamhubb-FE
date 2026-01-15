@@ -188,5 +188,21 @@ export const useAuthStore = defineStore("auth", {
         }
       }
     }
+
+    // Generic profile update (supports location_city_id, etc.)
+    async updateProfile(payload: Partial<Pick<User, "username" | "date_birth" | "gender" | "bio" | "location_city_id">>) {
+      if (!this.token) return;
+
+      const { data } = await api.put("/user/update", payload);
+
+      if (data && data.status === "success") {
+        // Replace user object if provided (keeps new location_*_name fields from BE)
+        if (data.user) {
+          this.user = data.user;
+        } else if (this.user) {
+          Object.assign(this.user, payload);
+        }
+      }
+    }
   }
 });

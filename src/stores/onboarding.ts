@@ -60,8 +60,9 @@ export const useOnboardingStore = defineStore("onboarding", {
         state.dateOfBirth &&
         state.gender &&
         state.profileContinent &&
-        state.profileCountry
-        // City is optional - user can type it manually
+        state.profileCountry &&
+        // City is REQUIRED for consistent "City, Country" display across the app
+        (state.profileCityId || state.profileCity)
       );
     }
   },
@@ -115,6 +116,13 @@ export const useOnboardingStore = defineStore("onboarding", {
         };
       }
 
+      // If city is a numeric string (selected via BE city list), treat it as city_id directly.
+      // We still fetch continent_id/country_id via /locations/ids using names.
+      const parsedCityId =
+        typeof this.profileCity === "string" && /^\d+$/.test(this.profileCity)
+          ? Number(this.profileCity)
+          : null;
+
       // If we have names but not IDs, fetch IDs from BE
       if (this.profileContinent && this.profileCountry) {
         try {
@@ -138,7 +146,8 @@ export const useOnboardingStore = defineStore("onboarding", {
             params: {
               continent: this.profileContinent,
               country: this.profileCountry,
-              city: this.profileCity || null
+              // Pass city only if it's a NAME (not an ID string)
+              city: parsedCityId ? null : (this.profileCity || null)
             }
           });
 
@@ -171,7 +180,12 @@ export const useOnboardingStore = defineStore("onboarding", {
               // Update store with IDs
               this.profileContinentId = ids.continent_id;
               this.profileCountryId = ids.country_id;
-              this.profileCityId = ids.city_id;
+              // City must be present (either from parsed ID, or from BE lookup by name)
+              this.profileCityId = parsedCityId || ids.city_id;
+
+              if (!this.profileCityId) {
+                throw new Error("City is required. Please select a valid city.");
+              }
 
               if (process.env.NODE_ENV === "development") {
                 console.log("✅ Location IDs set in store:", {
@@ -184,7 +198,7 @@ export const useOnboardingStore = defineStore("onboarding", {
               return {
                 continentId: ids.continent_id,
                 countryId: ids.country_id,
-                cityId: ids.city_id || null // City can be null
+                cityId: this.profileCityId
               };
             }
           }
@@ -210,7 +224,7 @@ export const useOnboardingStore = defineStore("onboarding", {
       return {
         continentId: this.profileContinentId,
         countryId: this.profileCountryId,
-        cityId: this.profileCityId || null
+        cityId: this.profileCityId
       };
     },
 
@@ -353,8 +367,8 @@ export const useOnboardingStore = defineStore("onboarding", {
         }
 
         // Validate location IDs before proceeding
-        if (!locationIds.continentId || !locationIds.countryId) {
-          throw new Error("Invalid location IDs. Please select a valid continent and country.");
+        if (!locationIds.continentId || !locationIds.countryId || !locationIds.cityId) {
+          throw new Error("Invalid location IDs. Please select a valid continent, country, and city.");
         }
 
         // Format date_birth - ensure it's in YYYY-MM-DD format
@@ -397,7 +411,7 @@ export const useOnboardingStore = defineStore("onboarding", {
           gender: this.gender,
           location_country_id: locationIds.countryId || null,
           location_continent_id: locationIds.continentId || null,
-          location_city_id: locationIds.cityId || null
+          location_city_id: locationIds.cityId
         };
 
         if (process.env.NODE_ENV === "development") {
