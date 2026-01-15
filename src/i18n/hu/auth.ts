@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Hungarian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Hely módosítása",
   changeLanguage: "Nyelv váltása",
   saveChanges: "Változások mentése",
   cancel: "Mégse",

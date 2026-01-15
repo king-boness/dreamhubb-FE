@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Nepali - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "स्थान परिवर्तन गर्नुहोस्",
   changeLanguage: "\u092d\u093e\u0937\u093e \u092a\u0930\u093f\u0935\u0930\u094d\u0924\u0928 \u0917\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d",
   saveChanges: "\u092a\u0930\u093f\u0935\u0930\u094d\u0924\u0928\u0939\u0930\u0942 \u0938\u0947\u0935\u0928\u0947",
   cancel: "\u0930\u0926\u094d\u0926 \u0917\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d",

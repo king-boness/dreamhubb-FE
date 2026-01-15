@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Dutch - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Locatie wijzigen",
   changeLanguage: "Taal wijzigen",
   saveChanges: "Wijzigingen opslaan",
   cancel: "Annuleren",

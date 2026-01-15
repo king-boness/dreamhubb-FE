@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Czech - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Změnit polohu",
   changeLanguage: "Změnit jazyk",
   saveChanges: "Uložit změny",
   cancel: "Zrušit",

@@ -55,6 +55,7 @@ export default {
   changePassword: "ਪਾਸਵਰਡ ਬਦਲੋ",
   changeEmailAddress: "ਈਮੇਲ ਪਤਾ ਬਦਲੋ",
   changeBio: "ਬਾਇਓ ਬਦਲੋ",
+  changeLocation: "ਟਿਕਾਣਾ ਬਦਲੋ",
   privacySettings: "ਗੋਪਨੀਯਤਾ ਸੈਟਿੰਗਾਂ",
   helpAndSupport: "ਮਦਦ ਅਤੇ ਸਹਾਇਤਾ",
   faq: "ਅਕਸਰ ਪੁੱਛੇ ਜਾਂਦੇ ਸਵਾਲ",

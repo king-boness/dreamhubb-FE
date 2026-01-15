@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Filipino (Tagalog) - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Baguhin ang Lokasyon",
   signIn: "Mag-sign In",
   createAccount: "Gumawa ng Account",
   description: "Ang natupad na mga pangarap ay nagbabago sa mundo",

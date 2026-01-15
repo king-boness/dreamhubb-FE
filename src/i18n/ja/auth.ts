@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Japanese - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "場所を変更",
   changeLanguage: "\u8a00\u8a9e\u3092\u5909\u66f4",
   saveChanges: "\u5909\u66f4\u3092\u4fdd\u5b58",
   cancel: "\u53d6\u6d88",

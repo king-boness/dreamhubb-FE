@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Gujarati - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "સ્થાન બદલો",
   signIn: "સાઇન ઇન કરો",
   createAccount: "એકાઉન્ટ બનાવો",
   description: "પૂર્ણ થયેલા સ્વપ્નો વિશ્વને બદલે છે",

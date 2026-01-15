@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Italian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Cambia posizione",
   changeLanguage: "Cambia lingua",
   saveChanges: "Salva modifiche",
   cancel: "Annulla",

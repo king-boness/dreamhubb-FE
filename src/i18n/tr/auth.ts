@@ -16,6 +16,7 @@ export default {
   changePassword: "Şifre değiştir",
   changeEmailAddress: "E-posta adresini değiştir",
   changeBio: "Biyografiyi değiştir",
+  changeLocation: "Konumu değiştir",
   privacySettings: "Gizlilik ayarları",
   helpAndSupport: "Yardım ve destek",
   faq: "Sık sorulan sorular",

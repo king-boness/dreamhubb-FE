@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Hausa - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Canza Wuri",
   signIn: "Shiga",
   createAccount: "Ƙirƙiri Asusun",
   description: "Mafarkai da aka cika suna canza duniya",

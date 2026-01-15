@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Lithuanian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Keisti vietą",
   changeLanguage: "Keisti kalbą",
   saveChanges: "Išsaugoti pakeitimus",
   cancel: "Atšaukti",

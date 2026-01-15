@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Marathi - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "स्थान बदला",
   signIn: "साइन इन करा",
   createAccount: "खाते तयार करा",
   description: "पूर्ण झालेले स्वप्ने जग बदलतात",

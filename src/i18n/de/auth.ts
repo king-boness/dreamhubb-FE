@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // German - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Standort ändern",
   changeLanguage: "Sprache ändern",
   saveChanges: "Änderungen speichern",
   cancel: "Abbrechen",

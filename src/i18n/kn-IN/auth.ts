@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Kannada - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "ಸ್ಥಳವನ್ನು ಬದಲಾಯಿಸಿ",
   signIn: "ಸೈನ್ ಇನ್ ಮಾಡಿ",
   createAccount: "ಖಾತೆಯನ್ನು ರಚಿಸಿ",
   description: "ನೆರವೇರಿದ ಕನಸುಗಳು ಜಗತ್ತನ್ನು ಬದಲಾಯಿಸುತ್ತವೆ",

@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Persian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "تغییر مکان",
   changeLanguage: "\u062a\u063a\u06cc\u06cc\u0631 \u0632\u0628\u0627\u0646",
   saveChanges: "\u0630\u062e\u06cc\u0631\u0647 \u062a\u063a\u06cc\u06cc\u0631\u0627\u062a",
   cancel: "\u0644\u063a\u0648",

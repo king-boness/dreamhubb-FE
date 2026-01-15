@@ -16,6 +16,7 @@ export default {
   changePassword: "Ändra lösenord",
   changeEmailAddress: "Ändra e-postadress",
   changeBio: "Ändra biografi",
+  changeLocation: "Ändra plats",
   privacySettings: "Integritetsinställningar",
   helpAndSupport: "Hjälp och support",
   faq: "Vanliga frågor",

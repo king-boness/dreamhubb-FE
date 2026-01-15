@@ -23,6 +23,7 @@ export default {
   changePassword: "Ndrysho fjalëkalimin",
   changeEmailAddress: "Ndrysho adresën e emailit",
   changeBio: "Ndrysho biografinë",
+  changeLocation: "Ndrysho vendndodhjen",
   privacySettings: "Cilësimet e privatësisë",
   helpAndSupport: "Ndihmë dhe mbështetje",
   faq: "Pyetjet e shpeshta",

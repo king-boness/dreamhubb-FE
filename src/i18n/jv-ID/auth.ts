@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Javanese - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Ganti lokasi",
   signIn: "Mlebu",
   createAccount: "Nggawe Akun",
   description: "Impèn sing wis ditindakaké ngganti donya",

@@ -110,6 +110,7 @@ const esOverrides = {
 // Merge en-US as base with Spanish overrides
 export default {
   ...enUS,
+  changeLocation: "Cambiar ubicación",
   ...esOverrides,
   // Merge languages object
   languages: {

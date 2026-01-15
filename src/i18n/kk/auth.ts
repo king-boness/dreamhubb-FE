@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Kazakh - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Орналасқан жерді өзгерту",
   changeLanguage: "\u0422\u0456\u043b\u0434\u0456 \u04e9\u0437\u0433\u0435\u0440\u0442\u0443",
   saveChanges: "\u04e8\u0437\u0433\u0435\u0440\u0456\u0441\u0442\u0435\u0440\u0434\u0456 \u0441\u0430\u049b\u0442\u0430\u0443",
   cancel: "\u0411\u0430\u0441 \u0442\u0430\u0440\u0442\u0443",

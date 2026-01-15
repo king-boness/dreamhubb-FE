@@ -16,6 +16,7 @@ export default {
   changePassword: "Alterar senha",
   changeEmailAddress: "Alterar endereço de e-mail",
   changeBio: "Alterar biografia",
+  changeLocation: "Alterar localização",
   privacySettings: "Configurações de privacidade",
   helpAndSupport: "Ajuda e suporte",
   faq: "Perguntas frequentes",

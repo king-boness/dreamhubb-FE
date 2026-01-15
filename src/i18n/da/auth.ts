@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Danish - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Skift placering",
   changeLanguage: "Skift sprog",
   saveChanges: "Gem ændringer",
   cancel: "Annuller",

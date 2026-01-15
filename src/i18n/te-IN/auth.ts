@@ -55,6 +55,7 @@ export default {
   changePassword: "పాస్వర్డ్ మార్చండి",
   changeEmailAddress: "ఇమెయిల్ చిరునామా మార్చండి",
   changeBio: "బయో మార్చండి",
+  changeLocation: "స్థానాన్ని మార్చండి",
   privacySettings: "గోప్యత సెట్టింగ్‌లు",
   helpAndSupport: "సహాయం మరియు మద్దతు",
   faq: "తరచుగా అడిగే ప్రశ్నలు",

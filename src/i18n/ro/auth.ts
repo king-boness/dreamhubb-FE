@@ -16,6 +16,7 @@ export default {
   changePassword: "Schimbă parola",
   changeEmailAddress: "Schimbă adresa de e-mail",
   changeBio: "Schimbă biografia",
+  changeLocation: "Schimbă locația",
   privacySettings: "Setări de confidențialitate",
   helpAndSupport: "Ajutor și suport",
   faq: "Întrebări frecvente",

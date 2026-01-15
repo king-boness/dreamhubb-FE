@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Macedonian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Променете локација",
   changeLanguage: "\u041f\u0440\u043e\u043c\u0435\u043d\u0435\u0442\u0435 \u0458\u0430\u0437\u0438\u043a",
   saveChanges: "\u0421\u0430\u0447\u0443\u0432\u0430\u0458\u0442\u0435 \u0438\u0437\u043c\u0435\u043d\u0438",
   cancel: "\u041e\u0442\u043a\u0430\u0436\u0438",

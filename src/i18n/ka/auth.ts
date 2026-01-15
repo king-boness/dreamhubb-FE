@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Georgian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "მდებარეობის შეცვლა",
   changeLanguage: "\u10d4\u10dc\u10d0\u10e1 \u10e8\u10d4\u10ea\u10d5\u10da\u10d0",
   saveChanges: "\u10e8\u10d4\u10dc\u10d0\u10ee\u10d4\u10d1\u10d8\u10e1 \u10e8\u10d4\u10ec\u10d0\u10d5\u10d4\u10d1\u10d0",
   cancel: "\u10e8\u10d4\u10ea\u10d5\u10da\u10d0",

@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Estonian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Muuda asukohta",
   changeLanguage: "Muuda keelt",
   saveChanges: "Salvesta muudatused",
   cancel: "Tühista",

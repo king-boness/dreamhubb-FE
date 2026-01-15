@@ -55,6 +55,7 @@ export default {
   changePassword: "Badilisha Nenosiri",
   changeEmailAddress: "Badilisha Anwani ya Barua Pepe",
   changeBio: "Badilisha Wasifu",
+  changeLocation: "Badilisha eneo",
   privacySettings: "Mipangilio ya Faragha",
   helpAndSupport: "Msaada na Usaidizi",
   faq: "Maswali Yanayoulizwa Mara kwa Mara",

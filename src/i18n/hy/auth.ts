@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Armenian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Փոխել գտնվելու վայրը",
   changeLanguage: "\u0540\u0561\u0574\u0561\u057f\u0565\u0572\u0565\u056c \u056c\u0561\u0575\u0584\u0568",
   saveChanges: "\u0570\u0561\u0577\u057e\u0565\u056c \u056f\u0565\u0569\u0565\u0580\u0561\u056f\u0561\u0576\u056d\u0576\u0565\u0580\u0568",
   cancel: "\u0567\u057b\u0565\u056c",

@@ -55,6 +55,7 @@ export default {
   changePassword: "கடவுச்சொல்லை மாற்றவும்",
   changeEmailAddress: "மின்னஞ்சல் முகவரியை மாற்றவும்",
   changeBio: "உயிரியலை மாற்றவும்",
+  changeLocation: "இடத்தை மாற்றவும்",
   privacySettings: "தனியுரிமை அமைப்புகள்",
   helpAndSupport: "உதவி மற்றும் ஆதரவு",
   faq: "அடிக்கடி கேட்கப்படும் கேள்விகள்",

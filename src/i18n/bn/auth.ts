@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Bengali - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "অবস্থান পরিবর্তন করুন",
   changeLanguage: "\u09ad\u09be\u09b7\u09be \u09aa\u09b0\u09bf\u09ac\u09b0\u09cd\u09a4\u09a8 \u0995\u09b0\u09c1\u09a8",
   saveChanges: "\u09aa\u09b0\u09bf\u09ac\u09b0\u09cd\u09a4\u09a8\u09b8\u09ae\u09c1\u09b9 \u09b8\u0982\u09b0\u0995\u09cd\u09b7\u09a8 \u0995\u09b0\u09c1\u09a8",
   cancel: "\u09ac\u09be\u09a4\u09bf\u09b2",

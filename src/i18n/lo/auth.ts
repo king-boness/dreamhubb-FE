@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Lao - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "ປ່ຽນສະຖານທີ່",
   changeLanguage: "\u0e9b\u0eb5\u0e81\u0eb2\u0e94\u0eb2\u0e81\u0eb0\u0ea5\u0eb2\u0e94",
   saveChanges: "\u0e9a\u0eb1\u0e99\u0eb2\u0e81\u0eb0\u0ea5\u0eb2\u0e94\u0eb2\u0e81\u0eb0\u0ea5\u0eb2\u0e94",
   cancel: "\u0e95\u0eb1\u0e87\u0eb2\u0e8d\u0eb2\u0e94",

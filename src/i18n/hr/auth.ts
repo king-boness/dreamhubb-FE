@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Croatian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Promijeni lokaciju",
   changeLanguage: "Promijeni jezik",
   saveChanges: "Spremi promjene",
   cancel: "Odustani",

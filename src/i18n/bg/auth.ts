@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Bulgarian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Промени местоположението",
   changeLanguage: "\u041f\u0440\u043e\u043c\u044f\u043d\u0430 \u043d\u0430 \u0435\u0437\u0438\u043a\u0430",
   saveChanges: "\u0417\u0430\u043f\u0430\u0437\u0438 \u043f\u0440\u043e\u043c\u044f\u043d\u0438\u0442\u0435",
   cancel: "\u041e\u0442\u043a\u0430\u0437",

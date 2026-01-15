@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Korean - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "위치 변경",
   changeLanguage: "\uc5b8\uc5b4 \ubcc0\uacbd",
   saveChanges: "\ubcc0\uacbd\uc0ac\ud56d \uc800\uc7a5",
   cancel: "\ucde8\uc18c",

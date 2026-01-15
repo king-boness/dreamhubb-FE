@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Hebrew - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "שנה מיקום",
   changeLanguage: "\u05e9\u05e0\u05d4 \u05e9\u05e4\u05d4",
   saveChanges: "\u05e9\u05de\u05d5\u05e8 \u05e9\u05d9\u05e0\u05d5\u05d9\u05d9\u05dd",
   cancel: "\u05d1\u05d8\u05dc",

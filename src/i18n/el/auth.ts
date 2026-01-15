@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Greek - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Αλλαγή τοποθεσίας",
   changeLanguage: "\u0391\u03bb\u03bb\u03b1\u03b3\u03ae \u03b3\u03bb\u03ce\u03c3\u03c3\u03b1\u03c2",
   saveChanges: "\u0391\u03c0\u03bf\u03b8\u03ae\u03ba\u03b5\u03c5\u03c3\u03b7 \u03b1\u03bb\u03bb\u03b1\u03b3\u03ce\u03bd",
   cancel: "\u0391\u03ba\u03cd\u03c1\u03c9\u03c3\u03b7",

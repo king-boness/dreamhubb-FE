@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Finnish - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Vaihda sijainti",
   changeLanguage: "Vaihda kieltä",
   saveChanges: "Tallenna muutokset",
   cancel: "Peruuta",

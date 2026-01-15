@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Azerbaijani - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Məkanı dəyişdir",
   changeLanguage: "Dili dəyişdir",
   saveChanges: "Dəyişiklikləri saxla",
   cancel: "Ləğv et",

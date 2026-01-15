@@ -16,6 +16,7 @@ export default {
   changePassword: "\u66f4\u6539\u5bc6\u7801",
   changeEmailAddress: "\u66f4\u6539\u90ae\u4ef6\u5730\u5740",
   changeBio: "\u66f4\u6539\u7b80\u4ecb",
+  changeLocation: "\u66f4\u6539\u4f4d\u7f6e",
   privacySettings: "\u9690\u79c1\u8bbe\u7f6e",
   helpAndSupport: "\u5e2e\u52a9\u4e0e\u652f\u6301",
   faq: "\u5e38\u89c1\u95ee\u9898",

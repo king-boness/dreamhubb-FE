@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Norwegian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Endre plassering",
   changeLanguage: "Endre språk",
   saveChanges: "Lagre endringer",
   cancel: "Avbryt",

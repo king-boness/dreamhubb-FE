@@ -55,6 +55,7 @@ export default {
   changePassword: "更改密碼",
   changeEmailAddress: "更改電郵地址",
   changeBio: "更改簡介",
+  changeLocation: "更改位置",
   privacySettings: "私隱設定",
   helpAndSupport: "幫助與支援",
   faq: "常見問題",

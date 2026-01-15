@@ -55,6 +55,7 @@ export default {
   changePassword: "Thay đổi mật khẩu",
   changeEmailAddress: "Thay đổi địa chỉ email",
   changeBio: "Thay đổi tiểu sử",
+  changeLocation: "Thay đổi vị trí",
   privacySettings: "Cài đặt quyền riêng tư",
   helpAndSupport: "Trợ giúp và Hỗ trợ",
   faq: "Câu hỏi thường gặp",

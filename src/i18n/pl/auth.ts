@@ -21,6 +21,7 @@ export default {
   changePassword: "Zmień hasło",
   changeEmailAddress: "Zmień adres e-mail",
   changeBio: "Zmień biografię",
+  changeLocation: "Zmień lokalizację",
   nameShown: "Wyświetlane imię",
   realName: "Prawdziwe imię",
   privacySettings: "Ustawienia prywatności",

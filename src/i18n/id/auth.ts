@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Indonesian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Ubah lokasi",
   changeLanguage: "Ubah bahasa",
   saveChanges: "Simpan perubahan",
   cancel: "Batal",

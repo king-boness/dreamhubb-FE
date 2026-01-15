@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Latvian - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "Mainīt atrašanās vietu",
   changeLanguage: "Mainīt valodu",
   saveChanges: "Saglabāt izmaiņas",
   cancel: "Atcelt",

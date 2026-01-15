@@ -3,6 +3,7 @@ import enUS from "../en-US/auth";
 // Hindi - use en-US as base, all keys available
 export default {
   ...enUS,
+  changeLocation: "स्थान बदलें",
   changeLanguage: "\u092d\u093e\u0937\u093e \u092c\u0926\u0932\u0947\u0902",
   saveChanges: "\u092c\u0926\u0932\u093e\u0935 \u0938\u0939\u0947\u091c\u0947\u0902",
   cancel: "\u0930\u0926\u094d\u0926 \u0915\u0930\u0947\u0902",
