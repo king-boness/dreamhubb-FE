@@ -187,7 +187,7 @@ export const useAuthStore = defineStore("auth", {
           this.user.bio = data.user.bio;
         }
       }
-    }
+    },
 
     // Generic profile update (supports location_city_id, etc.)
     async updateProfile(payload: Partial<Pick<User, "username" | "date_birth" | "gender" | "bio" | "location_city_id">>) {
