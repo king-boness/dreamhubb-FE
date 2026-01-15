@@ -306,6 +306,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, withDefaults } from "vue";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { Notify } from "quasar";
+import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 
@@ -616,7 +617,7 @@ const updateProfileCountryOptions = () => {
 };
 
 // Update profile city options when country changes
-const updateProfileCityOptions = () => {
+const updateProfileCityOptions = async () => {
   if (!localProfileCountry.value) {
     allProfileCitiesForCountry.value = [];
     filteredProfileCityOptions.value = [];
@@ -624,21 +625,66 @@ const updateProfileCityOptions = () => {
   }
 
   const countryCode = getCountryCode(localProfileCountry.value);
+
+  // Prefer BE-backed city IDs (real DB IDs). Fallback to safe "name values" if BE is unavailable.
+  try {
+    const { data: idsData } = await api.get("/locations/ids", {
+      params: {
+        continent: localProfileContinent.value,
+        country: localProfileCountry.value
+      }
+    });
+
+    const countryId = idsData?.location_ids?.country_id;
+    if (idsData?.status === "success" && countryId) {
+      const { data: citiesData } = await api.get("/locations/cities", {
+        params: { country_id: countryId, scope: "all" }
+      });
+
+      if (citiesData?.status === "success" && Array.isArray(citiesData.cities)) {
+        const citiesMapped: CityFromBackend[] = citiesData.cities.map((c: { id: number; name: string }) => ({
+          id: c.id,
+          name: c.name
+        }));
+
+        // If we can, use country code to keep TOP 10 + divider ordering
+        if (countryCode) {
+          const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+          allProfileCitiesForCountry.value = cityOptions;
+          filteredProfileCityOptions.value = cityOptions;
+          return;
+        }
+
+        // Otherwise, simple alphabetical list
+        const cityOptions: CityOption[] = citiesMapped
+          .slice()
+          .sort((a, b) => a.name.localeCompare(b.name, "sk", { sensitivity: "base" }))
+          .map((c) => ({ label: c.name, value: c.id }));
+
+        allProfileCitiesForCountry.value = cityOptions;
+        filteredProfileCityOptions.value = cityOptions;
+        return;
+      }
+    }
+  } catch {
+    // ignore, fall back to static list below
+  }
+
+  // Fallback: static list (IMPORTANT: use city NAME as value, not numeric index)
   if (countryCode) {
     const cities = getCitiesByCountryCode(countryCode);
-    // Convert string array to CityFromBackend format
-    const citiesMapped: CityFromBackend[] = cities.map((name: string, index: number) => ({
-      id: index,
+    const citiesMapped: CityFromBackend[] = cities.map((name: string) => ({
+      id: name,
       name
     }));
-    // Use buildCityOptionsForCountry to get TOP 10 + divider + alphabetical
     const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
     allProfileCitiesForCountry.value = cityOptions;
     filteredProfileCityOptions.value = cityOptions;
-  } else {
-    allProfileCitiesForCountry.value = [];
-    filteredProfileCityOptions.value = [];
+    return;
   }
+
+  allProfileCitiesForCountry.value = [];
+  filteredProfileCityOptions.value = [];
 };
 
 // Filter profile countries
@@ -691,7 +737,7 @@ const handleProfileContinentChange = (val: string) => {
 
   // Update options synchronously - no async operations
   updateProfileCountryOptions();
-  updateProfileCityOptions();
+  void updateProfileCityOptions();
 };
 
 // Handle profile country change - optimized for instant response
@@ -706,7 +752,7 @@ const handleProfileCountryChange = (val: string) => {
   emit("update:profileCity", "");
 
   // Update options synchronously - no async operations
-  updateProfileCityOptions();
+  void updateProfileCityOptions();
 };
 
 // Handle profile city change - prevent selecting divider
@@ -773,7 +819,7 @@ const handleEmailBlur = async () => {
 
 onMounted(() => {
   updateProfileCountryOptions();
-  updateProfileCityOptions();
+  void updateProfileCityOptions();
 
   // Restore avatar preview from store if it exists (e.g., after re-render due to email error)
   if (onboardingStore.profilePicturePreview) {

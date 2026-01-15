@@ -230,12 +230,12 @@ export const useOnboardingStore = defineStore("onboarding", {
 
     // Pomocná metóda na získanie location IDs pre feed (podobne ako fetchProfileLocationIds)
     async fetchFeedLocationIds() {
-      // If IDs are already set, use them
-      if (this.feedContinentId && this.feedCountryId && this.feedCityId) {
+      // If IDs are already set, use them (city is optional)
+      if (this.feedContinentId && this.feedCountryId) {
         return {
           continentId: this.feedContinentId,
           countryId: this.feedCountryId,
-          cityId: this.feedCityId
+          cityId: this.feedCityId || null
         };
       }
 
@@ -413,14 +413,6 @@ export const useOnboardingStore = defineStore("onboarding", {
           location_continent_id: locationIds.continentId || null,
           location_city_id: locationIds.cityId
         };
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("🚀 Register payload:", payload);
-        }
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("🚀 Calling register API with payload:", payload);
-        }
 
         if (process.env.NODE_ENV === "development") {
           console.log("🚀 Calling register API with payload:", payload);

@@ -171,15 +171,17 @@ export const usePreferencesStore = defineStore("preferences", {
         }
       };
 
-      // DEBUG: Log what we're saving
-      console.log("[DEBUG] [saveDonorFiltersToStorage] Saving to key:", key);
-      console.log("[DEBUG] [saveDonorFiltersToStorage] Payload:", payload);
+      if (process.env.NODE_ENV === "development") {
+        console.log("[DEBUG] [saveDonorFiltersToStorage] Saving to key:", key);
+        console.log("[DEBUG] [saveDonorFiltersToStorage] Payload:", payload);
+      }
 
       localStorage.setItem(key, JSON.stringify(payload));
 
-      // DEBUG: Verify what was actually saved
-      const saved = localStorage.getItem(key);
-      console.log("[DEBUG] [saveDonorFiltersToStorage] What was actually saved:", saved);
+      if (process.env.NODE_ENV === "development") {
+        const saved = localStorage.getItem(key);
+        console.log("[DEBUG] [saveDonorFiltersToStorage] What was actually saved:", saved);
+      }
     },
     // Load donor filters from user-specific localStorage key
     loadDonorFiltersFromStorage() {

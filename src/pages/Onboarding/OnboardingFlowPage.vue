@@ -55,7 +55,8 @@
     <WhereAreYou
       v-model:continent="feedContinent"
       v-model:country="feedCountry"
-      v-model:city="feedCity"
+      v-model:city="feedCityId"
+      :emit-city-id="true"
       :progress="80"
       @next="handleNext"
       @back="handleBack"
@@ -127,9 +128,9 @@ const feedCountry = computed({
   set: (value) => onboardingStore.setStepData("feedCountry", value)
 });
 
-const feedCity = computed({
-  get: () => onboardingStore.feedCity,
-  set: (value) => onboardingStore.setStepData("feedCity", value)
+const feedCityId = computed({
+  get: () => onboardingStore.feedCityId,
+  set: (value) => onboardingStore.setStepData("feedCityId", value)
 });
 
 const username = computed({

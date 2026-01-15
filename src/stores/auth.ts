@@ -67,6 +67,19 @@ export const useAuthStore = defineStore("auth", {
             api.defaults.headers.common.Authorization = `Bearer ${this.token}`;
           }
 
+          // Prevent "guest" filters leaking into authenticated session
+          try {
+            const { usePreferencesStore } = await import("src/stores/preferences");
+            const preferencesStore = usePreferencesStore();
+            preferencesStore.hydrateFromStorage();
+            preferencesStore.loadDonorFiltersFromStorage();
+            // Optional cleanup of guest keys (keeps things deterministic after login/register)
+            localStorage.removeItem("dreamhubb_donor_filters_guest");
+            localStorage.removeItem("preferences_store_guest");
+          } catch {
+            // ignore
+          }
+
           this.loading = false;
           return data;
         } else {
@@ -127,6 +140,10 @@ export const useAuthStore = defineStore("auth", {
         localStorage.removeItem(TOKEN_KEY);
         delete api.defaults.headers.common.Authorization;
 
+        // Clear guest filters to avoid inheriting old location/filters on next registration
+        localStorage.removeItem("dreamhubb_donor_filters_guest");
+        localStorage.removeItem("preferences_store_guest");
+
         // Reset onboarding store pri logout-e
         try {
           const { useOnboardingStore } = await import("src/stores/onboarding");
@@ -137,6 +154,15 @@ export const useAuthStore = defineStore("auth", {
           if (process.env.NODE_ENV === "development") {
             console.warn("Failed to reset onboarding store:", error);
           }
+        }
+
+        // Reset preferences donor filters in-memory (avoid UI using stale filters after logout)
+        try {
+          const { usePreferencesStore } = await import("src/stores/preferences");
+          const preferencesStore = usePreferencesStore();
+          preferencesStore.clearLastUsedFeedFilters();
+        } catch {
+          // ignore
         }
       }
     },
