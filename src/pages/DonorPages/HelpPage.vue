@@ -71,17 +71,13 @@
       </div>
 
       <!-- Sticky Footer CTA - placed immediately after "add image" -->
-      <div class="helpPage-footer">
-        <q-btn
-          class="helpPage-footerButton"
-          :loading="submitting"
-          :disable="submitting || !message.trim()"
-          @click="handleSubmit"
-        >
-          <img src="/icons/giftIcon.svg" alt="" />
-          <span>{{ t("helpAccomplish") }}</span>
-        </q-btn>
-      </div>
+      <BottomCtaButton
+        :label="t('helpAccomplish')"
+        icon-src="/icons/giftIcon.svg"
+        :loading="submitting"
+        :disabled="submitting || !message.trim()"
+        @click="handleSubmit"
+      />
     </div>
 
     <div v-else-if="contributionType === 'help'" class="helpPage-content">
@@ -118,17 +114,13 @@
       </div>
 
       <!-- Sticky Footer CTA - placed immediately after "add image" -->
-      <div class="helpPage-footer">
-        <q-btn
-          class="helpPage-footerButton"
-          :loading="submitting"
-          :disable="submitting || (contributionType === 'accomplish' ? !message.trim() : !helpWithText.trim())"
-          @click="handleSubmit"
-        >
-          <img src="/icons/giftIcon.svg" alt="" />
-          <span>{{ contributionType === 'accomplish' ? t("helpAccomplish") : t("helpToFulfill") }}</span>
-        </q-btn>
-      </div>
+      <BottomCtaButton
+        :label="contributionType === 'accomplish' ? t('helpAccomplish') : t('helpToFulfill')"
+        icon-src="/icons/giftIcon.svg"
+        :loading="submitting"
+        :disabled="submitting || (contributionType === 'accomplish' ? !message.trim() : !helpWithText.trim())"
+        @click="handleSubmit"
+      />
     </div>
 
     <!-- Share Sheet -->
@@ -158,6 +150,7 @@ import { Notify } from "quasar";
 import AppSplash from "src/components/common/AppSplash.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
+import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -655,58 +648,6 @@ onMounted(async () => {
 
     .helpPage-imageUploadComponent {
       width: 100%;
-    }
-  }
-
-  // Sticky Footer CTA - placed immediately after "add image"
-  .helpPage-footer {
-    position: sticky; // Changed from fixed to sticky
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 2000;
-    background: linear-gradient(
-      to top,
-      rgba(2, 3, 7, 0.95) 0%,
-      rgba(2, 3, 7, 0.98) 50%,
-      rgba(2, 3, 7, 1) 100%
-    );
-    backdrop-filter: blur(20px);
-    padding: 1rem 20px; // Same horizontal padding as content
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 0.5rem; // Reasonable spacing from "add image" block
-    width: 100%;
-    max-width: 390px; // Same max-width as content
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .helpPage-footerButton {
-    background-color: $primary;
-    color: white;
-    border: none;
-    font-size: 1.2rem;
-    height: 3.5rem;
-    width: 100%;
-    font-family: montseraatSemiBold;
-    border-radius: 0.5rem !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    max-width: 390px;
-    margin: 0 auto;
-
-    img {
-      height: 1.2rem;
-      width: auto;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
   }
 }

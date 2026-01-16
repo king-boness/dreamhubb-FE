@@ -228,7 +228,7 @@
       </section>
 
       <!-- CTA "Save Changes" - sticky na spodku -->
-      <BottomStickyAction
+      <BottomCtaButton
         label="SAVE CHANGES"
         :loading="isSaving"
         loading-label="SAVING..."
@@ -1125,7 +1125,7 @@
 }
 
 /* CTA - Sticky save button */
-// BottomStickyAction component handles its own styling
+// BottomCtaButton component handles its own styling
 
 /* Dialog blur background */
 :deep(.q-dialog__backdrop) {
@@ -1705,7 +1705,7 @@ import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import PostHeader from "src/components/post/PostHeader.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
-import BottomStickyAction from "src/components/common/BottomStickyAction.vue";
+import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
 import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
 import { useQuasar } from "quasar";
