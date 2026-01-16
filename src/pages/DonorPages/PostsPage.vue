@@ -51,12 +51,14 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
-        <div v-if="hasActiveFilters" class="donorPosts-emptyHint">
+        <div v-if="hasActiveFilters && !isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
             text="No posts with these filters yet."
             arrow="up"
             :clickable="true"
+            :show-close="true"
             @click="handleOpenFilters"
+            @close="dismissEmptyFiltersHint"
           >
             <div class="donorPosts-emptyHintSecondLine">
               <strong>Be the first or change the filters.</strong>
@@ -164,6 +166,22 @@ const route = useRoute();
 const postsStore = usePostsStore();
 const preferencesStore = usePreferencesStore();
 const authStore = useAuthStore();
+
+const emptyFiltersHintStorageKey = computed(() => {
+  const id = authStore.user?.id;
+  return id ? `dh_donor_empty_filters_hint_dismissed_${id}` : "dh_donor_empty_filters_hint_dismissed_guest";
+});
+
+const isEmptyFiltersHintDismissed = ref(false);
+
+const dismissEmptyFiltersHint = () => {
+  isEmptyFiltersHintDismissed.value = true;
+  try {
+    localStorage.setItem(emptyFiltersHintStorageKey.value, "true");
+  } catch {
+    // ignore
+  }
+};
 
 // Tab interface
 interface DonorTab {
@@ -301,6 +319,12 @@ watch(
 
 // Update indicator position on mount and fetch initial posts
 onMounted(() => {
+  try {
+    isEmptyFiltersHintDismissed.value = localStorage.getItem(emptyFiltersHintStorageKey.value) === "true";
+  } catch {
+    // ignore
+  }
+
   nextTick(() => {
     // Indicator position will be computed automatically via computed property
   });
@@ -646,6 +670,8 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 .donorPosts-emptyHintSecondLine {
   margin-top: 6px;
+  width: 100%;
+  text-align: center;
   font-family: poppins;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.95);
