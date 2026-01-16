@@ -55,6 +55,54 @@
           </q-select>
 
           <q-select
+            v-if="useObjectCityModel"
+            v-model="cityModel"
+            :options="filteredCityOptions"
+            option-label="label"
+            label="Choose your city"
+            dark
+            outlined
+            class="location-select"
+            :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
+            :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
+            use-input
+            input-debounce="300"
+            fit
+            fill-input
+            hide-selected
+            @filter="filterCities"
+            @update:model-value="handleCityChange"
+          >
+            <template v-slot:option="scope">
+              <q-item
+                v-if="scope.opt.disabled && scope.opt.value === '__divider__'"
+                class="cities-divider"
+                :clickable="false"
+                v-ripple="false"
+              >
+                <q-separator />
+              </q-item>
+              <q-item
+                v-else
+                v-bind="scope.itemProps"
+                v-on="scope.itemEvents || {}"
+              >
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  No results
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+
+          <q-select
+            v-else
             v-model="localCity"
             :options="filteredCityOptions"
             option-label="label"
@@ -150,6 +198,54 @@
         </q-select>
 
         <q-select
+          v-if="useObjectCityModel"
+          v-model="cityModel"
+          :options="filteredCityOptions"
+          option-label="label"
+          label="Choose your city"
+          dark
+          outlined
+          class="location-select"
+          :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
+          :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
+          use-input
+          input-debounce="300"
+          fit
+          fill-input
+          hide-selected
+          @filter="filterCities"
+          @update:model-value="handleCityChange"
+        >
+          <template v-slot:option="scope">
+            <q-item
+              v-if="scope.opt.disabled && scope.opt.value === '__divider__'"
+              class="cities-divider"
+              :clickable="false"
+              v-ripple="false"
+            >
+              <q-separator />
+            </q-item>
+            <q-item
+              v-else
+              v-bind="scope.itemProps"
+              v-on="scope.itemEvents || {}"
+            >
+              <q-item-section>
+                <q-item-label>{{ scope.opt.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                No results
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+
+        <q-select
+          v-else
           v-model="localCity"
           :options="filteredCityOptions"
           option-label="label"
@@ -260,12 +356,14 @@ const props = withDefaults(defineProps<{
   hideFooter?: boolean; // Hide footer (CTA buttons), defaults to false
   emitCityId?: boolean; // If true, emit city ID instead of name, defaults to false
   cityDisplayFallback?: string; // Optional: label to show while city options are still loading
+  cityModelMode?: "value" | "object"; // 'object' prevents 1-frame ID flash by not binding raw numeric id to QSelect model
 }>(), {
   continent: "",
   country: "",
   city: "",
   emitCityId: false,
-  cityDisplayFallback: ""
+  cityDisplayFallback: "",
+  cityModelMode: "value"
 });
 
 const emit = defineEmits<{
@@ -282,6 +380,54 @@ const localContinent = ref(props.continent || "");
 const localCountry = ref(props.country || "");
 // Initialize with the prop value, but allow it to be number (ID) or string (name)
 const localCity = ref<string | number>(props.city ? (typeof props.city === "string" && !isNaN(Number(props.city)) ? Number(props.city) : props.city) : "");
+const useObjectCityModel = computed(() => props.cityModelMode === "object");
+
+// Object-mode city model (so QSelect never receives raw numeric id)
+const localCityId = ref<number | null>(null);
+const cityModel = ref<CityOption | null>(null);
+
+const normalizeNumericId = (v: unknown): number | null => {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim() !== "" && !isNaN(Number(v))) return Number(v);
+  return null;
+};
+
+const initCityModelFromFallback = () => {
+  if (!useObjectCityModel.value) return;
+  const id = localCityId.value;
+  const label = (props.cityDisplayFallback || authStore.user?.location_city_name || authStore.user?.location_city || "").trim();
+  if (id && label) {
+    // IMPORTANT: Use an option object that is present in the QSelect options list
+    // so Quasar never falls back to rendering the raw numeric id.
+    const opt: CityOption = { label, value: id };
+    cityModel.value = opt;
+
+    // If options are not loaded yet, seed the options list with the placeholder option.
+    // This guarantees label rendering from the very first paint.
+    const alreadyInList = allCitiesForCountry.value.some((o) => o.value === id && !o.disabled);
+    if (!alreadyInList) {
+      allCitiesForCountry.value = [opt, ...allCitiesForCountry.value];
+      filteredCityOptions.value = [opt, ...filteredCityOptions.value];
+    }
+  } else {
+    cityModel.value = null; // show placeholder, never raw number
+  }
+};
+
+const rehydrateCityModelFromOptions = () => {
+  if (!useObjectCityModel.value) return;
+  const id = localCityId.value;
+  if (!id) {
+    cityModel.value = null;
+    return;
+  }
+  const found = allCitiesForCountry.value.find((o) => o.value === id && o.value !== "__divider__" && !o.disabled);
+  if (found) {
+    cityModel.value = found;
+    return;
+  }
+  initCityModelFromFallback();
+};
 
 const progressWidth = computed(() => {
   return `${props.progress ?? 80}%`;
@@ -336,8 +482,13 @@ const cityLabel = computed(() => {
 });
 
 const cityDisplayValue = computed(() => {
-  // Ensure we never show raw ID (e.g., "6") while options are loading.
-  // If we have a real label, use it; else show placeholder (never the raw number).
+  if (useObjectCityModel.value) {
+    // Object mode: Quasar will render the label from the model object; keep display-value empty.
+    // (Returning empty here avoids any chance of rendering raw id.)
+    return "";
+  }
+
+  // Value mode: Ensure we never show raw ID (e.g., "6") while options are loading.
   if (!localCity.value) return "";
   return cityLabel.value || "Choose your city";
 });
@@ -370,6 +521,7 @@ const updateCityOptions = async () => {
     citiesFromBackend.value = [];
     countryIdForCities.value = null;
     cityOptionsLoading.value = false;
+    if (useObjectCityModel.value) cityModel.value = null;
     return;
   }
 
@@ -407,6 +559,7 @@ const updateCityOptions = async () => {
             const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
             allCitiesForCountry.value = cityOptions;
             filteredCityOptions.value = cityOptions;
+            rehydrateCityModelFromOptions();
           }
         }
       }
@@ -425,6 +578,7 @@ const updateCityOptions = async () => {
         const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
         allCitiesForCountry.value = cityOptions;
         filteredCityOptions.value = cityOptions;
+        rehydrateCityModelFromOptions();
       }
     } finally {
       cityOptionsLoading.value = false;
@@ -443,6 +597,7 @@ const updateCityOptions = async () => {
       const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
       allCitiesForCountry.value = cityOptions;
       filteredCityOptions.value = cityOptions;
+      rehydrateCityModelFromOptions();
     } else {
       allCitiesForCountry.value = [];
       filteredCityOptions.value = [];
@@ -493,6 +648,10 @@ const filterCities = (val: string, update: (callback: () => void) => void) => {
 const handleContinentChange = () => {
   localCountry.value = "";
   localCity.value = "";
+  if (useObjectCityModel.value) {
+    localCityId.value = null;
+    cityModel.value = null;
+  }
   updateCountryOptions();
   updateCityOptions();
 };
@@ -500,24 +659,41 @@ const handleContinentChange = () => {
 // Handle country change
 const handleCountryChange = () => {
   localCity.value = "";
+  if (useObjectCityModel.value) {
+    localCityId.value = null;
+    cityModel.value = null;
+  }
   updateCityOptions();
 };
 
 // Handle city change - prevent selecting divider
-const handleCityChange = (value: string | number) => {
-  if (value === "__divider__") {
+const handleCityChange = (value: unknown) => {
+  if (useObjectCityModel.value) {
+    const opt = value as CityOption | null;
+    if (opt?.value === "__divider__") {
+      cityModel.value = null;
+      localCityId.value = null;
+      return;
+    }
+    cityModel.value = opt;
+    localCityId.value = typeof opt?.value === "number" ? opt.value : null;
+    return;
+  }
+
+  const v = value as string | number;
+  if (v === "__divider__") {
     // Ignore divider selection
     localCity.value = "";
     return;
   }
-  localCity.value = value;
+  localCity.value = v;
 };
 
 // Handle next
 const handleNext = () => {
   emit("update:continent", localContinent.value);
   emit("update:country", localCountry.value);
-  emit("update:city", localCity.value);
+  emit("update:city", useObjectCityModel.value ? (localCityId.value ?? "") : localCity.value);
   emit("next");
 };
 
@@ -546,7 +722,14 @@ const handleGeolocationAllow = async () => {
 
       // Set city if available
       if (locationData.city) {
-        localCity.value = locationData.city;
+        if (useObjectCityModel.value) {
+          localCityId.value = normalizeNumericId(locationData.city);
+          cityModel.value = null;
+          initCityModelFromFallback();
+          rehydrateCityModelFromOptions();
+        } else {
+          localCity.value = locationData.city;
+        }
       }
 
       Notify.create({
@@ -571,6 +754,13 @@ const handleGeolocationDeny = () => {
 
 // Show geolocation dialog on mount
 onMounted(() => {
+  if (useObjectCityModel.value) {
+    localCityId.value = normalizeNumericId(props.city);
+    // Keep value-model empty so QSelect never receives raw numeric id on first render
+    localCity.value = "";
+    initCityModelFromFallback();
+  }
+
   updateCountryOptions();
   updateCityOptions();
 
@@ -599,6 +789,14 @@ watch(() => props.country, (newVal) => {
 });
 
 watch(() => props.city, (newVal) => {
+  if (useObjectCityModel.value) {
+    localCityId.value = normalizeNumericId(newVal);
+    localCity.value = "";
+    initCityModelFromFallback();
+    rehydrateCityModelFromOptions();
+    return;
+  }
+
   if (newVal !== localCity.value) {
     localCity.value = newVal;
   }
@@ -614,7 +812,15 @@ watch(localCountry, (newVal) => {
 });
 
 watch(localCity, (newVal) => {
-  emit("update:city", newVal);
+  if (!useObjectCityModel.value) {
+    emit("update:city", newVal);
+  }
+});
+
+watch(localCityId, (newVal) => {
+  if (useObjectCityModel.value) {
+    emit("update:city", newVal ?? "");
+  }
 });
 </script>
 

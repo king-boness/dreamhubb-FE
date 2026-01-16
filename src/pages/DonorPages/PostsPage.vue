@@ -53,20 +53,13 @@
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
         <div v-if="hasActiveFilters" class="donorPosts-emptyHint">
           <HintBubble
-            :text="postsStore.filters.cityId ? t('noPostsFromThisCityYet') : t('noPostsMatchFilters')"
+            text="No posts with these filters yet."
             arrow="up"
             :clickable="true"
             @click="handleOpenFilters"
           >
-            <div class="donorPosts-emptyHintActions">
-              <q-btn
-                flat
-                dense
-                class="donorPosts-emptyHintReset"
-                @click.stop="handleResetFilters"
-              >
-                {{ t("resetFilters") }}
-              </q-btn>
+            <div class="donorPosts-emptyHintSecondLine">
+              <strong>Be the first or change the filters.</strong>
             </div>
           </HintBubble>
         </div>
@@ -447,13 +440,6 @@ const handleOpenFilters = () => {
   router.push({ name: "donor-filters" });
 };
 
-// Reset filters handler
-const handleResetFilters = async () => {
-  postsStore.resetFilters();
-  preferencesStore.clearLastUsedFeedFilters();
-  await postsStore.fetchPosts({ sort: activeTab.value });
-};
-
 // Format date as DD/MM/YYYY
 const formatDate = (dateString: string): string => {
   const d = new Date(dateString);
@@ -657,19 +643,11 @@ const emitOpenAuthor = (post: DonorPost) => {
   justify-content: center;
 }
 
-.donorPosts-emptyHintActions {
-  margin-top: 10px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.donorPosts-emptyHintReset {
+.donorPosts-emptyHintSecondLine {
+  margin-top: 6px;
+  font-family: poppins;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.95);
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-family: poppinsSemiBold;
 }
 
 // POST CARD

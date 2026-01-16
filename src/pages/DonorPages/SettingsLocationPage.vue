@@ -17,6 +17,7 @@
             :hide-header="true"
             :hide-footer="true"
             :emit-city-id="true"
+            city-model-mode="object"
             :enable-geolocation="false"
             :city-display-fallback="currentCityName"
           />
