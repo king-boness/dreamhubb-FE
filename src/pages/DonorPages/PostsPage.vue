@@ -680,7 +680,7 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 /* Move the "No posts..." text block down by 15px (both lines) */
 :deep(.donorPosts-emptyHintBubble .dhHintBubble-content) {
-  padding-top: 15px;
+  padding-top: 23px;
 }
 
 // POST CARD
