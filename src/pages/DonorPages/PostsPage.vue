@@ -51,17 +51,26 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
-        <p v-if="hasActiveFilters">
-          {{ postsStore.filters.cityId ? t("noPostsFromThisCityYet") : t("noPostsMatchFilters") }}
-        </p>
+        <div v-if="hasActiveFilters" class="donorPosts-emptyHint">
+          <HintBubble
+            :text="postsStore.filters.cityId ? t('noPostsFromThisCityYet') : t('noPostsMatchFilters')"
+            arrow="up"
+            :clickable="true"
+            @click="handleOpenFilters"
+          >
+            <div class="donorPosts-emptyHintActions">
+              <q-btn
+                flat
+                dense
+                class="donorPosts-emptyHintReset"
+                @click.stop="handleResetFilters"
+              >
+                {{ t("resetFilters") }}
+              </q-btn>
+            </div>
+          </HintBubble>
+        </div>
         <p v-else>{{ t("noPosts") }}</p>
-        <q-btn
-          v-if="hasActiveFilters"
-          class="donorPosts-resetFiltersBtn"
-          @click="handleResetFilters"
-        >
-          {{ t("resetFilters") }}
-        </q-btn>
       </div>
 
       <!-- Posts list -->
@@ -153,6 +162,7 @@ import { getUserAvatarUrl } from "src/utils/avatar";
 import { normalizePost } from "src/utils/normalizePost";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import UserAvatar from "src/components/common/UserAvatar.vue";
+import HintBubble from "src/components/ui/HintBubble.vue";
 
 const { t, locale } = useI18n();
 
@@ -247,15 +257,6 @@ const applyInitialFiltersFromPreferences = () => {
   preferencesStore.loadDonorFiltersFromStorage();
   const lastUsed = preferencesStore.lastUsedFeedFilters;
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 applyInitialFiltersFromPreferences:", {
-      lastUsed,
-      postType: lastUsed?.postType,
-      subcategory: lastUsed?.subcategory,
-      location: lastUsed?.location
-    });
-  }
-
   if (lastUsed) {
     postsStore.setFilters({
       type: lastUsed.postType,
@@ -265,13 +266,6 @@ const applyInitialFiltersFromPreferences = () => {
       cityId: lastUsed.location.cityId
     });
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 Applied filters from lastUsed:", {
-        type: lastUsed.postType,
-        feCategory: lastUsed.subcategory,
-        filters: postsStore.filters
-      });
-    }
     return;
   }
   postsStore.setFilters({
@@ -287,9 +281,6 @@ const applyInitialFiltersFromPreferences = () => {
 watch(
   () => authStore.user?.id,
   (newId, oldId) => {
-    // DEBUG: Log user change
-    console.log("[DEBUG] [PostsPage watch user] User changed", { oldId, newId });
-
     if (!newId) return;
 
     // Pri zmene usera vždy resetni store a načítaj jeho uložené filtre
@@ -304,11 +295,6 @@ watch(
     preferencesStore.migrateLegacyDonorFiltersIfNeeded();
     // Load user-specific filters (always load)
     preferencesStore.loadDonorFiltersFromStorage();
-
-    // DEBUG: Log loaded data after user change
-    const key = `dreamhubb_donor_filters_${newId ?? "guest"}`;
-    console.log("[DEBUG] [PostsPage watch user] storageKey:", key);
-    console.log("[DEBUG] [PostsPage watch user] loaded data:", preferencesStore.lastUsedFeedFilters);
 
     // Aplikovať načítané filtre
     applyInitialFiltersFromPreferences();
@@ -326,17 +312,8 @@ onMounted(() => {
     // Indicator position will be computed automatically via computed property
   });
 
-  // DEBUG: Log storage key and loaded data
-  const authStore = useAuthStore();
-  const userId = authStore.user?.id;
-  const key = `dreamhubb_donor_filters_${userId ?? "guest"}`;
-  console.log("[DEBUG] [PostsPage onMounted] storageKey:", key);
-
   // Load filters from storage first, then apply them
   preferencesStore.loadDonorFiltersFromStorage();
-
-  // DEBUG: Log loaded data
-  console.log("[DEBUG] [PostsPage onMounted] loaded data:", preferencesStore.lastUsedFeedFilters);
 
   applyInitialFiltersFromPreferences();
 
@@ -349,10 +326,6 @@ onActivated(() => {
   // Načítať filtre z localStorage a aplikovať ich
   preferencesStore.loadDonorFiltersFromStorage();
   applyInitialFiltersFromPreferences();
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 onActivated: Filters after applying:", postsStore.filters);
-  }
 
   // Načítať posty s aktuálnymi filtrami pri návrate na stránku
   postsStore.fetchPosts({ sort: activeTab.value });
@@ -367,11 +340,10 @@ const error = computed(() => postsStore.error);
 const hasActiveFilters = computed(() => {
   return !!(
     postsStore.filters.categorySlug ||
-    postsStore.filters.subcategorySlug
-    // TODO: Keď BE podporí location filtre, pridať:
-    // postsStore.filters.continentId ||
-    // postsStore.filters.countryId ||
-    // postsStore.filters.cityId
+    postsStore.filters.subcategorySlug ||
+    postsStore.filters.continentId ||
+    postsStore.filters.countryId ||
+    postsStore.filters.cityId
   );
 });
 
@@ -414,28 +386,6 @@ const mapPostData = (post: Record<string, unknown>): DonorPost => {
 
   // Get authorId for navigation
   const authorId = normalized.author_id || normalized.user_id || null;
-
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development") {
-    if (!authorPicture) {
-      console.log("🔍 No avatar found for post:", {
-        post_id: normalized.post_id,
-        author_name: authorName,
-        has_user: !!normalized.user,
-        user_profile_picture: normalized.user?.profile_picture,
-        author_picture: normalized.author_picture
-      });
-    }
-    if (!authorId) {
-      console.warn("⚠️ No authorId found in feed post:", {
-        post_id: normalized.post_id,
-        author_name: authorName,
-        has_author_id: !!normalized.author_id,
-        has_user_id: !!normalized.user_id,
-        has_user: !!normalized.user
-      });
-    }
-  }
 
   const images = normalized.images || [];
   const firstImage = images.length > 0 ? images[0] : null;
@@ -494,7 +444,6 @@ const sortedPosts = computed(() => {
 // Mock posts data removed - now using data from BE via posts store
 
 const handleOpenFilters = () => {
-  console.log("🔍 Filters button clicked! Navigating to filters page...");
   router.push({ name: "donor-filters" });
 };
 
@@ -536,9 +485,6 @@ const emitOpenPost = (post: DonorPost) => {
 
 const goToUserProfile = (userId: number | null) => {
   if (!userId) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("No authorId to navigate");
-    }
     return;
   }
   router.push({ name: "donor-user-profile", params: { userId } });
@@ -703,6 +649,27 @@ const emitOpenAuthor = (post: DonorPost) => {
   &:hover {
     background: rgba(255, 255, 255, 0.15);
   }
+}
+
+.donorPosts-emptyHint {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.donorPosts-emptyHintActions {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.donorPosts-emptyHintReset {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: poppinsSemiBold;
 }
 
 // POST CARD

@@ -130,48 +130,12 @@ export const usePostsStore = defineStore("posts", {
           delete queryParams.location_continent_id;
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Fetching posts with params:", queryParams);
-          console.log("📦 Current filters in store:", this.filters);
-          console.log("📦 Location filter details:", {
-            cityId: this.filters.cityId,
-            cityId_type: typeof this.filters.cityId,
-            countryId: this.filters.countryId,
-            continentId: this.filters.continentId,
-            sending_city_id: queryParams.location_city_id,
-            sending_city_id_type: typeof queryParams.location_city_id,
-            sending_country_id: queryParams.location_country_id,
-            sending_continent_id: queryParams.location_continent_id,
-            all_query_params: Object.keys(queryParams)
-          });
-        }
-
         const { data } = await api.get("/posts", { params: queryParams });
 
         // Robustný fallback pre rôzne BE štruktúry
         this.posts = data.data || data.posts || data || [];
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Posts received from BE:", this.posts.length, "posts");
-          if (this.posts.length > 0) {
-            const firstPost = this.posts[0] as NormalizedPost;
-            console.log("📦 First post details:", {
-              post_id: firstPost.post_id,
-              title: firstPost.title,
-              category: firstPost.category,
-              subcategory: firstPost.subcategory,
-              author_name: firstPost.author_name
-            });
-          }
-        }
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Posts fetched:", this.posts.length, "posts");
-        }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch posts:", error);
-        }
         this.error = "Failed to load posts.";
       } finally {
         this.loading = false;
@@ -235,9 +199,6 @@ export const usePostsStore = defineStore("posts", {
         this.currentPost = normalizedPost;
       }
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("📦 [upsertPostEverywhere] Updated post in all caches:", postId);
-      }
     },
 
     // Načítanie detailu postu podľa ID
@@ -263,18 +224,11 @@ export const usePostsStore = defineStore("posts", {
             await new Promise((resolve) => setTimeout(resolve, 500));
             this.detailLoading = false;
 
-            if (process.env.NODE_ENV === "development") {
-              console.log("📦 Post loaded from cache:", id);
-            }
             return;
           }
         }
 
         // Ak nie je v cache alebo force=true, načítaj z BE
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Fetching post detail from BE:", id, forceRefetch ? "(force)" : "");
-        }
-
         const { data } = await api.get(`/posts/${id}`);
 
         // BE vracia { status: 'success', post: {...} }
@@ -301,25 +255,7 @@ export const usePostsStore = defineStore("posts", {
           this.posts.push(normalizedPost);
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Post detail fetched:", {
-            ...this.currentPost,
-            raw_postData: {
-              author_id: postData.author_id,
-              user_id: postData.user_id,
-              user: postData.user,
-              author_name: postData.author_name,
-              author_city: postData.author_city,
-              author_country: postData.author_country,
-              author_continent: postData.author_continent
-            }
-          });
-        }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch post detail:", error);
-        }
-
         // Handle 404 specifically
         if (error && typeof error === "object" && "response" in error) {
           const axiosError = error as { response?: { status?: number } };
@@ -344,17 +280,9 @@ export const usePostsStore = defineStore("posts", {
       this.donateError = null;
 
       try {
-        if (process.env.NODE_ENV === "development") {
-          console.log("💰 Donating tokens:", { postId, tokens });
-        }
-
         const { data } = await api.post(`/posts/${postId}/donate`, {
           tokens
         });
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("💰 Donation successful:", data);
-        }
 
         // ✅ On success: Re-fetch post detail to get updated data
         if (data.post) {
@@ -372,9 +300,6 @@ export const usePostsStore = defineStore("posts", {
 
         if (data.user?.tokens !== undefined) {
           authStore.updateTokens(data.user.tokens);
-          if (process.env.NODE_ENV === "development") {
-            console.log("💰 Updated user tokens from response:", data.user.tokens);
-          }
         } else {
           // If BE doesn't return tokens, refresh from API
           // This ensures UI always shows correct balance
@@ -382,18 +307,11 @@ export const usePostsStore = defineStore("posts", {
             await authStore.refreshTokenBalance();
           } catch (error) {
             // Don't block UX if refresh fails
-            if (process.env.NODE_ENV === "development") {
-              console.warn("⚠️ Failed to refresh token balance after contribute:", error);
-            }
           }
         }
 
         return data;
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Donation failed:", error);
-        }
-
         // Handle different error types
         if (error && typeof error === "object" && "response" in error) {
           const axiosError = error as {
@@ -444,10 +362,6 @@ export const usePostsStore = defineStore("posts", {
           queryParams.category = "dream";
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Fetching my dreams with params:", queryParams);
-        }
-
         const { data } = await api.get("/my-posts", { params: queryParams });
 
         // Normalize posts from API - using new API format
@@ -456,13 +370,7 @@ export const usePostsStore = defineStore("posts", {
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 My dreams received from BE:", this.myDreams.length, "posts");
-        }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch my dreams:", error);
-        }
         this.myDreamsError = "Failed to load your dreams.";
       } finally {
         this.myDreamsLoading = false;
@@ -482,10 +390,6 @@ export const usePostsStore = defineStore("posts", {
           queryParams.category = "problem";
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Fetching my problems with params:", queryParams);
-        }
-
         const { data } = await api.get("/my-posts", { params: queryParams });
 
         // Normalize posts from API
@@ -494,13 +398,7 @@ export const usePostsStore = defineStore("posts", {
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 My problems received from BE:", this.myProblems.length, "posts");
-        }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch my problems:", error);
-        }
         this.myProblemsError = "Failed to load your problems.";
       } finally {
         this.myProblemsLoading = false;
@@ -520,10 +418,6 @@ export const usePostsStore = defineStore("posts", {
           queryParams.category = "idea";
         }
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Fetching my ideas with params:", queryParams);
-        }
-
         const { data } = await api.get("/my-posts", { params: queryParams });
 
         // Normalize posts from API
@@ -532,13 +426,7 @@ export const usePostsStore = defineStore("posts", {
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 My ideas received from BE:", this.myIdeas.length, "posts");
-        }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch my ideas:", error);
-        }
         this.myIdeasError = "Failed to load your ideas.";
       } finally {
         this.myIdeasLoading = false;
@@ -571,13 +459,7 @@ export const usePostsStore = defineStore("posts", {
           (post: NormalizedPost) => (post.tokens as number) >= 1000
         ).slice(0, 10); // Limit to 10 most recent
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("📦 Recently accomplished dreams:", this.recentlyAccomplishedDreams.length, "posts");
-        }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch recently accomplished dreams:", error);
-        }
         this.recentlyAccomplishedError = "Failed to load accomplished dreams.";
       } finally {
         this.recentlyAccomplishedLoading = false;

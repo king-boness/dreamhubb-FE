@@ -1,22 +1,14 @@
 <template>
   <div class="post-page">
     <!-- First Post Hint Bubble -->
-    <div
-      v-if="showFirstPostHint"
-      class="firstPostHint-bubble"
-    >
-      <button
-        class="firstPostHint-close"
-        @click="dismissFirstPostHint"
-        aria-label="Close hint"
-      >
-        ×
-      </button>
-      <div class="firstPostHint-content">
-        <h3 class="firstPostHint-title">Start your journey!</h3>
-        <p class="firstPostHint-text">Create your first dream, problem or idea and share it with the world.</p>
-      </div>
-      <div class="firstPostHint-arrow"></div>
+    <div v-if="showFirstPostHint" class="postPage-firstPostHint">
+      <HintBubble
+        title="Start your journey!"
+        text="Create your first dream, problem or idea and share it with the world."
+        arrow="down"
+        :show-close="true"
+        @close="dismissFirstPostHint"
+      />
     </div>
 
     <div class="postPage-carouselContainer">
@@ -160,6 +152,7 @@ import { useI18n } from "vue-i18n";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
 import { usePostsStore } from "src/stores/posts";
+import HintBubble from "src/components/ui/HintBubble.vue";
 import { getLocationLabel } from "src/utils/cityNames";
 
 const { t, locale } = useI18n();
@@ -320,9 +313,6 @@ const showFirstPostHint = computed(() => {
 const dismissFirstPostHint = () => {
   hintDismissed.value = true;
   localStorage.setItem("dh_donee_first_post_hint_dismissed", "true");
-  if (process.env.NODE_ENV === "development") {
-    console.log("❌ First post hint dismissed by user");
-  }
 };
 
 // Fetch data on mount
@@ -436,102 +426,15 @@ onActivated(async () => {
   }
 }
 
-/* First Post Hint Bubble */
-.firstPostHint-bubble {
+.postPage-firstPostHint {
   position: fixed;
   bottom: 8.5rem;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, rgba(189, 0, 67, 0.95), rgba(255, 0, 110, 0.95));
-  border-radius: 1rem;
-  padding: 1rem 1.5rem;
-  max-width: 300px;
-  width: calc(100% - 3rem);
-  box-shadow: 0 8px 24px rgba(189, 0, 67, 0.4);
   z-index: 9999;
-  animation: fadeInUp 0.3s ease-out;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.firstPostHint-close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
-.firstPostHint-content {
-  color: white;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  padding: 0.5rem 0;
-  margin-top: -4px;
-  transform: translateY(-4px);
-}
-
-.firstPostHint-title {
-  font-family: poppinsSemiBold;
-  font-size: 1rem;
-  margin: 0 0 0.5rem 0;
-  color: white;
-  text-align: center;
-}
-
-.firstPostHint-text {
-  font-family: poppins;
-  font-size: 0.85rem;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.95);
-  line-height: 1.4;
-  text-align: center;
-}
-
-.firstPostHint-arrow {
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 0.75rem solid transparent;
-  border-right: 0.75rem solid transparent;
-  border-top: 0.75rem solid rgba(189, 0, 67, 0.95);
-  margin-left: 0;
+  display: flex;
+  justify-content: center;
 }
 </style>
 <style lang="scss">
