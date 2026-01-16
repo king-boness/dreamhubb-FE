@@ -60,17 +60,41 @@
         v-model:city="feedCityId"
         :emit-city-id="true"
         :enable-geolocation="false"
+        :hide-footer="true"
         :progress="80"
         :title="t('postsWillBeFrom')"
         @next="handleNext"
         @back="handleBack"
       />
 
-      <div v-if="showNoPostsFromCity" class="step5-emptyHint">
-        <p class="step5-emptyText">{{ t("noPostsFromThisCityYet") }}</p>
-        <q-btn class="step5-resetBtn" flat @click="resetFeedLocation">
-          {{ t("resetFilters") }}
+      <!-- Footer area for this step (no overlay): primary CTA always visible -->
+      <div class="step5-footer">
+        <q-btn
+          class="step5-nextBtn full-width"
+          :disable="!feedContinent || !feedCountry"
+          @click="handleNext"
+        >
+          NEXT STEP
         </q-btn>
+
+        <!-- Preview indicator (only when city selected) -->
+        <div v-if="selectedCityId && previewLoading" class="step5-previewRow">
+          <q-spinner size="18px" color="primary" />
+          <span class="step5-previewText">{{ t("loadingPosts") }}</span>
+        </div>
+
+        <!-- Empty state (only after successful fetch + 0 posts + city selected) -->
+        <div v-if="showEmptyState" class="step5-emptyPanel">
+          <p class="step5-emptyText">{{ t("noPostsFromThisCityYet") }}</p>
+          <q-btn class="step5-resetBtn" flat @click="resetFeedLocation">
+            {{ t("resetFilters") }}
+          </q-btn>
+        </div>
+
+        <!-- Optional preview error (do NOT show empty-state on error) -->
+        <p v-if="previewError" class="step5-errorText">
+          {{ previewError }}
+        </p>
       </div>
     </div>
   </template>
@@ -150,12 +174,21 @@ const feedCityId = computed({
 
 // STEP 5 preview state: if selected city has 0 posts, show message + reset
 const feedWhereKey = ref(0);
-const previewCount = ref<number | null>(null);
+const previewCount = ref<number>(0);
 const previewLoading = ref(false);
+const previewFetched = ref(false);
+const previewError = ref<string | null>(null);
 const previewRequestId = ref(0);
 
-const showNoPostsFromCity = computed(() => {
-  return !!feedCityId.value && previewCount.value === 0 && !previewLoading.value;
+const selectedCityId = computed(() => (typeof feedCityId.value === "number" ? feedCityId.value : null));
+
+const showEmptyState = computed(() => {
+  return (
+    previewFetched.value &&
+    !previewLoading.value &&
+    selectedCityId.value !== null &&
+    previewCount.value === 0
+  );
 });
 
 const normalizePostsArray = (data: unknown): unknown[] => {
@@ -170,7 +203,9 @@ const normalizePostsArray = (data: unknown): unknown[] => {
 watch(
   () => feedCityId.value,
   async (cityId) => {
-    previewCount.value = null;
+    previewFetched.value = false;
+    previewError.value = null;
+    previewCount.value = 0;
     if (!cityId) return;
 
     const current = ++previewRequestId.value;
@@ -186,8 +221,10 @@ watch(
       if (current !== previewRequestId.value) return; // stale
       const posts = normalizePostsArray(data);
       previewCount.value = posts.length;
+      previewFetched.value = true;
     } catch {
-      previewCount.value = null;
+      previewError.value = null; // keep silent; no empty-state on error
+      previewFetched.value = false;
     } finally {
       if (current === previewRequestId.value) {
         previewLoading.value = false;
@@ -203,7 +240,9 @@ const resetFeedLocation = () => {
   onboardingStore.setStepData("feedContinentId", null);
   onboardingStore.setStepData("feedCountryId", null);
   onboardingStore.setStepData("feedCityId", null);
-  previewCount.value = null;
+  previewFetched.value = false;
+  previewError.value = null;
+  previewCount.value = 0;
   feedWhereKey.value++;
 };
 
@@ -387,22 +426,62 @@ const handleFinish = async () => {
   position: relative;
 }
 
-.step5-emptyHint {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 0 16px;
-}
-
 .step5-emptyText {
   color: rgba(255, 255, 255, 0.85);
   text-align: center;
   margin: 0;
   font-family: poppins;
+}
+
+.step5-footer {
+  padding: 0 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: -12px;
+}
+
+.step5-nextBtn {
+  background: rgba(182, 0, 67, 1);
+  color: #fff;
+  border-radius: 12px;
+  height: 48px;
+  font-family: montseraatSemiBold;
+}
+
+.step5-previewRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.step5-previewText {
+  font-family: poppins;
+  font-size: 0.95rem;
+}
+
+.step5-emptyPanel {
+  border-radius: 12px;
+  padding: 12px 12px 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.step5-resetBtn {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.step5-errorText {
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+  margin: 0;
+  font-family: poppins;
+  font-size: 0.9rem;
 }
 </style>
