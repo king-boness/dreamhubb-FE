@@ -52,35 +52,50 @@
 
   <!-- STEP 5: Where are you (feed location preferences) -->
   <template v-else-if="currentStep === 5">
-    <WhereAreYou
-      v-model:continent="feedContinent"
-      v-model:country="feedCountry"
-      v-model:city="feedCityId"
-      :emit-city-id="true"
-      :progress="80"
-      @next="handleNext"
-      @back="handleBack"
-    />
+    <div class="step5-wrap">
+      <WhereAreYou
+        :key="feedWhereKey"
+        v-model:continent="feedContinent"
+        v-model:country="feedCountry"
+        v-model:city="feedCityId"
+        :emit-city-id="true"
+        :enable-geolocation="false"
+        :progress="80"
+        :title="t('postsWillBeFrom')"
+        @next="handleNext"
+        @back="handleBack"
+      />
+
+      <div v-if="showNoPostsFromCity" class="step5-emptyHint">
+        <p class="step5-emptyText">{{ t("noPostsFromThisCityYet") }}</p>
+        <q-btn class="step5-resetBtn" flat @click="resetFeedLocation">
+          {{ t("resetFilters") }}
+        </q-btn>
+      </div>
+    </div>
   </template>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from "vue";
+import { ref, computed, nextTick, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { usePreferencesStore } from "src/stores/preferences";
 import { usePostsStore } from "src/stores/posts";
+import { api } from "boot/axios";
 import PickYourSide from "src/components/Onboarding/PickYourSide.vue";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
 import WhoAreYou from "src/components/Onboarding/WhoAreYou.vue";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
 const onboardingStore = useOnboardingStore();
 const preferencesStore = usePreferencesStore();
 const postsStore = usePostsStore();
+const { t } = useI18n();
 
 // Current step (1-5)
 const currentStep = ref(1);
@@ -132,6 +147,65 @@ const feedCityId = computed({
   get: () => onboardingStore.feedCityId,
   set: (value) => onboardingStore.setStepData("feedCityId", value)
 });
+
+// STEP 5 preview state: if selected city has 0 posts, show message + reset
+const feedWhereKey = ref(0);
+const previewCount = ref<number | null>(null);
+const previewLoading = ref(false);
+const previewRequestId = ref(0);
+
+const showNoPostsFromCity = computed(() => {
+  return !!feedCityId.value && previewCount.value === 0 && !previewLoading.value;
+});
+
+const normalizePostsArray = (data: unknown): unknown[] => {
+  const anyData = data as any;
+  const candidates = [anyData?.data, anyData?.posts, anyData];
+  for (const c of candidates) {
+    if (Array.isArray(c)) return c;
+  }
+  return [];
+};
+
+watch(
+  () => feedCityId.value,
+  async (cityId) => {
+    previewCount.value = null;
+    if (!cityId) return;
+
+    const current = ++previewRequestId.value;
+    previewLoading.value = true;
+
+    const params = { location_city_id: Number(cityId) };
+    if (process.env.NODE_ENV === "development") {
+      console.log("[onboarding-step5] preview /posts params:", params);
+    }
+
+    try {
+      const { data } = await api.get("/posts", { params });
+      if (current !== previewRequestId.value) return; // stale
+      const posts = normalizePostsArray(data);
+      previewCount.value = posts.length;
+    } catch {
+      previewCount.value = null;
+    } finally {
+      if (current === previewRequestId.value) {
+        previewLoading.value = false;
+      }
+    }
+  }
+);
+
+const resetFeedLocation = () => {
+  onboardingStore.setStepData("feedContinent", "");
+  onboardingStore.setStepData("feedCountry", "");
+  onboardingStore.setStepData("feedCity", "");
+  onboardingStore.setStepData("feedContinentId", null);
+  onboardingStore.setStepData("feedCountryId", null);
+  onboardingStore.setStepData("feedCityId", null);
+  previewCount.value = null;
+  feedWhereKey.value++;
+};
 
 const username = computed({
   get: () => onboardingStore.name,
@@ -306,5 +380,29 @@ const handleFinish = async () => {
   min-height: 100vh;
   padding: 0;
   background: transparent;
+}
+
+.step5-wrap {
+  width: 100%;
+  position: relative;
+}
+
+.step5-emptyHint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.step5-emptyText {
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin: 0;
+  font-family: poppins;
 }
 </style>

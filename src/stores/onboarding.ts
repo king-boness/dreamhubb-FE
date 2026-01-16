@@ -3,6 +3,21 @@ import { defineStore } from "pinia";
 import { api } from "boot/axios";
 import { useAuthStore } from "src/stores/auth";
 
+const normalizeId = (value: unknown): number | null => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (/^\d+$/.test(trimmed)) return Number(trimmed);
+    return null;
+  }
+  if (typeof value === "object") {
+    const anyVal = value as Record<string, unknown>;
+    return normalizeId(anyVal.id ?? anyVal.value ?? anyVal.cityId);
+  }
+  return null;
+};
+
 export const useOnboardingStore = defineStore("onboarding", {
   state: () => ({
     // Step 1: Pick your side
@@ -239,6 +254,8 @@ export const useOnboardingStore = defineStore("onboarding", {
         };
       }
 
+      const chosenCityId = normalizeId(this.feedCityId);
+
       // If we have names but not IDs, fetch IDs from BE
       if (this.feedContinent && this.feedCountry) {
         try {
@@ -246,7 +263,8 @@ export const useOnboardingStore = defineStore("onboarding", {
             console.log("🔍 Fetching feed location IDs for:", {
               continent: this.feedContinent,
               country: this.feedCountry,
-              city: this.feedCity
+              city: this.feedCity,
+              chosenCityId
             });
           }
 
@@ -262,7 +280,8 @@ export const useOnboardingStore = defineStore("onboarding", {
             params: {
               continent: this.feedContinent,
               country: this.feedCountry,
-              city: this.feedCity || null
+              // If user already picked a real city ID (emitCityId mode), don't override it via name lookup.
+              city: chosenCityId ? null : (this.feedCity || null)
             }
           });
 
@@ -294,7 +313,8 @@ export const useOnboardingStore = defineStore("onboarding", {
               // Update store with IDs
               this.feedContinentId = ids.continent_id;
               this.feedCountryId = ids.country_id;
-              this.feedCityId = ids.city_id || null; // City can be null
+              // Preserve chosen city id if already selected; otherwise accept BE lookup.
+              this.feedCityId = chosenCityId ?? (ids.city_id || null);
 
               if (process.env.NODE_ENV === "development") {
                 console.log("✅ Feed location IDs set in store:", {
@@ -307,7 +327,7 @@ export const useOnboardingStore = defineStore("onboarding", {
               return {
                 continentId: ids.continent_id,
                 countryId: ids.country_id,
-                cityId: ids.city_id || null // City can be null
+                cityId: this.feedCityId || null
               };
             }
           }

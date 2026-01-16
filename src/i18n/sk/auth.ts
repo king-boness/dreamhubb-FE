@@ -88,8 +88,10 @@ export default {
   loadingPosts: "Načítavajú sa príspevky...",
   noPosts: "Zatiaľ žiadne príspevky.",
   noPostsMatchFilters: "Zatiaľ žiadne príspevky nezodpovedajú filtrom.",
+  noPostsFromThisCityYet: "Z tohto mesta zatiaľ nie sú žiadne príspevky.",
   resetFilters: "Resetovať filtre",
   filters: "filtre",
+  postsWillBeFrom: "Príspevky budú z",
   // Donee Pages
   myDreams: "moje sny",
   myProblems: "moje problémy",
