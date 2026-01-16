@@ -22,7 +22,7 @@
         <h2 class="myProfile-username">{{ displayName }}</h2>
         <p v-if="displayLocation" class="myProfile-location">{{ displayLocation }}</p>
         <div v-if="displayBio" class="myProfile-bioSection">
-          <h3 class="myProfile-bioLabel">{{ t("about") }}</h3>
+          <PageTitle :title="`About ${displayName}`" />
           <p class="myProfile-bio">{{ displayBio }}</p>
         </div>
       </div>
@@ -37,6 +37,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import { translateCityName, translateCountryName } from "src/utils/cityNames";
+import PageTitle from "src/components/ui/PageTitle.vue";
 
 const { t } = useI18n();
 
@@ -71,17 +72,6 @@ const displayName = computed(() => {
 const displayLocation = computed(() => {
   const u = props.userData;
   if (!u) return null;
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("📍 PublicProfileContent displayLocation:", {
-      user_id: u.id,
-      username: u.username,
-      location_city: u.location_city,
-      location_country: u.location_country,
-      location_continent: u.location_continent,
-      full_userData: u
-    });
-  }
 
   // Build location string from user's location (city, country, continent)
   // Note: We need to get locale from i18n, but this component doesn't use i18n yet
@@ -213,18 +203,10 @@ const displayBio = computed(() => {
 
 .myProfile-bioSection {
   margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  padding-top: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   text-align: left;
   width: 100%;
-}
-
-.myProfile-bioLabel {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 0.75rem;
-  font-family: poppinsSemiBold;
 }
 
 .myProfile-bio {

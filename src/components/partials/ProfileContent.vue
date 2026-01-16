@@ -34,7 +34,7 @@
           <span class="myProfile-roleValue">{{ currentRole }}</span>
         </div>
         <div v-if="displayBio" class="myProfile-bioSection">
-          <h3 class="myProfile-bioLabel">{{ t("about") }}</h3>
+          <PageTitle :title="`About ${displayUsername}`" />
           <p class="myProfile-bio">{{ displayBio }}</p>
         </div>
       </div>
@@ -147,6 +147,7 @@ import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import ProfileActionsSheet from "src/components/profile/ProfileActionsSheet.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import BadgeSwiperComponent from "src/components/partials/BadgeSwiperComponent.vue";
+import PageTitle from "src/components/ui/PageTitle.vue";
 import { api } from "src/boot/axios";
 import { Notify } from "quasar";
 
@@ -501,9 +502,7 @@ onMounted(async () => {
     try {
       await authStore.fetchUser();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Failed to fetch user data:", error);
-      }
+      // ignore
     }
   }
 });
@@ -635,18 +634,10 @@ onBeforeUnmount(() => {
 
 .myProfile-bioSection {
   margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  padding-top: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   text-align: left;
   width: 100%;
-}
-
-.myProfile-bioLabel {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 0.75rem;
-  font-family: poppinsSemiBold;
 }
 
 .myProfile-bio {

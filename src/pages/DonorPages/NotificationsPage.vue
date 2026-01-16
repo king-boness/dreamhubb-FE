@@ -1,8 +1,6 @@
 <template>
   <div class="notification-Page q-pa-sm">
-    <div class="notifications-Header">
-      <h2 class="notifications-Heading">Notifications</h2>
-    </div>
+    <PageTitle title="Notifications" />
     <q-pull-to-refresh @refresh="refresh">
       <div v-if="isLoading" class="notifications-loading">
         <q-spinner color="primary" size="2rem" />
@@ -30,6 +28,7 @@ import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useNotificationsStore } from "src/stores/notifications";
 import NotificationComponent from "src/components/partials/NotificationComponent.vue";
+import PageTitle from "src/components/ui/PageTitle.vue";
 
 const router = useRouter();
 const notificationsStore = useNotificationsStore();
@@ -85,21 +84,6 @@ onMounted(async () => {
 <style scoped lang="scss">
 .notification-Page {
   background-position: center;
-  .notifications-Header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 1.5rem 1.2rem 1rem 1.2rem;
-  }
-
-  .notifications-Heading {
-    color: white;
-    font-size: 1.7rem;
-    font-family: poppinsSemiBold;
-    margin: 0;
-    text-align: center;
-  }
 
   .notifications-loading,
   .notifications-error,
