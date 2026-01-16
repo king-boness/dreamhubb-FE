@@ -134,7 +134,6 @@ export const usePostsStore = defineStore("posts", {
 
         // Robustný fallback pre rôzne BE štruktúry
         this.posts = data.data || data.posts || data || [];
-
       } catch (error: unknown) {
         this.error = "Failed to load posts.";
       } finally {
@@ -198,7 +197,6 @@ export const usePostsStore = defineStore("posts", {
       if (this.currentPost && (this.currentPost.post_id || this.currentPost.id) === postId) {
         this.currentPost = normalizedPost;
       }
-
     },
 
     // Načítanie detailu postu podľa ID
@@ -254,7 +252,6 @@ export const usePostsStore = defineStore("posts", {
           // Add to cache if not present
           this.posts.push(normalizedPost);
         }
-
       } catch (error: unknown) {
         // Handle 404 specifically
         if (error && typeof error === "object" && "response" in error) {
@@ -369,7 +366,6 @@ export const usePostsStore = defineStore("posts", {
         this.myDreams = Array.isArray(rawPosts)
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
-
       } catch (error: unknown) {
         this.myDreamsError = "Failed to load your dreams.";
       } finally {
@@ -397,7 +393,6 @@ export const usePostsStore = defineStore("posts", {
         this.myProblems = Array.isArray(rawPosts)
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
-
       } catch (error: unknown) {
         this.myProblemsError = "Failed to load your problems.";
       } finally {
@@ -425,7 +420,6 @@ export const usePostsStore = defineStore("posts", {
         this.myIdeas = Array.isArray(rawPosts)
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
-
       } catch (error: unknown) {
         this.myIdeasError = "Failed to load your ideas.";
       } finally {
@@ -458,7 +452,6 @@ export const usePostsStore = defineStore("posts", {
         this.recentlyAccomplishedDreams = allDreams.filter(
           (post: NormalizedPost) => (post.tokens as number) >= 1000
         ).slice(0, 10); // Limit to 10 most recent
-
       } catch (error: unknown) {
         this.recentlyAccomplishedError = "Failed to load accomplished dreams.";
       } finally {
