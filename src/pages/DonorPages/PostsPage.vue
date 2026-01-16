@@ -641,6 +641,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   width: 100%;
   display: flex;
   justify-content: center;
+  transform: translateY(-2px);
 }
 
 .donorPosts-emptyHintSecondLine {
