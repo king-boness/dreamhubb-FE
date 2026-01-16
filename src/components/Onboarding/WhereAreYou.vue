@@ -61,6 +61,8 @@
             option-value="value"
             emit-value
             map-options
+            :display-value="localCity && selectedCityLabel ? selectedCityLabel : undefined"
+            :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
             label="Choose your city"
             dark
             outlined
@@ -154,6 +156,8 @@
           option-value="value"
           emit-value
           map-options
+          :display-value="localCity && selectedCityLabel ? selectedCityLabel : undefined"
+          :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
           label="Choose your city"
           dark
           outlined
@@ -302,6 +306,14 @@ const filteredCityOptions = ref<CityOption[]>([]);
 const cityFilter = ref("");
 const citiesFromBackend = ref<CityFromBackend[]>([]); // Cities with IDs from BE
 const countryIdForCities = ref<number | null>(null); // Store country ID for fetching cities
+const cityOptionsLoading = ref(false);
+
+const selectedCityLabel = computed(() => {
+  const val = localCity.value;
+  if (val === "" || val === null || val === undefined) return "";
+  const found = allCitiesForCountry.value.find((o) => o.value === val);
+  return found?.label ?? "";
+});
 
 // Get country code from country name
 const getCountryCode = (countryName: string): string | undefined => {
@@ -330,11 +342,13 @@ const updateCityOptions = async () => {
     filteredCityOptions.value = [];
     citiesFromBackend.value = [];
     countryIdForCities.value = null;
+    cityOptionsLoading.value = false;
     return;
   }
 
   // If emitCityId is true, fetch cities with IDs from BE
   if (props.emitCityId) {
+    cityOptionsLoading.value = true;
     try {
       // First, get country_id from country name
       const { data: locationData } = await api.get("/locations/ids", {
@@ -404,6 +418,8 @@ const updateCityOptions = async () => {
         allCitiesForCountry.value = cityOptions;
         filteredCityOptions.value = cityOptions;
       }
+    } finally {
+      cityOptionsLoading.value = false;
     }
   } else {
     // Backward compatibility: use static data
