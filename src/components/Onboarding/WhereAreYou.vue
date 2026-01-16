@@ -61,13 +61,13 @@
             option-value="value"
             emit-value
             map-options
-            :display-value="localCity && selectedCityLabel ? selectedCityLabel : undefined"
+            :display-value="localCity ? cityDisplayValue : undefined"
             :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
             label="Choose your city"
             dark
             outlined
             class="location-select"
-            :disable="!localCountry"
+            :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
             use-input
             input-debounce="300"
             fit
@@ -156,13 +156,13 @@
           option-value="value"
           emit-value
           map-options
-          :display-value="localCity && selectedCityLabel ? selectedCityLabel : undefined"
+          :display-value="localCity ? cityDisplayValue : undefined"
           :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
           label="Choose your city"
           dark
           outlined
           class="location-select"
-          :disable="!localCountry"
+          :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
           use-input
           input-debounce="300"
           fit
@@ -246,6 +246,7 @@ import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
+import { useAuthStore } from "src/stores/auth";
 
 const props = withDefaults(defineProps<{
   continent?: string;
@@ -258,11 +259,13 @@ const props = withDefaults(defineProps<{
   hideHeader?: boolean; // Hide header (back button + title), defaults to false
   hideFooter?: boolean; // Hide footer (CTA buttons), defaults to false
   emitCityId?: boolean; // If true, emit city ID instead of name, defaults to false
+  cityDisplayFallback?: string; // Optional: label to show while city options are still loading
 }>(), {
   continent: "",
   country: "",
   city: "",
-  emitCityId: false
+  emitCityId: false,
+  cityDisplayFallback: ""
 });
 
 const emit = defineEmits<{
@@ -272,6 +275,8 @@ const emit = defineEmits<{
   next: [];
   back: [];
 }>();
+
+const authStore = useAuthStore();
 
 const localContinent = ref(props.continent || "");
 const localCountry = ref(props.country || "");
@@ -313,6 +318,28 @@ const selectedCityLabel = computed(() => {
   if (val === "" || val === null || val === undefined) return "";
   const found = allCitiesForCountry.value.find((o) => o.value === val);
   return found?.label ?? "";
+});
+
+const cityLabel = computed(() => {
+  // Prefer label from loaded options; fallback to user/profile label (for settings page) while options are loading.
+  // Never return raw ID.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const legacyCity = (authStore.user as any)?.location_city as string | undefined;
+  return (
+    selectedCityLabel.value ||
+    // Most reliable on settings page immediately after loading /api/user
+    authStore.user?.location_city_name ||
+    legacyCity ||
+    props.cityDisplayFallback ||
+    ""
+  );
+});
+
+const cityDisplayValue = computed(() => {
+  // Ensure we never show raw ID (e.g., "6") while options are loading.
+  // If we have a real label, use it; else show placeholder (never the raw number).
+  if (!localCity.value) return "";
+  return cityLabel.value || "Choose your city";
 });
 
 // Get country code from country name
@@ -367,14 +394,6 @@ const updateCityOptions = async () => {
           params: { country_id: countryId, scope: "all" }
         });
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("🔍 Cities data from BE:", {
-            status: citiesData.status,
-            citiesCount: citiesData.cities?.length || 0,
-            cities: citiesData.cities
-          });
-        }
-
         if (citiesData.status === "success" && citiesData.cities) {
           const citiesMapped: CityFromBackend[] = citiesData.cities.map((c: { id: number; name: string }) => ({
             id: c.id,
@@ -388,17 +407,6 @@ const updateCityOptions = async () => {
             const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
             allCitiesForCountry.value = cityOptions;
             filteredCityOptions.value = cityOptions;
-
-            if (process.env.NODE_ENV === "development") {
-              console.log("🔍 Cities options:", {
-                count: cityOptions.length,
-                cities: cityOptions
-              });
-            }
-          }
-        } else {
-          if (process.env.NODE_ENV === "development") {
-            console.warn("⚠️ No cities data from BE, using fallback");
           }
         }
       }

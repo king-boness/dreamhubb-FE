@@ -18,6 +18,7 @@
             :hide-footer="true"
             :emit-city-id="true"
             :enable-geolocation="false"
+            :city-display-fallback="currentCityName"
           />
         </q-card-section>
       </q-card>
@@ -62,6 +63,12 @@ const city = ref<string | number>("");
 
 const currentLocationLabel = computed(() => {
   return authStore.user ? getLocationLabel(authStore.user, locale.value as string) : "";
+});
+
+const currentCityName = computed(() => {
+  // Prefer explicit name from BE if present; fall back to legacy fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (authStore.user as any)?.location_city_name || authStore.user?.location_city || "";
 });
 
 const canSave = computed(() => {
