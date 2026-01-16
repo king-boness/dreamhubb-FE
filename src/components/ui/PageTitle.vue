@@ -27,4 +27,3 @@ defineProps<{
   text-align: center;
 }
 </style>
-
