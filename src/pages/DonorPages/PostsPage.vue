@@ -51,7 +51,9 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
-        <p v-if="hasActiveFilters">{{ t("noPostsMatchFilters") }}</p>
+        <p v-if="hasActiveFilters">
+          {{ postsStore.filters.cityId ? t("noPostsFromThisCityYet") : t("noPostsMatchFilters") }}
+        </p>
         <p v-else>{{ t("noPosts") }}</p>
         <q-btn
           v-if="hasActiveFilters"

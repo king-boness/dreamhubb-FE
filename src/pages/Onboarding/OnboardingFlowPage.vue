@@ -52,62 +52,27 @@
 
   <!-- STEP 5: Where are you (feed location preferences) -->
   <template v-else-if="currentStep === 5">
-    <div class="step5-wrap">
-      <WhereAreYou
-        :key="feedWhereKey"
-        v-model:continent="feedContinent"
-        v-model:country="feedCountry"
-        v-model:city="feedCityId"
-        :emit-city-id="true"
-        :enable-geolocation="false"
-        :hide-footer="true"
-        :progress="80"
-        :title="t('postsWillBeFrom')"
-        @next="handleNext"
-        @back="handleBack"
-      />
-
-      <!-- Footer area for this step (no overlay): primary CTA always visible -->
-      <div class="step5-footer">
-        <q-btn
-          class="step5-nextBtn full-width"
-          :disable="!feedContinent || !feedCountry"
-          @click="handleNext"
-        >
-          NEXT STEP
-        </q-btn>
-
-        <!-- Preview indicator (only when city selected) -->
-        <div v-if="selectedCityId && previewLoading" class="step5-previewRow">
-          <q-spinner size="18px" color="primary" />
-          <span class="step5-previewText">{{ t("loadingPosts") }}</span>
-        </div>
-
-        <!-- Empty state (only after successful fetch + 0 posts + city selected) -->
-        <div v-if="showEmptyState" class="step5-emptyPanel">
-          <p class="step5-emptyText">{{ t("noPostsFromThisCityYet") }}</p>
-          <q-btn class="step5-resetBtn" flat @click="resetFeedLocation">
-            {{ t("resetFilters") }}
-          </q-btn>
-        </div>
-
-        <!-- Optional preview error (do NOT show empty-state on error) -->
-        <p v-if="previewError" class="step5-errorText">
-          {{ previewError }}
-        </p>
-      </div>
-    </div>
+    <WhereAreYou
+      v-model:continent="feedContinent"
+      v-model:country="feedCountry"
+      v-model:city="feedCityId"
+      :emit-city-id="true"
+      :enable-geolocation="false"
+      :progress="80"
+      :title="t('postsWillBeFrom')"
+      @next="handleNext"
+      @back="handleBack"
+    />
   </template>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, watch } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { usePreferencesStore } from "src/stores/preferences";
 import { usePostsStore } from "src/stores/posts";
-import { api } from "boot/axios";
 import PickYourSide from "src/components/Onboarding/PickYourSide.vue";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
@@ -171,80 +136,6 @@ const feedCityId = computed({
   get: () => onboardingStore.feedCityId,
   set: (value) => onboardingStore.setStepData("feedCityId", value)
 });
-
-// STEP 5 preview state: if selected city has 0 posts, show message + reset
-const feedWhereKey = ref(0);
-const previewCount = ref<number>(0);
-const previewLoading = ref(false);
-const previewFetched = ref(false);
-const previewError = ref<string | null>(null);
-const previewRequestId = ref(0);
-
-const selectedCityId = computed(() => (typeof feedCityId.value === "number" ? feedCityId.value : null));
-
-const showEmptyState = computed(() => {
-  return (
-    previewFetched.value &&
-    !previewLoading.value &&
-    selectedCityId.value !== null &&
-    previewCount.value === 0
-  );
-});
-
-const normalizePostsArray = (data: unknown): unknown[] => {
-  const anyData = data as any;
-  const candidates = [anyData?.data, anyData?.posts, anyData];
-  for (const c of candidates) {
-    if (Array.isArray(c)) return c;
-  }
-  return [];
-};
-
-watch(
-  () => feedCityId.value,
-  async (cityId) => {
-    previewFetched.value = false;
-    previewError.value = null;
-    previewCount.value = 0;
-    if (!cityId) return;
-
-    const current = ++previewRequestId.value;
-    previewLoading.value = true;
-
-    const params = { location_city_id: Number(cityId) };
-    if (process.env.NODE_ENV === "development") {
-      console.log("[onboarding-step5] preview /posts params:", params);
-    }
-
-    try {
-      const { data } = await api.get("/posts", { params });
-      if (current !== previewRequestId.value) return; // stale
-      const posts = normalizePostsArray(data);
-      previewCount.value = posts.length;
-      previewFetched.value = true;
-    } catch {
-      previewError.value = null; // keep silent; no empty-state on error
-      previewFetched.value = false;
-    } finally {
-      if (current === previewRequestId.value) {
-        previewLoading.value = false;
-      }
-    }
-  }
-);
-
-const resetFeedLocation = () => {
-  onboardingStore.setStepData("feedContinent", "");
-  onboardingStore.setStepData("feedCountry", "");
-  onboardingStore.setStepData("feedCity", "");
-  onboardingStore.setStepData("feedContinentId", null);
-  onboardingStore.setStepData("feedCountryId", null);
-  onboardingStore.setStepData("feedCityId", null);
-  previewFetched.value = false;
-  previewError.value = null;
-  previewCount.value = 0;
-  feedWhereKey.value++;
-};
 
 const username = computed({
   get: () => onboardingStore.name,
@@ -419,69 +310,5 @@ const handleFinish = async () => {
   min-height: 100vh;
   padding: 0;
   background: transparent;
-}
-
-.step5-wrap {
-  width: 100%;
-  position: relative;
-}
-
-.step5-emptyText {
-  color: rgba(255, 255, 255, 0.85);
-  text-align: center;
-  margin: 0;
-  font-family: poppins;
-}
-
-.step5-footer {
-  padding: 0 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: -12px;
-}
-
-.step5-nextBtn {
-  background: rgba(182, 0, 67, 1);
-  color: #fff;
-  border-radius: 12px;
-  height: 48px;
-  font-family: montseraatSemiBold;
-}
-
-.step5-previewRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.step5-previewText {
-  font-family: poppins;
-  font-size: 0.95rem;
-}
-
-.step5-emptyPanel {
-  border-radius: 12px;
-  padding: 12px 12px 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.step5-resetBtn {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.step5-errorText {
-  color: rgba(255, 255, 255, 0.65);
-  text-align: center;
-  margin: 0;
-  font-family: poppins;
-  font-size: 0.9rem;
 }
 </style>
