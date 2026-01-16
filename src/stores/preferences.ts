@@ -171,17 +171,7 @@ export const usePreferencesStore = defineStore("preferences", {
         }
       };
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("[DEBUG] [saveDonorFiltersToStorage] Saving to key:", key);
-        console.log("[DEBUG] [saveDonorFiltersToStorage] Payload:", payload);
-      }
-
       localStorage.setItem(key, JSON.stringify(payload));
-
-      if (process.env.NODE_ENV === "development") {
-        const saved = localStorage.getItem(key);
-        console.log("[DEBUG] [saveDonorFiltersToStorage] What was actually saved:", saved);
-      }
     },
     // Load donor filters from user-specific localStorage key
     loadDonorFiltersFromStorage() {

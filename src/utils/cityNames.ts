@@ -210,32 +210,10 @@ function extractCountryName(entity: any): string | null {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getLocationLabel(entity: any, locale = "en-US"): string {
-  if (!entity) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[getLocationLabel] Entity is null/undefined");
-    }
-    return "";
-  }
+  if (!entity) return "";
 
   const city = extractCityName(entity);
   const country = extractCountryName(entity);
-
-  // Debug warning in dev mode if no location data found
-  if (process.env.NODE_ENV === "development" && !city && !country) {
-    console.warn("[getLocationLabel] No location data found in entity:", {
-      availableFields: Object.keys(entity).filter(key =>
-        key.includes("city") || key.includes("country") || key.includes("location")
-      ),
-      sample: {
-        location_city_name: entity.location_city_name,
-        city_name: entity.city_name,
-        author_city: entity.author_city,
-        location_country_name: entity.location_country_name,
-        country_name: entity.country_name,
-        author_country: entity.author_country
-      }
-    });
-  }
 
   return formatLocation(city, country, locale);
 }
