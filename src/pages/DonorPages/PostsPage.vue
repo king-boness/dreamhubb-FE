@@ -53,6 +53,7 @@
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
         <div v-if="hasActiveFilters && !isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
+            class="donorPosts-emptyHintBubble"
             text="No posts with these filters yet."
             arrow="up"
             :clickable="true"
@@ -675,6 +676,11 @@ const emitOpenAuthor = (post: DonorPost) => {
   font-family: poppins;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.95);
+}
+
+/* Move the "No posts..." text block down by 15px (both lines) */
+:deep(.donorPosts-emptyHintBubble .dhHintBubble-content) {
+  padding-top: 15px;
 }
 
 // POST CARD
