@@ -88,7 +88,7 @@ const emit = defineEmits<{
   background: transparent;
   border: none;
   color: white;
-  font-size: 1.5rem;
+  font-sie: 1.5rem;
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -155,4 +155,3 @@ const emit = defineEmits<{
   border-bottom: 0.75rem solid rgba(189, 0, 67, 0.95);
 }
 </style>
-
