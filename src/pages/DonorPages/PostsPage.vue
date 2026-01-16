@@ -51,12 +51,14 @@
 
       <!-- Empty state -->
       <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
-        <div v-if="hasActiveFilters" class="donorPosts-emptyHint">
+        <div v-if="hasActiveFilters && !emptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
             text="No posts with these filters yet."
             arrow="up"
             :clickable="true"
             @click="handleOpenFilters"
+            :show-close="true"
+            @close="emptyFiltersHintDismissed = true"
           >
             <div class="donorPosts-emptyHintSecondLine">
               <strong>Be the first or change the filters.</strong>
@@ -164,6 +166,9 @@ const route = useRoute();
 const postsStore = usePostsStore();
 const preferencesStore = usePreferencesStore();
 const authStore = useAuthStore();
+
+// Allow dismissing the empty-filters hint (same UX as donee first-post hint)
+const emptyFiltersHintDismissed = ref(false);
 
 // Tab interface
 interface DonorTab {
@@ -649,6 +654,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   font-family: poppins;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.95);
+  text-align: center;
 }
 
 // POST CARD
