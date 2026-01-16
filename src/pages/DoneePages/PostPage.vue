@@ -428,7 +428,7 @@ onActivated(async () => {
 
 .postPage-firstPostHint {
   position: fixed;
-  bottom: calc(8.5rem + 32px);
+  bottom: calc(8.5rem + 2px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
