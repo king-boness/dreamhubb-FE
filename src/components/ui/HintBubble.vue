@@ -155,4 +155,3 @@ const emit = defineEmits<{
   border-bottom: 0.75rem solid rgba(189, 0, 67, 0.95);
 }
 </style>
-
