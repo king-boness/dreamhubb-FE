@@ -95,7 +95,7 @@ export default {
   noPostsFromThisCityYet: "No posts from this city yet.",
   resetFilters: "Reset filters",
   filters: "filters",
-  postsWillBeFrom: "Posts will be from",
+  postsWillBeFrom: "posts will be from",
   // Donee Pages
   myDreams: "my dreams",
   myProblems: "my problems",
