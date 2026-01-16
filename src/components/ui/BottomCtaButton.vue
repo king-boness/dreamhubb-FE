@@ -82,4 +82,3 @@ const emit = defineEmits<{
   width: auto;
 }
 </style>
-
