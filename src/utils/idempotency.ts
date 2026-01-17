@@ -20,4 +20,3 @@ export function getOrCreateIdempotencyKey(storageKey: string): string {
 export function clearIdempotencyKey(storageKey: string) {
   localStorage.removeItem(storageKey);
 }
-
