@@ -2870,6 +2870,9 @@ const onPhotosDialogHide = () => {
 };
 
 const applyPhotosChange = () => {
+  // Mark as saved so @hide handler doesn't restore tempPhotos
+  photosSaved.value = true;
+
   if (editedPost.value) {
     // Update images array
     const imageUrls = editForm.photos.map(img =>
@@ -2890,7 +2893,12 @@ const applyPhotosChange = () => {
 
 // Mark form as dirty
 const markDirty = () => {
-  // hasChanges computed property will automatically detect the change
+  // Sync draft images from editForm.photos so hasChanges reflects photo edits.
+  if (draft.value) {
+    draft.value.images = editForm.photos
+      .map((img) => (typeof img === "string" ? img : (img.url || img.secure_url || "")))
+      .filter((url) => typeof url === "string" && url.length > 0);
+  }
 };
 
 // Edit actions array
@@ -3169,15 +3177,15 @@ const onSaveChanges = async () => {
       payload.deadline = d.deadline;
     }
 
+    // Send images if they changed (backend supports URL array after BE update)
+    if (JSON.stringify(o.images || []) !== JSON.stringify(d.images || [])) {
+      payload.images = d.images || [];
+    }
+
     // Always send tokens_to_top_up (it's additive)
     if (form.tokensToTopUp > 0) {
       payload.tokens_to_top_up = form.tokensToTopUp;
     }
-
-    // Don't send images - they are already uploaded to the server
-    // Backend will keep existing images if we don't send new file uploads
-    // The images in editForm.photos are URLs (strings), not File objects,
-    // so we can't send them as files. The backend already has them stored.
 
     // Debug log before API call
     if (process.env.NODE_ENV === "development") {
