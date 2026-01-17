@@ -26,6 +26,10 @@ const getDonorFiltersStorageKey = (userId: number | null | undefined): string =>
   return `dreamhubb_donor_filters_${userId ?? "guest"}`;
 };
 
+const getSeededDonorFiltersFlagKey = (userId: number | null | undefined): string => {
+  return `seeded_donor_filters_from_donee_${userId ?? "guest"}`;
+};
+
 const loadFromStorage = (userId: number | null | undefined) => {
   const storageKey = getStorageKey(userId);
   const raw = localStorage.getItem(storageKey);
@@ -228,6 +232,68 @@ export const usePreferencesStore = defineStore("preferences", {
         }
         this.lastUsedFeedFilters = null;
       }
+    },
+
+    /**
+     * Seed donor filters exactly once from DONEE onboarding preferences.
+     *
+     * Rules:
+     * - Runs at most once per user (localStorage flag).
+     * - Does NOT overwrite donor filters if user already has any non-empty donor filters stored.
+     * - Uses existing donor filters storage key + shape (lastUsedFeedFilters).
+     */
+    seedDonorFiltersFromDoneeOnboardingIfNeeded() {
+      const authStore = useAuthStore();
+      const userId = authStore.user?.id;
+      if (!userId) return;
+
+      const flagKey = getSeededDonorFiltersFlagKey(userId);
+      if (localStorage.getItem(flagKey) === "1") return;
+
+      // B) Do not overwrite if user already has donor filters stored (non-empty)
+      const donorKey = getDonorFiltersStorageKey(userId);
+      const raw = localStorage.getItem(donorKey);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as Partial<FeedFilters>;
+          const loc = (parsed as any)?.location as Partial<FeedLocation> | undefined;
+          const hasAny =
+            !!(parsed as any)?.postType ||
+            !!(parsed as any)?.subcategory ||
+            !!loc?.continentId ||
+            !!loc?.countryId ||
+            !!loc?.cityId;
+          if (hasAny) {
+            localStorage.setItem(flagKey, "1");
+            return;
+          }
+        } catch {
+          // ignore parse errors; continue to attempt seed
+        }
+      }
+
+      // C) Seed from onboarding preferences (already persisted into preferences store)
+      const postType = this.preferredPostType;
+      const subcategory = this.preferredSubcategory;
+      if (!postType || !subcategory) return;
+
+      const prefLoc = this.preferredFeedLocation;
+      const location: FeedLocation =
+        prefLoc?.cityId
+          ? { continentId: null, countryId: null, cityId: prefLoc.cityId }
+          : prefLoc?.countryId
+            ? { continentId: null, countryId: prefLoc.countryId, cityId: null }
+            : prefLoc?.continentId
+              ? { continentId: prefLoc.continentId, countryId: null, cityId: null }
+              : { continentId: null, countryId: null, cityId: null };
+
+      this.setLastUsedFeedFilters({
+        postType,
+        subcategory,
+        location
+      });
+
+      localStorage.setItem(flagKey, "1");
     },
     // Reset donor filters to defaults
     // NOTE: This only resets in memory, NOT in localStorage

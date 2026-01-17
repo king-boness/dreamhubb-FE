@@ -242,6 +242,22 @@ const handleLogoClick = async () => {
 };
 
 const applyFiltersFromPreferences = () => {
+  // Seed donor filters once from donee onboarding (idempotent + won't overwrite user-changed donor filters)
+  preferencesStore.seedDonorFiltersFromDoneeOnboardingIfNeeded();
+  // Always prefer user’s saved donor filters when switching to donor
+  preferencesStore.loadDonorFiltersFromStorage();
+  const storedDonor = preferencesStore.lastUsedFeedFilters;
+  if (storedDonor) {
+    postsStore.setFilters({
+      type: storedDonor.postType,
+      feCategory: storedDonor.subcategory,
+      continentId: storedDonor.location.continentId,
+      countryId: storedDonor.location.countryId,
+      cityId: storedDonor.location.cityId
+    });
+    return;
+  }
+
   // Priority 1: Use stored preferences from registration (they are saved in preferences store during onboarding)
   // These include postType, subcategory, and location preferences
   const storedPostType = preferencesStore.preferredPostType;
@@ -292,13 +308,6 @@ const applyFiltersFromPreferences = () => {
       type: storedPostType,
       feCategory: storedSubcategory,
       ...locationFilters
-    });
-
-    // Save to lastUsedFeedFilters so PostsPage will use them
-    preferencesStore.setLastUsedFeedFilters({
-      postType: storedPostType,
-      subcategory: storedSubcategory,
-      location: locationFilters
     });
 
     return;

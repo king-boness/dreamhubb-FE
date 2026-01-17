@@ -191,10 +191,7 @@ const handleFinish = async () => {
       await onboardingStore.fetchFeedLocationIds();
     }
   } catch (error) {
-    // Log error but don't fail registration - location filtering will just be skipped
-    if (process.env.NODE_ENV === "development") {
-      console.error("Failed to fetch feed location IDs:", error);
-    }
+    // Don't fail registration - location filtering will just be skipped
   }
 
   // Execute registration via onboarding store
@@ -204,9 +201,6 @@ const handleFinish = async () => {
     // registration errors are handled in store
     // If there are field errors (e.g., existing email), navigate back to step 1
     if (onboardingStore.fieldErrors && Object.keys(onboardingStore.fieldErrors).length > 0) {
-      if (process.env.NODE_ENV === "development") {
-        console.log("❌ Registration failed with field errors:", onboardingStore.fieldErrors);
-      }
       // Use nextTick to ensure store is updated before navigating
       await nextTick();
       // Small delay to ensure component re-renders
@@ -232,7 +226,6 @@ const handleFinish = async () => {
     countryId: onboardingStore.feedCountryId,
     cityId: onboardingStore.feedCityId
   });
-  preferencesStore.clearLastUsedFeedFilters();
 
   // Apply initial feed filters for donor side
   const applyInitialFeedFilters = () => {
@@ -290,9 +283,12 @@ const handleFinish = async () => {
 
   if (initialSide === "donee") {
     preferencesStore.setCurrentSide("donee");
+    // Seed donor filters once from donee onboarding so first switch to donor uses these filters.
+    preferencesStore.seedDonorFiltersFromDoneeOnboardingIfNeeded();
     router.push({ name: "submit-postCreation" });
   } else {
     preferencesStore.setCurrentSide("donor");
+    preferencesStore.clearLastUsedFeedFilters();
     applyInitialFeedFilters();
     router.push({ name: "donor-posts" });
   }
