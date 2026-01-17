@@ -660,7 +660,10 @@ const emitOpenAuthor = (post: DonorPost) => {
 }
 
 .donorPosts-emptyHint {
-  width: 100%;
+  /* Break out of .donorPosts-state horizontal padding (2rem) so bubble matches donee sizing */
+  width: calc(100% + 4rem);
+  margin-left: -2rem;
+  margin-right: -2rem;
   display: flex;
   justify-content: center;
   transform: translateY(-32px);
