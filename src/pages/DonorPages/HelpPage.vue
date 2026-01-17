@@ -140,12 +140,15 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { usePostsStore } from "src/stores/posts";
 import { useCommentsStore } from "src/stores/comments";
+import { useAuthStore } from "src/stores/auth";
+import { useNotificationsStore } from "src/stores/notifications";
 import ImageUploader from "../../components/partials/UploadImgComponent.vue";
 import PostHeader from "src/components/post/PostHeader.vue";
 import { getPostTypeIcon } from "src/utils/postIcons";
 import { getLocationLabel } from "src/utils/cityNames";
 import { normalizePost } from "src/utils/normalizePost";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
+import { clearIdempotencyKey, getOrCreateIdempotencyKey } from "src/utils/idempotency";
 import { Notify } from "quasar";
 import AppSplash from "src/components/common/AppSplash.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
@@ -157,6 +160,8 @@ const route = useRoute();
 const router = useRouter();
 const postsStore = usePostsStore();
 const commentsStore = useCommentsStore();
+const authStore = useAuthStore();
+const notificationsStore = useNotificationsStore();
 
 // State for active mode in Help to Fulfill
 const activeMode = ref<"help" | "return">("help"); // Default to "I'll help with"
@@ -353,18 +358,30 @@ const handleSubmit = async () => {
   submitting.value = true;
 
   try {
-    await commentsStore.addComment(postId.value, {
-      type: contributionType.value,
-      message: contributionType.value === "accomplish" ? message.value : helpWithText.value, // help part from helpWithText
-      return_message: contributionType.value === "help" ? returnText.value : null, // return part from returnText
-      is_private: privacy.value
-    });
+    const userId = authStore.user?.id || "guest";
+    const keyStorage = `dh_idemp_contribution_${userId}_${postId.value}_${contributionType.value}`;
+    const idempotencyKey = getOrCreateIdempotencyKey(keyStorage);
+
+    await commentsStore.addComment(
+      postId.value,
+      {
+        type: contributionType.value,
+        message: contributionType.value === "accomplish" ? message.value : helpWithText.value, // help part from helpWithText
+        return_message: contributionType.value === "help" ? returnText.value : null, // return part from returnText
+        is_private: privacy.value
+      },
+      { idempotencyKey }
+    );
+    clearIdempotencyKey(keyStorage);
 
     Notify.create({
       type: "positive",
       message: "Contribution submitted successfully",
       position: "top"
     });
+
+    // Refresh unread badge (best-effort)
+    void notificationsStore.fetchUnreadCount();
 
     // Redirect back to post detail
     router.push({

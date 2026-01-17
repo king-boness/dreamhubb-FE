@@ -339,6 +339,8 @@ import { getLocationLabel } from "src/utils/cityNames";
 import { usePostsStore, type PostDetail } from "src/stores/posts";
 import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
+import { useNotificationsStore } from "src/stores/notifications";
+import { clearIdempotencyKey, getOrCreateIdempotencyKey } from "src/utils/idempotency";
 import { useRoute, useRouter } from "vue-router";
 import AppSplash from "src/components/common/AppSplash.vue";
 import PostHeader from "src/components/post/PostHeader.vue";
@@ -386,6 +388,7 @@ const categoryIcon = computed(() => {
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
+const notificationsStore = useNotificationsStore();
 const commentsStore = useCommentsStore();
 const route = useRoute();
 const router = useRouter();
@@ -1155,7 +1158,15 @@ const handleConfirmDonate = async () => {
   try {
     // Reset error state before donation
     postsStore.donateError = null;
-    await postsStore.donateToPost(postId, selectedTokens.value);
+    const userId = authStore.user?.id || "guest";
+    const keyStorage = `dh_idemp_topup_${userId}_${postId}`;
+    const idempotencyKey = getOrCreateIdempotencyKey(keyStorage);
+
+    await postsStore.donateToPost(postId, selectedTokens.value, { idempotencyKey });
+    clearIdempotencyKey(keyStorage);
+
+    // Refresh unread badge (best-effort)
+    void notificationsStore.fetchUnreadCount();
 
     // Success notification
     Notify.create({

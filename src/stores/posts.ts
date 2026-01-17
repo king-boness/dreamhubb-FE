@@ -272,14 +272,29 @@ export const usePostsStore = defineStore("posts", {
     },
 
     // 💰 Donate tokens to a post
-    async donateToPost(postId: number, tokens: number) {
+    async donateToPost(
+      postId: number,
+      tokens: number,
+      opts?: { idempotencyKey?: string }
+    ) {
       this.donateLoading = true;
       this.donateError = null;
 
       try {
-        const { data } = await api.post(`/posts/${postId}/donate`, {
-          tokens
-        });
+        const { data } = await api.post(
+          `/posts/${postId}/donate`,
+          {
+            tokens,
+            idempotency_key: opts?.idempotencyKey || undefined
+          },
+          opts?.idempotencyKey
+            ? {
+                headers: {
+                  "Idempotency-Key": opts.idempotencyKey
+                }
+              }
+            : undefined
+        );
 
         // ✅ On success: Re-fetch post detail to get updated data
         if (data.post) {

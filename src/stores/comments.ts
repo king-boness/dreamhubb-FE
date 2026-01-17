@@ -129,15 +129,27 @@ export const useCommentsStore = defineStore("comments", {
         message: string;
         return_message?: string | null;
         is_private?: boolean;
-      }
+      },
+      opts?: { idempotencyKey?: string }
     ) {
       try {
-        const { data } = await api.post(`/posts/${postId}/contributions`, {
-          contribution_type: payload.type,
-          message: payload.message,
-          return_message: payload.return_message || null,
-          is_private: payload.is_private || false
-        });
+        const { data } = await api.post(
+          `/posts/${postId}/contributions`,
+          {
+            contribution_type: payload.type,
+            message: payload.message,
+            return_message: payload.return_message || null,
+            is_private: payload.is_private || false,
+            idempotency_key: opts?.idempotencyKey || undefined
+          },
+          opts?.idempotencyKey
+            ? {
+                headers: {
+                  "Idempotency-Key": opts.idempotencyKey
+                }
+              }
+            : undefined
+        );
 
         if (data.status === "success" && data.contribution) {
           const newComment: Comment = {
@@ -176,12 +188,24 @@ export const useCommentsStore = defineStore("comments", {
       commentId: number,
       payload: {
         text: string;
-      }
+      },
+      opts?: { idempotencyKey?: string }
     ) {
       try {
-        const { data } = await api.post(`/posts/${postId}/contributions/${commentId}/reply`, {
-          text: payload.text
-        });
+        const { data } = await api.post(
+          `/posts/${postId}/contributions/${commentId}/reply`,
+          {
+            text: payload.text,
+            idempotency_key: opts?.idempotencyKey || undefined
+          },
+          opts?.idempotencyKey
+            ? {
+                headers: {
+                  "Idempotency-Key": opts.idempotencyKey
+                }
+              }
+            : undefined
+        );
 
         if (data.status === "success" && data.reply) {
           const newReply: Reply = {
