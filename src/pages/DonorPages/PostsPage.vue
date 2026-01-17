@@ -54,17 +54,14 @@
         <div v-if="hasActiveFilters && !isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
             class="donorPosts-emptyHintBubble"
-            text="No posts with these filters yet."
+            title="No posts with these filters"
+            text="Be the first or change the filters."
             arrow="up"
             :clickable="true"
             :show-close="true"
             @click="handleOpenFilters"
             @close="dismissEmptyFiltersHint"
-          >
-            <div class="donorPosts-emptyHintSecondLine">
-              <strong>Be the first or change the filters.</strong>
-            </div>
-          </HintBubble>
+          />
         </div>
         <p v-else>{{ t("noPosts") }}</p>
       </div>
@@ -667,15 +664,6 @@ const emitOpenAuthor = (post: DonorPost) => {
   display: flex;
   justify-content: center;
   transform: translateY(-32px);
-}
-
-.donorPosts-emptyHintSecondLine {
-  margin-top: 6px;
-  width: 100%;
-  text-align: center;
-  font-family: poppins;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.95);
 }
 
 /* Move the "No posts..." text block down by 15px (both lines) */
