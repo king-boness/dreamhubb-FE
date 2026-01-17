@@ -54,17 +54,14 @@
         <div v-if="hasActiveFilters && !isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
             class="donorPosts-emptyHintBubble"
-            text="No posts with these filters."
+            title="No posts with these filters."
+            text="Be the first or change the filters."
             arrow="up"
             :clickable="true"
             :show-close="true"
             @click="handleOpenFilters"
             @close="dismissEmptyFiltersHint"
-          >
-            <div class="donorPosts-emptyHintSecondLine">
-              Be the first or change the filters.
-            </div>
-          </HintBubble>
+          />
         </div>
         <p v-else>{{ t("noPosts") }}</p>
       </div>
@@ -669,26 +666,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   transform: translateY(-32px);
 }
 
-.donorPosts-emptyHintSecondLine {
-  margin-top: 6px;
-  width: 100%;
-  text-align: center;
-  font-family: poppins;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.95);
-}
-
-/* Move the "No posts..." text block down by 15px (both lines) */
-:deep(.donorPosts-emptyHintBubble .dhHintBubble-content) {
-  padding-top: 23px;
-}
-
-/* Make the first line bold and keep it on a single line (no wrap) */
-:deep(.donorPosts-emptyHintBubble .dhHintBubble-text) {
-  font-family: poppinsSemiBold;
-  font-weight: 700;
-  white-space: nowrap;
-}
+/* Donor bubble should match the donee HintBubble sizing/typography (no extra overrides) */
 
 // POST CARD
 .postCard {
