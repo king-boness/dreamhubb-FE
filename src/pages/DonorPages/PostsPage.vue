@@ -666,7 +666,10 @@ const emitOpenAuthor = (post: DonorPost) => {
   transform: translateY(-32px);
 }
 
-/* Donor bubble should match the donee HintBubble sizing/typography (no extra overrides) */
+/* Keep the first sentence on one line (match donee bubble sizing/typography otherwise) */
+:deep(.donorPosts-emptyHintBubble .dhHintBubble-title) {
+  white-space: nowrap;
+}
 
 // POST CARD
 .postCard {
