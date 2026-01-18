@@ -157,13 +157,12 @@
         class="button-footer profileIcon"
         :class="{ activeProfile: activeNav === 'profile' }"
       >
-        <span class="profileAvatarWrap" aria-hidden="true">
-          <UserAvatar
-            :image-url="authStore.avatarUrl"
-            :name="authStore.name"
-            size="1.8rem"
-          />
-        </span>
+        <UserAvatar
+          :image-url="authStore.avatarUrl"
+          :name="authStore.name"
+          size="1.8rem"
+          class="profileImg"
+        />
         <span class="footer-pageName profileName">{{ t("profile") }}</span>
       </q-btn>
     </div>
@@ -827,6 +826,8 @@ onBeforeUnmount(() => {
       will-change: opacity, color;
     }
 
+    // Match donee behavior: only left-side icons use the hover lift/scale.
+    // Right-side icons (Notifications/Profile) should stay perfectly stable.
     &:hover:not(.red):not(.profileIcon) {
       background: transparent !important;
       background-color: transparent !important;
@@ -920,6 +921,7 @@ onBeforeUnmount(() => {
     outline: none !important;
     width: auto !important;
     height: auto !important;
+    // No global transform here; keep right-side icons stable.
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
     img {
@@ -1031,40 +1033,10 @@ onBeforeUnmount(() => {
     }
   }
 
-  // Active transform only for left-side icons (Home, Inspirations) – match donee behavior
+  // Active transform only for left-side icons (Home/Inspirations) – match donee behavior
   .active.button-footer:not(.red):not(.profileIcon),
   .activeProfile.button-footer:not(.red):not(.profileIcon) {
     transform: translateY(-1px) scale(1.02);
-  }
-
-  // Profile icon specific positioning – match donee offsets (donor has 4 buttons; profile is 4th)
-  .footer > .q-btn.button-footer.profileIcon:nth-child(4),
-  .footer > .button-footer.profileIcon:nth-child(4),
-  .footer .q-btn.button-footer.profileIcon,
-  .footer .button-footer.profileIcon {
-    transform: translateX(4px) translateY(4px) !important;
-  }
-
-  .footer > .q-btn.button-footer.profileIcon:nth-child(4):hover,
-  .footer > .button-footer.profileIcon:nth-child(4):hover,
-  .footer .q-btn.button-footer.profileIcon:hover,
-  .footer .button-footer.profileIcon:hover {
-    transform: translateX(4px) translateY(2px) scale(1.05) !important;
-  }
-
-  .footer > .q-btn.button-footer.profileIcon:nth-child(4):active,
-  .footer > .button-footer.profileIcon:nth-child(4):active,
-  .footer .q-btn.button-footer.profileIcon:active,
-  .footer .button-footer.profileIcon:active {
-    transform: translateX(4px) translateY(4px) scale(0.95) !important;
-  }
-
-  .footer > .q-btn.button-footer.profileIcon:nth-child(4).activeProfile,
-  .footer > .button-footer.profileIcon:nth-child(4).activeProfile,
-  .footer .q-btn.button-footer.profileIcon.activeProfile,
-  .footer .button-footer.profileIcon.activeProfile,
-  .footer .activeProfile.button-footer.profileIcon {
-    transform: translateX(4px) translateY(3px) scale(1.02) !important;
   }
 
   .no-padding-bottom {
@@ -1091,21 +1063,17 @@ onBeforeUnmount(() => {
 
   .activeProfile {
     background: transparent !important;
-  }
 
-  .profileAvatarWrap {
-    position: relative;
-    display: inline-flex;
-    border-radius: 999px;
-  }
+    .profileImg {
+      // Use a "ring" that doesn't change layout (unlike border).
+      // Matches donee selected Profile look more reliably across Quasar/QAvatar.
+      box-shadow: 0 0 0 0.16rem #bd0043 !important;
+      border-radius: 999px !important;
+    }
 
-  .activeProfile .profileAvatarWrap::after {
-    content: "";
-    position: absolute;
-    inset: -0.16rem;
-    border: 0.16rem solid #bd0043;
-    border-radius: 999px;
-    pointer-events: none;
+    .profileImg img {
+      border-radius: 999px !important;
+    }
   }
 
   .footer-pageName {
