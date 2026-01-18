@@ -103,7 +103,11 @@
           :error="shouldShowEmailError"
           :error-message="emailErrorMessage"
           @blur="handleEmailBlur"
-        />
+        >
+          <template #append>
+            <q-spinner v-if="emailChecking" size="16px" color="grey-5" />
+          </template>
+        </q-input>
 
         <div class="who-passwordFieldWrapper" ref="passwordFieldRef">
           <q-input
@@ -373,9 +377,12 @@ watch(localGender, (val) => {
 // Debounce timer for email validation
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 let emailCheckAbort: AbortController | null = null;
-let lastCheckedEmail = "";
-let lastCheckedExists: boolean | null = null;
+const emailExistsCache = new Map<string, boolean>();
+const emailChecking = ref(false);
 let emailCheckSeq = 0;
+let emailCheckRetryTimeout: ReturnType<typeof setTimeout> | null = null;
+let emailCheckRetryEmail = "";
+let emailCheckRetryCount = 0;
 
 // Check if email exists on backend
 const checkEmailExists = async (email: string) => {
@@ -387,9 +394,10 @@ const checkEmailExists = async (email: string) => {
   }
 
   try {
-    // Cache: if we already checked this exact email, reuse result instantly
-    if (trimmedEmail === lastCheckedEmail && lastCheckedExists !== null) {
-      if (lastCheckedExists) {
+    // Cache: reuse result instantly for already checked emails
+    if (emailExistsCache.has(trimmedEmail)) {
+      const exists = emailExistsCache.get(trimmedEmail) === true;
+      if (exists) {
         if (!onboardingStore.fieldErrors) onboardingStore.fieldErrors = {};
         onboardingStore.fieldErrors.email =
           "This email is already registered. Please choose another one or log in.";
@@ -406,6 +414,7 @@ const checkEmailExists = async (email: string) => {
     }
     emailCheckAbort = new AbortController();
     const seq = ++emailCheckSeq;
+    emailChecking.value = true;
 
     const { data } = await api.post(
       "/check-email",
@@ -417,10 +426,10 @@ const checkEmailExists = async (email: string) => {
     if (seq !== emailCheckSeq) return;
     if ((localEmail.value || "").trim() !== trimmedEmail) return;
 
-    lastCheckedEmail = trimmedEmail;
-    lastCheckedExists = !!data?.exists;
+    const exists = !!data?.exists;
+    emailExistsCache.set(trimmedEmail, exists);
 
-    if (data.exists) {
+    if (exists) {
       // Email exists - set field error
       if (!onboardingStore.fieldErrors) {
         onboardingStore.fieldErrors = {};
@@ -442,14 +451,32 @@ const checkEmailExists = async (email: string) => {
     const errorResponse = (error as any).response;
 
     // Handle 429 (Too Many Requests) - rate limiting
-    // Don't block user; backend will validate on register. We'll just skip this check.
+    // Don't block user; backend will validate on register.
+    // But try one quick retry (using Retry-After if present) so UX still feels responsive.
     if (errorResponse?.status === 429) {
-      // ignore
+      const current = (localEmail.value || "").trim();
+      if (current === trimmedEmail && emailCheckRetryCount < 1) {
+        emailCheckRetryCount += 1;
+        emailCheckRetryEmail = trimmedEmail;
+        const retryAfterRaw = errorResponse?.headers?.["retry-after"];
+        const retryAfterSec = Number(retryAfterRaw);
+        const delayMs = Number.isFinite(retryAfterSec) && retryAfterSec > 0 ? retryAfterSec * 1000 : 1000;
+        if (emailCheckRetryTimeout) clearTimeout(emailCheckRetryTimeout);
+        emailCheckRetryTimeout = setTimeout(() => {
+          void checkEmailExists(trimmedEmail);
+        }, delayMs);
+      }
     }
 
     // Silently fail for all other errors (including 422 validation errors)
     // Frontend validation will handle email format validation
     // Don't block user from continuing with registration
+  } finally {
+    // Only clear loading for the current email
+    const current = (localEmail.value || "").trim();
+    if (current === trimmedEmail) {
+      emailChecking.value = false;
+    }
   }
 };
 
@@ -466,11 +493,22 @@ watch(localEmail, (val) => {
     clearTimeout(emailCheckTimeout);
   }
 
+  // Clear any scheduled retry when user changes the email
+  if (emailCheckRetryTimeout) {
+    clearTimeout(emailCheckRetryTimeout);
+    emailCheckRetryTimeout = null;
+  }
+  if ((val || "").trim() !== emailCheckRetryEmail) {
+    emailCheckRetryEmail = "";
+    emailCheckRetryCount = 0;
+  }
+
   // Cancel in-flight request when user edits email
   if (emailCheckAbort) {
     emailCheckAbort.abort();
     emailCheckAbort = null;
   }
+  emailChecking.value = false;
 
   // Debounce email check - keep UX snappy but avoid spamming backend
   if (val && val.trim() && emailRegex.test(val.trim())) {
@@ -816,6 +854,11 @@ watch(
 // Handle email blur - check email immediately
 const handleEmailBlur = async () => {
   emailTouched.value = true;
+  // If debounce is scheduled, cancel it so blur triggers only ONE request
+  if (emailCheckTimeout) {
+    clearTimeout(emailCheckTimeout);
+    emailCheckTimeout = null;
+  }
   // Check email immediately on blur
   if (localEmail.value && localEmail.value.trim()) {
     await checkEmailExists(localEmail.value);
@@ -924,7 +967,7 @@ const handleAvatarChange = (event: Event) => {
 
 const isFormValid = computed(() => {
   const usernameValid = localUsername.value && localUsername.value.trim() !== "";
-  const emailValid = !!localEmail.value && !emailError.value;
+  const emailValid = !!localEmail.value && !emailError.value && !emailServerError.value && !emailChecking.value;
   const passwordValid = !!localPassword.value && !passwordError.value;
   const repeatPasswordValid = localRepeatPassword.value && localRepeatPassword.value.trim() !== "";
   const passwordsMatch =
