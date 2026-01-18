@@ -49,11 +49,11 @@
            In practice, the common "error" here is a transient fetch failure or an empty DB;
            showing "Failed..." is poor UX for the donor feed. -->
       <div v-else-if="!loading && sortedPosts.length === 0" class="donorPosts-state">
-        <div v-if="hasActiveFilters && !isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
+        <div v-if="!isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
             class="donorPosts-emptyHintBubble"
-            title="No posts with these filters."
-            text="Be the first or change the filters."
+            :title="emptyStateTitle"
+            :text="emptyStateText"
             arrow="up"
             :clickable="true"
             :show-close="true"
@@ -163,20 +163,10 @@ const postsStore = usePostsStore();
 const preferencesStore = usePreferencesStore();
 const authStore = useAuthStore();
 
-const emptyFiltersHintStorageKey = computed(() => {
-  const id = authStore.user?.id;
-  return id ? `dh_donor_empty_filters_hint_dismissed_${id}` : "dh_donor_empty_filters_hint_dismissed_guest";
-});
-
 const isEmptyFiltersHintDismissed = ref(false);
 
 const dismissEmptyFiltersHint = () => {
   isEmptyFiltersHintDismissed.value = true;
-  try {
-    localStorage.setItem(emptyFiltersHintStorageKey.value, "true");
-  } catch {
-    // ignore
-  }
 };
 
 // Tab interface
@@ -315,11 +305,9 @@ watch(
 
 // Update indicator position on mount and fetch initial posts
 onMounted(() => {
-  try {
-    isEmptyFiltersHintDismissed.value = localStorage.getItem(emptyFiltersHintStorageKey.value) === "true";
-  } catch {
-    // ignore
-  }
+  // Always show the empty-state bubble when there are no posts.
+  // (We intentionally do not persist dismissal in localStorage.)
+  isEmptyFiltersHintDismissed.value = false;
 
   nextTick(() => {
     // Indicator position will be computed automatically via computed property
@@ -336,6 +324,8 @@ onMounted(() => {
 
 // Reload posts when returning from filters page (kept-alive component)
 onActivated(() => {
+  // Kept-alive component: reset dismissal so bubble can show again when feed is empty.
+  isEmptyFiltersHintDismissed.value = false;
   // Načítať filtre z localStorage a aplikovať ich
   preferencesStore.loadDonorFiltersFromStorage();
   applyInitialFiltersFromPreferences();
@@ -347,7 +337,6 @@ onActivated(() => {
 // Computed properties from store
 const posts = computed(() => postsStore.posts);
 const loading = computed(() => postsStore.loading);
-const error = computed(() => postsStore.error);
 
 // Check if any filters are active - using new API
 const hasActiveFilters = computed(() => {
@@ -358,6 +347,14 @@ const hasActiveFilters = computed(() => {
     postsStore.filters.countryId ||
     postsStore.filters.cityId
   );
+});
+
+const emptyStateTitle = computed(() => {
+  return hasActiveFilters.value ? "No posts with these filters." : t("noPosts");
+});
+
+const emptyStateText = computed(() => {
+  return "Be the first or change the filters.";
 });
 
 // Post interface
