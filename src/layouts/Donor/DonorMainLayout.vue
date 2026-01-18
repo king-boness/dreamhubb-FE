@@ -161,6 +161,7 @@
           :image-url="authStore.avatarUrl"
           :name="authStore.name"
           size="24px"
+          class="profileImg"
         />
         <span class="footer-pageName profileName">{{ t("profile") }}</span>
       </q-btn>
