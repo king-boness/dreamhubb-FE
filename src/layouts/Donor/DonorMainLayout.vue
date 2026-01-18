@@ -160,7 +160,7 @@
         <UserAvatar
           :image-url="authStore.avatarUrl"
           :name="authStore.name"
-          size="24px"
+          size="1.8rem"
           class="profileImg"
         />
         <span class="footer-pageName profileName">{{ t("profile") }}</span>
@@ -1057,7 +1057,14 @@ onBeforeUnmount(() => {
     background: transparent !important;
 
     .profileImg {
-      border: 0.16rem solid #bd0043 !important;
+      // Use a "ring" that doesn't change layout (unlike border).
+      // Matches donee selected Profile look more reliably across Quasar/QAvatar.
+      box-shadow: 0 0 0 0.16rem #bd0043 !important;
+      border-radius: 999px !important;
+    }
+
+    .profileImg img {
+      border-radius: 999px !important;
     }
   }
 
