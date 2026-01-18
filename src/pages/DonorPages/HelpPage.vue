@@ -322,7 +322,7 @@ const loadPost = async (id: number) => {
 };
 
 // Submit contribution
-const handleSubmit = async () => {
+const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
   if (!postId.value || !post.value) {
     Notify.create({
       type: "negative",
@@ -361,6 +361,9 @@ const handleSubmit = async () => {
   const keyStorage = `dh_idemp_contribution_${userId}_${postId.value}_${contributionType.value}`;
 
   try {
+    if (opts?.forceNewAttempt) {
+      clearIdempotencyKey(keyStorage);
+    }
     const idempotencyKey = getOrCreateIdempotencyKey(keyStorage);
 
     await commentsStore.addComment(
@@ -390,9 +393,29 @@ const handleSubmit = async () => {
       params: { id: String(postId.value) }
     });
   } catch (error: unknown) {
-    // Clear key on definitive fail (4xx/5xx). Keep it on network fail to allow retry/refresh with same key.
-    if (error && typeof error === "object" && "response" in error) {
+    const hasResponse = !!(error && typeof error === "object" && "response" in error);
+    if (hasResponse) {
       clearIdempotencyKey(keyStorage);
+    } else {
+      Notify.create({
+        type: "negative",
+        message: "Network error. Retry or start a new attempt?",
+        position: "top",
+        timeout: 7000,
+        actions: [
+          {
+            label: "RETRY",
+            color: "white",
+            handler: () => void submitWithIdempotency(),
+          },
+          {
+            label: "TRY AGAIN",
+            color: "white",
+            handler: () => void submitWithIdempotency({ forceNewAttempt: true }),
+          }
+        ]
+      });
+      return;
     }
 
     if (process.env.NODE_ENV === "development") {
@@ -406,6 +429,10 @@ const handleSubmit = async () => {
   } finally {
     submitting.value = false;
   }
+};
+
+const handleSubmit = async () => {
+  await submitWithIdempotency();
 };
 
 // Share functionality

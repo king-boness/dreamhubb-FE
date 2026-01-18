@@ -1149,7 +1149,7 @@ const handleSliderChange = (value: number | null) => {
 };
 
 // Handle confirm donate
-const handleConfirmDonate = async () => {
+const donateWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
   const postId = post.value?.post_id;
   if (!postId || !canDonate.value) {
     return;
@@ -1161,6 +1161,9 @@ const handleConfirmDonate = async () => {
   try {
     // Reset error state before donation
     postsStore.donateError = null;
+    if (opts?.forceNewAttempt) {
+      clearIdempotencyKey(keyStorage);
+    }
     const idempotencyKey = getOrCreateIdempotencyKey(keyStorage);
 
     await postsStore.donateToPost(postId, selectedTokens.value, { idempotencyKey });
@@ -1180,9 +1183,31 @@ const handleConfirmDonate = async () => {
     // Close modal
     closeTopUpModal();
   } catch (error) {
-    // Clear key on definitive fail (4xx/5xx). Keep it on network fail to allow retry/refresh with same key.
-    if (error && typeof error === "object" && "response" in error) {
+    // Definitive fail (4xx/5xx): clear key so next attempt gets a new one.
+    // Network fail (no response): keep key for safe retry/refresh, but offer "Try again" (new key) UX.
+    const hasResponse = !!(error && typeof error === "object" && "response" in error);
+    if (hasResponse) {
       clearIdempotencyKey(keyStorage);
+    } else {
+      Notify.create({
+        type: "negative",
+        message: "Network error. Retry or start a new attempt?",
+        position: "top",
+        timeout: 7000,
+        actions: [
+          {
+            label: "RETRY",
+            color: "white",
+            handler: () => void donateWithIdempotency(),
+          },
+          {
+            label: "TRY AGAIN",
+            color: "white",
+            handler: () => void donateWithIdempotency({ forceNewAttempt: true }),
+          }
+        ]
+      });
+      return;
     }
 
     // Error notification (error message is already set in store)
@@ -1194,6 +1219,11 @@ const handleConfirmDonate = async () => {
       timeout: 5000
     });
   }
+};
+
+// Handle confirm donate
+const handleConfirmDonate = async () => {
+  await donateWithIdempotency();
 };
 
 const onContributeOption = async (option: ContributeOption | string) => {
