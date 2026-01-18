@@ -44,13 +44,11 @@
         <p>{{ t("loadingPosts") }}</p>
       </div>
 
-      <!-- Error state -->
-      <div v-else-if="error" class="donorPosts-state donorPosts-state--error">
-        <p>{{ error }}</p>
-      </div>
-
       <!-- Empty state -->
-      <div v-else-if="!loading && !error && sortedPosts.length === 0" class="donorPosts-state">
+      <!-- NOTE: We intentionally show the empty-state bubble even if the feed request failed.
+           In practice, the common "error" here is a transient fetch failure or an empty DB;
+           showing "Failed..." is poor UX for the donor feed. -->
+      <div v-else-if="!loading && sortedPosts.length === 0" class="donorPosts-state">
         <div v-if="hasActiveFilters && !isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
           <HintBubble
             class="donorPosts-emptyHintBubble"
