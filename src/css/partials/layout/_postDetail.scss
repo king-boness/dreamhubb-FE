@@ -680,134 +680,140 @@
     }
 
 
-    .aboutPost,
-    .aboutAuthor {
-      margin-bottom: 1.75rem;
-
-      h2 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #fff;
-        margin-bottom: 0.75rem;
-        margin-top: 0;
-      }
-
-      p {
-        font-size: 0.875rem;
-        line-height: 1.6;
-        color: rgba(255, 255, 255, 0.78);
-        margin: 0;
+    /* ABOUT (match Donee MyProfile "About ..." styling) */
+    .postDetailAbout {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
     }
 
-      p + p {
-        margin-top: 0.85rem;
-      }
+    .postDetailAbout-section {
+      width: 100%;
+    }
+
+    .postDetailAbout-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+      font-family: poppins;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      text-align: center;
+      padding: 0 0.25rem;
+    }
+
+    .postDetailAbout-separator {
+      width: 100%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 1.5rem 0 1.25rem;
+    }
+
+    .postDetailDoneeCard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .postDetailDonee-avatarWrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+    }
+
+    .postDetailDonee-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(102deg, #ff006e, #ff8c00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .postDetailDonee-avatarInitials {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+      font-family: poppinsSemiBold;
+    }
+
+    .postDetailDonee-avatarImg {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .postDetailDonee-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: poppinsSemiBold;
+      margin: 0;
+      color: white;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .postDetailDonee-location {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      font-family: poppins;
+      text-align: center;
     }
 
     .postDetail-reportSection {
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0;
+      padding: 0;
     }
 
-    .postDetail-reportBtn {
+    .postDetail-reportCta {
+      width: 100%;
+      height: 56px;
       border: 0;
-      background: transparent;
-      color: #ff4db8;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.2px;
-      font-weight: 600;
+      border-radius: 9999px;
+      padding: 0 1.25rem;
+      background: linear-gradient(102deg, #ff006e, #ff8c00);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: montseraatSemiBold;
+      text-transform: none;
+      box-shadow: 0 18px 40px rgba(255, 0, 110, 0.35);
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      justify-content: center;
+      gap: 0.5rem;
       cursor: pointer;
-      padding: 0;
-
-      .postDetail-reportIcon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-      }
-
-      span {
-        line-height: 1.2;
-      }
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
 
       &:hover {
-        opacity: 0.8;
+        transform: translateY(-2px);
+        box-shadow: 0 22px 45px rgba(255, 0, 110, 0.45);
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
 
-    .aboutAuthor {
-      .authorCard {
-        display: flex;
-        align-items: center;
-        gap: 0.85rem;
-        margin-bottom: 1rem;
-        width: 100%;
-        border: none;
-        background: transparent;
-        padding: 0;
-        text-align: left;
-        cursor: pointer;
-        position: relative;
-        z-index: 10;
-        
-        .authorCard-avatarWrapper {
-          cursor: pointer;
-          pointer-events: auto;
-        }
-        
-        .authorInfo {
-          cursor: pointer;
-          pointer-events: auto;
-        }
-
-        .authorAvatar {
-          width: 60px;
-          height: 60px;
-          min-width: 60px;
-          border-radius: 999px;
-          object-fit: cover;
-          border: 2px solid rgba(255, 255, 255, 0.25);
-        }
-
-        .authorInfo {
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-
-          .authorName {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #fff;
-            margin: 0;
-            line-height: 1.3;
-            cursor: pointer;
-          }
-
-          .authorRole {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin: 0;
-          }
-        }
-      }
-
-      .authorLead {
-        font-size: 0.95rem;
-            font-weight: 600;
-        color: rgba(255, 255, 255, 0.9);
-        margin: 0 0 0.75rem;
-          }
-
-      .authorStory {
-        color: rgba(255, 255, 255, 0.78);
-        margin-bottom: 0.85rem;
-      }
+    .postDetail-reportIcon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
+
+    // Legacy aboutAuthor styles removed (now using postDetailAbout/postDetailDoneeCard)
 
   }
 

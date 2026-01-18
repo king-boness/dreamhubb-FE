@@ -124,8 +124,10 @@ export default {
   aboutTheProblem: "About Problem",
   aboutTheIdea: "About Idea",
   aboutAuthor: "About Author",
+  aboutDonee: "About donee",
   about: "about",
   noBioYet: "No bio yet.",
+  reportPost: "Report a post",
   // Contribution forms
   helpAccomplish: "HELP ACCOMPLISH",
   helpToFulfill: "HELP TO FULFILL",

@@ -142,55 +142,72 @@
 
         <!-- Original Content (About Dream/Problem/Idea, About Author, Report) -->
         <template v-else>
-          <!-- ABOUT DREAM/PROBLEM/IDEA -->
-          <div class="aboutPost">
-            <h2>{{ aboutSectionTitle }}</h2>
-            <p>{{ post.description }}</p>
-          </div>
+          <div class="postDetailAbout">
+            <!-- A) About {post type} -->
+            <section class="postDetailAbout-section">
+              <PageTitle :title="aboutSectionTitle" />
+              <p class="postDetailAbout-text">
+                {{ post.description }}
+              </p>
+            </section>
 
-          <!-- ABOUT AUTHOR -->
-          <div class="aboutAuthor">
-            <h2>{{ t("aboutAuthor") }}</h2>
+            <div class="postDetailAbout-separator" />
 
-            <div
-              class="authorCard"
-              role="button"
-              tabindex="0"
-              @click.prevent="goToAuthorProfile"
-              @keyup.enter="goToAuthorProfile"
-            >
-              <div class="authorCard-avatarWrapper" @click.prevent="goToAuthorProfile">
-                <UserAvatar
-                  :image-url="displayAuthorAvatar"
-                  :name="displayAuthorName"
-                  size="32px"
+            <!-- B) About donee -->
+            <section class="postDetailAbout-section">
+              <PageTitle :title="t('aboutDonee')" />
+
+              <div
+                class="postDetailDoneeCard"
+                role="button"
+                tabindex="0"
+                @click.prevent="goToAuthorProfile"
+                @keyup.enter="goToAuthorProfile"
+              >
+                <div class="postDetailDonee-avatarWrapper" aria-hidden="true">
+                  <div v-if="!displayAuthorAvatar" class="postDetailDonee-avatar">
+                    <span class="postDetailDonee-avatarInitials">{{ authorInitials }}</span>
+                  </div>
+                  <img
+                    v-else
+                    :src="displayAuthorAvatar"
+                    alt=""
+                    class="postDetailDonee-avatarImg"
+                  />
+                  <!-- Badge can be added here once BE provides it -->
+                </div>
+
+                <h3 class="postDetailDonee-name">{{ displayAuthorName }}</h3>
+                <p v-if="displayAuthorLocation" class="postDetailDonee-location">{{ displayAuthorLocation }}</p>
+              </div>
+            </section>
+
+            <div class="postDetailAbout-separator" />
+
+            <!-- C) BIO -->
+            <section class="postDetailAbout-section">
+              <p class="postDetailAbout-text">
+                {{ authorBio || t("noBioYet") }}
+              </p>
+            </section>
+
+            <div class="postDetailAbout-separator" />
+
+            <!-- D) Report a post -->
+            <div class="postDetail-reportSection">
+              <button
+                type="button"
+                class="postDetail-reportCta"
+                @click="handleReportDream"
+              >
+                <img
+                  src="/other_icons/report.svg"
+                  alt=""
+                  class="postDetail-reportIcon"
                 />
-              </div>
-              <div class="authorInfo" @click.prevent="goToAuthorProfile">
-                <p class="authorName">{{ displayAuthorName }}</p>
-                <p class="authorRole">{{ displayAuthorLocation }}</p>
-              </div>
+                <span>{{ t("reportPost") }}</span>
+              </button>
             </div>
-
-            <!-- TODO: Replace with API data from author.bio when BE endpoint is ready -->
-            <p v-if="authorBio" class="authorStory">{{ authorBio }}</p>
-            <p v-else class="authorStory">{{ t("noBioYet") }}</p>
-          </div>
-
-          <!-- REPORT POST BUTTON (moved to bottom) -->
-          <div class="postDetail-reportSection">
-            <button
-              type="button"
-              class="postDetail-reportBtn"
-              @click="handleReportDream"
-            >
-              <img
-                src="/other_icons/report.svg"
-                alt="Report"
-                class="postDetail-reportIcon"
-              />
-              <span>REPORT A POST</span>
-            </button>
           </div>
         </template>
 
@@ -351,9 +368,9 @@ import { useEdgeSwipeBack } from "src/composables/useEdgeSwipeBack";
 import { normalizePost } from "src/utils/normalizePost";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { getPostTypeIcon } from "src/utils/postIcons";
-import { getUserAvatarUrl } from "src/utils/avatar";
+import { getUserAvatarUrl, getUserInitials } from "src/utils/avatar";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
-import UserAvatar from "src/components/common/UserAvatar.vue";
+import PageTitle from "src/components/ui/PageTitle.vue";
 import { Notify } from "quasar";
 import { useCommentsStore } from "src/stores/comments";
 
@@ -549,7 +566,7 @@ const displayAuthorAvatar = computed(() => {
     });
   }
 
-  // Return avatar URL or null (UserAvatar component will show initials)
+  // Return avatar URL or null (we'll show initials in the template if null)
   return avatarUrl;
 });
 
@@ -586,6 +603,8 @@ const authorBio = computed(() => {
   const postWithBio = p as PostDetail & { user?: { bio?: string | null } };
   return postWithBio.author_bio || postWithBio.user?.bio || null;
 });
+
+const authorInitials = computed(() => getUserInitials(displayAuthorName.value));
 
 // Post owner ID for reply functionality
 const postOwnerId = computed(() => {

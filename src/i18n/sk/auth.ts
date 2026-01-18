@@ -120,8 +120,10 @@ export default {
   aboutTheProblem: "O probléme",
   aboutTheIdea: "O nápade",
   aboutAuthor: "O autorovi",
+  aboutDonee: "O donee",
   about: "o mne",
   noBioYet: "Zatiaľ žiadne bio.",
+  reportPost: "Nahlásiť príspevok",
   // Contribution forms
   helpAccomplish: "POMÔCŤ SPLNIŤ",
   helpToFulfill: "POMÔCŤ SPLNIŤ",
