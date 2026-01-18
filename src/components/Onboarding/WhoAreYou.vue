@@ -372,6 +372,10 @@ watch(localGender, (val) => {
 
 // Debounce timer for email validation
 let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null;
+let emailCheckAbort: AbortController | null = null;
+let lastCheckedEmail = "";
+let lastCheckedExists: boolean | null = null;
+let emailCheckSeq = 0;
 
 // Check if email exists on backend
 const checkEmailExists = async (email: string) => {
@@ -379,20 +383,42 @@ const checkEmailExists = async (email: string) => {
 
   // Validate email format before making API call
   if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("📧 Skipping email check - invalid format:", trimmedEmail);
-    }
     return; // Don't check invalid emails
   }
 
   try {
-    const { api } = await import("boot/axios");
-
-    if (process.env.NODE_ENV === "development") {
-      console.log("📧 Checking email:", trimmedEmail);
+    // Cache: if we already checked this exact email, reuse result instantly
+    if (trimmedEmail === lastCheckedEmail && lastCheckedExists !== null) {
+      if (lastCheckedExists) {
+        if (!onboardingStore.fieldErrors) onboardingStore.fieldErrors = {};
+        onboardingStore.fieldErrors.email =
+          "This email is already registered. Please choose another one or log in.";
+        emailTouched.value = true;
+      } else if (onboardingStore.fieldErrors?.email) {
+        delete onboardingStore.fieldErrors.email;
+      }
+      return;
     }
 
-    const { data } = await api.post("/check-email", { email: trimmedEmail });
+    // Cancel previous in-flight request so only latest result can win
+    if (emailCheckAbort) {
+      emailCheckAbort.abort();
+    }
+    emailCheckAbort = new AbortController();
+    const seq = ++emailCheckSeq;
+
+    const { data } = await api.post(
+      "/check-email",
+      { email: trimmedEmail },
+      { signal: emailCheckAbort.signal }
+    );
+
+    // Ignore stale responses (user typed a new email)
+    if (seq !== emailCheckSeq) return;
+    if ((localEmail.value || "").trim() !== trimmedEmail) return;
+
+    lastCheckedEmail = trimmedEmail;
+    lastCheckedExists = !!data?.exists;
 
     if (data.exists) {
       // Email exists - set field error
@@ -408,30 +434,17 @@ const checkEmailExists = async (email: string) => {
       }
     }
   } catch (error: unknown) {
+    // Abort is expected when user keeps typing
+    if (error && typeof error === "object" && "name" in error && (error as { name?: string }).name === "CanceledError") {
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorResponse = (error as any).response;
 
-    // Log error details for debugging
-    if (process.env.NODE_ENV === "development") {
-      console.warn("Failed to check email:", error);
-      if (errorResponse) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.warn("Response status:", errorResponse.status);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.warn("Response data:", errorResponse.data);
-      }
-    }
-
     // Handle 429 (Too Many Requests) - rate limiting
-    // Silently fail - don't block user from continuing with registration
-    // Frontend validation will handle email format validation
+    // Don't block user; backend will validate on register. We'll just skip this check.
     if (errorResponse?.status === 429) {
-      // Rate limit reached - silently ignore, user can still register
-      // The email will be validated on the backend during registration
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Email check rate limit reached - skipping check");
-      }
-      // No need to return here - function naturally ends
+      return;
     }
 
     // Silently fail for all other errors (including 422 validation errors)
@@ -453,11 +466,17 @@ watch(localEmail, (val) => {
     clearTimeout(emailCheckTimeout);
   }
 
-  // Debounce email check - wait 800ms after user stops typing to reduce API calls
-  if (val && val.trim()) {
+  // Cancel in-flight request when user edits email
+  if (emailCheckAbort) {
+    emailCheckAbort.abort();
+    emailCheckAbort = null;
+  }
+
+  // Debounce email check - keep UX snappy but avoid spamming backend
+  if (val && val.trim() && emailRegex.test(val.trim())) {
     emailCheckTimeout = setTimeout(() => {
       checkEmailExists(val);
-    }, 800);
+    }, 450);
   }
 
   emit("update:email", val);
@@ -775,20 +794,11 @@ const handleProfileCityChange = (value: string | number) => {
 watch(
   () => onboardingStore.fieldErrors?.email,
   (emailError, oldEmailError) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("📧 Watch triggered - emailError:", emailError, "oldEmailError:", oldEmailError);
-      console.log("📧 Full fieldErrors:", onboardingStore.fieldErrors);
-    }
     if (emailError) {
       // If there's a server error (e.g., existing email), mark field as touched
       // so the error is immediately visible
       emailTouched.value = true;
       triedSubmit.value = true;
-      if (process.env.NODE_ENV === "development") {
-        console.log("📧 Setting emailTouched and triedSubmit to true");
-        console.log("📧 shouldShowEmailError will be:", shouldShowEmailError.value);
-        console.log("📧 emailErrorMessage will be:", emailErrorMessage.value);
-      }
       // Show notification only if error is new (not on initial mount)
       if (emailError !== oldEmailError) {
         Notify.create({
@@ -797,11 +807,6 @@ watch(
           position: "top",
           timeout: 5000
         });
-      }
-    } else if (oldEmailError && !emailError) {
-      // Error was cleared
-      if (process.env.NODE_ENV === "development") {
-        console.log("📧 Email error was cleared");
       }
     }
   },
@@ -833,20 +838,6 @@ onMounted(() => {
   if (onboardingStore.fieldErrors?.email) {
     emailTouched.value = true;
     triedSubmit.value = true;
-    if (process.env.NODE_ENV === "development") {
-      console.log("📧 Component mounted with email error:", onboardingStore.fieldErrors.email);
-      console.log("📧 emailTouched:", emailTouched.value, "triedSubmit:", triedSubmit.value);
-      console.log("📧 emailServerError:", emailServerError.value);
-      console.log("📧 shouldShowEmailError:", shouldShowEmailError.value);
-      console.log("📧 emailErrorMessage:", emailErrorMessage.value);
-    }
-    // Force update to ensure error is visible
-    nextTick(() => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("📧 After nextTick - shouldShowEmailError:", shouldShowEmailError.value);
-        console.log("📧 After nextTick - emailErrorMessage:", emailErrorMessage.value);
-      }
-    });
   }
 });
 
@@ -854,6 +845,10 @@ onBeforeUnmount(() => {
   // Clear timeout on unmount
   if (emailCheckTimeout) {
     clearTimeout(emailCheckTimeout);
+  }
+  if (emailCheckAbort) {
+    emailCheckAbort.abort();
+    emailCheckAbort = null;
   }
 });
 
@@ -950,33 +945,6 @@ const isFormValid = computed(() => {
     !!genderValid &&
     !!continentValid &&
     !!countryValid;
-
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development" && !isValid) {
-    console.log("Form validation check:", {
-      username: usernameValid,
-      email: emailValid,
-      password: passwordValid,
-      repeatPassword: repeatPasswordValid,
-      passwordsMatch,
-      dateOfBirth: dateOfBirthValid,
-      gender: genderValid,
-      continent: continentValid,
-      country: countryValid,
-      city: "optional",
-      values: {
-        username: localUsername.value,
-        email: localEmail.value,
-        password: localPassword.value ? "***" : "",
-        repeatPassword: localRepeatPassword.value ? "***" : "",
-        dateOfBirth: localDateOfBirth.value,
-        gender: localGender.value,
-        continent: localProfileContinent.value,
-        country: localProfileCountry.value,
-        city: localProfileCity.value
-      }
-    });
-  }
 
   return isValid;
 });
