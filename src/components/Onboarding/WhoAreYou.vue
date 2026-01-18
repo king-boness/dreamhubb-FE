@@ -303,7 +303,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, withDefaults } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, withDefaults } from "vue";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { Notify } from "quasar";
 import { api } from "boot/axios";
@@ -444,7 +444,7 @@ const checkEmailExists = async (email: string) => {
     // Handle 429 (Too Many Requests) - rate limiting
     // Don't block user; backend will validate on register. We'll just skip this check.
     if (errorResponse?.status === 429) {
-      return;
+      // ignore
     }
 
     // Silently fail for all other errors (including 422 validation errors)
