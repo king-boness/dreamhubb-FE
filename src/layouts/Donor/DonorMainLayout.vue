@@ -157,12 +157,13 @@
         class="button-footer profileIcon"
         :class="{ activeProfile: activeNav === 'profile' }"
       >
-        <UserAvatar
-          :image-url="authStore.avatarUrl"
-          :name="authStore.name"
-          size="1.8rem"
-          class="profileImg"
-        />
+        <span class="profileAvatarWrap" aria-hidden="true">
+          <UserAvatar
+            :image-url="authStore.avatarUrl"
+            :name="authStore.name"
+            size="1.8rem"
+          />
+        </span>
         <span class="footer-pageName profileName">{{ t("profile") }}</span>
       </q-btn>
     </div>
@@ -909,6 +910,17 @@ onBeforeUnmount(() => {
     }
   }
 
+  // Disable "bounce" transforms for right-side icons (Notifications, Profile) to match donee behavior
+  .button-footer.red:hover,
+  .button-footer.profileIcon:hover {
+    transform: none !important;
+  }
+
+  .button-footer.red:active,
+  .button-footer.profileIcon:active {
+    transform: none !important;
+  }
+
   .active.button-footer,
   .activeProfile.button-footer {
     background: transparent !important;
@@ -1055,17 +1067,21 @@ onBeforeUnmount(() => {
 
   .activeProfile {
     background: transparent !important;
+  }
 
-    .profileImg {
-      // Use a "ring" that doesn't change layout (unlike border).
-      // Matches donee selected Profile look more reliably across Quasar/QAvatar.
-      box-shadow: 0 0 0 0.16rem #bd0043 !important;
-      border-radius: 999px !important;
-    }
+  .profileAvatarWrap {
+    position: relative;
+    display: inline-flex;
+    border-radius: 999px;
+  }
 
-    .profileImg img {
-      border-radius: 999px !important;
-    }
+  .activeProfile .profileAvatarWrap::after {
+    content: "";
+    position: absolute;
+    inset: -0.16rem;
+    border: 0.16rem solid #bd0043;
+    border-radius: 999px;
+    pointer-events: none;
   }
 
   .footer-pageName {
