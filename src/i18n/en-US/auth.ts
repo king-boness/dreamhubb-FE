@@ -122,7 +122,7 @@ export default {
   pleaseEnterValueBetween: "Please enter a value between {min} and {max}.",
   aboutTheDream: "About Dream",
   aboutTheProblem: "About Problem",
-  aboutTheIdea: "About Idea",
+  aboutTheIdea: "About idea",
   aboutAuthor: "About Author",
   aboutDonee: "About donee",
   about: "about",
