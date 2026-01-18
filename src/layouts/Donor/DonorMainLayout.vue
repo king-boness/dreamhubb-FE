@@ -827,7 +827,7 @@ onBeforeUnmount(() => {
       will-change: opacity, color;
     }
 
-    &:hover {
+    &:hover:not(.red):not(.profileIcon) {
       background: transparent !important;
       background-color: transparent !important;
       box-shadow: none !important;
@@ -857,7 +857,7 @@ onBeforeUnmount(() => {
       }
     }
 
-    &:active {
+    &:active:not(.red):not(.profileIcon) {
       background: transparent !important;
       background-color: transparent !important;
       box-shadow: none !important;
@@ -910,17 +910,6 @@ onBeforeUnmount(() => {
     }
   }
 
-  // Disable "bounce" transforms for right-side icons (Notifications, Profile) to match donee behavior
-  .button-footer.red:hover,
-  .button-footer.profileIcon:hover {
-    transform: none !important;
-  }
-
-  .button-footer.red:active,
-  .button-footer.profileIcon:active {
-    transform: none !important;
-  }
-
   .active.button-footer,
   .activeProfile.button-footer {
     background: transparent !important;
@@ -931,7 +920,6 @@ onBeforeUnmount(() => {
     outline: none !important;
     width: auto !important;
     height: auto !important;
-    transform: translateY(-1px) scale(1.02);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
     img {
@@ -1041,6 +1029,42 @@ onBeforeUnmount(() => {
       border: none !important;
       outline: none !important;
     }
+  }
+
+  // Active transform only for left-side icons (Home, Inspirations) – match donee behavior
+  .active.button-footer:not(.red):not(.profileIcon),
+  .activeProfile.button-footer:not(.red):not(.profileIcon) {
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  // Profile icon specific positioning – match donee offsets (donor has 4 buttons; profile is 4th)
+  .footer > .q-btn.button-footer.profileIcon:nth-child(4),
+  .footer > .button-footer.profileIcon:nth-child(4),
+  .footer .q-btn.button-footer.profileIcon,
+  .footer .button-footer.profileIcon {
+    transform: translateX(4px) translateY(4px) !important;
+  }
+
+  .footer > .q-btn.button-footer.profileIcon:nth-child(4):hover,
+  .footer > .button-footer.profileIcon:nth-child(4):hover,
+  .footer .q-btn.button-footer.profileIcon:hover,
+  .footer .button-footer.profileIcon:hover {
+    transform: translateX(4px) translateY(2px) scale(1.05) !important;
+  }
+
+  .footer > .q-btn.button-footer.profileIcon:nth-child(4):active,
+  .footer > .button-footer.profileIcon:nth-child(4):active,
+  .footer .q-btn.button-footer.profileIcon:active,
+  .footer .button-footer.profileIcon:active {
+    transform: translateX(4px) translateY(4px) scale(0.95) !important;
+  }
+
+  .footer > .q-btn.button-footer.profileIcon:nth-child(4).activeProfile,
+  .footer > .button-footer.profileIcon:nth-child(4).activeProfile,
+  .footer .q-btn.button-footer.profileIcon.activeProfile,
+  .footer .button-footer.profileIcon.activeProfile,
+  .footer .activeProfile.button-footer.profileIcon {
+    transform: translateX(4px) translateY(3px) scale(1.02) !important;
   }
 
   .no-padding-bottom {
