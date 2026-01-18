@@ -1060,9 +1060,32 @@ watch(showPasswordRulesDialog, (isOpen) => {
   }
 });
 
-const handleNextStep = () => {
+const handleNextStep = async () => {
   // Mark that user attempted to submit – errors can now be shown
   triedSubmit.value = true;
+  emailTouched.value = true;
+
+  // Ensure email duplication check has a chance to run BEFORE allowing next step.
+  // This fixes the case where user pastes an existing email and clicks "NEXT STEP" immediately.
+  const currentEmail = (localEmail.value || "").trim();
+  if (currentEmail && emailRegex.test(currentEmail)) {
+    // Cancel any pending debounce/retry so we don't double-fire
+    if (emailCheckTimeout) {
+      clearTimeout(emailCheckTimeout);
+      emailCheckTimeout = null;
+    }
+    if (emailCheckRetryTimeout) {
+      clearTimeout(emailCheckRetryTimeout);
+      emailCheckRetryTimeout = null;
+      emailCheckRetryEmail = "";
+      emailCheckRetryCount = 0;
+    }
+
+    // If we don't have a cached result yet, do an immediate check now
+    if (!emailExistsCache.has(currentEmail)) {
+      await checkEmailExists(currentEmail);
+    }
+  }
 
   if (!isFormValid.value) {
     // Prefer specific field errors for better UX
