@@ -41,6 +41,13 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
+    isAxiosStatus(error: unknown, status: number): boolean {
+      if (!error || typeof error !== "object") return false;
+      if (!("response" in error)) return false;
+      const anyErr = error as { response?: { status?: number } };
+      return anyErr.response?.status === status;
+    },
+
     async login(payload: { email: string; password: string }) {
       this.loading = true;
 
@@ -119,18 +126,30 @@ export const useAuthStore = defineStore("auth", {
         this.loading = false;
       } catch (error) {
         this.loading = false;
-        this.logout();
+        // If token is invalid/expired, do local-only logout (avoid /logout spam + loops)
+        if (this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403)) {
+          await this.logout({ remote: false, silent: true });
+        } else {
+          await this.logout({ remote: true, silent: false });
+        }
         throw error;
       }
     },
 
-    async logout() {
+    async logout(opts?: { remote?: boolean; silent?: boolean }) {
+      const remote = opts?.remote ?? true;
+      const silent = opts?.silent ?? false;
+
       try {
-        // Pokúsiť sa zavolať POST /logout (endpoint existuje, ale token sa na BE pravdepodobne reálne neinvaliduje)
-        await api.post("/logout");
+        if (remote) {
+          // Pokúsiť sa zavolať POST /logout (endpoint existuje, ale token sa na BE pravdepodobne reálne neinvaliduje)
+          await api.post("/logout");
+        }
       } catch (error) {
-        // Ignorovať chyby - aj tak vymazeme token
-        if (process.env.NODE_ENV === "development") {
+        // Ignore errors - we still clear local session.
+        // 401 is expected if token is already expired/invalid.
+        const isExpected = this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403);
+        if (!silent && process.env.NODE_ENV === "development" && !isExpected) {
           console.warn("Logout API call failed:", error);
         }
       } finally {

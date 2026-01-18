@@ -50,6 +50,7 @@ if (savedToken) {
 // ------------------------------------
 //  Request interceptor (token)
 // ------------------------------------
+let didLogTokenAttached = false;
 const attachInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.request.use(
     async (config) => {
@@ -57,8 +58,10 @@ const attachInterceptor = (instance: AxiosInstance) => {
 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        if (process.env.NODE_ENV === "development") {
-          console.log("🔐 Token attached:", token.substring(0, 20));
+        if (process.env.NODE_ENV === "development" && !didLogTokenAttached) {
+          // eslint-disable-next-line no-console
+          console.debug("🔐 Token attached (first request):", token.substring(0, 20));
+          didLogTokenAttached = true;
         }
       }
 

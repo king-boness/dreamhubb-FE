@@ -406,12 +406,12 @@ const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
           {
             label: "RETRY",
             color: "white",
-            handler: () => void submitWithIdempotency(),
+            handler: () => void submitWithIdempotency()
           },
           {
             label: "TRY AGAIN",
             color: "white",
-            handler: () => void submitWithIdempotency({ forceNewAttempt: true }),
+            handler: () => void submitWithIdempotency({ forceNewAttempt: true })
           }
         ]
       });

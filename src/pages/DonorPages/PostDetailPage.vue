@@ -1198,12 +1198,12 @@ const donateWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
           {
             label: "RETRY",
             color: "white",
-            handler: () => void donateWithIdempotency(),
+            handler: () => void donateWithIdempotency()
           },
           {
             label: "TRY AGAIN",
             color: "white",
-            handler: () => void donateWithIdempotency({ forceNewAttempt: true }),
+            handler: () => void donateWithIdempotency({ forceNewAttempt: true })
           }
         ]
       });

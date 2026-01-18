@@ -30,7 +30,14 @@ export const useAppStore = defineStore("app", {
             if (process.env.NODE_ENV === "development") {
               console.warn("⚠️ [AppStore] fetchUser failed during init:", error);
             }
-            await authStore.logout();
+            // If token is expired/invalid, avoid calling /logout (it would 401 and spam console)
+            const is401 =
+              error &&
+              typeof error === "object" &&
+              "response" in error &&
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ((error as any).response?.status === 401 || (error as any).response?.status === 403);
+            await authStore.logout({ remote: !is401, silent: true });
           }
         }
       } finally {
