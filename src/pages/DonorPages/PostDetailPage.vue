@@ -1155,11 +1155,12 @@ const handleConfirmDonate = async () => {
     return;
   }
 
+  const userId = authStore.user?.id || "guest";
+  const keyStorage = `dh_idemp_topup_${userId}_${postId}`;
+
   try {
     // Reset error state before donation
     postsStore.donateError = null;
-    const userId = authStore.user?.id || "guest";
-    const keyStorage = `dh_idemp_topup_${userId}_${postId}`;
     const idempotencyKey = getOrCreateIdempotencyKey(keyStorage);
 
     await postsStore.donateToPost(postId, selectedTokens.value, { idempotencyKey });
@@ -1179,6 +1180,11 @@ const handleConfirmDonate = async () => {
     // Close modal
     closeTopUpModal();
   } catch (error) {
+    // Clear key on definitive fail (4xx/5xx). Keep it on network fail to allow retry/refresh with same key.
+    if (error && typeof error === "object" && "response" in error) {
+      clearIdempotencyKey(keyStorage);
+    }
+
     // Error notification (error message is already set in store)
     const errorMessage = postsStore.donateError || "Failed to process donation. Please try again.";
     Notify.create({

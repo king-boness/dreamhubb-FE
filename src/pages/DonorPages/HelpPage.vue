@@ -357,9 +357,10 @@ const handleSubmit = async () => {
 
   submitting.value = true;
 
+  const userId = authStore.user?.id || "guest";
+  const keyStorage = `dh_idemp_contribution_${userId}_${postId.value}_${contributionType.value}`;
+
   try {
-    const userId = authStore.user?.id || "guest";
-    const keyStorage = `dh_idemp_contribution_${userId}_${postId.value}_${contributionType.value}`;
     const idempotencyKey = getOrCreateIdempotencyKey(keyStorage);
 
     await commentsStore.addComment(
@@ -389,6 +390,11 @@ const handleSubmit = async () => {
       params: { id: String(postId.value) }
     });
   } catch (error: unknown) {
+    // Clear key on definitive fail (4xx/5xx). Keep it on network fail to allow retry/refresh with same key.
+    if (error && typeof error === "object" && "response" in error) {
+      clearIdempotencyKey(keyStorage);
+    }
+
     if (process.env.NODE_ENV === "development") {
       console.error("Failed to submit contribution:", error);
     }

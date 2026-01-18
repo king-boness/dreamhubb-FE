@@ -75,7 +75,7 @@ const loadSubcategory = (): string => {
 // Function to load and sync subcategory value
 const loadAndSyncSubcategory = async () => {
   const loadedSubcategory = loadSubcategory();
-  
+
   if (loadedSubcategory !== selectedSubcategory.value) {
     selectedSubcategory.value = loadedSubcategory;
     // Wait for next tick to ensure WhatKindOfDream component has updated
@@ -92,10 +92,10 @@ watch(() => selectedSubcategory.value, (newVal) => {
   if (newVal && newVal.trim() !== "") {
     // Save to store immediately
     postCreationStore.setField("subcategory", newVal);
-    
+
     // Save to localStorage immediately
     localStorage.setItem("donee_postCreation_subcategory", newVal);
-    
+
     if (process.env.NODE_ENV === "development") {
       console.log("📝 PostSubcategoryPickerPage: selectedSubcategory changed to:", newVal, "- saved to store and localStorage");
     }
@@ -106,7 +106,7 @@ onMounted(async () => {
   if (process.env.NODE_ENV === "development") {
     console.log("📝 PostSubcategoryPickerPage: onMounted called");
   }
-  
+
   await loadAndSyncSubcategory();
 });
 
