@@ -145,7 +145,7 @@
           <div class="postDetailAbout">
             <!-- A) About {post type} -->
             <section class="postDetailAbout-section">
-              <PageTitle :title="aboutSectionTitle" />
+              <PageTitle :title="postType" />
               <p class="postDetailAbout-text">
                 {{ post.description }}
               </p>
@@ -155,7 +155,7 @@
 
             <!-- B) About donee -->
             <section class="postDetailAbout-section">
-              <PageTitle :title="t('aboutDonee')" />
+              <PageTitle title="donee" />
 
               <div
                 class="postDetailDoneeCard"
@@ -184,20 +184,11 @@
 
             <div class="postDetailAbout-separator" />
 
-            <!-- C) BIO -->
-            <section class="postDetailAbout-section">
-              <p class="postDetailAbout-text">
-                {{ authorBio || t("noBioYet") }}
-              </p>
-            </section>
-
-            <div class="postDetailAbout-separator" />
-
-            <!-- D) Report a post -->
+            <!-- Report a post -->
             <div class="postDetail-reportSection">
               <button
                 type="button"
-                class="postDetail-reportCta"
+                class="postDetail-reportBtn"
                 @click="handleReportDream"
               >
                 <img
@@ -205,7 +196,7 @@
                   alt=""
                   class="postDetail-reportIcon"
                 />
-                <span>{{ t("reportPost") }}</span>
+                <span>Report a post</span>
               </button>
             </div>
           </div>
@@ -594,14 +585,6 @@ const displayAuthorLocation = computed(() => {
   const p = post.value;
   if (!p) return "Unknown";
   return getLocationLabel(p, locale.value as string) || "Unknown";
-});
-
-const authorBio = computed(() => {
-  const p = post.value;
-  if (!p) return null;
-  // Prefer explicit author_bio from BE, fallback to nested user.bio if present
-  const postWithBio = p as PostDetail & { user?: { bio?: string | null } };
-  return postWithBio.author_bio || postWithBio.user?.bio || null;
 });
 
 const authorInitials = computed(() => getUserInitials(displayAuthorName.value));
