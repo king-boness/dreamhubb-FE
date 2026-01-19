@@ -1,5 +1,6 @@
 <template>
   <div class="TokensOnboarding-page" v-touch-swipe.mouse.right="goBack">
+    <BackOverlayButton :fallback="fallbackRoute" />
     <img src="/images/Auth/WhiteHands-Show.svg" alt="" />
     <div class="onboarding-text">
       <h5>Introducing Currency Tokens</h5>
@@ -23,10 +24,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import BackOverlayButton from "src/components/common/BackOverlayButton.vue";
+import { goBackOrFallback } from "src/utils/navigation";
 const router = useRouter();
+const route = useRoute();
+
+const fallbackRoute = computed(() => {
+  // Tokens info is reachable from both donor/donee layouts; fallback should go to the correct home feed.
+  return route.path.startsWith("/donee") ? { name: "donee-posts" } : { name: "donor-posts" };
+});
 const goBack = () => {
-  router.go(-1);
+  goBackOrFallback(router, fallbackRoute.value);
 };
 </script>
 <style scoped lang="scss">
