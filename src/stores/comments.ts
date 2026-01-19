@@ -167,6 +167,7 @@ export const useCommentsStore = defineStore("comments", {
         message: string;
         return_message?: string | null;
         is_private?: boolean;
+        images?: string[];
       },
       opts?: { idempotencyKey?: string }
     ) {
@@ -178,6 +179,7 @@ export const useCommentsStore = defineStore("comments", {
             message: payload.message,
             return_message: payload.return_message || null,
             is_private: payload.is_private || false,
+            images: Array.isArray(payload.images) && payload.images.length > 0 ? payload.images : undefined,
             idempotency_key: opts?.idempotencyKey || undefined
           },
           opts?.idempotencyKey

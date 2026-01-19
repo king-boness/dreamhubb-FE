@@ -67,7 +67,13 @@
         </q-input>
       </div>
       <div class="helpPage-imageUploadDiv">
-        <ImageUploader class="helpPage-imageUploadComponent" :max="5" upload-msg="add image"></ImageUploader>
+        <ImageUploader
+          ref="imageUploaderRef"
+          class="helpPage-imageUploadComponent"
+          :max="5"
+          upload-msg="add image"
+          @imagesUpdated="handleImagesUpdated"
+        ></ImageUploader>
       </div>
 
       <!-- Sticky Footer CTA - placed immediately after "add image" -->
@@ -110,7 +116,13 @@
         </q-input>
       </div>
       <div class="helpPage-imageUploadDiv">
-        <ImageUploader class="helpPage-imageUploadComponent" :max="5" upload-msg="add image"></ImageUploader>
+        <ImageUploader
+          ref="imageUploaderRef"
+          class="helpPage-imageUploadComponent"
+          :max="5"
+          upload-msg="add image"
+          @imagesUpdated="handleImagesUpdated"
+        ></ImageUploader>
       </div>
 
       <!-- Sticky Footer CTA - placed immediately after "add image" -->
@@ -154,6 +166,7 @@ import AppSplash from "src/components/common/AppSplash.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
 import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
+import type { UploadedImage } from "src/composables/useUpload";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -259,6 +272,15 @@ const privacy = ref(false);
 const isLiked = ref(false);
 const message = ref("");
 const submitting = ref(false);
+
+const imageUploaderRef = ref<InstanceType<typeof ImageUploader> | null>(null);
+const contributionImages = ref<string[]>([]);
+
+const handleImagesUpdated = (imgs: UploadedImage[]) => {
+  contributionImages.value = (imgs || [])
+    .map((img) => img?.secure_url)
+    .filter((u): u is string => typeof u === "string" && u.trim().length > 0);
+};
 
 // Computed properties for post display
 const formattedDate = computed(() => {
@@ -372,7 +394,8 @@ const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
         type: contributionType.value,
         message: contributionType.value === "accomplish" ? message.value : helpWithText.value, // help part from helpWithText
         return_message: contributionType.value === "help" ? returnText.value : null, // return part from returnText
-        is_private: privacy.value
+        is_private: privacy.value,
+        images: contributionImages.value
       },
       { idempotencyKey }
     );
@@ -386,6 +409,10 @@ const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
 
     // Refresh unread badge (best-effort)
     void notificationsStore.fetchUnreadCount();
+
+    // Reset uploader + images state
+    contributionImages.value = [];
+    imageUploaderRef.value?.reset?.();
 
     // Redirect back to post detail
     router.push({
