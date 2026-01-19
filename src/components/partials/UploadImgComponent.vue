@@ -40,10 +40,11 @@
 
       <!-- Add photo tile as the last item (until max is reached) -->
       <div
-        v-if="canAddMore && !isUploading"
+        v-if="!isUploading"
         class="uploadImgIcon-Div uploadImgIcon-Div--tile"
+        :class="{ 'uploadImgIcon-Div--disabled': !canAddMore }"
         role="listitem"
-        @click="append"
+        @click="handleAddTileClick"
       >
         <img src="/icons/uploadImg-icon.svg" alt="" class="uploadImg-icon" />
       </div>
@@ -51,6 +52,7 @@
       <!-- Scroll target to keep last photo + add tile visible after adding -->
       <div ref="endMarkerEl" class="endMarker" aria-hidden="true"></div>
     </div>
+    <div v-if="error" class="error">{{ error }}</div>
     <q-linear-progress v-if="isUploading" :indeterminate="true" color="primary" class="q-mt-md" />
   </div>
 </template>
@@ -186,6 +188,11 @@
   scroll-snap-align: end;
 }
 
+.uploadImgIcon-Div--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .endMarker {
   flex: 0 0 auto;
   width: 1px;
@@ -269,6 +276,14 @@ const drop = async (e: DragEvent) => {
 
 const append = () => {
   uploadInput.value?.click();
+};
+
+const handleAddTileClick = () => {
+  if (!canAddMore.value) {
+    error.value = props.maxError || `Maximum files is ${props.max || 0}`;
+    return;
+  }
+  append();
 };
 
 const handleUpload = async (files: File[]) => {
