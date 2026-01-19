@@ -459,6 +459,14 @@ const citiesFromBackend = ref<CityFromBackend[]>([]); // Cities with IDs from BE
 const countryIdForCities = ref<number | null>(null); // Store country ID for fetching cities
 const cityOptionsLoading = ref(false);
 
+const getHttpStatus = (err: unknown): number | null => {
+  if (!err || typeof err !== "object") return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const e = err as any;
+  const status = e?.response?.status;
+  return typeof status === "number" ? status : null;
+};
+
 const selectedCityLabel = computed(() => {
   const val = localCity.value;
   if (val === "" || val === null || val === undefined) return "";
@@ -527,6 +535,29 @@ const updateCityOptions = async () => {
 
   // If emitCityId is true, fetch cities with IDs from BE
   if (props.emitCityId) {
+    // BE resolver needs continent+country names; if continent is missing, skip BE and fall back.
+    // This also prevents noisy 400s when props set country without continent.
+    if (!localContinent.value) {
+      const countryCode = getCountryCode(localCountry.value);
+      if (countryCode) {
+        const cities = getCitiesByCountryCode(countryCode);
+        const citiesMapped: CityFromBackend[] = cities.map((name: string) => ({
+          id: name,
+          name
+        }));
+        citiesFromBackend.value = citiesMapped;
+        const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+        allCitiesForCountry.value = cityOptions;
+        filteredCityOptions.value = cityOptions;
+        rehydrateCityModelFromOptions();
+      } else {
+        allCitiesForCountry.value = [];
+        filteredCityOptions.value = [];
+        citiesFromBackend.value = [];
+      }
+      return;
+    }
+
     cityOptionsLoading.value = true;
     try {
       // First, get country_id from country name
@@ -564,14 +595,28 @@ const updateCityOptions = async () => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch cities with IDs:", error);
+      const status = getHttpStatus(error);
+      // 400 here usually means the DB doesn't contain the given continent/country yet.
+      // Treat it as an expected "fallback to static list" case (avoid noisy console errors).
+      if (process.env.NODE_ENV === "development") {
+        if (status && status !== 400) {
+          console.error("Failed to fetch cities with IDs:", error);
+        } else {
+          // eslint-disable-next-line no-console
+          console.debug("[WhereAreYou] Falling back to static cities list (no BE location match).", {
+            status,
+            continent: localContinent.value,
+            country: localCountry.value
+          });
+        }
+      }
       // Fallback to static data
       const countryCode = getCountryCode(localCountry.value);
       if (countryCode) {
         const cities = getCitiesByCountryCode(countryCode);
         // Convert string array to CityFromBackend format
-        const citiesMapped: CityFromBackend[] = cities.map((name: string, index: number) => ({
-          id: index,
+        const citiesMapped: CityFromBackend[] = cities.map((name: string) => ({
+          id: name,
           name
         }));
         citiesFromBackend.value = citiesMapped;
@@ -589,8 +634,8 @@ const updateCityOptions = async () => {
     if (countryCode) {
       const cities = getCitiesByCountryCode(countryCode);
       // Convert string array to CityFromBackend format
-      const citiesMapped: CityFromBackend[] = cities.map((name: string, index: number) => ({
-        id: index,
+      const citiesMapped: CityFromBackend[] = cities.map((name: string) => ({
+        id: name,
         name
       }));
       citiesFromBackend.value = citiesMapped;

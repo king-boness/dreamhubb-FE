@@ -57,6 +57,7 @@
       v-model:country="feedCountry"
       v-model:city="feedCityId"
       :emit-city-id="true"
+      city-model-mode="object"
       :enable-geolocation="false"
       :progress="80"
       :title="t('postsWillBeFrom')"
