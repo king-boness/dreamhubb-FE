@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <StatsFilterComponent></StatsFilterComponent>
 </template>
 <script setup lang="ts">

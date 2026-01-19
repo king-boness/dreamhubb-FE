@@ -21,8 +21,14 @@
         {{ uploadMsg ? uploadMsg : "Add image" }}
       </p>
     </div>
-    <div class="imgsPreview" v-show="uploadedImages.length > 0">
-      <div class="imageHolder" v-for="(img, i) in uploadedImages" :key="i">
+    <div
+      class="imgsPreview"
+      v-show="uploadedImages.length > 0"
+      ref="carouselEl"
+      role="list"
+      aria-label="Uploaded images"
+    >
+      <div class="imageHolder" v-for="(img, i) in uploadedImages" :key="i" role="listitem">
         <div class="uploadedImgDiv">
           <img :src="img.secure_url" class="uploadedImg" />
           <span class="delete" @click="handleDelete(i)">
@@ -30,14 +36,20 @@
           </span>
           <q-spinner v-if="uploadingStates[i]" color="primary" size="20px" class="spinner-overlay" />
         </div>
-        <div
-          class="plus uploadImgIcon-Div"
-          @click="append"
-          v-if="i === uploadedImages.length - 1 && !isUploading"
-        >
-          <img src="/icons/uploadImg-icon.svg" alt="" class="uploadImg-icon" />
-        </div>
       </div>
+
+      <!-- Add photo tile as the last item (until max is reached) -->
+      <div
+        v-if="canAddMore && !isUploading"
+        class="uploadImgIcon-Div uploadImgIcon-Div--tile"
+        role="listitem"
+        @click="append"
+      >
+        <img src="/icons/uploadImg-icon.svg" alt="" class="uploadImg-icon" />
+      </div>
+
+      <!-- Scroll target to keep last photo + add tile visible after adding -->
+      <div ref="endMarkerEl" class="endMarker" aria-hidden="true"></div>
     </div>
     <q-linear-progress v-if="isUploading" :indeterminate="true" color="primary" class="q-mt-md" />
   </div>
@@ -45,8 +57,9 @@
 
 <style scoped lang="scss">
 .container {
-  width: 24rem;
-  height: 8rem;
+  width: 100%;
+  max-width: 24rem;
+  min-height: 8rem;
   background: rgb(19, 19, 19);
   border-radius: 1rem;
   position: relative;
@@ -99,20 +112,25 @@
   }
   .imgsPreview {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-start;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
 
     .imageHolder {
       display: flex;
-      flex-basis: 1%;
       position: relative;
       height: 6rem;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
       .uploadedImgDiv {
         height: 6rem;
         width: 6rem;
-        margin: 0 0.5rem;
         position: relative;
 
         .uploadedImg {
@@ -143,23 +161,40 @@
           z-index: 10;
         }
       }
-      .uploadImgIcon-Div {
-        background: rgb(44, 44, 44);
-        height: 6rem;
-        width: 6rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 1.5rem;
-        margin: 0 0.5rem;
-        margin-left: 1rem;
-      }
+    }
+
+    // Add photo tile (last element in the carousel)
+    .uploadImgIcon-Div {
+      background: rgb(44, 44, 44);
+      height: 6rem;
+      width: 6rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 1.5rem;
+      flex: 0 0 auto;
+      scroll-snap-align: end;
+      cursor: pointer;
     }
   }
 }
+
+.uploadImgIcon-Div--tile {
+  flex: 0 0 auto;
+  height: 6rem;
+  width: 6rem;
+  scroll-snap-align: end;
+}
+
+.endMarker {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: end;
+}
 </style>
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { useUpload, type UploadedImage } from "src/composables/useUpload";
 
 const props = defineProps<{
@@ -184,6 +219,29 @@ const error = ref("");
 const uploadedImages = ref<UploadedImage[]>([]);
 const isUploading = ref(false);
 const uploadingStates = ref<boolean[]>([]);
+
+const carouselEl = ref<HTMLElement | null>(null);
+const endMarkerEl = ref<HTMLElement | null>(null);
+
+const canAddMore = computed(() => {
+  if (!props.max) return true;
+  return uploadedImages.value.length < props.max;
+});
+
+const scrollToEnd = async (opts?: { smooth?: boolean }) => {
+  await nextTick();
+  const behavior = opts?.smooth === false ? "auto" : "smooth";
+
+  // Prefer scrollIntoView (more robust across browsers)
+  if (endMarkerEl.value) {
+    endMarkerEl.value.scrollIntoView({ behavior, inline: "end", block: "nearest" });
+    return;
+  }
+  // Fallback
+  if (carouselEl.value) {
+    carouselEl.value.scrollTo({ left: carouselEl.value.scrollWidth, behavior });
+  }
+};
 
 const dragOver = () => {
   dropped.value = 2;
@@ -294,6 +352,15 @@ const handleDelete = async (index: number) => {
     uploadInput.value.value = "";
   }
 };
+
+watch(
+  () => uploadedImages.value.length,
+  async (newLen, oldLen) => {
+    if (newLen > oldLen) {
+      await scrollToEnd();
+    }
+  }
+);
 
 const reset = () => {
   if (uploadInput.value) {
