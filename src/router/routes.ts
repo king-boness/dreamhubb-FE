@@ -216,7 +216,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           requiresAuth: true,
           showHeaderBack: true,
-          headerBackFallback: { name: "donor-post-detail", params: { id: ":id" } }
+          headerBackFallback: { name: "donor-post-detail", params: { id: ":id" } },
+          hideFooter: true
         },
         component: () => import("src/pages/DonorPages/SettingsReportPage.vue"),
         name: "donor-post-report"
@@ -459,7 +460,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "tokens",
-        meta: { requiresAuth: true, showHeaderBack: true, headerBackFallback: "/donee/posts" },
+        meta: { requiresAuth: true, showHeaderBack: true, headerBackFallback: "/donee/posts", hideFooter: true },
         component: () => import("src/pages/DonorPages/TokensOnboardingPage.vue"),
         name: "donee-token"
       },
@@ -471,7 +472,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "tokenshop",
-        meta: { requiresAuth: true, showHeaderBack: true, headerBackFallback: "donee-token" },
+        meta: { requiresAuth: true, showHeaderBack: true, headerBackFallback: "donee-token", hideFooter: true },
         component: () => import("src/pages/DonorPages/TokensPage.vue"),
         name: "donee-tokenshop"
       },
