@@ -1230,6 +1230,11 @@ const handleFileChange = async (event: Event) => {
       border-color: rgba(255, 255, 255, 0.28);
     }
 
+    /* Remove extra gap between title and text only for this bubble */
+    :deep(.postCreation-submitBubble .dhHintBubble-title) {
+      margin-bottom: 0 !important;
+    }
+
     .postCreation-error {
       font-size: 0.875rem;
       color: #ff2c8b;
