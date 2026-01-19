@@ -36,12 +36,29 @@
       </div>
 
       <div class="image-preview-content">
-        <img
-          v-if="currentImageUrl"
-          :src="currentImageUrl"
-          :alt="`Image ${currentIndex + 1}`"
-          class="image-preview-image"
-        />
+        <q-carousel
+          v-if="images.length > 0"
+          v-model="currentIndex"
+          animated
+          swipeable
+          :arrows="false"
+          :navigation="false"
+          class="image-preview-carousel"
+        >
+          <q-carousel-slide
+            v-for="(url, idx) in images"
+            :key="`${idx}-${url}`"
+            :name="idx"
+            class="image-preview-slide"
+          >
+            <img
+              :src="url"
+              :alt="`Image ${idx + 1}`"
+              class="image-preview-image"
+              draggable="false"
+            />
+          </q-carousel-slide>
+        </q-carousel>
       </div>
     </q-card>
   </q-dialog>
@@ -71,10 +88,7 @@ const isOpen = computed({
   set: (value) => emit("update:modelValue", value)
 });
 
-const currentImageUrl = computed(() => {
-  if (props.images.length === 0) return null;
-  return props.images[currentIndex.value] || props.images[0];
-});
+// currentIndex drives QCarousel; we keep it in bounds on updates.
 
 // Watch for initialIndex changes
 watch(() => props.initialIndex, (newIndex) => {
@@ -210,6 +224,19 @@ watch(isOpen, (open) => {
   justify-content: center;
   overflow: hidden;
   padding: 2rem;
+}
+
+.image-preview-carousel {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.image-preview-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .image-preview-image {

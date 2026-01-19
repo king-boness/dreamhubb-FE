@@ -24,6 +24,7 @@ export interface Comment {
   type: "help" | "accomplish";
   message: string;
   return_message?: string | null;
+  images?: string[];
   is_private?: boolean;
   created_at: string;
   replies?: Reply[];
@@ -55,6 +56,40 @@ export const useCommentsStore = defineStore("comments", {
   },
 
   actions: {
+    normalizeContributionImages(raw: unknown): string[] {
+      if (!raw) return [];
+
+      if (Array.isArray(raw)) {
+        return raw.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+      }
+
+      if (typeof raw === "string") {
+        const trimmed = raw.trim();
+        if (!trimmed) return [];
+
+        // Try JSON array first
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            return parsed.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+          }
+        } catch {
+          // ignore
+        }
+
+        // Fallback: comma-separated or single URL
+        if (trimmed.includes(",")) {
+          return trimmed
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0);
+        }
+        return [trimmed];
+      }
+
+      return [];
+    },
+
     async fetchComments(postId: number, forceRefresh = false) {
       // Skip if already loading or already loaded (unless force refresh)
       if (!forceRefresh && (this.loadingByPostId[postId] || this.itemsByPostId[postId])) {
@@ -78,6 +113,9 @@ export const useCommentsStore = defineStore("comments", {
             type: contrib.type, // 'help' or 'accomplish'
             message: contrib.message,
             return_message: contrib.return_message,
+            images: this.normalizeContributionImages(
+              contrib.images ?? contrib.image_urls ?? contrib.attachments ?? contrib.photos
+            ),
             is_private: contrib.is_private,
             created_at: contrib.created_at,
             replies: (contrib.replies || []).map((reply: any) => ({
@@ -161,6 +199,12 @@ export const useCommentsStore = defineStore("comments", {
             type: data.contribution.type,
             message: data.contribution.message,
             return_message: data.contribution.return_message,
+            images: this.normalizeContributionImages(
+              data.contribution.images ??
+                data.contribution.image_urls ??
+                data.contribution.attachments ??
+                data.contribution.photos
+            ),
             is_private: data.contribution.is_private,
             created_at: data.contribution.created_at
           };

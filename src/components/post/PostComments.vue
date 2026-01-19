@@ -85,6 +85,23 @@
             </div>
           </div>
 
+          <!-- Comment images (clickable) -->
+          <div
+            v-if="comment.images && comment.images.length > 0"
+            class="post-comments-item-images"
+            aria-label="Comment images"
+          >
+            <button
+              v-for="(url, idx) in comment.images"
+              :key="`${comment.id}-${idx}-${url}`"
+              type="button"
+              class="post-comments-item-imageBtn"
+              @click="openCommentLightbox(comment.images || [], idx)"
+            >
+              <img :src="url" alt="" class="post-comments-item-image" />
+            </button>
+          </div>
+
           <!-- Reply Button (only for post owner) -->
           <div v-if="isPostOwner" class="post-comments-item-reply-section">
             <div class="post-comments-reply-btn-wrapper">
@@ -148,6 +165,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Fullscreen viewer for comment images -->
+    <ImagePreviewModal
+      v-model="isCommentLightboxOpen"
+      :images="commentLightboxImages"
+      :initial-index="commentLightboxIndex"
+    />
   </div>
 </template>
 
@@ -157,6 +181,7 @@ import { useRouter } from "vue-router";
 import { useCommentsStore, type Reply } from "src/stores/comments";
 import { useAuthStore } from "src/stores/auth";
 import UserAvatar from "src/components/common/UserAvatar.vue";
+import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
 
 interface Props {
   postId: number;
@@ -176,6 +201,17 @@ const emit = defineEmits<{
 const router = useRouter();
 const commentsStore = useCommentsStore();
 const authStore = useAuthStore();
+
+const isCommentLightboxOpen = ref(false);
+const commentLightboxImages = ref<string[]>([]);
+const commentLightboxIndex = ref(0);
+
+const openCommentLightbox = (images: string[], idx: number) => {
+  if (!images || images.length === 0) return;
+  commentLightboxImages.value = images;
+  commentLightboxIndex.value = Math.max(0, Math.min(idx, images.length - 1));
+  isCommentLightboxOpen.value = true;
+};
 
 // Reply state for each comment
 const replyTexts = ref<Record<number, string>>({});
@@ -388,6 +424,40 @@ const handleReplySubmit = async (commentId: number) => {
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.8);
   white-space: pre-wrap;
+}
+
+.post-comments-item-images {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 0.75rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+.post-comments-item-imageBtn {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0;
+  cursor: pointer;
+}
+
+.post-comments-item-imageBtn:active {
+  transform: scale(0.98);
+}
+
+.post-comments-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .post-comments-item-help-message {
