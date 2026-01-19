@@ -1205,6 +1205,12 @@ const handleFileChange = async (event: Event) => {
       pointer-events: auto;
     }
 
+    /* Nudge the bubble title ("...publish a post.") slightly higher for this specific bubble */
+    :deep(.postCreation-submitBubble .dhHintBubble-title) {
+      position: relative;
+      top: -5px;
+    }
+
     .postCreation-submitBubbleActions {
       display: flex;
       gap: 0.6rem;
@@ -1228,11 +1234,6 @@ const handleFileChange = async (event: Event) => {
     .postCreation-submitBubbleBtn--primary {
       background: rgba(0, 0, 0, 0.28);
       border-color: rgba(255, 255, 255, 0.28);
-    }
-
-    /* Remove extra gap between title and text only for this bubble */
-    :deep(.postCreation-submitBubble .dhHintBubble-title) {
-      margin-bottom: 0 !important;
     }
 
     .postCreation-error {
