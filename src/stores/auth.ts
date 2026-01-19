@@ -52,7 +52,7 @@ export const useAuthStore = defineStore("auth", {
       this.loading = true;
 
       if (process.env.NODE_ENV === "development") {
-        console.log("🚀 Login payload:", payload);
+        console.debug("🚀 Login attempt:", { email: payload.email });
       }
 
       try {
@@ -62,7 +62,10 @@ export const useAuthStore = defineStore("auth", {
         });
 
         if (process.env.NODE_ENV === "development") {
-          console.log("🔐 Login response:", data);
+          console.debug("🔐 Login response:", {
+            status: data?.status,
+            userId: data?.user?.id
+          });
         }
 
         if (data && data.status === "success") {
