@@ -127,7 +127,7 @@
           <q-input
             v-model.number="tokens"
             type="number"
-            :min="0"
+            :min="minReward"
             :max="maxTokens"
             dark
             outlined
@@ -144,10 +144,10 @@
         <div class="postCreation-sliderWrapper">
           <q-slider
             v-model.number="tokens"
-            :min="0"
+            :min="minReward"
             :max="maxTokens"
             :step="1"
-            :disable="maxTokens <= 0"
+            :disable="maxTokens < minReward"
             color="primary"
             track-size="10px"
             thumb-size="22px"
@@ -168,7 +168,7 @@
       <q-btn
         class="postCreation-submitButton"
         @click="handleSubmitPost"
-        :disabled="!postCreationStore.isValid || postCreationStore.loading"
+        :disabled="!canSubmitPost"
       >
         <span v-if="postCreationStore.loading">Creating post...</span>
         <span v-else>Submit Post</span>
@@ -200,6 +200,8 @@ const postCreationStore = usePostCreationStore();
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
+
+const MIN_SUBMIT_TOKENS = 10;
 
 // Handle close button click - same behavior as PostDetailPage
 const handleClose = () => {
@@ -248,6 +250,12 @@ const maxTokens = computed(() => {
   return Math.max(0, userTokensBalance.value);
 });
 
+// For submit/publish, reward must be at least 10 IF the user can afford it.
+// If user has < 10 tokens total, keep UI editable (min 0), but hard-disable submit.
+const minReward = computed(() => {
+  return userTokensBalance.value >= MIN_SUBMIT_TOKENS ? MIN_SUBMIT_TOKENS : 0;
+});
+
 // Remaining tokens after spending (using composable)
 const { remainingTokens } = useRemainingFunds(
   userTokensBalance,
@@ -255,25 +263,46 @@ const { remainingTokens } = useRemainingFunds(
 );
 
 const hasTokenError = computed(() => {
-  return tokens.value > maxTokens.value || tokens.value < 0;
+  return tokens.value > maxTokens.value || tokens.value < minReward.value;
 });
 
 const tokenErrorMessage = computed(() => {
   if (tokens.value > maxTokens.value) {
     return t("youDontHaveEnoughTokens");
   }
-  if (tokens.value < 0) {
-    return t("pleaseEnterValueBetween", { min: 0, max: maxTokens.value });
+  if (tokens.value < minReward.value) {
+    if (minReward.value >= MIN_SUBMIT_TOKENS) {
+      return "Reward musí byť aspoň 10 tokenov.";
+    }
+    return t("pleaseEnterValueBetween", { min: minReward.value, max: maxTokens.value });
   }
   return "";
 });
+
+const canSubmitPost = computed(() => {
+  return (
+    postCreationStore.isValid &&
+    !postCreationStore.loading &&
+    userTokensBalance.value >= MIN_SUBMIT_TOKENS &&
+    tokens.value >= MIN_SUBMIT_TOKENS &&
+    !hasTokenError.value
+  );
+});
+
+const ensureDefaultTokens = () => {
+  // Default reward to 10 for new posts when possible
+  if (maxTokens.value < MIN_SUBMIT_TOKENS) return;
+  if (postCreationStore.tokens < MIN_SUBMIT_TOKENS) {
+    postCreationStore.setTokens(MIN_SUBMIT_TOKENS);
+  }
+};
 
 // Handle token input change - only update store, no heavy operations
 const handleTokenInputChange = (value: number | string | null) => {
   if (value === null) return;
   const numValue = typeof value === "string" ? parseInt(value, 10) || 0 : value;
   // Clamp value but don't do heavy validation here - let computed properties handle it
-  const clampedValue = Math.max(0, Math.min(numValue, maxTokens.value));
+  const clampedValue = Math.max(minReward.value, Math.min(numValue, maxTokens.value));
   postCreationStore.setTokens(clampedValue);
 };
 
@@ -283,7 +312,7 @@ const handleSliderChange = (value: number | null) => {
   if (value > maxTokens.value) {
     tokens.value = maxTokens.value;
   } else {
-    tokens.value = value;
+    tokens.value = Math.max(minReward.value, value);
   }
 };
 
@@ -426,11 +455,13 @@ const categories = ref({
 // Load categories on mount
 onMounted(() => {
   loadSelectedCategories();
+  ensureDefaultTokens();
 });
 
 // Reload categories when component is activated (e.g., returning from submit-2 page or picker pages)
 onActivated(() => {
   loadSelectedCategories();
+  ensureDefaultTokens();
 });
 
 // Watch for changes to category and subcategory in store/localStorage
@@ -458,6 +489,24 @@ const handleSubmitPost = async () => {
         loading: postCreationStore.loading
       });
     }
+    return;
+  }
+
+  if (userTokensBalance.value < MIN_SUBMIT_TOKENS) {
+    Notify.create({
+      type: "negative",
+      message: "Na publikovanie príspevku potrebuješ aspoň 10 tokenov.",
+      position: "top"
+    });
+    return;
+  }
+
+  if (tokens.value < MIN_SUBMIT_TOKENS) {
+    Notify.create({
+      type: "negative",
+      message: "Reward musí byť aspoň 10 tokenov.",
+      position: "top"
+    });
     return;
   }
 
@@ -549,6 +598,15 @@ const handleSubmitPost = async () => {
     }
   }
 };
+
+// Keep tokens in bounds if user balance changes (e.g. after top up or other actions)
+watch([maxTokens, minReward], () => {
+  if (postCreationStore.loading) return;
+  const clampedValue = Math.max(minReward.value, Math.min(tokens.value, maxTokens.value));
+  if (clampedValue !== tokens.value) {
+    postCreationStore.setTokens(clampedValue);
+  }
+});
 const deleteImg = () => {
   uploadedImages.value.images.splice(imgIndex.value, 1);
   // Aktualizovať store - using new API

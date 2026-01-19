@@ -103,16 +103,13 @@ export const usePostCreationStore = defineStore("postCreation", {
 
     // Create post
     async createPost(): Promise<{ post_id: number } | null> {
-      // Debug log: start
-      console.log("[submitPost] start", {
-        title: this.title,
-        description: this.description,
-        tokens: this.tokens,
-        category: this.category,
-        subcategory: this.subcategory,
-        images: this.images,
-        dateDeadline: this.dateDeadline
-      });
+      const MIN_SUBMIT_TOKENS = 10;
+
+      // Frontend guard (extra safety): reward must be at least 10 before hitting BE
+      if ((this.tokens ?? 0) < MIN_SUBMIT_TOKENS) {
+        this.error = "Reward musí byť aspoň 10 tokenov.";
+        return null;
+      }
 
       // Validate required fields
       if (!this.isValid) {
@@ -167,17 +164,9 @@ export const usePostCreationStore = defineStore("postCreation", {
           payload.images = safeImages;
         }
 
-        // Debug log: before axios call
-        console.log("[submitPost] about to call /api/post-create", payload);
-
         const { data } = await api.post("/post-create", payload);
 
-        // Debug log: after axios call
-        console.log("[submitPost] /api/post-create response", data?.status, data);
-
         if (data.status === "success") {
-          // Debug log: success
-          console.log("[submitPost] success", { post_id: data.post_id, user: data.user });
           // Reset form after successful creation
           this.reset();
           return {
