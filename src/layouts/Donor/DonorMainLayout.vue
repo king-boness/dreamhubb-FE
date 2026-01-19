@@ -20,7 +20,7 @@
       <div class="donorLayout-topBar row">
         <!-- Logo + switch icon OR Back button -->
         <div class="row">
-          <template v-if="!isSettingsSubPage">
+          <template v-if="!shouldShowHeaderBack">
             <div
               class="iconContainer"
               @click="handleLogoClick"
@@ -39,7 +39,7 @@
             </div>
           </template>
           <template v-else>
-            <q-btn class="settingsHeader-button" @click="$router.go(-1)">
+            <q-btn class="settingsHeader-button" @click="handleHeaderBack">
               <img src="/icons/arrowIcon.svg" alt="" />
             </q-btn>
           </template>
@@ -181,6 +181,7 @@ import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
 import { useNotificationsStore } from "src/stores/notifications";
 import UserAvatar from "src/components/common/UserAvatar.vue";
+import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
 
 const { t } = useI18n();
 
@@ -292,6 +293,16 @@ const isSettingsSubPage = computed(() => {
   const routeName = route.name?.toString() || "";
   return routeName.startsWith("donor-settings") && routeName !== "donor-settings";
 });
+
+const shouldShowHeaderBack = computed(() => {
+  return Boolean(isSettingsSubPage.value || route.meta?.showHeaderBack);
+});
+
+const handleHeaderBack = () => {
+  const defaultFallback = isSettingsSubPage.value ? { name: "donor-settings" } : { name: "donor-posts" };
+  const fallback = resolveBackFallback(route.meta?.headerBackFallback, route, defaultFallback);
+  goBackOrFallback(router, fallback);
+};
 
 // Header/Footer visibility logic
 const shouldShowHeader = computed(() => {

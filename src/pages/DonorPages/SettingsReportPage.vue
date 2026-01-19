@@ -1,6 +1,5 @@
 <template>
   <div class="report-page">
-    <BackOverlayButton :fallback="fallbackRoute" />
     <div class="report-header">
       <span class="report-title">Report a post</span>
       <span class="report-description"
@@ -123,7 +122,6 @@
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Notify } from "quasar";
-import BackOverlayButton from "src/components/common/BackOverlayButton.vue";
 import { goBackOrFallback } from "src/utils/navigation";
 
 const route = useRoute();
@@ -167,10 +165,6 @@ const postId = computed(() => {
   return route.params.id ? String(route.params.id) : null;
 });
 
-const fallbackRoute = computed(() => {
-  return postId.value ? { name: "donor-post-detail", params: { id: postId.value } } : { name: "donor-posts" };
-});
-
 const canSendReport = computed(() => {
   return !!shape.value || !!helpMessage.value.trim();
 });
@@ -186,12 +180,12 @@ const handleSendReport = async () => {
   });
 
   // Redirect back to post detail or previous page
-  goBackOrFallback(router, fallbackRoute.value);
+  const fallback = postId.value ? { name: "donor-post-detail", params: { id: postId.value } } : { name: "donor-posts" };
+  goBackOrFallback(router, fallback);
 };
 </script>
 <style scoped lang="scss">
 .report-page {
-  position: relative;
   padding: 0 1.2rem;
   .radioButton-report {
     margin-left: -0.7rem;

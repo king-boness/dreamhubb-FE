@@ -4,7 +4,7 @@
     <AppSplash v-if="isSwitchingRole" class="splash-overlay" />
 
     <div class="row" style="">
-      <template v-if="!props.showBack">
+      <template v-if="!shouldShowBack">
         <div
           class="iconContainer"
           @click="handleLogoClick"
@@ -19,7 +19,7 @@
         </div>
       </template>
       <template v-else>
-        <q-btn class="settingsHeader-button" @click="$router.go(-1)"
+        <q-btn class="settingsHeader-button" @click="handleHeaderBack"
           ><img src="/icons/arrowIcon.svg" alt=""
         /></q-btn>
       </template>
@@ -185,11 +185,12 @@
 
 <script setup lang="ts">
 import { defineProps, ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { usePreferencesStore } from "src/stores/preferences";
 import { usePostsStore } from "src/stores/posts";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
+import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
 
 interface Props {
   karma: number;
@@ -213,9 +214,20 @@ const props: Props = defineProps({
 });
 
 const router = useRouter();
+const route = useRoute();
 const isSwitchingRole = ref(false);
 const preferencesStore = usePreferencesStore();
 const postsStore = usePostsStore();
+
+const shouldShowBack = computed(() => {
+  return Boolean(props.showBack || route.meta?.showHeaderBack);
+});
+
+const handleHeaderBack = () => {
+  const defaultFallback = { name: "donee-posts" };
+  const fallback = resolveBackFallback(route.meta?.headerBackFallback, route, defaultFallback);
+  goBackOrFallback(router, fallback);
+};
 
 // Logo imports
 const logoImageLight = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
