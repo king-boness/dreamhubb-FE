@@ -125,15 +125,16 @@
         <span class="postCreation-rewardTitle">Initial Reward</span>
         <div class="postCreation-tokenInputWrapper">
           <q-input
-            v-model.number="tokens"
+            v-model.number="rewardUi"
             type="number"
-            :min="minReward"
-            :max="maxTokens"
+            :min="MIN_SUBMIT_TOKENS"
+            :max="rewardUiMax"
             dark
             outlined
             class="postCreation-tokenInput"
             :error="hasTokenError"
             :error-message="tokenErrorMessage"
+            :disable="rewardControlsDisabled"
             @update:model-value="(val: string | number | null) => handleTokenInputChange(val ?? 0)"
           >
             <template #append>
@@ -143,11 +144,11 @@
         </div>
         <div class="postCreation-sliderWrapper">
           <q-slider
-            v-model.number="tokens"
-            :min="minReward"
-            :max="maxTokens"
+            v-model.number="rewardUi"
+            :min="MIN_SUBMIT_TOKENS"
+            :max="rewardUiMax"
             :step="1"
-            :disable="maxTokens < minReward"
+            :disable="rewardControlsDisabled"
             color="primary"
             track-size="10px"
             thumb-size="22px"
@@ -155,8 +156,8 @@
             @update:model-value="handleSliderChange"
           />
         </div>
-        <div v-if="maxTokens > 0" class="postCreation-tokenBalance">
-          {{ t("funds") }}: {{ remainingTokens }} tokens
+        <div class="postCreation-tokenBalance">
+          {{ t("funds") }}: {{ userTokensBalance }} tokens
         </div>
       </div>
     </div>
@@ -165,19 +166,53 @@
       <div v-if="postCreationStore.error" class="postCreation-error">
         {{ postCreationStore.error }}
       </div>
-      <q-btn
-        class="postCreation-submitButton"
-        @click="handleSubmitPost"
-        :disabled="!canSubmitPost"
-      >
-        <span v-if="postCreationStore.loading">Creating post...</span>
-        <span v-else>Submit Post</span>
-      </q-btn>
+      <div ref="submitCtaWrapperRef" class="postCreation-submitCtaWrapper" @click.stop>
+        <div v-if="showMinTokensBubble" class="postCreation-submitBubble" @click.stop>
+          <HintBubble
+            :title="t('minTokensPublishTitle')"
+            :text="t('minTokensPublishText')"
+            arrow="down"
+            :show-close="true"
+            @close="showMinTokensBubble = false"
+          >
+            <div class="postCreation-submitBubbleActions">
+              <q-btn
+                flat
+                no-caps
+                class="postCreation-submitBubbleBtn"
+                @click.stop="handleGoHowToGetTokens"
+              >
+                {{ t("howToGetTokens") }}
+              </q-btn>
+              <q-btn
+                flat
+                no-caps
+                class="postCreation-submitBubbleBtn postCreation-submitBubbleBtn--primary"
+                @click.stop="handleGoBuyTokens"
+              >
+                {{ t("buyTokens") }}
+              </q-btn>
+            </div>
+          </HintBubble>
+        </div>
+
+        <q-btn
+          class="postCreation-submitButton"
+          :class="{ 'postCreation-submitButton--minTokensBlocked': isMinTokensBlocked }"
+          @click="handleSubmitPost"
+          :disabled="!postCreationStore.isValid || postCreationStore.loading"
+          :ripple="!isMinTokensBlocked"
+          :aria-disabled="isMinTokensBlocked ? 'true' : undefined"
+        >
+          <span v-if="postCreationStore.loading">Creating post...</span>
+          <span v-else>Submit Post</span>
+        </q-btn>
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, onActivated, computed, nextTick } from "vue";
+import { ref, watch, onMounted, onActivated, computed, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { usePostCreationStore } from "src/stores/postCreation";
@@ -191,7 +226,7 @@ import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import type { UploadedImage } from "src/composables/useUpload";
 import { useUpload } from "src/composables/useUpload";
 import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
-import { useRemainingFunds } from "src/composables/useRemainingFunds";
+import HintBubble from "src/components/ui/HintBubble.vue";
 
 const { t } = useI18n();
 
@@ -250,43 +285,37 @@ const maxTokens = computed(() => {
   return Math.max(0, userTokensBalance.value);
 });
 
-// For submit/publish, reward must be at least 10 IF the user can afford it.
-// If user has < 10 tokens total, keep UI editable (min 0), but hard-disable submit.
-const minReward = computed(() => {
-  return userTokensBalance.value >= MIN_SUBMIT_TOKENS ? MIN_SUBMIT_TOKENS : 0;
+// UX rule: always DISPLAY min reward 10 in the reward UI.
+// If user balance < 10, lock controls and still show the requirement (10) without allowing submit.
+const rewardControlsDisabled = computed(() => userTokensBalance.value < MIN_SUBMIT_TOKENS);
+const rewardUiMax = computed(() => (rewardControlsDisabled.value ? MIN_SUBMIT_TOKENS : maxTokens.value));
+
+const rewardUi = computed<number>({
+  get: () => (rewardControlsDisabled.value ? MIN_SUBMIT_TOKENS : (tokens.value || 0)),
+  set: (v) => {
+    if (rewardControlsDisabled.value) return;
+    handleTokenInputChange(v);
+  }
 });
 
-// Remaining tokens after spending (using composable)
-const { remainingTokens } = useRemainingFunds(
-  userTokensBalance,
-  () => tokens.value
-);
-
 const hasTokenError = computed(() => {
-  return tokens.value > maxTokens.value || tokens.value < minReward.value;
+  if (rewardControlsDisabled.value) return false;
+  return tokens.value > maxTokens.value || tokens.value < MIN_SUBMIT_TOKENS;
 });
 
 const tokenErrorMessage = computed(() => {
+  if (rewardControlsDisabled.value) return "";
   if (tokens.value > maxTokens.value) {
     return t("youDontHaveEnoughTokens");
   }
-  if (tokens.value < minReward.value) {
-    if (minReward.value >= MIN_SUBMIT_TOKENS) {
-      return "Reward musí byť aspoň 10 tokenov.";
-    }
-    return t("pleaseEnterValueBetween", { min: minReward.value, max: maxTokens.value });
+  if (tokens.value < MIN_SUBMIT_TOKENS) {
+    return t("minTokensPublishTitle");
   }
   return "";
 });
 
-const canSubmitPost = computed(() => {
-  return (
-    postCreationStore.isValid &&
-    !postCreationStore.loading &&
-    userTokensBalance.value >= MIN_SUBMIT_TOKENS &&
-    tokens.value >= MIN_SUBMIT_TOKENS &&
-    !hasTokenError.value
-  );
+const isMinTokensBlocked = computed(() => {
+  return userTokensBalance.value < MIN_SUBMIT_TOKENS || tokens.value < MIN_SUBMIT_TOKENS;
 });
 
 const ensureDefaultTokens = () => {
@@ -302,7 +331,7 @@ const handleTokenInputChange = (value: number | string | null) => {
   if (value === null) return;
   const numValue = typeof value === "string" ? parseInt(value, 10) || 0 : value;
   // Clamp value but don't do heavy validation here - let computed properties handle it
-  const clampedValue = Math.max(minReward.value, Math.min(numValue, maxTokens.value));
+  const clampedValue = Math.max(MIN_SUBMIT_TOKENS, Math.min(numValue, maxTokens.value));
   postCreationStore.setTokens(clampedValue);
 };
 
@@ -312,7 +341,7 @@ const handleSliderChange = (value: number | null) => {
   if (value > maxTokens.value) {
     tokens.value = maxTokens.value;
   } else {
-    tokens.value = Math.max(minReward.value, value);
+    tokens.value = Math.max(MIN_SUBMIT_TOKENS, value);
   }
 };
 
@@ -492,21 +521,8 @@ const handleSubmitPost = async () => {
     return;
   }
 
-  if (userTokensBalance.value < MIN_SUBMIT_TOKENS) {
-    Notify.create({
-      type: "negative",
-      message: "Na publikovanie príspevku potrebuješ aspoň 10 tokenov.",
-      position: "top"
-    });
-    return;
-  }
-
-  if (tokens.value < MIN_SUBMIT_TOKENS) {
-    Notify.create({
-      type: "negative",
-      message: "Reward musí byť aspoň 10 tokenov.",
-      position: "top"
-    });
+  if (isMinTokensBlocked.value) {
+    showMinTokensBubble.value = !showMinTokensBubble.value;
     return;
   }
 
@@ -600,12 +616,54 @@ const handleSubmitPost = async () => {
 };
 
 // Keep tokens in bounds if user balance changes (e.g. after top up or other actions)
-watch([maxTokens, minReward], () => {
+watch([maxTokens], () => {
   if (postCreationStore.loading) return;
-  const clampedValue = Math.max(minReward.value, Math.min(tokens.value, maxTokens.value));
+  if (maxTokens.value >= MIN_SUBMIT_TOKENS) {
+    ensureDefaultTokens();
+  }
+  const clampedValue = Math.max(MIN_SUBMIT_TOKENS, Math.min(tokens.value, maxTokens.value));
   if (clampedValue !== tokens.value) {
     postCreationStore.setTokens(clampedValue);
   }
+});
+
+// Bubble (min tokens) UX
+const showMinTokensBubble = ref(false);
+const submitCtaWrapperRef = ref<HTMLElement | null>(null);
+
+const closeMinTokensBubble = () => {
+  showMinTokensBubble.value = false;
+};
+
+watch(isMinTokensBlocked, (blocked) => {
+  if (!blocked) {
+    closeMinTokensBubble();
+  }
+});
+
+const handleGoHowToGetTokens = () => {
+  closeMinTokensBubble();
+  router.push({ name: "donee-token" });
+};
+
+const handleGoBuyTokens = () => {
+  closeMinTokensBubble();
+  router.push({ name: "donee-tokenshop" });
+};
+
+const onDocPointerDown = (event: Event) => {
+  if (!showMinTokensBubble.value) return;
+  const target = event.target as Node | null;
+  if (submitCtaWrapperRef.value && target && submitCtaWrapperRef.value.contains(target)) return;
+  closeMinTokensBubble();
+};
+
+onMounted(() => {
+  document.addEventListener("pointerdown", onDocPointerDown, { capture: true });
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("pointerdown", onDocPointerDown, { capture: true });
 });
 const deleteImg = () => {
   uploadedImages.value.images.splice(imgIndex.value, 1);
@@ -1128,6 +1186,50 @@ const handleFileChange = async (event: Event) => {
     padding: 0 1rem;
     gap: 0.5rem;
 
+    .postCreation-submitCtaWrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .postCreation-submitBubble {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      // Arrow tip should be 10px above the CTA. HintBubble's arrow tip sits ~4px below the bubble box,
+      // so we offset by 10px + 4px = 14px.
+      bottom: calc(100% + 14px);
+      z-index: 10;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      pointer-events: auto;
+    }
+
+    .postCreation-submitBubbleActions {
+      display: flex;
+      gap: 0.6rem;
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .postCreation-submitBubbleBtn {
+      font-family: poppinsSemiBold;
+      font-size: 0.85rem;
+      border-radius: 0.6rem;
+      padding: 0.35rem 0.8rem;
+      color: rgba(255, 255, 255, 0.95);
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      min-height: 2.1rem;
+    }
+
+    .postCreation-submitBubbleBtn--primary {
+      background: rgba(0, 0, 0, 0.28);
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
     .postCreation-error {
       font-size: 0.875rem;
       color: #ff2c8b;
@@ -1151,6 +1253,10 @@ const handleFileChange = async (event: Event) => {
       margin-top: 1rem;
       margin-bottom: 2rem;
       font-family: montseraatSemiBold;
+
+      &.postCreation-submitButton--minTokensBlocked {
+        opacity: 0.75;
+      }
 
       &:disabled {
         opacity: 0.5;
