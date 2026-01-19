@@ -11,4 +11,3 @@ export function goBackOrFallback(router: Router, fallback: RouteLocationRaw) {
   }
   router.push(fallback);
 }
-
