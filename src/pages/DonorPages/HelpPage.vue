@@ -67,7 +67,7 @@
         </q-input>
       </div>
       <div class="helpPage-imageUploadDiv">
-        <ImageUploader class="helpPage-imageUploadComponent" :max="2" upload-msg="add image"></ImageUploader>
+        <ImageUploader class="helpPage-imageUploadComponent" :max="5" upload-msg="add image"></ImageUploader>
       </div>
 
       <!-- Sticky Footer CTA - placed immediately after "add image" -->
@@ -110,7 +110,7 @@
         </q-input>
       </div>
       <div class="helpPage-imageUploadDiv">
-        <ImageUploader class="helpPage-imageUploadComponent" :max="2" upload-msg="add image"></ImageUploader>
+        <ImageUploader class="helpPage-imageUploadComponent" :max="5" upload-msg="add image"></ImageUploader>
       </div>
 
       <!-- Sticky Footer CTA - placed immediately after "add image" -->
