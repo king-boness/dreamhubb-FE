@@ -145,7 +145,7 @@
           <div class="postDetailAbout">
             <!-- A) About {post type} -->
             <section class="postDetailAbout-section">
-              <PageTitle :title="postType" />
+              <PageTitle :title="aboutTypeTitle" />
               <p class="postDetailAbout-text">
                 {{ post.description }}
               </p>
@@ -155,7 +155,7 @@
 
             <!-- B) About donee -->
             <section class="postDetailAbout-section">
-              <PageTitle title="donee" />
+              <PageTitle :title="t('aboutDonee')" />
 
               <div
                 class="postDetailDoneeCard"
@@ -184,11 +184,20 @@
 
             <div class="postDetailAbout-separator" />
 
+            <!-- C) Bio -->
+            <section class="postDetailAbout-section">
+              <p class="postDetailAbout-text">
+                {{ displayAuthorBioText }}
+              </p>
+            </section>
+
+            <div class="postDetailAbout-separator" />
+
             <!-- Report a post -->
             <div class="postDetail-reportSection">
               <button
                 type="button"
-                class="postDetail-reportBtn"
+                class="postDetail-reportCta"
                 @click="handleReportDream"
               >
                 <img
@@ -196,7 +205,7 @@
                   alt=""
                   class="postDetail-reportIcon"
                 />
-                <span>Report a post</span>
+                <span>{{ t("reportPost") }}</span>
               </button>
             </div>
           </div>
@@ -364,6 +373,7 @@ import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import PageTitle from "src/components/ui/PageTitle.vue";
 import { Notify } from "quasar";
 import { useCommentsStore } from "src/stores/comments";
+import { api } from "boot/axios";
 
 const { t, locale } = useI18n();
 
@@ -613,16 +623,70 @@ const postType = computed(() => {
   return norm.category?.slug || "dream";
 });
 
-// Computed property for "About" section title
-const aboutSectionTitle = computed(() => {
-  const type = postType.value;
-  const titles: Record<string, string> = {
-    dream: t("aboutTheDream"),
-    problem: t("aboutTheProblem"),
-    idea: t("aboutTheIdea")
+const getPostTypeLowerLabel = (type: string): "dream" | "problem" | "idea" => {
+  if (type === "problem") return "problem";
+  if (type === "idea") return "idea";
+  return "dream";
+};
+
+const aboutTypeTitle = computed(() => {
+  const type = getPostTypeLowerLabel(postType.value);
+
+  // EN: "About dream/problem/idea" (type always lowercase)
+  if (!locale.value?.toString().startsWith("sk")) {
+    return `About ${type}`;
+  }
+
+  // SK: keep lowercase type as well
+  const skType: Record<typeof type, string> = {
+    dream: "sen",
+    problem: "problém",
+    idea: "nápad"
   };
-  return titles[type] || t("aboutTheDream");
+  return `O ${skType[type]}`;
 });
+
+type PublicUserProfile = {
+  id: number;
+  bio?: string | null;
+};
+
+const authorProfile = ref<PublicUserProfile | null>(null);
+
+const displayAuthorBioText = computed(() => {
+  const bio =
+    authorProfile.value?.bio ||
+    // fallback if BE ever embeds it in post payload
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((post.value as any)?.author_bio as string | null | undefined) ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((post.value as any)?.bio as string | null | undefined) ||
+    "";
+
+  const trimmed = typeof bio === "string" ? bio.trim() : "";
+  return trimmed ? trimmed : t("noBioYet");
+});
+
+const loadAuthorProfile = async (id: number) => {
+  try {
+    const { data } = await api.get(`/user/${id}`);
+    if (data?.status === "success" && data?.user) {
+      authorProfile.value = data.user as PublicUserProfile;
+    }
+  } catch {
+    // ignore (bio will fall back to "No bio yet.")
+  }
+};
+
+watch(authorId, async (newId) => {
+  if (!newId) {
+    authorProfile.value = null;
+    return;
+  }
+  // Avoid refetch if same author already loaded
+  if (authorProfile.value?.id === newId) return;
+  await loadAuthorProfile(newId);
+}, { immediate: true });
 
 // Load post by ID
 const loadPost = async (id: number) => {
