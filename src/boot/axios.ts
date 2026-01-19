@@ -79,12 +79,28 @@ const attachInterceptor = (instance: AxiosInstance) => {
       const originalRequest = error.config;
 
       if (error.response?.status === 401 && !originalRequest._retry) {
+        // IMPORTANT: Never try to refresh / redirect for auth endpoints (login/register/refresh/etc.)
+        // Otherwise invalid credentials on /login would hard-reload the page and wipe the form.
+        const url = String(originalRequest?.url || "");
+        const isAuthEndpoint =
+          url.includes("/login") ||
+          url.includes("/register") ||
+          url.includes("/refresh") ||
+          url.includes("/logout") ||
+          url.includes("/check-email");
+        if (isAuthEndpoint) {
+          return Promise.reject(error);
+        }
+
         originalRequest._retry = true;
 
         const token = localStorage.getItem("token");
         if (!token) {
           localStorage.removeItem("token");
-          window.location.href = "/login";
+          // Avoid reloading the login page if we're already there.
+          if (!String(window.location.href).includes("/login")) {
+            window.location.href = "/login";
+          }
           return Promise.reject(error);
         }
 

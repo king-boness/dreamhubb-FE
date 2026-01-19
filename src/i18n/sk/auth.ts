@@ -41,6 +41,7 @@ export default {
   // login messages
   userInactive: "Prosím over svoju emailovú adresu pomocou odkazu, ktorý sme ti poslali na email.",
   badCredentials: "Nesprávny e-mail alebo heslo.",
+  loginFillBoth: "Prosím vyplň e-mail aj heslo.",
   loginNetworkError: "Nepodarilo sa pripojiť. Skús to znova.",
   loginServerError: "Niečo sa pokazilo. Skús to neskôr.",
   loginError: "Niečo sa pokazilo. Skús to prosím neskôr.",

@@ -41,6 +41,7 @@ export default {
   // login messages
   userInactive: "Please verify your email address with the link we sent to your email address.",
   badCredentials: "Incorrect email or password.",
+  loginFillBoth: "Please fill in both email and password.",
   loginNetworkError: "Couldn't connect. Please try again.",
   loginServerError: "Something went wrong. Please try again later.",
   loginError: "Something went wrong. Please try again later.",

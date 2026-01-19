@@ -123,9 +123,10 @@ watch([email, password], () => {
 const onSubmit = async () => {
   if (!email.value || !password.value) {
     $q.notify({
-      message: "Please fill in both email and password.",
+      message: tOr("loginFillBoth", "Please fill in both email and password."),
       color: "negative",
-      icon: "error"
+      icon: "error",
+      timeout: 6500
     });
     return;
   }
@@ -183,7 +184,8 @@ const onSubmit = async () => {
       $q.notify({
         message: t("badCredentials"),
         color: "negative",
-        icon: "error"
+        icon: "error",
+        timeout: 8000
       });
 
       safeTriggerShake();
@@ -196,7 +198,8 @@ const onSubmit = async () => {
       $q.notify({
         message: tOr("loginNetworkError", "Couldn't connect. Please try again."),
         color: "negative",
-        icon: "error"
+        icon: "error",
+        timeout: 8000
       });
       return;
     }
@@ -206,7 +209,8 @@ const onSubmit = async () => {
       $q.notify({
         message: tOr("loginServerError", t("loginError")),
         color: "negative",
-        icon: "error"
+        icon: "error",
+        timeout: 8000
       });
       return;
     }
@@ -215,7 +219,8 @@ const onSubmit = async () => {
     $q.notify({
       message: t("loginError"),
       color: "negative",
-      icon: "error"
+      icon: "error",
+      timeout: 8000
     });
   }
 };
