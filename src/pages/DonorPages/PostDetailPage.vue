@@ -664,7 +664,7 @@ const displayAuthorBioText = computed(() => {
     "";
 
   const trimmed = typeof bio === "string" ? bio.trim() : "";
-  return trimmed ? trimmed : t("noBioYet");
+  return trimmed || t("noBioYet");
 });
 
 const loadAuthorProfile = async (id: number) => {
