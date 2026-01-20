@@ -67,7 +67,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Notify } from "quasar";
 import { api } from "boot/axios";
-import { normalizePost, type NormalizedPost } from "src/utils/normalizePost";
+import { normalizePost, type NormalizedPost, type RawPostFromAPI } from "src/utils/normalizePost";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -104,8 +104,8 @@ const fetchPosts = async () => {
       params: { category },
       signal: abortCtrl.signal
     });
-    const rawPosts = (data?.data || data?.posts || data || []) as unknown[];
-    const normalized = rawPosts.map((p) => normalizePost(p as any));
+    const rawPosts = (data?.data || data?.posts || data || []) as RawPostFromAPI[];
+    const normalized = rawPosts.map((p) => normalizePost(p));
     items.value = normalized.filter((p) => (p.user_id || p.author_id) === uid);
   } catch {
     items.value = [];
@@ -243,4 +243,3 @@ const formatDate = (dateString: string): string => {
   font-family: poppins;
 }
 </style>
-
