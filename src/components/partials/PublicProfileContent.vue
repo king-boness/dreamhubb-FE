@@ -29,17 +29,52 @@
     </div>
 
     <!-- Note: Settings button is NOT shown for public profiles -->
+
+    <!-- Donor: profile menu list -->
+    <div v-if="isDonorSide" class="publicProfileMenu">
+      <ProfileMenuItem
+        :label="`${t('reviews')} (${counts.reviews})`"
+        icon-src="/icons/starIcon.svg"
+        @click="goToReviews"
+      />
+      <ProfileMenuItem
+        :label="`${t('contributions')} (${counts.contributions})`"
+        icon-src="/icons/redGiftIcon.svg"
+        @click="goToContributions"
+      />
+      <ProfileMenuItem
+        :label="`${t('dreams')} (${counts.dreams})`"
+        icon-src="/icons/redCloudIcon.svg"
+        @click="goToPosts('dream')"
+      />
+      <ProfileMenuItem
+        :label="`${t('problems')} (${counts.problems})`"
+        icon-src="/icons/problemIcon.svg"
+        @click="goToPosts('problem')"
+      />
+      <ProfileMenuItem
+        :label="`${t('ideas')} (${counts.ideas})`"
+        icon-src="/icons/ideaIcon.svg"
+        @click="goToPosts('idea')"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { api } from "boot/axios";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import { translateCityName, translateCountryName } from "src/utils/cityNames";
 import PageTitle from "src/components/ui/PageTitle.vue";
+import ProfileMenuItem from "src/components/common/ProfileMenuItem.vue";
+import { normalizePost } from "src/utils/normalizePost";
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 interface PublicUser {
   id: number;
@@ -64,6 +99,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const isDonorSide = computed(() => route.meta?.side === "donor");
 
 const displayName = computed(() => {
   return props.userData?.name || props.userData?.username || "User";
@@ -106,6 +143,95 @@ const displayBio = computed(() => {
   const trimmed = bio.trim();
   return trimmed.length > 0 ? trimmed : null;
 });
+
+type MenuCounts = {
+  reviews: number;
+  contributions: number;
+  dreams: number;
+  problems: number;
+  ideas: number;
+};
+
+const counts = ref<MenuCounts>({
+  reviews: 0,
+  contributions: 0,
+  dreams: 0,
+  problems: 0,
+  ideas: 0
+});
+
+let countsAbort: AbortController | null = null;
+
+const loadCategoryCount = async (category: "dream" | "problem" | "idea"): Promise<number> => {
+  const userId = props.userData?.id;
+  if (!userId) return 0;
+
+  try {
+    const { data } = await api.get("/posts", {
+      params: { category },
+      signal: countsAbort?.signal
+    });
+    const rawPosts = (data?.data || data?.posts || data || []) as unknown[];
+    const normalized = rawPosts.map((p) => normalizePost(p as any));
+    return normalized.filter((p) => (p.user_id || p.author_id) === userId).length;
+  } catch {
+    return 0;
+  }
+};
+
+const refreshCounts = async () => {
+  if (!isDonorSide.value) return;
+  if (!props.userData?.id) return;
+
+  if (countsAbort) countsAbort.abort();
+  countsAbort = new AbortController();
+
+  // Safe-first: reviews & contributions counts are not implemented yet
+  counts.value.reviews = 0;
+  counts.value.contributions = 0;
+
+  const [dreams, problems, ideas] = await Promise.all([
+    loadCategoryCount("dream"),
+    loadCategoryCount("problem"),
+    loadCategoryCount("idea")
+  ]);
+
+  counts.value.dreams = dreams;
+  counts.value.problems = problems;
+  counts.value.ideas = ideas;
+};
+
+onMounted(() => {
+  void refreshCounts();
+});
+
+watch(
+  () => props.userData?.id,
+  () => {
+    void refreshCounts();
+  }
+);
+
+const goToReviews = () => {
+  const userId = props.userData?.id;
+  if (!userId) return;
+  router.push({ name: "donor-user-reviews", params: { userId: String(userId) } });
+};
+
+const goToContributions = () => {
+  const userId = props.userData?.id;
+  if (!userId) return;
+  router.push({ name: "donor-user-contributions", params: { userId: String(userId) } });
+};
+
+const goToPosts = (type: "dream" | "problem" | "idea") => {
+  const userId = props.userData?.id;
+  if (!userId) return;
+  router.push({
+    name: "donor-user-posts-type",
+    params: { userId: String(userId), type }
+  });
+};
 </script>
 
 <style scoped lang="scss">
@@ -217,5 +343,14 @@ const displayBio = computed(() => {
   font-family: poppins;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.publicProfileMenu {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0 24px 0;
 }
 </style>

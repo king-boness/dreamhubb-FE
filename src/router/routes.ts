@@ -128,6 +128,39 @@ const routes: RouteRecordRaw[] = [
         name: "donor-user-profile"
       },
       {
+        path: "user/:userId/reviews",
+        meta: {
+          requiresAuth: true,
+          side: "donor",
+          showHeaderBack: true,
+          headerBackFallback: { name: "donor-user-profile", params: { userId: ":userId" } }
+        },
+        component: () => import("src/pages/DonorPages/UserReviewsPage.vue"),
+        name: "donor-user-reviews"
+      },
+      {
+        path: "user/:userId/contributions",
+        meta: {
+          requiresAuth: true,
+          side: "donor",
+          showHeaderBack: true,
+          headerBackFallback: { name: "donor-user-profile", params: { userId: ":userId" } }
+        },
+        component: () => import("src/pages/DonorPages/UserContributionsPage.vue"),
+        name: "donor-user-contributions"
+      },
+      {
+        path: "user/:userId/posts/:type",
+        meta: {
+          requiresAuth: true,
+          side: "donor",
+          showHeaderBack: true,
+          headerBackFallback: { name: "donor-user-profile", params: { userId: ":userId" } }
+        },
+        component: () => import("src/pages/DonorPages/UserPostsByTypePage.vue"),
+        name: "donor-user-posts-type"
+      },
+      {
         path: "filters",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/FiltersPage.vue"),
