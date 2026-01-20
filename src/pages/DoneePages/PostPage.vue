@@ -413,8 +413,8 @@ onActivated(async () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 8px;
-    margin-bottom: 12px;
+    margin-top: 18px;
+    margin-bottom: 22px;
     padding: 0 1.2rem;
     width: 100%;
 
