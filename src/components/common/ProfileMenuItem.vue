@@ -21,9 +21,7 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: "click"): void;
-}>();
+const emit = defineEmits<{(e: "click"): void}>();
 
 const emitClick = () => {
   if (props.disabled) return;
@@ -83,4 +81,3 @@ const emitClick = () => {
   cursor: not-allowed;
 }
 </style>
-
