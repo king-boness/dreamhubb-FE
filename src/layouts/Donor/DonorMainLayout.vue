@@ -157,12 +157,13 @@
         class="button-footer profileIcon"
         :class="{ activeProfile: activeNav === 'profile' }"
       >
-        <UserAvatar
-          :image-url="authStore.avatarUrl"
-          :name="authStore.name"
-          size="1.8rem"
-          class="profileImg"
-        />
+        <div class="donorFooter-profileAvatarWrap" aria-hidden="true">
+          <UserAvatar
+            :image-url="authStore.avatarUrl"
+            :name="authStore.name"
+            size="1.8rem"
+          />
+        </div>
         <span class="footer-pageName profileName">{{ t("profile") }}</span>
       </q-btn>
     </div>
@@ -278,14 +279,6 @@ const navIconNotifications = computed(() => {
   }
   // If not selected: light mode uses _lm, dark mode uses _ns
   return isBodyLight.value ? "/footer_icons/bell_lm.svg" : "/footer_icons/bell_ns.svg";
-});
-const navIconProfile = computed(() => {
-  // If selected, always use _s version
-  if (activeNav.value === "profile") {
-    return "/footer_icons/profile_s.svg";
-  }
-  // If not selected: light mode uses _lm, dark mode uses _ns
-  return isBodyLight.value ? "/footer_icons/profile_lm.svg" : "/footer_icons/profile_ns.svg";
 });
 
 // Check if we're on a settings sub-page
@@ -1072,18 +1065,30 @@ onBeforeUnmount(() => {
     width: 2.4rem !important;
   }
 
+  // Donor footer: ensure Profile avatar is perfectly centered inside the active ring.
+  // QAvatar inside QBtn can look slightly off without a fixed flex-centered wrapper.
+  .donorFooter-profileAvatarWrap {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    line-height: 0;
+  }
+
+  // Prevent the global active img scale from affecting the profile avatar alignment.
+  .button-footer.profileIcon img {
+    transform: none !important;
+  }
+
   .activeProfile {
     background: transparent !important;
 
-    .profileImg {
-      // Use a "ring" that doesn't change layout (unlike border).
-      // Matches donee selected Profile look more reliably across Quasar/QAvatar.
+    .donorFooter-profileAvatarWrap {
+      // Ring without layout shift (box-shadow).
       box-shadow: 0 0 0 0.16rem #bd0043 !important;
-      border-radius: 999px !important;
-    }
-
-    .profileImg img {
-      border-radius: 999px !important;
     }
   }
 
