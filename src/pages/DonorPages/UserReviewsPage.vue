@@ -39,4 +39,3 @@ const { t } = useI18n();
   font-family: poppins;
 }
 </style>
-
