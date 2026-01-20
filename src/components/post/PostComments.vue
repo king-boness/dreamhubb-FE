@@ -102,15 +102,20 @@
             </button>
           </div>
 
-          <!-- Reply Button (only for post owner) -->
-          <div v-if="isPostOwner" class="post-comments-item-reply-section">
+          <!-- Reply Button (thread participants only: post owner + root comment author) -->
+          <div v-if="authStore.user?.id" class="post-comments-item-reply-section">
             <div class="post-comments-reply-btn-wrapper">
               <button
                 class="post-comments-reply-btn"
+                :class="{ 'post-comments-reply-btn--disabled': !canReply(comment) }"
+                :disabled="!canReply(comment)"
                 @click="toggleReplyInput(comment.id)"
               >
-                Reply
+                {{ t("reply") }}
               </button>
+              <q-tooltip v-if="!canReply(comment)" anchor="top middle" self="bottom middle">
+                {{ t("replyNotAllowed") }}
+              </q-tooltip>
             </div>
 
             <!-- Reply Input (inline) -->
@@ -122,7 +127,7 @@
                 dense
                 dark
                 outlined
-                placeholder="Write a reply to this donor..."
+                :placeholder="replyPlaceholder(comment.id)"
                 class="post-comments-reply-input-field"
                 :disable="sendingReplies[comment.id]"
               >
@@ -144,7 +149,7 @@
           <!-- Replies Thread -->
           <div v-if="comment.replies && comment.replies.length > 0" class="post-comments-replies">
             <div
-              v-for="reply in comment.replies"
+              v-for="reply in sortedReplies(comment.replies)"
               :key="reply.id"
               class="post-comments-reply-item"
             >
@@ -158,6 +163,14 @@
                   <span class="post-comments-reply-name">Reply from {{ reply.user_name }}</span>
                   <span class="post-comments-reply-time">{{ timeAgo(reply.created_at) }}</span>
                 </div>
+                <button
+                  v-if="canReply(comment)"
+                  type="button"
+                  class="post-comments-reply-inlineBtn"
+                  @click="openReplyTo(comment.id, reply.user_name)"
+                >
+                  {{ t("reply") }}
+                </button>
               </div>
               <div class="post-comments-reply-message">{{ reply.message }}</div>
             </div>
@@ -177,7 +190,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { Notify } from "quasar";
 import { useCommentsStore, type Reply } from "src/stores/comments";
 import { useAuthStore } from "src/stores/auth";
 import UserAvatar from "src/components/common/UserAvatar.vue";
@@ -199,6 +214,8 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const route = useRoute();
+const { t } = useI18n();
 const commentsStore = useCommentsStore();
 const authStore = useAuthStore();
 
@@ -218,10 +235,29 @@ const replyTexts = ref<Record<number, string>>({});
 const showReplyInputs = ref<Record<number, boolean>>({});
 const sendingReplies = ref<Record<number, boolean>>({});
 
-// Check if current user is post owner
-const isPostOwner = computed(() => {
-  return props.postOwnerId !== null && authStore.user?.id === props.postOwnerId;
-});
+const currentUserId = computed(() => authStore.user?.id ?? null);
+
+// Thread participants: post owner (donee) OR root comment author (donor)
+const canReply = (comment: { user_id: number }) => {
+  const uid = currentUserId.value;
+  if (!uid) return false;
+  if (props.postOwnerId !== null && uid === props.postOwnerId) return true;
+  return uid === comment.user_id;
+};
+
+const replyTargets = ref<Record<number, string | null>>({});
+
+const replyPlaceholder = (commentId: number) => {
+  const name = replyTargets.value[commentId];
+  return name ? t("replyToUser", { name }) : t("replyPlaceholder");
+};
+
+const openReplyTo = (commentId: number, userName: string) => {
+  if (!showReplyInputs.value[commentId]) {
+    showReplyInputs.value[commentId] = true;
+  }
+  replyTargets.value[commentId] = userName;
+};
 
 // Navigate to user profile
 const goToUserProfile = (userId: number | null) => {
@@ -231,7 +267,8 @@ const goToUserProfile = (userId: number | null) => {
     }
     return;
   }
-  router.push({ name: "donor-user-profile", params: { userId: String(userId) } });
+  const side = route.path.includes("/donee/") ? "donee" : "donor";
+  router.push({ name: `${side}-user-profile`, params: { userId: String(userId) } });
 };
 
 const localActiveTab = computed({
@@ -284,9 +321,19 @@ const timeAgo = (iso: string) => {
 
 // Toggle reply input
 const toggleReplyInput = (commentId: number) => {
+  const comment = commentsForPost.value.find((c) => c.id === commentId);
+  if (comment && !canReply(comment)) {
+    Notify.create({
+      message: t("replyNotAllowed"),
+      color: "grey-8",
+      timeout: 2500
+    });
+    return;
+  }
   showReplyInputs.value[commentId] = !showReplyInputs.value[commentId];
   if (!showReplyInputs.value[commentId]) {
     replyTexts.value[commentId] = "";
+    replyTargets.value[commentId] = null;
   }
 };
 
@@ -305,6 +352,7 @@ const handleReplySubmit = async (commentId: number) => {
     });
     replyTexts.value[commentId] = "";
     showReplyInputs.value[commentId] = false;
+    replyTargets.value[commentId] = null;
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("Failed to send reply:", error);
@@ -312,6 +360,14 @@ const handleReplySubmit = async (commentId: number) => {
   } finally {
     sendingReplies.value[commentId] = false;
   }
+};
+
+const sortedReplies = (replies: Reply[]) => {
+  return [...replies].sort((a, b) => {
+    const da = new Date(a.created_at).getTime();
+    const db = new Date(b.created_at).getTime();
+    return da - db;
+  });
 };
 </script>
 
@@ -505,6 +561,27 @@ const handleReplySubmit = async (commentId: number) => {
     background: rgba(189, 0, 67, 0.1);
     border-color: $primary;
   }
+}
+
+.post-comments-reply-btn--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.post-comments-reply-inlineBtn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: $primary;
+  font-family: poppinsSemiBold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  opacity: 0.9;
+}
+
+.post-comments-reply-inlineBtn:active {
+  transform: scale(0.98);
 }
 
 .post-comments-reply-input {
