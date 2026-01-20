@@ -185,13 +185,13 @@
             <div class="postDetailAbout-separator" />
 
             <!-- C) Bio -->
-            <section class="postDetailAbout-section">
+            <section v-if="displayAuthorBioText" class="postDetailAbout-section">
               <p class="postDetailAbout-text">
                 {{ displayAuthorBioText }}
               </p>
             </section>
 
-            <div class="postDetailAbout-separator" />
+            <div v-if="displayAuthorBioText" class="postDetailAbout-separator" />
 
             <!-- Report a post -->
             <div class="postDetail-reportSection">
@@ -664,7 +664,7 @@ const displayAuthorBioText = computed(() => {
     "";
 
   const trimmed = typeof bio === "string" ? bio.trim() : "";
-  return trimmed || t("noBioYet");
+  return trimmed;
 });
 
 const loadAuthorProfile = async (id: number) => {
@@ -674,7 +674,7 @@ const loadAuthorProfile = async (id: number) => {
       authorProfile.value = data.user as PublicUserProfile;
     }
   } catch {
-    // ignore (bio will fall back to "No bio yet.")
+    // ignore (bio will be empty)
   }
 };
 
