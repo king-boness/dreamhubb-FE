@@ -167,6 +167,7 @@ export default {
   replyPlaceholder: "Write a reply...",
   replyToUser: "Reply to {name}...",
   replyNotAllowed: "Only the post owner and the original commenter can reply.",
+  more: "more",
   stats: "stats",
   earn: "Earn",
   earnMoreBadges: "Earn more badges by completing tasks",

@@ -127,7 +127,7 @@
                 dense
                 dark
                 outlined
-                :placeholder="replyPlaceholder(comment.id)"
+                :placeholder="replyPlaceholder()"
                 class="post-comments-reply-input-field"
                 :disable="sendingReplies[comment.id]"
               >
@@ -149,7 +149,7 @@
           <!-- Replies Thread -->
           <div v-if="comment.replies && comment.replies.length > 0" class="post-comments-replies">
             <div
-              v-for="reply in sortedReplies(comment.replies)"
+              v-for="reply in visibleReplies(comment)"
               :key="reply.id"
               class="post-comments-reply-item"
             >
@@ -163,16 +163,21 @@
                   <span class="post-comments-reply-name">Reply from {{ reply.user_name }}</span>
                   <span class="post-comments-reply-time">{{ timeAgo(reply.created_at) }}</span>
                 </div>
-                <button
-                  v-if="canReply(comment)"
-                  type="button"
-                  class="post-comments-reply-inlineBtn"
-                  @click="openReplyTo(comment.id, reply.user_name)"
-                >
-                  {{ t("reply") }}
-                </button>
               </div>
               <div class="post-comments-reply-message">{{ reply.message }}</div>
+            </div>
+
+            <div
+              v-if="hasMoreReplies(comment) && !isRepliesExpanded(comment.id)"
+              class="post-comments-replies-more"
+            >
+              <button
+                type="button"
+                class="post-comments-replies-moreBtn"
+                @click="toggleRepliesExpanded(comment.id)"
+              >
+                {{ t("more") }}
+              </button>
             </div>
           </div>
         </div>
@@ -245,18 +250,8 @@ const canReply = (comment: { user_id: number }) => {
   return uid === comment.user_id;
 };
 
-const replyTargets = ref<Record<number, string | null>>({});
-
-const replyPlaceholder = (commentId: number) => {
-  const name = replyTargets.value[commentId];
-  return name ? t("replyToUser", { name }) : t("replyPlaceholder");
-};
-
-const openReplyTo = (commentId: number, userName: string) => {
-  if (!showReplyInputs.value[commentId]) {
-    showReplyInputs.value[commentId] = true;
-  }
-  replyTargets.value[commentId] = userName;
+const replyPlaceholder = () => {
+  return t("replyPlaceholder");
 };
 
 // Navigate to user profile
@@ -281,7 +276,10 @@ const commentsForPost = computed(() => {
 });
 
 const filteredComments = computed(() => {
-  return commentsForPost.value.filter((c) => c.type === localActiveTab.value);
+  // Always show newest -> oldest (independent of BE ordering)
+  return [...commentsForPost.value]
+    .filter((c) => c.type === localActiveTab.value)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 });
 
 const loading = computed(() => {
@@ -333,7 +331,6 @@ const toggleReplyInput = (commentId: number) => {
   showReplyInputs.value[commentId] = !showReplyInputs.value[commentId];
   if (!showReplyInputs.value[commentId]) {
     replyTexts.value[commentId] = "";
-    replyTargets.value[commentId] = null;
   }
 };
 
@@ -352,7 +349,6 @@ const handleReplySubmit = async (commentId: number) => {
     });
     replyTexts.value[commentId] = "";
     showReplyInputs.value[commentId] = false;
-    replyTargets.value[commentId] = null;
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("Failed to send reply:", error);
@@ -362,12 +358,30 @@ const handleReplySubmit = async (commentId: number) => {
   }
 };
 
-const sortedReplies = (replies: Reply[]) => {
-  return [...replies].sort((a, b) => {
-    const da = new Date(a.created_at).getTime();
-    const db = new Date(b.created_at).getTime();
-    return da - db;
-  });
+const repliesExpanded = ref<Record<number, boolean>>({});
+
+const isRepliesExpanded = (commentId: number) => {
+  return repliesExpanded.value[commentId] === true;
+};
+
+const toggleRepliesExpanded = (commentId: number) => {
+  repliesExpanded.value[commentId] = true;
+};
+
+const sortedRepliesDesc = (replies: Reply[]) => {
+  return [...replies].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+};
+
+const visibleReplies = (comment: { id: number; replies?: Reply[] }) => {
+  const replies = Array.isArray(comment.replies) ? comment.replies : [];
+  const sorted = sortedRepliesDesc(replies);
+  if (isRepliesExpanded(comment.id)) return sorted;
+  return sorted.slice(0, 3);
+};
+
+const hasMoreReplies = (comment: { replies?: Reply[] }) => {
+  const total = Array.isArray(comment.replies) ? comment.replies.length : 0;
+  return total > 3;
 };
 </script>
 
@@ -568,24 +582,29 @@ const sortedReplies = (replies: Reply[]) => {
   cursor: not-allowed;
 }
 
-.post-comments-reply-inlineBtn {
-  margin-left: auto;
+.post-comments-reply-input {
+  margin-top: 0.75rem;
+}
+
+.post-comments-replies-more {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.post-comments-replies-moreBtn {
   background: transparent;
-  border: none;
-  color: $primary;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 6px 14px;
+  border-radius: 999px;
   font-family: poppinsSemiBold;
   font-size: 0.8rem;
   cursor: pointer;
-  padding: 4px 6px;
-  opacity: 0.9;
 }
 
-.post-comments-reply-inlineBtn:active {
+.post-comments-replies-moreBtn:active {
   transform: scale(0.98);
-}
-
-.post-comments-reply-input {
-  margin-top: 0.75rem;
 }
 
 .post-comments-reply-input-field {

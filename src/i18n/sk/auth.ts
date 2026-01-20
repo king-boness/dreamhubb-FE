@@ -163,6 +163,7 @@ export default {
   replyPlaceholder: "Napíš odpoveď...",
   replyToUser: "Odpovedať používateľovi {name}...",
   replyNotAllowed: "Odpovedať môžu iba donee (autor príspevku) a donor (autor komentára).",
+  more: "viac",
   stats: "súhrn",
   earn: "získaj",
   earnMoreBadges: "Zarábaj viac odznakov dokončením úloh",
