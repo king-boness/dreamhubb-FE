@@ -39,6 +39,14 @@
       </q-carousel>
     </div>
 
+    <!-- Ongoing / Accomplished switcher (between Quote and "my dreams") -->
+    <div class="postPage-switcherContainer">
+      <SegmentedToggle
+        v-model="doneePostsMode"
+        :options="[t('ongoing'), t('accomplished')]"
+      />
+    </div>
+
     <!-- My Dreams Section -->
     <div class="postPage-header postPgae-myDreamsContainer">
       <div class="postPage-headerContainer">
@@ -118,42 +126,17 @@
       </div>
     </div>
 
-    <!-- Recently Accomplished Section -->
-    <div class="postPage-postsContainer">
-      <div class="postPage-header">
-        <div class="postPage-headerContainer">
-          <span class="postPage-title">{{ t("recentlyAccomplished") }}</span>
-        </div>
-        <!-- Loading state -->
-        <div v-if="postsStore.recentlyAccomplishedLoading" class="postPage-loading">
-          <p>{{ t("loading") }}</p>
-        </div>
-        <!-- Error state -->
-        <div v-else-if="postsStore.recentlyAccomplishedError" class="postPage-error">
-          <p>{{ postsStore.recentlyAccomplishedError }}</p>
-        </div>
-        <!-- Empty state -->
-        <div v-else-if="!postsStore.recentlyAccomplishedLoading && mappedRecentlyAccomplished.length === 0" class="postPage-empty">
-          <p>{{ t("noGoalsAccomplished") }}</p>
-        </div>
-        <!-- Posts -->
-        <PostComponent
-          v-else
-          class="postPage-postComponent"
-          :post="mappedRecentlyAccomplished"
-        ></PostComponent>
-      </div>
-    </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onActivated } from "vue";
+import { ref, computed, onMounted, onActivated, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
 import { usePostsStore } from "src/stores/posts";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import { getLocationLabel } from "src/utils/cityNames";
+import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
 
 const { t, locale } = useI18n();
 
@@ -168,29 +151,96 @@ const navPos = ref<"top" | "right" | "bottom" | "left" | undefined>("top");
 const carousels = ref([
   {
     value: "1",
-    title: "Quote for the day",
+    title: "Quote of the day",
     text: "“If you don't dream, you won't die, but even you won't be alive without them.”",
     img: "/icons/carousel-bg.svg"
   },
   {
     value: "2",
-    title: "Quote for the day",
+    title: "Quote of the day",
     text: "“We cannot solve problems with the kind of thinking we employed when we came up with them.”",
     img: "/icons/carousel-bg.svg"
   },
   {
     value: "3",
-    title: "Quote for the day",
+    title: "Quote of the day",
     text: "“Learn as if you will live forever, live like you will die tomorrow.”",
     img: "/icons/carousel-bg.svg"
   },
   {
     value: "4",
-    title: "Quote for Tomi",
+    title: "Quote of the day",
     text: "“I never dreamed about success. I worked for it.”",
     img: "/icons/carousel-bg.svg"
   }
 ] as CarouselPost[]);
+
+type DoneePostsView = "ongoing" | "accomplished";
+const DONEE_POSTS_VIEW_LS_KEY = "donee_posts_view";
+
+const initialView = (() => {
+  try {
+    const raw = localStorage.getItem(DONEE_POSTS_VIEW_LS_KEY);
+    return raw === "accomplished" ? "accomplished" : "ongoing";
+  } catch {
+    return "ongoing";
+  }
+})();
+
+const selectedView = ref<DoneePostsView>(initialView);
+
+watch(selectedView, (v) => {
+  try {
+    localStorage.setItem(DONEE_POSTS_VIEW_LS_KEY, v);
+  } catch {
+    // ignore
+  }
+});
+
+// NOTE: SegmentedToggle has reversed logic:
+// - when modelValue === options[0] it adds .active which moves the circle RIGHT (second option looks active)
+// So we map selectedView <-> modelValue with reversed mapping.
+const doneePostsMode = computed({
+  get: () => (selectedView.value === "accomplished" ? t("ongoing") : t("accomplished")),
+  set: (val: string) => {
+    if (val === t("ongoing")) {
+      selectedView.value = "accomplished";
+    } else if (val === t("accomplished")) {
+      selectedView.value = "ongoing";
+    }
+  }
+});
+
+const isAccomplishedPost = (post: Record<string, unknown>): boolean => {
+  const status = post.status;
+  if (typeof status === "string") {
+    const s = status.toLowerCase();
+    if (s === "accomplished" || s === "completed" || s === "done") return true;
+    if (s === "ongoing" || s === "active") return false;
+  }
+
+  const boolLike =
+    post.is_accomplished ??
+    post.isAccomplished ??
+    post.accomplished ??
+    post.completed ??
+    post.goal_reached ??
+    post.goalReached;
+  if (typeof boolLike === "boolean") return boolLike;
+  if (typeof boolLike === "number") return boolLike === 1;
+
+  const progress = post.progress ?? post.progress_percent ?? post.completion ?? post.completionPercent;
+  if (typeof progress === "number") return progress >= 100;
+
+  // Fallback (legacy placeholder): same condition as old "recently accomplished" list
+  return Number(post.tokens ?? 0) >= 1000;
+};
+
+const filterByView = (posts: Record<string, unknown>[]) => {
+  if (!Array.isArray(posts) || posts.length === 0) return [];
+  const wantAccomplished = selectedView.value === "accomplished";
+  return posts.filter((p) => (wantAccomplished ? isAccomplishedPost(p) : !isAccomplishedPost(p)));
+};
 
 // Map category names to icon file names (same as PostCreationPage)
 const getCategoryIcon = (category: string | null): string => {
@@ -240,34 +290,17 @@ const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
 
 // Map my dreams from store to Post[] format
 const mappedMyDreams = computed(() => {
-  if (!postsStore.myDreams || postsStore.myDreams.length === 0) {
-    return [];
-  }
-  return postsStore.myDreams.map(mapPostToComponentFormat);
+  return filterByView(postsStore.myDreams || []).map(mapPostToComponentFormat);
 });
 
 // Map my problems from store to Post[] format
 const mappedMyProblems = computed(() => {
-  if (!postsStore.myProblems || postsStore.myProblems.length === 0) {
-    return [];
-  }
-  return postsStore.myProblems.map(mapPostToComponentFormat);
+  return filterByView(postsStore.myProblems || []).map(mapPostToComponentFormat);
 });
 
 // Map my ideas from store to Post[] format
 const mappedMyIdeas = computed(() => {
-  if (!postsStore.myIdeas || postsStore.myIdeas.length === 0) {
-    return [];
-  }
-  return postsStore.myIdeas.map(mapPostToComponentFormat);
-});
-
-// Map recently accomplished dreams from store to Post[] format
-const mappedRecentlyAccomplished = computed(() => {
-  if (!postsStore.recentlyAccomplishedDreams || postsStore.recentlyAccomplishedDreams.length === 0) {
-    return [];
-  }
-  return postsStore.recentlyAccomplishedDreams.map(mapPostToComponentFormat);
+  return filterByView(postsStore.myIdeas || []).map(mapPostToComponentFormat);
 });
 
 // Check if user has any posts
@@ -326,8 +359,7 @@ onMounted(async () => {
   await Promise.all([
     postsStore.fetchMyDreams({ type: "dream" }),
     postsStore.fetchMyProblems({ type: "problem" }),
-    postsStore.fetchMyIdeas({ type: "idea" }),
-    postsStore.fetchRecentlyAccomplishedDreams()
+    postsStore.fetchMyIdeas({ type: "idea" })
   ]);
 });
 
@@ -336,8 +368,7 @@ onActivated(async () => {
   await Promise.all([
     postsStore.fetchMyDreams({ type: "dream" }),
     postsStore.fetchMyProblems({ type: "problem" }),
-    postsStore.fetchMyIdeas({ type: "idea" }),
-    postsStore.fetchRecentlyAccomplishedDreams()
+    postsStore.fetchMyIdeas({ type: "idea" })
   ]);
 });
 </script>
@@ -376,6 +407,21 @@ onActivated(async () => {
   }
   .postPgae-myDreamsContainer {
     margin-bottom: 0.6rem;
+  }
+
+  .postPage-switcherContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding: 0 1.2rem;
+    width: 100%;
+
+    :deep(.segmented-toggle-container) {
+      width: 100% !important;
+      max-width: 360px;
+    }
   }
 
   .postPage-header {

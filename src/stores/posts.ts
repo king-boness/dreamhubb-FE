@@ -32,9 +32,6 @@ export const usePostsStore = defineStore("posts", {
     myIdeasLoading: false,
     myIdeasError: null as string | null,
     // Recently Accomplished Dreams state
-    recentlyAccomplishedDreams: [] as Record<string, unknown>[],
-    recentlyAccomplishedLoading: false,
-    recentlyAccomplishedError: null as string | null,
     // Filters state - using new API (category/subcategory slugs)
     filters: {
       categorySlug: null as CategorySlug | null,
@@ -183,14 +180,6 @@ export const usePostsStore = defineStore("posts", {
       );
       if (myIdeasIndex !== -1) {
         this.myIdeas[myIdeasIndex] = normalizedPost;
-      }
-
-      // Update in recentlyAccomplishedDreams if exists
-      const recentlyIndex = this.recentlyAccomplishedDreams.findIndex(
-        (p) => (p.post_id || p.id) === postId
-      );
-      if (recentlyIndex !== -1) {
-        this.recentlyAccomplishedDreams[recentlyIndex] = normalizedPost;
       }
 
       // Update currentPost if it's the same post
@@ -440,38 +429,7 @@ export const usePostsStore = defineStore("posts", {
       } finally {
         this.myIdeasLoading = false;
       }
-    },
-
-    // 🟣 Fetch recently accomplished dreams
-    async fetchRecentlyAccomplishedDreams() {
-      this.recentlyAccomplishedLoading = true;
-      this.recentlyAccomplishedError = null;
-
-      try {
-        // For now, we'll use my-posts endpoint with category=dream - using new API
-        // TODO: When BE adds is_accomplished or status column, filter by that
-        // For now, return empty array or filter by some criteria (e.g., tokens reached a threshold)
-        const { data } = await api.get("/my-posts", {
-          params: { category: "dream" }
-        });
-
-        // Normalize posts from API
-        const rawPosts = data.data || data.posts || data || [];
-        const allDreams = Array.isArray(rawPosts)
-          ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
-          : [];
-
-        // TODO: Filter accomplished dreams when BE supports it
-        // For now, we'll return empty array or filter by high tokens as a placeholder
-        // Filter dreams with tokens >= 1000 as "accomplished" (placeholder logic)
-        this.recentlyAccomplishedDreams = allDreams.filter(
-          (post: NormalizedPost) => (post.tokens as number) >= 1000
-        ).slice(0, 10); // Limit to 10 most recent
-      } catch (error: unknown) {
-        this.recentlyAccomplishedError = "Failed to load accomplished dreams.";
-      } finally {
-        this.recentlyAccomplishedLoading = false;
-      }
     }
+
   }
 });

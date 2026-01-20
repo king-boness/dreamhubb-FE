@@ -157,6 +157,8 @@ export default {
   completed: "Splnené",
   completedComingSoon: "Splnené (čoskoro)",
   noUserPostsYet: "Zatiaľ tu nie sú žiadne príspevky.",
+  ongoing: "Prebiehajúce",
+  accomplished: "Splnené",
   stats: "súhrn",
   earn: "získaj",
   earnMoreBadges: "Zarábaj viac odznakov dokončením úloh",

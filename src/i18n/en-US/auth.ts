@@ -161,6 +161,8 @@ export default {
   completed: "Completed",
   completedComingSoon: "Completed (coming soon)",
   noUserPostsYet: "No posts yet.",
+  ongoing: "Ongoing",
+  accomplished: "Accomplished",
   stats: "stats",
   earn: "Earn",
   earnMoreBadges: "Earn more badges by completing tasks",
