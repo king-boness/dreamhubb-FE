@@ -227,9 +227,7 @@ const onFileChange = (event: Event) => {
   const src = URL.createObjectURL(file);
   data.imageSrc = src;
   data.image = file as File;
-  if (process.env.NODE_ENV === "development") {
-    console.log(src);
-  }
+  // Never log local object URLs (can be sensitive / noisy)
 };
 fetch("/images/Auth/default-avatar-male.jpg").then((response) =>
   response.blob().then((blob) => {

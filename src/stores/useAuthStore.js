@@ -34,15 +34,9 @@ export const useAuthStore = defineStore("auth", {
 
       const email = String(payload.email ?? "");
       const password = String(payload.password ?? "");
-      const remember = !!payload.remember; // zatiaľ ho len držíme, ale nepoužívame
+      // NOTE: never keep/print sensitive flags (remember) in logs here; legacy store
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("🚀 useAuthStore normalized login payload:", {
-          email,
-          password,
-          remember
-        });
-      }
+      // Never log credentials/tokens (even in dev)
 
       try {
         const { data } = await api.post("/login", {
@@ -50,19 +44,12 @@ export const useAuthStore = defineStore("auth", {
           password
         });
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("🔐 useAuthStore login response:", data);
-        }
-
         this.token = data?.authorization?.token || null;
         this.user = data?.user || null;
 
         // ⬇️ DÔLEŽITÉ: token ULOŽ vždy, ak existuje
         if (this.token) {
           localStorage.setItem(TOKEN_KEY, this.token);
-          if (process.env.NODE_ENV === "development") {
-            console.log("💾 jwtToken saved to localStorage");
-          }
         }
 
         this.status = "success";

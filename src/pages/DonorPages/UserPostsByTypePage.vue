@@ -29,6 +29,20 @@
         <q-spinner color="primary" size="32px" />
       </div>
 
+      <div v-else-if="error" class="userPostsByType-error">
+        <div class="userPostsByType-errorText">{{ error }}</div>
+        <q-btn
+          class="userPostsByType-retryBtn"
+          unelevated
+          no-caps
+          color="primary"
+          :disable="loading"
+          @click="handleRetry"
+        >
+          {{ retryLabel }}
+        </q-btn>
+      </div>
+
       <q-list v-else class="userPostsByType-list">
         <q-item v-if="items.length === 0" class="userPostsByType-empty">
           <q-item-section>
@@ -65,9 +79,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { Notify } from "quasar";
+import { notifyInfo } from "src/utils/notify";
 import { api } from "boot/axios";
 import { normalizePost, type NormalizedPost, type RawPostFromAPI } from "src/utils/normalizePost";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -84,6 +100,11 @@ const typeLabel = computed(() => {
 
 const loading = ref(false);
 const items = ref<NormalizedPost[]>([]);
+const error = ref<string | null>(null);
+const retryLabel = computed(() => {
+  const label = t("common.actions.retry");
+  return label === "common.actions.retry" ? "Retry" : label;
+});
 
 const titleWithCount = computed(() => `${typeLabel.value} (${items.value.length})`);
 
@@ -99,6 +120,7 @@ const fetchPosts = async () => {
   abortCtrl = new AbortController();
 
   loading.value = true;
+  error.value = null;
   try {
     const { data } = await api.get("/posts", {
       params: { category },
@@ -107,7 +129,9 @@ const fetchPosts = async () => {
     const rawPosts = (data?.data || data?.posts || data || []) as RawPostFromAPI[];
     const normalized = rawPosts.map((p) => normalizePost(p));
     items.value = normalized.filter((p) => (p.user_id || p.author_id) === uid);
-  } catch {
+  } catch (e: unknown) {
+    const mapped = mapAxiosErrorToDhError(e);
+    error.value = tGlobal(mapped.messageKey, mapped.fallbackMessage);
     items.value = [];
   } finally {
     loading.value = false;
@@ -122,16 +146,16 @@ watch([userId, type], () => {
   void fetchPosts();
 });
 
+const handleRetry = () => {
+  void fetchPosts();
+};
+
 const openPost = (postId: number) => {
   router.push({ name: "donor-post-detail", params: { id: String(postId) } });
 };
 
 const handleCompletedClick = () => {
-  Notify.create({
-    message: t("completedComingSoon"),
-    color: "grey-8",
-    timeout: 2500
-  });
+  notifyInfo("common.info.comingSoon", t("completedComingSoon") || "Coming soon", { timeout: 2500 });
 };
 
 // Format date as DD/MM/YYYY (same behavior as donor feed)
@@ -206,6 +230,24 @@ const formatDate = (dateString: string): string => {
   display: flex;
   justify-content: center;
   padding: 28px 0;
+}
+
+.userPostsByType-error {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 16px 14px;
+  text-align: center;
+}
+
+.userPostsByType-errorText {
+  font-family: poppins;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.userPostsByType-retryBtn {
+  margin-top: 10px;
 }
 
 .userPostsByType-list {

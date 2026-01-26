@@ -41,3 +41,14 @@ resources/android/**/*
 
 # Temporary/debug files
 exit
+
+# Test results and reports
+test-results/
+playwright-report/
+
+# Environment files
+.env
+.env.*
+
+# Build artifacts
+dist/

@@ -3,6 +3,8 @@ import { defineStore } from "pinia";
 import { api } from "boot/axios";
 import { normalizePost, type NormalizedPost } from "src/utils/normalizePost";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 // Type for post detail - using normalized format
 export type PostDetail = NormalizedPost;
@@ -132,7 +134,8 @@ export const usePostsStore = defineStore("posts", {
         // Robustný fallback pre rôzne BE štruktúry
         this.posts = data.data || data.posts || data || [];
       } catch (error: unknown) {
-        this.error = "Failed to load posts.";
+        const mapped = mapAxiosErrorToDhError(error);
+        this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);
       } finally {
         this.loading = false;
       }
@@ -242,17 +245,8 @@ export const usePostsStore = defineStore("posts", {
           this.posts.push(normalizedPost);
         }
       } catch (error: unknown) {
-        // Handle 404 specifically
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as { response?: { status?: number } };
-          if (axiosError.response?.status === 404) {
-            this.detailError = "Post not found";
-          } else {
-            this.detailError = "Failed to load post.";
-          }
-        } else {
-          this.detailError = "Failed to load post.";
-        }
+        const mapped = mapAxiosErrorToDhError(error);
+        this.detailError = tGlobal(mapped.messageKey, mapped.fallbackMessage);
 
         this.currentPost = null;
       } finally {
@@ -313,36 +307,9 @@ export const usePostsStore = defineStore("posts", {
 
         return data;
       } catch (error: unknown) {
-        // Handle different error types
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as {
-            response?: {
-              status?: number;
-              data?: {
-                message?: string;
-                errors?: Record<string, string[]>;
-              };
-            };
-          };
-
-          if (axiosError.response?.data?.message) {
-            this.donateError = axiosError.response.data.message;
-          } else if (axiosError.response?.status === 400) {
-            this.donateError = "Insufficient tokens or invalid request.";
-          } else if (axiosError.response?.status === 401) {
-            this.donateError = "Please log in to donate.";
-          } else if (axiosError.response?.status === 403) {
-            this.donateError = "You cannot donate to your own post.";
-          } else if (axiosError.response?.status === 404) {
-            this.donateError = "Post not found.";
-          } else if (axiosError.response?.status === 422) {
-            this.donateError = "Invalid donation amount.";
-          } else {
-            this.donateError = "Failed to process donation. Please try again.";
-          }
-        } else {
-          this.donateError = "Network error. Please check your connection.";
-        }
+        const mapped = mapAxiosErrorToDhError(error);
+        // Keep donation errors non-raw and user-friendly
+        this.donateError = tGlobal(mapped.messageKey, mapped.fallbackMessage);
 
         throw error;
       } finally {
@@ -371,7 +338,8 @@ export const usePostsStore = defineStore("posts", {
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
       } catch (error: unknown) {
-        this.myDreamsError = "Failed to load your dreams.";
+        const mapped = mapAxiosErrorToDhError(error);
+        this.myDreamsError = tGlobal(mapped.messageKey, mapped.fallbackMessage);
       } finally {
         this.myDreamsLoading = false;
       }
@@ -398,7 +366,8 @@ export const usePostsStore = defineStore("posts", {
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
       } catch (error: unknown) {
-        this.myProblemsError = "Failed to load your problems.";
+        const mapped = mapAxiosErrorToDhError(error);
+        this.myProblemsError = tGlobal(mapped.messageKey, mapped.fallbackMessage);
       } finally {
         this.myProblemsLoading = false;
       }
@@ -425,7 +394,8 @@ export const usePostsStore = defineStore("posts", {
           ? rawPosts.map((raw: unknown) => normalizePost(raw as Parameters<typeof normalizePost>[0]))
           : [];
       } catch (error: unknown) {
-        this.myIdeasError = "Failed to load your ideas.";
+        const mapped = mapAxiosErrorToDhError(error);
+        this.myIdeasError = tGlobal(mapped.messageKey, mapped.fallbackMessage);
       } finally {
         this.myIdeasLoading = false;
       }

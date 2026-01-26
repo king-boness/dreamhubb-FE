@@ -20,9 +20,6 @@ let donee = false;
 
 const routeCheck = () => {
   routesName = route.name?.toString() || "";
-  if (process.env.NODE_ENV === "development") {
-    console.log(routesName);
-  }
   routesName.startsWith("donee") ? (donee = true) : (donee = false);
 };
 routeCheck();

@@ -98,9 +98,6 @@ const route = useRoute();
 const routesName = route.name?.toString() || "";
 
 const routeCheck = (name: string) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(routesName);
-  }
   routesName.startsWith("donee")
     ? router.push({ name: `donee-${name}` })
     : router.push({ name: `donor-${name}` });

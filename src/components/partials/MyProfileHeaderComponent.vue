@@ -160,15 +160,9 @@ const profile = ref({
 watch(
   () => apiStore.user,
   (user) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("API Store User:", user);
-    }
     if (user) {
       // Try different possible property names from API
       const userName = (user as any).name || (user as any).username || (user as any).fullName || (user as any).nickname;
-      if (process.env.NODE_ENV === "development") {
-        console.log("Extracted userName:", userName);
-      }
       if (userName) {
         profile.value.user.userName = userName;
         return;
@@ -176,9 +170,6 @@ watch(
     }
     // Fallback to userStore.name
     if (userStore.name) {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Using userStore.name:", userStore.name);
-      }
       profile.value.user.userName = userStore.name;
     }
   },
@@ -412,9 +403,6 @@ const route = useRoute();
 const routesName = route.name?.toString() || "";
 
 const routeCheck = (name: string) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(routesName);
-  }
   routesName.startsWith("donee")
     ? router.push({ name: `donee-${name}` })
     : router.push({ name: `donor-${name}` });
@@ -429,13 +417,7 @@ onMounted(async () => {
   }
   // Update name from API store - try different possible property names
   if (apiStore.user) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("API Store User on mount:", apiStore.user);
-    }
     const userName = (apiStore.user as any).name || (apiStore.user as any).username || (apiStore.user as any).fullName || (apiStore.user as any).nickname;
-    if (process.env.NODE_ENV === "development") {
-      console.log("Extracted userName on mount:", userName);
-    }
     if (userName) {
       profile.value.user.userName = userName;
     } else if (userStore.name) {

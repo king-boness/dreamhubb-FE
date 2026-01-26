@@ -88,9 +88,7 @@ export default {
       this.uploadedImages = imgs;
     },
     async storyClicked(index) {
-      if (process.env.NODE_ENV === "development") {
-        console.log(index);
-      }
+      void index;
       this.storiesComponent.recalculateDimensions();
       setTimeout(() => {
         this.showSlider = true;

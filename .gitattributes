@@ -1,5 +1,18 @@
 * text=auto
 
+# Normalize common source files to LF to avoid CRLF/LF noise across OSes
+*.ts  text eol=lf
+*.js  text eol=lf
+*.vue text eol=lf
+*.scss text eol=lf
+*.css text eol=lf
+*.md  text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+* text=auto
+
 # Keep consistent LF line endings in repo (Windows-friendly; prevents ESLint EOF ping-pong)
 *.js text eol=lf
 *.ts text eol=lf

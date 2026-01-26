@@ -17,9 +17,9 @@ export const useUserStore = defineStore("user", {
       } catch (error: unknown) {
         // Ignorovať chyby - aj tak vymazeme token
         // Dôležité je vyčistiť FE stav, aj keď BE vracia 500
-        if (process.env.NODE_ENV === "development") {
+        if (import.meta.env.DEV) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          console.warn("Logout API call failed:", errorMessage);
+          console.debug("Logout API call failed:", errorMessage);
         }
       } finally {
         // Vždy vymazať token a resetovať store

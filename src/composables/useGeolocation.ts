@@ -87,7 +87,9 @@ export function useGeolocation() {
         countryCode
       };
     } catch (err) {
-      console.error("Reverse geocoding error:", err);
+      if (import.meta.env.DEV) {
+        console.debug("Reverse geocoding error:", err);
+      }
       throw err;
     }
   }

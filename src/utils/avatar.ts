@@ -10,40 +10,25 @@ export const getUserAvatarUrl = (
 ): string | null => {
   // Priority 1: Direct user profile_picture
   if (user?.profile_picture) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ getUserAvatarUrl: Found in user.profile_picture:", user.profile_picture);
-    }
     return user.profile_picture;
   }
 
   // Priority 2: Author data from post (author_picture)
   if (authorData?.author_picture) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ getUserAvatarUrl: Found in authorData.author_picture:", authorData.author_picture);
-    }
     return authorData.author_picture;
   }
 
   // Priority 3: Author data from post (authorAvatarUrl)
   if (authorData?.authorAvatarUrl && !authorData.authorAvatarUrl.startsWith("data:image")) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ getUserAvatarUrl: Found in authorData.authorAvatarUrl:", authorData.authorAvatarUrl);
-    }
     return authorData.authorAvatarUrl;
   }
 
   // Priority 4: Nested user in author data
   if (authorData?.user?.profile_picture) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ getUserAvatarUrl: Found in authorData.user.profile_picture:", authorData.user.profile_picture);
-    }
     return authorData.user.profile_picture;
   }
 
   // No avatar available - return null (component should show initials/default)
-  if (process.env.NODE_ENV === "development") {
-    console.log("❌ getUserAvatarUrl: No avatar found", { user, authorData });
-  }
   return null;
 };
 

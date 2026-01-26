@@ -50,6 +50,8 @@ import { useAuthStore } from "src/stores/auth";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
 import { getLocationLabel } from "src/utils/cityNames";
 import { useI18n } from "vue-i18n";
+import { notifyError, notifySuccess } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const router = useRouter();
 const $q = useQuasar();
@@ -119,19 +121,12 @@ const handleSave = async () => {
     // Refresh user data to get updated location_*_name fields from BE
     await authStore.fetchUser();
 
-    $q.notify({
-      type: "positive",
-      message: t("locationUpdated"),
-      position: "top"
-    });
+    notifySuccess("common.success.locationUpdated", t("locationUpdated") || "Location updated", { position: "top" });
 
     router.back();
   } catch (e) {
-    $q.notify({
-      type: "negative",
-      message: t("locationUpdateFailed"),
-      position: "top"
-    });
+    // Safe, localized error toast (no raw exception strings)
+    notifyError(mapAxiosErrorToDhError(e));
   } finally {
     saving.value = false;
   }

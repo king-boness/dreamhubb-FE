@@ -5,6 +5,16 @@
       <AppSplash />
         </div>
 
+    <!-- Load error state (edit mode only) -->
+    <div v-else-if="isEditMode && postsStore.detailError" class="postDetail-error">
+      <RetryPanel
+        :message="postsStore.detailError"
+        :on-retry="handleRetryLoadPost"
+        :loading="loading"
+        variant="card"
+      />
+    </div>
+
     <!-- Post content -->
     <template v-else-if="postDetail">
       <!-- HERO + SLIDER (rovnaký komponent ako na detaile) -->
@@ -1706,11 +1716,15 @@ import PostHeader from "src/components/post/PostHeader.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
 import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
+import RetryPanel from "src/components/common/RetryPanel.vue";
 import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
 import { useQuasar } from "quasar";
 import { useUpload } from "src/composables/useUpload";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { notifyError, notifySuccess } from "src/utils/notify";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const route = useRoute();
 const router = useRouter();
@@ -1854,6 +1868,8 @@ const checkBodyClass = () => {
   isBodyLight.value = document.body.classList.contains("body--light");
 };
 
+// retryLabel removed - now using RetryPanel component
+
 // Check if we're in edit mode (route name is "donee-post-edit")
 const isEditMode = computed(() => route.name === "donee-post-edit");
 const postId = computed(() => {
@@ -1868,16 +1884,11 @@ onMounted(async () => {
   checkBodyClass();
   if (isEditMode.value && postId.value) {
     loading.value = true;
-    try {
-      await postsStore.fetchPostById(postId.value);
-      if (postsStore.currentPost) {
-        fillFormFromPost(postsStore.currentPost);
-      }
-    } catch (error) {
-      console.error("Failed to load post:", error);
-    } finally {
-      loading.value = false;
+    await postsStore.fetchPostById(postId.value);
+    if (postsStore.currentPost) {
+      fillFormFromPost(postsStore.currentPost);
     }
+    loading.value = false;
   } else {
     // For non-edit mode, initialize originalPost and editedPost
     if (postsStore.currentPost) {
@@ -1894,20 +1905,30 @@ onMounted(async () => {
   lastKnownScrollY.value = readScrollPosition();
 });
 
+const handleRetryLoadPost = async () => {
+  if (!isEditMode.value || !postId.value) return;
+  loading.value = true;
+  await postsStore.fetchPostById(postId.value, { force: true });
+  if (postsStore.currentPost) {
+    fillFormFromPost(postsStore.currentPost);
+  }
+  loading.value = false;
+};
+
 // Watch for dialog open/close to freeze/unfreeze blur
 watch(isEditDialogOpen, (isOpen) => {
   if (isOpen) {
     // Freeze blur: save current scroll position
     frozenScrollY.value = lastKnownScrollY.value;
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔒 [Blur Freeze] Dialog opened, freezing blur at scrollY:", frozenScrollY.value);
+    if (import.meta.env.DEV) {
+      console.debug("[Blur] Dialog opened, freezing blur at scrollY:", frozenScrollY.value);
     }
   } else {
     // Unfreeze blur: update lastKnownScrollY with current position
     const currentScrollY = readScrollPosition();
     lastKnownScrollY.value = currentScrollY;
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔓 [Blur Unfreeze] Dialog closed, updating lastKnownScrollY to:", currentScrollY);
+    if (import.meta.env.DEV) {
+      console.debug("[Blur] Dialog closed, updating lastKnownScrollY to:", currentScrollY);
     }
   }
 });
@@ -1918,8 +1939,8 @@ onBeforeUnmount(() => {
     try {
       fn();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Error in cleanup function:", error);
+      if (import.meta.env.DEV) {
+        console.debug("[TopDreamPage] Error in cleanup function:", error);
       }
     }
   });
@@ -2733,8 +2754,8 @@ const applyCategoryChange = async () => {
   await nextTick();
 
   // Debug log
-  if (process.env.NODE_ENV === "development") {
-    console.log("[applyCategoryChange] After category change:", {
+  if (import.meta.env.DEV) {
+    console.debug("[applyCategoryChange] After category change:", {
       categoryId: editForm.categoryId,
       categorySlug: draft.value.categorySlug,
       subcategorySlug: draft.value.subcategorySlug,
@@ -2797,8 +2818,8 @@ const applySubcategoryChange = async () => {
   await nextTick();
 
   // Debug log
-  if (process.env.NODE_ENV === "development") {
-    console.log("[applySubcategoryChange] After subcategory change:", {
+  if (import.meta.env.DEV) {
+    console.debug("[applySubcategoryChange] After subcategory change:", {
       subcategoryId: editForm.subcategoryId,
       subcategorySlug: draft.value?.subcategorySlug,
       originalSubcategorySlug: originalDraft.value?.subcategorySlug,
@@ -2839,11 +2860,10 @@ const onPhotosSelected = async (event: Event) => {
     editForm.photos.push(...imageUrls);
     markDirty();
   } catch (error) {
-    console.error("Failed to upload images:", error);
-    $q.notify({
-      type: "negative",
-      message: "Failed to upload images. Please try again."
-    });
+    if (import.meta.env.DEV) {
+      console.debug("[TopDreamPage] Failed to upload images:", error);
+    }
+    notifyError(mapAxiosErrorToDhError(error));
   }
 
   // Reset input
@@ -2912,7 +2932,8 @@ const editActions = [
 
 // Use real post data if in edit mode, otherwise use default
 const postDetail = computed(() => {
-  if (isEditMode.value && postsStore.currentPost) {
+  if (isEditMode.value) {
+    if (!postsStore.currentPost) return null;
     const p = postsStore.currentPost;
     // Ensure images is always an array, never null or undefined
     const images = Array.isArray(p.images) ? p.images : [];
@@ -2979,9 +3000,7 @@ const displayCategoryName = computed(() => {
   if (!subcategorySlug) {
     const translated = t("subcategories.other") || "Other";
     const result = formatSubcategoryLabel(translated);
-    if (process.env.NODE_ENV === "development") {
-      console.log("[displayCategoryName] No subcategory slug, using 'other':", { translated, result });
-    }
+    // no logs
     return result;
   }
   // Use i18n key: subcategories.traveling, subcategories.health, etc.
@@ -2990,9 +3009,7 @@ const displayCategoryName = computed(() => {
   // If translation doesn't exist, return capitalized slug, then apply formatSubcategoryLabel
   const finalText = translated !== i18nKey ? translated : subcategorySlug.charAt(0).toUpperCase() + subcategorySlug.slice(1);
   const result = formatSubcategoryLabel(finalText);
-  if (process.env.NODE_ENV === "development") {
-    console.log("[displayCategoryName] Computed:", { subcategorySlug, i18nKey, translated, finalText, result });
-  }
+  // no logs
   return result;
 });
 // Display category icon (dream/problem/idea)
@@ -3063,12 +3080,7 @@ const fillFormFromPost = (p: PostDetail) => {
 // IMPORTANT: Compare using draft model with primitives (slugs), not objects
 const hasChanges = computed(() => {
   if (!originalDraft.value || !draft.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[hasChanges] Missing originalDraft or draft:", {
-        hasOriginal: !!originalDraft.value,
-        hasDraft: !!draft.value
-      });
-    }
+    // no logs
     return false;
   }
 
@@ -3092,9 +3104,9 @@ const hasChanges = computed(() => {
     sameTokens
   );
 
-  // Debug log
-  if (process.env.NODE_ENV === "development" && hasChangesResult) {
-    console.log("[hasChanges] Changes detected:", {
+  // Debug log (dev-only)
+  if (import.meta.env.DEV && hasChangesResult) {
+    console.debug("[hasChanges] Changes detected:", {
       sameTitle,
       sameCategory: { original: o.categorySlug, draft: d.categorySlug, result: sameCategory },
       sameSubcategory: { original: o.subcategorySlug, draft: d.subcategorySlug, result: sameSubcategory },
@@ -3111,8 +3123,8 @@ const hasChanges = computed(() => {
 // Save handler
 const onSaveChanges = async () => {
   if (!draft.value || !hasChanges.value || isSaving.value || !originalDraft.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[onSaveChanges] Cannot save:", {
+    if (import.meta.env.DEV) {
+      console.debug("[onSaveChanges] Cannot save:", {
         hasDraft: !!draft.value,
         hasChanges: hasChanges.value,
         isSaving: isSaving.value,
@@ -3130,9 +3142,9 @@ const onSaveChanges = async () => {
 
     const payload: Record<string, unknown> = {};
 
-    // Debug log before building payload
-    if (process.env.NODE_ENV === "development") {
-      console.log("[SaveChanges] store category/subcategory:", {
+    // Debug log before building payload (dev-only)
+    if (import.meta.env.DEV) {
+      console.debug("[SaveChanges] store category/subcategory:", {
         categorySlug: d.categorySlug,
         subcategorySlug: d.subcategorySlug,
         originalCategory: o.categorySlug,
@@ -3159,9 +3171,9 @@ const onSaveChanges = async () => {
         payload.subcategory = d.subcategorySlug;
       }
 
-      // Debug log
-      if (process.env.NODE_ENV === "development") {
-        console.log("[onSaveChanges] Category/subcategory payload (NEW FORMAT ONLY):", {
+      // Debug log (dev-only)
+      if (import.meta.env.DEV) {
+        console.debug("[onSaveChanges] Category/subcategory payload (NEW FORMAT ONLY):", {
           category: payload.category,
           subcategory: payload.subcategory,
           originalCategory: o.categorySlug,
@@ -3187,9 +3199,9 @@ const onSaveChanges = async () => {
       payload.tokens_to_top_up = form.tokensToTopUp;
     }
 
-    // Debug log before API call
-    if (process.env.NODE_ENV === "development") {
-      console.log("[onSaveChanges] About to send update request:", {
+    // Debug log before API call (dev-only)
+    if (import.meta.env.DEV) {
+      console.debug("[onSaveChanges] About to send update request:", {
         postId: postId.value,
         payload,
         hasChanges: hasChanges.value,
@@ -3199,9 +3211,9 @@ const onSaveChanges = async () => {
 
     const { data } = await api.put(`/post-update/${postId.value}`, payload);
 
-    // Debug log after API call
-    if (process.env.NODE_ENV === "development") {
-      console.log("[onSaveChanges] Update response:", data);
+    // Debug log after API call (dev-only)
+    if (import.meta.env.DEV) {
+      console.debug("[onSaveChanges] Update response:", data);
     }
 
     // IMPORTANT: Refetch post detail to get updated data from backend
@@ -3241,9 +3253,9 @@ const onSaveChanges = async () => {
         originalDraft.value = JSON.parse(JSON.stringify(draft.value));
       }
 
-      // Debug log after cache update
-      if (process.env.NODE_ENV === "development") {
-        console.log("[onSaveChanges] After cache update:", {
+      // Debug log after cache update (dev-only)
+      if (import.meta.env.DEV) {
+        console.debug("[onSaveChanges] After cache update:", {
           category: normalizedPost.category?.slug,
           subcategory: normalizedPost.subcategory?.slug,
           draftCategory: draft.value?.categorySlug,
@@ -3288,10 +3300,7 @@ const onSaveChanges = async () => {
     }
 
     // Show success toast
-    $q.notify({
-      type: "positive",
-      message: "Post has been updated."
-    });
+    notifySuccess("common.success.postUpdated", "Post has been updated.", {});
 
     // Update post in lists (feed, my-posts, etc.) to reflect changes everywhere
     if (postId.value && postsStore.currentPost) {
@@ -3377,12 +3386,8 @@ const onSaveChanges = async () => {
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   } catch (error: unknown) {
-    // Show error notify with backend message
-    const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to update post. Please try again.";
-    $q.notify({
-      type: "negative",
-      message: errorMessage
-    });
+    // Safe error notify (no raw backend messages)
+    notifyError(mapAxiosErrorToDhError(error), {});
   } finally {
     isSaving.value = false;
   }

@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # Preflight checks (fail fast)
+  preflight:
+    runs-on: ubuntu-latest
+    name: Preflight (lint + build + guardrails + unit + prod-safety)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: dreamhubb-FE/package-lock.json
+
+      - name: Install dependencies
+        working-directory: dreamhubb-FE
+        run: npm ci
+
+      - name: Run preflight (lint + build + guardrails + unit + prod-safety)
+        working-directory: dreamhubb-FE
+        run: npm run preflight:ci
+        env:
+          CI: "true"
+
+  frontend:
+    runs-on: ${{ matrix.os }}
+    needs: preflight  # Fail fast: ak preflight zlyhá, E2E sa nespustí
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: dreamhubb-FE/package-lock.json
+
+      - name: Install dependencies
+        working-directory: dreamhubb-FE
+        run: npm ci
+
+      - name: Build (already done in preflight, but verify)
+        working-directory: dreamhubb-FE
+        run: npm run build
+
+      - name: Install Playwright
+        working-directory: dreamhubb-FE
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo, pdo_pgsql, pgsql
+
+      - name: Start backend server
+        working-directory: dreamhubb-BE
+        run: php artisan serve --host=127.0.0.1 --port=8000 &
+        env:
+          APP_ENV: testing
+
+      - name: Start frontend dev server
+        working-directory: dreamhubb-FE
+        run: npm run dev &
+        env:
+          QUASAR_PORT: 9000
+
+      - name: Wait for servers (readiness check)
+        run: |
+          echo "🔍 Checking server readiness..."
+          timeout=60
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            be_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/health || echo "000")
+            fe_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/ || echo "000")
+            
+            if [ "$be_status" = "200" ] && [ "$fe_status" = "200" ]; then
+              echo "✅ Servers are ready"
+              echo "   Backend: http://localhost:8000/api/health (HTTP $be_status)"
+              echo "   Frontend: http://localhost:9000/ (HTTP $fe_status)"
+              exit 0
+            fi
+            
+            echo "⏳ Waiting for servers... (Backend: HTTP $be_status, Frontend: HTTP $fe_status)"
+            sleep 2
+            elapsed=$((elapsed + 2))
+          done
+          echo "❌ Servers failed to start within $timeout seconds"
+          echo "   Backend: http://localhost:8000/api/health (last status: HTTP $be_status)"
+          echo "   Frontend: http://localhost:9000/ (last status: HTTP $fe_status)"
+          echo ""
+          echo "💡 Troubleshooting:"
+          echo "   - Check if ports 8000 and 9000 are available"
+          echo "   - Verify backend server started: ps aux | grep 'php artisan serve'"
+          echo "   - Verify frontend server started: ps aux | grep 'npm run dev'"
+          echo "   - Check server logs above for errors"
+          exit 1
+        shell: bash
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Wait for servers (readiness check) - Windows
+        run: |
+          Write-Host "🔍 Checking server readiness..."
+          $timeout = 60
+          $elapsed = 0
+          $beStatus = "000"
+          $feStatus = "000"
+          
+          while ($elapsed -lt $timeout) {
+            try {
+              $be = Invoke-WebRequest -Uri "http://localhost:8000/api/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+              $beStatus = $be.StatusCode
+            } catch {
+              $beStatus = "000"
+            }
+            
+            try {
+              $fe = Invoke-WebRequest -Uri "http://localhost:9000/" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+              $feStatus = $fe.StatusCode
+            } catch {
+              $feStatus = "000"
+            }
+            
+            if ($beStatus -eq 200 -and $feStatus -eq 200) {
+              Write-Host "✅ Servers are ready"
+              Write-Host "   Backend: http://localhost:8000/api/health (HTTP $beStatus)"
+              Write-Host "   Frontend: http://localhost:9000/ (HTTP $feStatus)"
+              exit 0
+            }
+            
+            Write-Host "⏳ Waiting for servers... (Backend: HTTP $beStatus, Frontend: HTTP $feStatus)"
+            Start-Sleep -Seconds 2
+            $elapsed += 2
+          }
+          
+          Write-Host "❌ Servers failed to start within $timeout seconds"
+          Write-Host "   Backend: http://localhost:8000/api/health (last status: HTTP $beStatus)"
+          Write-Host "   Frontend: http://localhost:9000/ (last status: HTTP $feStatus)"
+          Write-Host ""
+          Write-Host "💡 Troubleshooting:"
+          Write-Host "   - Check if ports 8000 and 9000 are available"
+          Write-Host "   - Verify backend server started: Get-Process | Where-Object { $_.ProcessName -like '*php*' }"
+          Write-Host "   - Verify frontend server started: Get-Process | Where-Object { $_.ProcessName -like '*node*' }"
+          Write-Host "   - Check server logs above for errors"
+          exit 1
+        shell: pwsh
+        if: matrix.os == 'windows-latest'
+
+      - name: Run E2E tests
+        working-directory: dreamhubb-FE
+        run: npm run test:e2e
+        env:
+          E2E_BASE_URL: http://localhost:9000
+          E2E_API_BASE: http://localhost:8000/api
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_POST_ID: ${{ secrets.E2E_POST_ID || '1' }}
+        continue-on-error: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: |
+            dreamhubb-FE/playwright-report/
+            dreamhubb-FE/test-results/
+          retention-days: 7
+
+  backend:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dreamhubb_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo, pdo_pgsql, pgsql
+
+      - name: Install dependencies
+        working-directory: dreamhubb-BE
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHP tests
+        working-directory: dreamhubb-BE
+        run: php artisan test
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: dreamhubb_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres

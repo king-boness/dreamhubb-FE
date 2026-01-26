@@ -692,6 +692,11 @@
       width: 100%;
     }
 
+    // Keep spacing where we removed the divider line under "About donee" location.
+    .postDetailAbout-section--donee {
+      margin-bottom: 1.25rem;
+    }
+
     .postDetailAbout-text {
       font-size: 0.95rem;
       line-height: 1.6;

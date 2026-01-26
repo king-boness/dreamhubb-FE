@@ -64,9 +64,8 @@ let routesName = route.name?.toString() || "";
 
 const routeCheck = () => {
   routesName = route.name?.toString() || "";
-  if (process.env.NODE_ENV === "development") {
-    console.log(routesName);
-  }
+  // No noisy logs in production
+  // If needed, add temporary dev-only debug here.
   // Show back button only on settings sub-pages, not on main settings page
   routesName.startsWith("donee-settings") && routesName !== "donee-settings"
     ? (settingsPage = true)
@@ -182,8 +181,9 @@ onMounted(async () => {
     try {
       await authStore.fetchUser();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Failed to fetch user data:", error);
+      // Silent during boot (weak net / offline is normal). Dev-only debug is enough.
+      if (import.meta.env.DEV) {
+        console.debug("[DoneeMainLayout] Failed to fetch user data:", error);
       }
     }
   }

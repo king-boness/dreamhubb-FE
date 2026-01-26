@@ -97,7 +97,7 @@ import "swiper/scss";
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
 
-const props = defineProps({
+defineProps({
   openedFully: {
     type: Boolean,
     required: true
@@ -105,16 +105,11 @@ const props = defineProps({
 });
 
 const handleHSwiperReady = () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(props.openedFully);
-    console.log(activeButton.value);
-  }
+  // no logs
 };
 
 const handleHSwiperSlideChange = (swiper) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("swiper slide change", swiper);
-  }
+  void swiper;
 };
 
 const badges = [

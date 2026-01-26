@@ -1,7 +1,7 @@
 <template>
   <div class="post-page">
     <!-- First Post Hint Bubble -->
-    <div v-if="showFirstPostHint" class="postPage-firstPostHint">
+    <div v-if="showFirstPostHint && !isFirstPostHintTemporarilyHidden" class="postPage-firstPostHint">
       <HintBubble
         title="Start your journey!"
         text="Create your first dream, problem or idea and share it with the world."
@@ -58,7 +58,13 @@
       </div>
       <!-- Error state -->
       <div v-else-if="postsStore.myDreamsError" class="postPage-error">
-        <p>{{ postsStore.myDreamsError }}</p>
+        <RetryPanel
+          :message="postsStore.myDreamsError"
+          :on-retry="retryMyPosts"
+          :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
+          variant="card"
+          button-class="postPage-retryBtn"
+        />
       </div>
       <!-- Empty state -->
       <div v-else-if="!postsStore.myDreamsLoading && mappedMyDreams.length === 0" class="postPage-empty">
@@ -84,7 +90,13 @@
         </div>
         <!-- Error state -->
         <div v-else-if="postsStore.myProblemsError" class="postPage-error">
-          <p>{{ postsStore.myProblemsError }}</p>
+          <RetryPanel
+            :message="postsStore.myProblemsError"
+            :on-retry="retryMyPosts"
+            :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
+            variant="card"
+            button-class="postPage-retryBtn"
+          />
         </div>
         <!-- Empty state -->
         <div v-else-if="!postsStore.myProblemsLoading && mappedMyProblems.length === 0" class="postPage-empty">
@@ -111,7 +123,13 @@
         </div>
         <!-- Error state -->
         <div v-else-if="postsStore.myIdeasError" class="postPage-error">
-          <p>{{ postsStore.myIdeasError }}</p>
+          <RetryPanel
+            :message="postsStore.myIdeasError"
+            :on-retry="retryMyPosts"
+            :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
+            variant="card"
+            button-class="postPage-retryBtn"
+          />
         </div>
         <!-- Empty state -->
         <div v-else-if="!postsStore.myIdeasLoading && mappedMyIdeas.length === 0" class="postPage-empty">
@@ -129,7 +147,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onActivated, watch } from "vue";
+import { ref, computed, onMounted, onActivated, watch, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
@@ -137,6 +155,7 @@ import { usePostsStore } from "src/stores/posts";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import { getLocationLabel } from "src/utils/cityNames";
 import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
+import RetryPanel from "src/components/common/RetryPanel.vue";
 
 const { t, locale } = useI18n();
 
@@ -263,7 +282,7 @@ const getCategoryIcon = (category: string | null): string => {
 };
 
 // Map BE post data to Post interface format (for PostComponent)
-const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
+const mapPostToComponentFormat = (post: Record<string, unknown>, postType: "dream" | "problem" | "idea"): Post => {
   const images = Array.isArray(post.images) ? post.images as string[] : [];
   const firstImage = images.length > 0 ? images[0] : "/images/Auth/postBackground.png";
 
@@ -271,6 +290,7 @@ const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
     post_id: (post.post_id || null) as number | undefined,
     goalName: (post.title || "Untitled") as string,
     goalImage: getCategoryIcon((post.fe_category || post.category_name || null) as string | null),
+    postType,
     karma: (post.tokens || 0) as number,
     image: firstImage,
     images: images.length > 0 ? images : null,
@@ -290,17 +310,17 @@ const mapPostToComponentFormat = (post: Record<string, unknown>): Post => {
 
 // Map my dreams from store to Post[] format
 const mappedMyDreams = computed(() => {
-  return filterByView(postsStore.myDreams || []).map(mapPostToComponentFormat);
+  return filterByView(postsStore.myDreams || []).map((p) => mapPostToComponentFormat(p, "dream"));
 });
 
 // Map my problems from store to Post[] format
 const mappedMyProblems = computed(() => {
-  return filterByView(postsStore.myProblems || []).map(mapPostToComponentFormat);
+  return filterByView(postsStore.myProblems || []).map((p) => mapPostToComponentFormat(p, "problem"));
 });
 
 // Map my ideas from store to Post[] format
 const mappedMyIdeas = computed(() => {
-  return filterByView(postsStore.myIdeas || []).map(mapPostToComponentFormat);
+  return filterByView(postsStore.myIdeas || []).map((p) => mapPostToComponentFormat(p, "idea"));
 });
 
 // Check if user has any posts
@@ -348,6 +368,50 @@ const dismissFirstPostHint = () => {
   localStorage.setItem("dh_donee_first_post_hint_dismissed", "true");
 };
 
+// Hide the hint when footer is hidden (same behavior as the bottom nav),
+// but do NOT permanently dismiss it. It re-appears when footer shows again
+// unless user manually closes it (X).
+const isFirstPostHintTemporarilyHidden = ref(false);
+let firstScrollListenerAttached = false;
+
+const onHintScroll = () => {
+  // Footer visibility is driven globally in DoneeMainLayout via `.footer--hidden`.
+  // Mirror that state so the coachmark never "floats" while footer is gone.
+  const footerHidden = !!document.querySelector(".footer--hidden");
+  isFirstPostHintTemporarilyHidden.value = footerHidden;
+};
+
+const attachFirstScrollListener = () => {
+  if (firstScrollListenerAttached) return;
+  firstScrollListenerAttached = true;
+  window.addEventListener("scroll", onHintScroll, { passive: true });
+  // Sync immediately (in case footer is already hidden on mount)
+  onHintScroll();
+};
+
+const detachFirstScrollListener = () => {
+  if (!firstScrollListenerAttached) return;
+  firstScrollListenerAttached = false;
+  window.removeEventListener("scroll", onHintScroll);
+};
+
+watch(
+  showFirstPostHint,
+  (visible) => {
+    if (visible) {
+      attachFirstScrollListener();
+    } else {
+      detachFirstScrollListener();
+      isFirstPostHintTemporarilyHidden.value = false;
+    }
+  },
+  { immediate: true }
+);
+
+onBeforeUnmount(() => {
+  detachFirstScrollListener();
+});
+
 // Fetch data on mount
 onMounted(async () => {
   // Check localStorage first
@@ -362,6 +426,14 @@ onMounted(async () => {
     postsStore.fetchMyIdeas({ type: "idea" })
   ]);
 });
+
+const retryMyPosts = async () => {
+  await Promise.all([
+    postsStore.fetchMyDreams({ type: "dream" }),
+    postsStore.fetchMyProblems({ type: "problem" }),
+    postsStore.fetchMyIdeas({ type: "idea" })
+  ]);
+};
 
 // Re-fetch data when returning to this page (for updated data after post creation/donation)
 onActivated(async () => {
@@ -465,6 +537,10 @@ onActivated(async () => {
 
   .postPage-error {
     color: rgba(255, 68, 68, 0.8);
+  }
+
+  .postPage-retryBtn {
+    margin-top: 0.75rem;
   }
 
   .postPage-empty {

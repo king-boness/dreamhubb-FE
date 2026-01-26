@@ -27,21 +27,18 @@
 </template>
 
 <script setup lang="ts">
-import { useQuasar } from "quasar";
-
-const $q = useQuasar();
+import { notifyInfo } from "src/utils/notify";
 
 const reloadApp = () => {
   window.location.reload();
 };
 
 const openNetworkSettings = () => {
-  $q.notify({
-    type: "info",
-    message: "Open Wi‑Fi or mobile data settings on your device, then tap Reload.",
-    position: "top",
-    timeout: 4000
-  });
+  notifyInfo(
+    "common.info.openNetworkSettings",
+    "Open Wi‑Fi or mobile data settings on your device, then tap Reload.",
+    { timeout: 4000 }
+  );
 };
 </script>
 

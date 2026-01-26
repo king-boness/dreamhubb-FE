@@ -38,10 +38,21 @@
     </div>
 
     <!-- Feed of posts -->
-    <div class="donorPosts-feed">
+    <div class="donorPosts-feed" data-testid="dh-feed-container">
       <!-- Loading state -->
       <div v-if="loading" class="donorPosts-state">
         <p>{{ t("loadingPosts") }}</p>
+      </div>
+
+      <!-- Error state (safe, with Retry) -->
+      <div v-else-if="feedError" class="donorPosts-state" data-testid="dh-feed-error">
+        <RetryPanel
+          :message="feedError"
+          :on-retry="retryFetch"
+          variant="inline"
+          button-class="donorPosts-retryBtn"
+          data-testid="dh-feed-retry"
+        />
       </div>
 
       <!-- Empty state -->
@@ -77,8 +88,10 @@
         >
           <!-- Hero image with overlay -->
           <div class="postCard-imageWrapper">
-            <PostImagesCarousel
+            <PostCover
               :images="post.images"
+              :post-type="post.type"
+              :icon-url="getPostTypeIcon(post.type)"
               :auto-slide="true"
               :show-progress="true"
               :show-arrows="false"
@@ -147,13 +160,14 @@ import { useRouter, useRoute } from "vue-router";
 import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
 import { useAuthStore } from "src/stores/auth";
-import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
+import PostCover from "src/components/post/PostCover.vue";
 import { getPostTypeIcon } from "src/utils/postIcons";
 import { getUserAvatarUrl } from "src/utils/avatar";
 import { normalizePost } from "src/utils/normalizePost";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
+import RetryPanel from "src/components/common/RetryPanel.vue";
 
 const { t, locale } = useI18n();
 
@@ -212,6 +226,12 @@ const tabs = computed<DonorTab[]>(() => [
 
 // Active tab
 const activeTab = ref<"help" | "pay" | "top">("help");
+
+const feedError = computed(() => postsStore.error);
+
+const retryFetch = async () => {
+  await postsStore.fetchPosts({ sort: activeTab.value });
+};
 
 // Tab refs for indicator positioning
 const tabRefs = ref<(HTMLElement | null)[]>([]);
@@ -634,6 +654,11 @@ const emitOpenAuthor = (post: DonorPost) => {
   &--error {
     color: rgba(255, 68, 68, 0.8);
   }
+}
+
+.donorPosts-retryBtn {
+  color: #ff4db8;
+  font-family: poppinsSemiBold;
 }
 
 .donorPosts-resetFiltersBtn {

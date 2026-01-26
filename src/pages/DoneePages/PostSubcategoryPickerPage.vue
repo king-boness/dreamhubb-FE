@@ -13,13 +13,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onActivated, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { notifyError } from "src/utils/notify";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import { usePostCreationStore } from "src/stores/postCreation";
-import { usePreferencesStore } from "src/stores/preferences";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const router = useRouter();
 const postCreationStore = usePostCreationStore();
-const preferencesStore = usePreferencesStore();
 
 // Get selected category to filter subcategories
 // IMPORTANT: Do NOT use preferencesStore for post creation flow - it's for onboarding only
@@ -82,9 +82,7 @@ const loadAndSyncSubcategory = async () => {
     await nextTick();
   }
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostSubcategoryPickerPage: Loaded subcategory:", selectedSubcategory.value, "for category:", selectedCategory.value);
-  }
+  // no verbose logs
 };
 
 // Watch for changes from WhatKindOfDream component - save immediately on change
@@ -96,17 +94,11 @@ watch(() => selectedSubcategory.value, (newVal) => {
     // Save to localStorage immediately
     localStorage.setItem("donee_postCreation_subcategory", newVal);
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("📝 PostSubcategoryPickerPage: selectedSubcategory changed to:", newVal, "- saved to store and localStorage");
-    }
+    // no logs
   }
 });
 
 onMounted(async () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostSubcategoryPickerPage: onMounted called");
-  }
-
   await loadAndSyncSubcategory();
 });
 
@@ -117,23 +109,17 @@ onActivated(async () => {
   // Give extra time for WhatKindOfDream component to re-mount and initialize Flicking
   await nextTick();
   await new Promise(resolve => setTimeout(resolve, 300));
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostSubcategoryPickerPage: onActivated - Synchronizing subcategory picker");
-  }
+  // no logs
 });
 
 const handleNext = () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostSubcategoryPickerPage: handleNext called", {
-      selectedSubcategory: selectedSubcategory.value,
-      category: selectedCategory.value
-    });
-  }
-
   if (!selectedSubcategory.value || selectedSubcategory.value.trim() === "") {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ PostSubcategoryPickerPage: No subcategory selected, cannot proceed");
-    }
+    notifyError({
+      kind: "validation",
+      messageKey: "common.errors.validation",
+      fallbackMessage: "Please check your input and try again.",
+      retryable: false
+    }, { position: "top", timeout: 3500 });
     return;
   }
 
@@ -144,17 +130,11 @@ const handleNext = () => {
   // Save to localStorage (redundant but ensures consistency)
   localStorage.setItem("donee_postCreation_subcategory", selectedSubcategory.value);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostSubcategoryPickerPage: Saved subcategory:", selectedSubcategory.value);
-    console.log("📝 PostSubcategoryPickerPage: Navigating to submit-postCreation");
-  }
-
   // Navigate back to post creation - use nextTick to ensure state is saved
   nextTick(() => {
     router.push({ name: "submit-postCreation" }).catch((error) => {
-      if (process.env.NODE_ENV === "development") {
-        console.error("❌ PostSubcategoryPickerPage: Navigation error:", error);
-        console.error("❌ Error details:", error.message, error.stack);
+      if (import.meta.env.DEV) {
+        console.debug("[PostSubcategoryPickerPage] Navigation error:", error);
       }
     });
   });

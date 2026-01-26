@@ -22,7 +22,8 @@ module.exports = configure(function (/* ctx */) {
     boot: [
       "i18n",
       "axios",
-      "auth"
+      "auth",
+      "resume-check"
     ],
 
     // App CSS

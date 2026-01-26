@@ -77,11 +77,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { notifyError } from "src/utils/notify";
 import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
-import { useAuthStore } from "src/stores/auth";
 import { api } from "boot/axios";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
+import { tGlobal } from "src/utils/i18nGlobal";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
@@ -119,30 +120,10 @@ const currentNextLabel = computed(() => {
 });
 
 const handleNext = () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 handleNext called:", {
-      currentStep: currentStep.value,
-      filterCategory: filterCategory.value,
-      filterSubcategory: filterSubcategory.value
-    });
-  }
-
   if (currentStep.value < 3) {
-    // Ensure filterSubcategory is saved before moving to next step
-    if (currentStep.value === 2) {
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 Moving from step 2 to step 3. filterSubcategory:", filterSubcategory.value);
-        if (!filterSubcategory.value) {
-          console.error("❌ filterSubcategory is null when moving from step 2 to step 3!");
-        }
-      }
-    }
     currentStep.value++;
   } else {
     // Apply filters and go back to posts page
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 handleNext: About to call applyFilters from step 3");
-    }
     applyFilters();
   }
 };
@@ -151,12 +132,6 @@ const handleNext = () => {
 const handleSearchFromStep1 = () => {
   // Ak sme v kroku 1, resetovať subcategorySlug na null (len category sa aplikuje)
   if (currentStep.value === 1) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 Applying filters from step 1 (category only):", {
-        categorySlug: filterCategory.value,
-        subcategorySlug: null
-      });
-    }
     postsStore.setFilters({
       categorySlug: filterCategory.value,
       subcategorySlug: null // Explicitne nastaviť na null, ak nie je vybraná podkategória
@@ -181,10 +156,6 @@ const handleSearchFromStep1 = () => {
 // Handle subcategory update from WhatKindOfDream component - using new API
 const handleCategoryUpdate = (value: string) => {
   filterSubcategory.value = value;
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 handleCategoryUpdate called with value:", value);
-    console.log("🔍 filterCategory.value after update:", filterCategory.value);
-  }
 };
 
 const handleBack = (event?: Event) => {
@@ -215,41 +186,15 @@ const handleBack = (event?: Event) => {
 };
 
 const applyFilters = async () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 Applying filters:", {
-      categorySlug: filterCategory.value,
-      subcategorySlug: filterSubcategory.value,
-      filterSubcategory_type: typeof filterSubcategory.value,
-      filterSubcategory_isNull: filterSubcategory.value === null,
-      filterSubcategory_isUndefined: filterSubcategory.value === undefined,
-      filterSubcategory_value: filterSubcategory.value,
-      currentStep: currentStep.value,
-      location: {
-        continent: filterContinent.value,
-        country: filterCountry.value,
-        cityId: filterCityId.value
-      }
-    });
-  }
-
   // Ensure filterSubcategory is set if we're on step 2 or 3 - using new API
   if ((currentStep.value === 2 || currentStep.value === 3) && !filterSubcategory.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("❌ filterSubcategory is null but we're on step 2 or 3. This should not happen.");
-      console.error("❌ Current step:", currentStep.value, "filterSubcategory:", filterSubcategory.value);
-      console.error("❌ filterCategory:", filterCategory.value);
-    }
-    // Don't proceed if subcategory is required but not set
+    notifyError({
+      kind: "validation",
+      messageKey: "common.errors.validation",
+      fallbackMessage: "Please check your input and try again.",
+      retryable: false
+    }, { position: "top", timeout: 4000 });
     return;
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 applyFilters: About to set filters with:", {
-      categorySlug: filterCategory.value,
-      subcategorySlug: filterSubcategory.value,
-      filterSubcategory_type: typeof filterSubcategory.value,
-      filterSubcategory_value: filterSubcategory.value
-    });
   }
 
   // Get country and continent IDs if needed (only if city is not selected)
@@ -298,9 +243,6 @@ const applyFilters = async () => {
         }
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("❌ Failed to fetch location IDs:", error);
-      }
       // Fallback: apply filters without location - using new API
       postsStore.setFilters({
         categorySlug: filterCategory.value,
@@ -318,67 +260,14 @@ const applyFilters = async () => {
   // Ensure filterSubcategory is set before saving - but only if we're actually on step 2 or 3
   // If we're on step 1, filterSubcategory can be null (user only selected category)
   if (currentStep.value >= 2 && !filterSubcategory.value) {
-    console.error("❌ filterSubcategory is null when applying filters from step 2 or 3!");
-    console.error("❌ This should not happen. filterSubcategory:", filterSubcategory.value);
-    console.error("❌ currentStep:", currentStep.value);
-    console.error("❌ filterCategory:", filterCategory.value);
-    // Don't proceed if subcategory is required but not set
+    notifyError({
+      kind: "validation",
+      messageKey: "common.errors.validation",
+      fallbackMessage: "Please check your input and try again.",
+      retryable: false
+    }, { position: "top", timeout: 4000 });
     return;
   }
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 Saving filters to preferences:", {
-      postType: filterCategory.value, // Legacy key for preferences store
-      subcategory: filterSubcategory.value,
-      location: {
-        continentId,
-        countryId,
-        cityId: filterCityId.value
-      }
-    });
-  }
-
-  // DEBUG: Log filters before saving
-  console.log("🔍 DEBUG filters before save to localStorage", {
-    postType: filterCategory.value, // Legacy key for preferences store
-    subcategory: filterSubcategory.value,
-    subcategory_type: typeof filterSubcategory.value,
-    subcategory_isNull: filterSubcategory.value === null,
-    subcategory_value: filterSubcategory.value,
-    currentStep: currentStep.value,
-    location: {
-      continentId,
-      countryId,
-      cityId: filterCityId.value
-    }
-  });
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 About to save filters to preferences:", {
-      postType: filterCategory.value, // Legacy key for preferences store
-      subcategory: filterSubcategory.value,
-      subcategory_type: typeof filterSubcategory.value,
-      subcategory_isNull: filterSubcategory.value === null,
-      location: {
-        continentId,
-        countryId,
-        cityId: filterCityId.value
-      }
-    });
-  }
-
-  // DEBUG: Log what we're about to save
-  console.log("[DEBUG] [applyFilters] About to save to localStorage", {
-    postType: filterCategory.value, // Legacy key for preferences store
-    subcategory: filterSubcategory.value,
-    subcategory_type: typeof filterSubcategory.value,
-    subcategory_value: filterSubcategory.value,
-    location: {
-      continentId,
-      countryId,
-      cityId: filterCityId.value
-    }
-  });
 
   preferencesStore.setLastUsedFeedFilters({
     postType: filterCategory.value, // Legacy key for preferences store
@@ -390,26 +279,7 @@ const applyFilters = async () => {
     }
   });
 
-  // DEBUG: Verify what was actually saved
-  const authStore = useAuthStore();
-  const userId = authStore.user?.id;
-  const key = `dreamhubb_donor_filters_${userId ?? "guest"}`;
-  const saved = localStorage.getItem(key);
-  console.log("[DEBUG] [applyFilters] What was actually saved to localStorage:", saved);
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 Filters saved. Current postsStore filters:", postsStore.filters);
-    console.log("🔍 About to navigate to donor-posts. Filters in store:", {
-      categorySlug: postsStore.filters.categorySlug,
-      subcategorySlug: postsStore.filters.subcategorySlug
-    });
-    // Verify what was actually saved to localStorage
-    const authStore2 = useAuthStore();
-    const userId2 = authStore2.user?.id;
-    const key2 = `dreamhubb_donor_filters_${userId2 ?? "guest"}`;
-    const saved2 = localStorage.getItem(key2);
-    console.log("🔍 What was actually saved to localStorage:", saved2);
-  }
+  // Note: preferences store persists filters to localStorage; no verbose logging here
 
   // Navigovať späť na posts page a načítať posty s filtrami
   // Use nextTick to ensure filters are saved before navigation
@@ -435,32 +305,6 @@ onMounted(() => {
   filterCategory.value = postsStore.filters.categorySlug;
   filterSubcategory.value = postsStore.filters.subcategorySlug;
   currentStep.value = 1;
-});
-
-// Watch filterCategory changes to ensure it's synced
-watch(filterCategory, (newVal, oldVal) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 filterCategory changed:", {
-      old: oldVal,
-      new: newVal,
-      type: typeof newVal,
-      isNull: newVal === null,
-      isUndefined: newVal === undefined,
-      currentStep: currentStep.value
-    });
-  }
-}, { immediate: true });
-
-// Watch currentStep to see when it changes and what filterCategory value is
-watch(currentStep, (newStep, oldStep) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 currentStep changed:", {
-      old: oldStep,
-      new: newStep,
-      filterCategory: filterCategory.value,
-      filterSubcategory: filterSubcategory.value
-    });
-  }
 });
 
 // Watch filterCategory changes and update store immediately (for real-time updates) - using new API

@@ -8,8 +8,13 @@
   <div v-else-if="error" class="help-page-error">
     <div class="help-page-errorContent">
       <h2>Unable to load post</h2>
-      <p>{{ error }}</p>
-      <button class="primaryCtaBtn" @click="router.go(-1)">Go Back</button>
+      <RetryPanel
+        :message="error"
+        :on-retry="handleRetry"
+        :loading="loading"
+        variant="card"
+      />
+      <button class="primaryCtaBtn" @click="router.go(-1)" style="margin-top: 1rem;">Go Back</button>
     </div>
   </div>
 
@@ -161,12 +166,15 @@ import { getLocationLabel } from "src/utils/cityNames";
 import { normalizePost } from "src/utils/normalizePost";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import { clearIdempotencyKey, getOrCreateIdempotencyKey } from "src/utils/idempotency";
-import { Notify } from "quasar";
+import { notifyError, notifySuccess } from "src/utils/notify";
 import AppSplash from "src/components/common/AppSplash.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
 import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
+import RetryPanel from "src/components/common/RetryPanel.vue";
 import type { UploadedImage } from "src/composables/useUpload";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -175,6 +183,10 @@ const postsStore = usePostsStore();
 const commentsStore = useCommentsStore();
 const authStore = useAuthStore();
 const notificationsStore = useNotificationsStore();
+const retryLabel = computed(() => {
+  const label = t("common.actions.retry");
+  return label === "common.actions.retry" ? "Retry" : label;
+});
 
 // State for active mode in Help to Fulfill
 const activeMode = ref<"help" | "return">("help"); // Default to "I'll help with"
@@ -343,35 +355,44 @@ const loadPost = async (id: number) => {
   await postsStore.fetchPostById(id);
 };
 
+const handleRetry = async () => {
+  const id = postId.value;
+  if (!id || Number.isNaN(id)) return;
+  await loadPost(id);
+};
+
 // Submit contribution
 const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
   if (!postId.value || !post.value) {
-    Notify.create({
-      type: "negative",
-      message: "Post not found",
-      position: "top"
-    });
+    notifyError({
+      kind: "not_found",
+      messageKey: "common.errors.notFound",
+      fallbackMessage: "Content not found.",
+      retryable: false
+    }, { position: "top" });
     return;
   }
 
   // Validate message based on contribution type
   if (contributionType.value === "accomplish") {
     if (!message.value.trim()) {
-      Notify.create({
-        type: "negative",
-        message: "Please enter a message",
-        position: "top"
-      });
+      notifyError({
+        kind: "validation",
+        messageKey: "common.errors.validation",
+        fallbackMessage: "Please check your input and try again.",
+        retryable: false
+      }, { position: "top" });
       return;
     }
   } else {
     // For "help" type, validate helpWithText (required)
     if (!helpWithText.value.trim()) {
-      Notify.create({
-        type: "negative",
-        message: "Please enter a message for 'I'll help with'",
-        position: "top"
-      });
+      notifyError({
+        kind: "validation",
+        messageKey: "common.errors.validation",
+        fallbackMessage: "Please check your input and try again.",
+        retryable: false
+      }, { position: "top" });
       return;
     }
     // returnText is optional for "help" type
@@ -401,11 +422,7 @@ const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
     );
     clearIdempotencyKey(keyStorage);
 
-    Notify.create({
-      type: "positive",
-      message: "Contribution submitted successfully",
-      position: "top"
-    });
+    notifySuccess("common.success.contributionSubmitted", "Contribution submitted successfully", { position: "top" });
 
     // Refresh unread badge (best-effort)
     void notificationsStore.fetchUnreadCount();
@@ -424,35 +441,20 @@ const submitWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
     if (hasResponse) {
       clearIdempotencyKey(keyStorage);
     } else {
-      Notify.create({
-        type: "negative",
-        message: "Network error. Retry or start a new attempt?",
-        position: "top",
-        timeout: 7000,
-        actions: [
-          {
-            label: "RETRY",
-            color: "white",
-            handler: () => void submitWithIdempotency()
-          },
-          {
-            label: "TRY AGAIN",
-            color: "white",
-            handler: () => void submitWithIdempotency({ forceNewAttempt: true })
-          }
-        ]
-      });
+      // Network/timeout errors: keep it safe + actionable (retry/new attempt)
+      notifyError(mapAxiosErrorToDhError(error), { position: "top", timeout: 7000 });
       return;
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.error("Failed to submit contribution:", error);
+    if (import.meta.env.DEV) {
+      console.debug("Failed to submit contribution:", error);
     }
-    Notify.create({
-      type: "negative",
-      message: "Failed to submit contribution. Please try again.",
-      position: "top"
-    });
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage: "Something went wrong. Please try again.",
+      retryable: true
+    }, { position: "top" });
   } finally {
     submitting.value = false;
   }
@@ -496,11 +498,12 @@ onMounted(async () => {
   if (id && !Number.isNaN(id)) {
     await loadPost(id);
   } else {
-    Notify.create({
-      type: "negative",
-      message: "Invalid post ID",
-      position: "top"
-    });
+    notifyError({
+      kind: "not_found",
+      messageKey: "common.errors.notFound",
+      fallbackMessage: "Content not found.",
+      retryable: false
+    }, { position: "top" });
     router.push({ name: "donor-posts" });
   }
 
@@ -513,11 +516,24 @@ onMounted(async () => {
     await nextTick();
     // Force update by accessing helpMode to trigger computed property
     // This ensures SegmentedToggle shows "I'll help with" (first option) as active
-    const _ = helpMode.value; // Trigger computed getter to ensure proper initialization
+    void helpMode.value; // Trigger computed getter to ensure proper initialization
   }
 });
 </script>
 <style lang="scss">
+.help-page-errorActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.primaryCtaBtn--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .postDetail-img {
   width: 100%;
   height: 100%;

@@ -112,9 +112,7 @@ const changeSwiper = () => {
 const handleSelectedItemId = (itemId: any) => {
   selectedItemIdFromChild.value = itemId;
   emit("changedHoriz", { horiz: horiz.value, selectedItemId: itemId });
-  if (process.env.NODE_ENV === "development") {
-    console.log(itemId);
-  }
+  // no logs
 };
 
 const props = defineProps({

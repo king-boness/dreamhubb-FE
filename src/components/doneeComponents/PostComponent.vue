@@ -10,8 +10,10 @@
       @click="handlePostClick(item)"
     >
       <div class="post-component-imageWrapper">
-        <PostImagesCarousel
+        <PostCover
           :images="item.images"
+          :post-type="item.postType || null"
+          :icon-url="item.goalImage"
           :auto-slide="true"
           :show-progress="true"
           :show-arrows="false"
@@ -113,7 +115,7 @@ import { defineProps, PropType } from "vue";
 import { useRouter } from "vue-router";
 import { Post } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
-import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
+import PostCover from "src/components/post/PostCover.vue";
 
 interface Props {
   post: Post[];

@@ -74,6 +74,8 @@ import RegistrationPage1 from "src/pages/Auth/Registration/RegistrationPage1.vue
 import RegistrationPage4 from "src/pages/Auth/Registration/RegistrationPage4.vue";
 import RegistrationPage5 from "src/pages/Auth/Registration/RegistrationPage5.vue";
 import { useApiCallStore } from "src/stores/api-calls-store";
+import { notifyError } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const horiz = ref(false);
 const { t } = useI18n();
@@ -155,27 +157,24 @@ const register = async () => {
   await apiCalls
     .register(form)
     .then(() => {
-      $q.notify({
-        message: t("registrationSuccess"),
-        color: "positive",
-        icon: "check"
-      });
+      // Success handled by redirect, no toast needed
       return router.push({ name: "login" });
     })
     .catch((err) => {
-      if (err.response.status === 406) {
-        return $q.notify({
-          message: t("registrationUsernameExists"),
-          color: "negative",
-          icon: "report_problem"
+      const status: number | undefined = err?.response?.status;
+      if (status === 406) {
+        // Username already exists (safe, localized)
+        notifyError({
+          kind: "validation",
+          status,
+          messageKey: "registrationUsernameExists",
+          fallbackMessage: t("registrationUsernameExists"),
+          retryable: false
         });
-      } else {
-        return $q.notify({
-          message: t("registrationError"),
-          color: "negative",
-          icon: "report_problem"
-        });
+        return;
       }
+      // Fallback: map common network/offline/timeout/5xx to safe texts
+      notifyError(mapAxiosErrorToDhError(err));
     });
 };
 
@@ -209,9 +208,7 @@ let activeComponent = comps[registrationIndex.value - 1] as {
 
 watch(registrationInfo, () => {
   disabledCheck();
-  if (process.env.NODE_ENV === "development") {
-    console.log(registrationInfo);
-  }
+  // Never log registration payloads (PII) even in dev
 });
 
 const disabledCheck = () => {

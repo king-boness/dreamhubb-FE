@@ -1,6 +1,8 @@
 // src/stores/comments.ts
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 export interface Reply {
   id: number;
@@ -133,28 +135,8 @@ export const useCommentsStore = defineStore("comments", {
           }));
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch comments:", error);
-        }
-
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as {
-            response?: {
-              status?: number;
-              data?: {
-                message?: string;
-              };
-            };
-          };
-
-          if (axiosError.response?.data?.message) {
-            this.errorByPostId[postId] = axiosError.response.data.message;
-          } else {
-            this.errorByPostId[postId] = "Failed to load comments.";
-          }
-        } else {
-          this.errorByPostId[postId] = "Network error. Please check your connection.";
-        }
+        const mapped = mapAxiosErrorToDhError(error);
+        this.errorByPostId[postId] = tGlobal(mapped.messageKey, mapped.fallbackMessage);
       } finally {
         this.loadingByPostId[postId] = false;
       }
@@ -222,8 +204,8 @@ export const useCommentsStore = defineStore("comments", {
 
         throw new Error("Invalid response from server");
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to add comment:", error);
+        if (import.meta.env.DEV) {
+          console.debug("[Comments] Failed to add comment:", error);
         }
         throw error;
       }
@@ -283,8 +265,8 @@ export const useCommentsStore = defineStore("comments", {
 
         throw new Error("Invalid response from server");
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to add reply:", error);
+        if (import.meta.env.DEV) {
+          console.debug("[Comments] Failed to add reply:", error);
         }
         throw error;
       }

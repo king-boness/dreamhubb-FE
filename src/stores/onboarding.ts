@@ -1,6 +1,8 @@
 // src/stores/onboarding.ts
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 import { useAuthStore } from "src/stores/auth";
 
 const normalizeId = (value: unknown): number | null => {
@@ -141,16 +143,8 @@ export const useOnboardingStore = defineStore("onboarding", {
       // If we have names but not IDs, fetch IDs from BE
       if (this.profileContinent && this.profileCountry) {
         try {
-          if (process.env.NODE_ENV === "development") {
-            console.log("🔍 Fetching location IDs for:", {
-              continent: this.profileContinent,
-              country: this.profileCountry,
-              city: this.profileCity
-            });
-          }
-
-          if (process.env.NODE_ENV === "development") {
-            console.log("🔍 Fetching location IDs for profile:", {
+          if (import.meta.env.DEV) {
+            console.debug("Fetching location IDs for profile:", {
               continent: this.profileContinent,
               country: this.profileCountry,
               city: this.profileCity
@@ -166,18 +160,14 @@ export const useOnboardingStore = defineStore("onboarding", {
             }
           });
 
-          if (process.env.NODE_ENV === "development") {
-            console.log("✅ Location IDs response:", data);
+          if (import.meta.env.DEV) {
+            console.debug("Location IDs response:", data);
           }
 
           if (data) {
             if (data.status === "error") {
-              // BE returned an error
-              const errorMsg = data.message || "Failed to get location IDs from server";
-              if (process.env.NODE_ENV === "development") {
-                console.error("❌ BE returned error:", errorMsg, data);
-              }
-              throw new Error(errorMsg);
+              // BE returned an error (do not surface raw messages)
+              throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
             }
 
             if (data.status === "success" && data.location_ids) {
@@ -185,11 +175,10 @@ export const useOnboardingStore = defineStore("onboarding", {
 
               // Check if we got valid IDs (continent and country are required)
               if (!ids.continent_id || !ids.country_id) {
-                const errorMsg = `Invalid location IDs received from server. Continent: ${ids.continent_id}, Country: ${ids.country_id}`;
-                if (process.env.NODE_ENV === "development") {
-                  console.error("❌", errorMsg, ids);
+                if (import.meta.env.DEV) {
+                  console.debug("Invalid location IDs received from server:", ids);
                 }
-                throw new Error(errorMsg);
+                throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
               }
 
               // Update store with IDs
@@ -202,8 +191,8 @@ export const useOnboardingStore = defineStore("onboarding", {
                 throw new Error("City is required. Please select a valid city.");
               }
 
-              if (process.env.NODE_ENV === "development") {
-                console.log("✅ Location IDs set in store:", {
+              if (import.meta.env.DEV) {
+                console.debug("Location IDs set in store:", {
                   continentId: ids.continent_id,
                   countryId: ids.country_id,
                   cityId: ids.city_id
@@ -217,11 +206,10 @@ export const useOnboardingStore = defineStore("onboarding", {
               };
             }
           }
-        } catch (error) {
-          if (process.env.NODE_ENV === "development") {
-            console.error("❌ Failed to fetch location IDs:", error);
+        } catch (error: unknown) {
+          if (import.meta.env.DEV) {
+            console.debug("Failed to fetch location IDs:", error);
           }
-          // Re-throw error so register() can handle it
           throw error;
         }
       }
@@ -229,11 +217,7 @@ export const useOnboardingStore = defineStore("onboarding", {
       // Fallback: If we still don't have IDs, throw error instead of using defaults
       // This prevents silent failures where wrong location IDs are used
       if (!this.profileContinentId || !this.profileCountryId) {
-        const errorMsg = `Failed to get location IDs. Continent: ${this.profileContinent}, Country: ${this.profileCountry}, City: ${this.profileCity}`;
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌", errorMsg);
-        }
-        throw new Error(errorMsg);
+        throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
       }
 
       return {
@@ -259,21 +243,8 @@ export const useOnboardingStore = defineStore("onboarding", {
       // If we have names but not IDs, fetch IDs from BE
       if (this.feedContinent && this.feedCountry) {
         try {
-          if (process.env.NODE_ENV === "development") {
-            console.log("🔍 Fetching feed location IDs for:", {
-              continent: this.feedContinent,
-              country: this.feedCountry,
-              city: this.feedCity,
-              chosenCityId
-            });
-          }
-
-          if (process.env.NODE_ENV === "development") {
-            console.log("🔍 Fetching location IDs for feed:", {
-              continent: this.feedContinent,
-              country: this.feedCountry,
-              city: this.feedCity
-            });
+          if (import.meta.env.DEV) {
+            console.debug("[Onboarding] Fetching location IDs for feed");
           }
 
           const { data } = await api.get("/locations/ids", {
@@ -285,17 +256,15 @@ export const useOnboardingStore = defineStore("onboarding", {
             }
           });
 
-          if (process.env.NODE_ENV === "development") {
-            console.log("✅ Feed location IDs response:", data);
-          }
+          // Do not log raw responses (may contain PII)
 
           if (data) {
             if (data.status === "error") {
               const errorMsg = data.message || "Failed to get feed location IDs from server";
-              if (process.env.NODE_ENV === "development") {
-                console.error("❌ BE returned error:", errorMsg, data);
+              if (import.meta.env.DEV) {
+                console.debug("[Onboarding] BE returned error for feed location IDs:", errorMsg);
               }
-              throw new Error(errorMsg);
+              throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
             }
 
             if (data.status === "success" && data.location_ids) {
@@ -303,11 +272,10 @@ export const useOnboardingStore = defineStore("onboarding", {
 
               // Check if we got valid IDs (continent and country are required)
               if (!ids.continent_id || !ids.country_id) {
-                const errorMsg = `Invalid feed location IDs received from server. Continent: ${ids.continent_id}, Country: ${ids.country_id}`;
-                if (process.env.NODE_ENV === "development") {
-                  console.error("❌", errorMsg, ids);
+                if (import.meta.env.DEV) {
+                  console.debug("[Onboarding] Invalid feed location IDs received from server.");
                 }
-                throw new Error(errorMsg);
+                throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
               }
 
               // Update store with IDs
@@ -316,13 +284,7 @@ export const useOnboardingStore = defineStore("onboarding", {
               // Preserve chosen city id if already selected; otherwise accept BE lookup.
               this.feedCityId = chosenCityId ?? (ids.city_id || null);
 
-              if (process.env.NODE_ENV === "development") {
-                console.log("✅ Feed location IDs set in store:", {
-                  continentId: ids.continent_id,
-                  countryId: ids.country_id,
-                  cityId: ids.city_id
-                });
-              }
+              // no verbose logs here
 
               return {
                 continentId: ids.continent_id,
@@ -332,8 +294,8 @@ export const useOnboardingStore = defineStore("onboarding", {
             }
           }
         } catch (error) {
-          if (process.env.NODE_ENV === "development") {
-            console.error("❌ Failed to fetch feed location IDs:", error);
+          if (import.meta.env.DEV) {
+            console.debug("[Onboarding] Failed to fetch feed location IDs:", error);
           }
           // Re-throw error so it can be handled
           throw error;
@@ -376,8 +338,8 @@ export const useOnboardingStore = defineStore("onboarding", {
         } catch (locationError) {
           // If location fetch fails, use IDs from store if available
           // Backend will validate them anyway
-          if (process.env.NODE_ENV === "development") {
-            console.warn("⚠️ Location IDs fetch failed, using store IDs:", locationError);
+          if (import.meta.env.DEV) {
+            console.debug("[Onboarding] Location IDs fetch failed, using store IDs:", locationError);
           }
           locationIds = {
             continentId: this.profileContinentId,
@@ -388,7 +350,7 @@ export const useOnboardingStore = defineStore("onboarding", {
 
         // Validate location IDs before proceeding
         if (!locationIds.continentId || !locationIds.countryId || !locationIds.cityId) {
-          throw new Error("Invalid location IDs. Please select a valid continent, country, and city.");
+          throw new Error(tGlobal("common.errors.validation", "Please check your input and try again."));
         }
 
         // Format date_birth - ensure it's in YYYY-MM-DD format
@@ -434,15 +396,11 @@ export const useOnboardingStore = defineStore("onboarding", {
           location_city_id: locationIds.cityId
         };
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("🚀 Calling register API with payload:", payload);
-        }
+        // Never log registration payloads (may contain PII)
 
         const { data } = await api.post("/register", payload);
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("✅ Register response:", data);
-        }
+        // Never log raw register responses (may contain token/user PII)
 
         // BE register endpoint NEVRÁTI token (len user)
         // Preto po úspešnej registrácii automaticky prihlásime používateľa
@@ -468,8 +426,8 @@ export const useOnboardingStore = defineStore("onboarding", {
               await authStore.fetchUser();
             } catch (error) {
               // Log error but don't fail registration
-              if (process.env.NODE_ENV === "development") {
-                console.error("Failed to upload profile picture:", error);
+              if (import.meta.env.DEV) {
+                console.debug("[Onboarding] Failed to upload profile picture:", error);
               }
             }
           }
@@ -479,8 +437,8 @@ export const useOnboardingStore = defineStore("onboarding", {
           throw new Error(data?.message || "Registration failed");
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Registration error:", error);
+        if (import.meta.env.DEV) {
+          console.debug("[Onboarding] Registration error:", error);
         }
 
         // Check if it's a location-related error
@@ -504,9 +462,8 @@ export const useOnboardingStore = defineStore("onboarding", {
           };
         };
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("🔍 Error response status:", errorResponse.response?.status);
-          console.log("🔍 Error response data:", errorResponse.response?.data);
+        if (import.meta.env.DEV) {
+          console.debug("[Onboarding] Registration error response status:", errorResponse.response?.status);
         }
 
         if (errorResponse.response?.data?.errors) {
@@ -525,16 +482,13 @@ export const useOnboardingStore = defineStore("onboarding", {
             }
           });
           this.fieldErrors = fieldErrors;
-          if (process.env.NODE_ENV === "development") {
-            console.log("✅ Set fieldErrors:", this.fieldErrors);
-          }
+          // do not log field errors (can contain sensitive validation data)
           // Also show first error as global message for visibility
           const firstKey = Object.keys(fieldErrors)[0];
           this.error = firstKey ? fieldErrors[firstKey] : "Validation error";
-        } else if (errorResponse.response?.data?.message) {
-          this.error = errorResponse.response.data.message;
         } else {
-          this.error = "Registration failed. Please try again.";
+          const mapped = mapAxiosErrorToDhError(error);
+          this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);
         }
 
         throw error;

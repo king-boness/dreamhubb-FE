@@ -5,12 +5,12 @@
   </div>
 
   <!-- Error state -->
-  <div v-else-if="error" class="postDetail-error">
+  <div v-else-if="error" class="postDetail-error" data-testid="dh-post-detail-error">
     <div class="postDetail-errorContent">
       <h2>Unable to load this post</h2>
       <p>{{ error }}</p>
       <div class="postDetail-errorActions">
-        <button class="primaryCtaBtn" @click="handleRetry">
+        <button class="primaryCtaBtn" @click="handleRetry" data-testid="dh-post-detail-retry">
           Try Again
         </button>
         <button class="secondaryBtn" @click="handleClose">
@@ -32,12 +32,15 @@
   </div>
 
   <!-- Post content -->
-  <div v-else class="postDetail">
+  <div v-else class="postDetail" data-testid="dh-post-detail-container">
     <!-- TOP IMAGE - Full-bleed hero (outside postDetail-inner for full width) -->
     <div class="postDetailBg">
         <PostHeader
           :images="post?.images || []"
           :cover-image="coverImage"
+          :post-type="post?.type || null"
+          :icon-url="categoryIcon"
+          icon-placement="center"
           :auto-slide="true"
           :show-progress="true"
           :show-arrows="true"
@@ -154,7 +157,7 @@
             <div class="postDetailAbout-separator" />
 
             <!-- B) About donee -->
-            <section class="postDetailAbout-section">
+            <section class="postDetailAbout-section postDetailAbout-section--donee">
               <PageTitle :title="t('aboutDonee')" />
 
               <div
@@ -181,8 +184,6 @@
                 <p v-if="displayAuthorLocation" class="postDetailDonee-location">{{ displayAuthorLocation }}</p>
               </div>
             </section>
-
-            <div class="postDetailAbout-separator" />
 
             <!-- C) Bio -->
             <section v-if="displayAuthorBioText" class="postDetailAbout-section">
@@ -371,7 +372,9 @@ import { getPostTypeIcon } from "src/utils/postIcons";
 import { getUserAvatarUrl, getUserInitials } from "src/utils/avatar";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import PageTitle from "src/components/ui/PageTitle.vue";
-import { Notify } from "quasar";
+import { notifyError, notifySuccess } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 import { useCommentsStore } from "src/stores/comments";
 import { api } from "boot/axios";
 
@@ -466,8 +469,8 @@ const handleScroll = () => {
   // Debug: log scroll position to verify it's working
   if (newScrollY > 0 && newScrollY % 50 === 0) {
     // Scroll position tracking (debug only in development)
-    if (process.env.NODE_ENV === "development") {
-      console.log("📜 Scroll position:", newScrollY, "| Blur progress:", Math.min(newScrollY / 220, 1).toFixed(2));
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Scroll position:", newScrollY);
     }
   }
 };
@@ -491,8 +494,8 @@ const heroStyle = computed(() => {
   // Debug: log computed style when scroll changes significantly
   if (progress > 0 && scrollY.value % 100 === 0) {
     // Hero style computed (debug only in development)
-    if (process.env.NODE_ENV === "development") {
-      console.log("🎨 heroStyle computed:", styles, "| progress:", progress.toFixed(2));
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] heroStyle progress:", progress.toFixed(2));
     }
   }
 
@@ -556,16 +559,7 @@ const displayAuthorAvatar = computed(() => {
     }
   );
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development" && !avatarUrl && post.value) {
-    console.log("🔍 No avatar found for post detail:", {
-      post_id: post.value.post_id,
-      author_name: post.value.author_name,
-      has_user: !!postData.user,
-      user_profile_picture: postData.user?.profile_picture,
-      author_picture: postData.author_picture
-    });
-  }
+  // No debug logs here (avatar fields can contain PII)
 
   // Return avatar URL or null (we'll show initials in the template if null)
   return avatarUrl;
@@ -577,16 +571,6 @@ const authorId = computed(() => {
   if (!p) return null;
   const postData = p as PostDetail & { user_id?: number; author_id?: number; user?: { id?: number } };
   const id = (postData.user_id || postData.author_id || postData.user?.id || null) as number | null;
-  if (process.env.NODE_ENV === "development" && !id && post.value) {
-    console.warn("⚠️ No authorId found in post:", {
-      post_id: post.value.post_id,
-      author_name: post.value.author_name,
-      has_author_id: !!postData.author_id,
-      has_user_id: !!postData.user_id,
-      has_user: !!postData.user,
-      user_id: postData.user?.id
-    });
-  }
   return id;
 });
 
@@ -745,9 +729,7 @@ watch(
 
 // Lifecycle hooks
 onMounted(async () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🟢 [PostDetailPage] onMounted called");
-  }
+  // keep production console clean
 
   // Clear any existing error when mounting
   clearDonateError();
@@ -755,9 +737,6 @@ onMounted(async () => {
   const id = Number(route.params.id);
 
   if (Number.isNaN(id)) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("❌ Invalid post ID:", route.params.id);
-    }
     return;
   }
 
@@ -779,19 +758,14 @@ onMounted(async () => {
 
   // Always use window as scroll target for Quasar QLayout compatibility
   scrollTarget.value = window;
-  if (process.env.NODE_ENV === "development") {
-    console.log("🎯 PostDetail mounted - using window as scroll target");
-    console.log("📍 Initial scroll position:", readScrollPosition());
-  }
+  // no logs
 
   attachScrollListener(window);
   handleScroll();
 });
 
 onBeforeUnmount(() => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔴 [PostDetailPage] onBeforeUnmount called");
-  }
+  // no logs
 
   // Clear error message and timeout
   clearDonateError();
@@ -801,8 +775,8 @@ onBeforeUnmount(() => {
     try {
       fn();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Error in cleanup function:", error);
+      if (import.meta.env.DEV) {
+        console.debug("[PostDetail] Error in cleanup function:", error);
       }
     }
   });
@@ -844,19 +818,9 @@ const coverImage = computed(() => {
 const goToAuthorProfile = () => {
   const targetId = authorId.value;
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 goToAuthorProfile called:", {
-      targetId,
-      currentUserId: authStore.user?.id,
-      currentSide: preferencesStore.currentSide,
-      post: post.value
-    });
-  }
+  // no logs (avoid leaking post/user data)
 
   if (!targetId) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ No authorId available for navigation");
-    }
     return;
   }
 
@@ -864,9 +828,6 @@ const goToAuthorProfile = () => {
 
   // If user clicks on their own profile, stay on current side
   if (authStore.user?.id === targetId) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ Navigating to own profile on side:", currentSide);
-    }
     if (currentSide === "donee") {
       router.push({ name: "donee-myprofile" });
     } else {
@@ -876,9 +837,7 @@ const goToAuthorProfile = () => {
   }
 
   // For other users, keep existing logic on donor side and map to proper profile route on donee side
-  if (process.env.NODE_ENV === "development") {
-    console.log("✅ Navigating to user profile:", { targetId, currentSide });
-  }
+  // no logs
 
   if (currentSide === "donee") {
     router.push({ name: "donee-user-profile", params: { userId: String(targetId) } });
@@ -898,7 +857,9 @@ const handleClose = () => {
 const handleEditPost = () => {
   const postId = post.value?.post_id;
   if (!postId) {
-    console.warn("Cannot edit: missing post id");
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Cannot edit: missing post id");
+    }
     return;
   }
   // Navigate to edit post page
@@ -936,13 +897,17 @@ const handleShare = () => {
 };
 
 const sendLikeToApi = async (postId: number | string, like: boolean) => {
-  console.log("sendLikeToApi placeholder", { postId, like });
+  void postId;
+  void like;
+  // TODO: implement endpoint when BE is ready
 };
 
 const handleLike = async () => {
   const postId = post.value?.post_id;
   if (!postId) {
-    console.warn("Cannot like: missing post id");
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Cannot like: missing post id");
+    }
     return;
   }
 
@@ -955,7 +920,9 @@ const handleLike = async () => {
   try {
     await sendLikeToApi(postId, newValue);
   } catch (error) {
-    console.error("Failed to update like on server", error);
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Failed to update like on server", error);
+    }
     isLiked.value = !newValue;
     if (likesCount.value !== null) {
       likesCount.value += newValue ? -1 : 1;
@@ -964,14 +931,18 @@ const handleLike = async () => {
 };
 
 const sendSaveToApi = async (postId: number | string, save: boolean) => {
-  console.log("sendSaveToApi placeholder", { postId, save });
+  void postId;
+  void save;
+  // TODO: implement endpoint when BE is ready
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleSave = async () => {
   const postId = post.value?.post_id;
   if (!postId) {
-    console.warn("Cannot save: missing post id");
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Cannot save: missing post id");
+    }
     return;
   }
 
@@ -981,7 +952,9 @@ const handleSave = async () => {
   try {
     await sendSaveToApi(postId, newValue);
   } catch (error) {
-    console.error("Failed to update save on server", error);
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Failed to update save on server", error);
+    }
     isSaved.value = !newValue;
   }
 };
@@ -999,7 +972,9 @@ const handleReportDream = () => {
 const handleComments = () => {
   const postId = post.value?.post_id;
   if (!postId) {
-    console.warn("Chýba postId, nedá sa otvoriť komentárový thread");
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Missing postId, cannot open comments thread");
+    }
     return;
   }
 
@@ -1239,12 +1214,7 @@ const donateWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
     void notificationsStore.fetchUnreadCount();
 
     // Success notification
-    Notify.create({
-      type: "positive",
-      message: `Successfully donated ${selectedTokens.value} tokens!`,
-      position: "top",
-      timeout: 3000
-    });
+    notifySuccess("common.success.donationSuccessful", `Successfully donated ${selectedTokens.value} tokens!`, { position: "top", timeout: 3000 });
 
     // Close modal
     closeTopUpModal();
@@ -1255,35 +1225,18 @@ const donateWithIdempotency = async (opts?: { forceNewAttempt?: boolean }) => {
     if (hasResponse) {
       clearIdempotencyKey(keyStorage);
     } else {
-      Notify.create({
-        type: "negative",
-        message: "Network error. Retry or start a new attempt?",
-        position: "top",
-        timeout: 7000,
-        actions: [
-          {
-            label: "RETRY",
-            color: "white",
-            handler: () => void donateWithIdempotency()
-          },
-          {
-            label: "TRY AGAIN",
-            color: "white",
-            handler: () => void donateWithIdempotency({ forceNewAttempt: true })
-          }
-        ]
-      });
+      notifyError({
+        kind: "network",
+        messageKey: "common.errors.network",
+        fallbackMessage: "Network error. Please try again.",
+        retryable: true
+      }, { position: "top", timeout: 7000 });
       return;
     }
 
     // Error notification (error message is already set in store)
-    const errorMessage = postsStore.donateError || "Failed to process donation. Please try again.";
-    Notify.create({
-      type: "negative",
-      message: errorMessage,
-      position: "top",
-      timeout: 5000
-    });
+    const mapped = mapAxiosErrorToDhError(error);
+    notifyError(mapped, { position: "top", timeout: 5000 });
   }
 };
 
@@ -1295,7 +1248,9 @@ const handleConfirmDonate = async () => {
 const onContributeOption = async (option: ContributeOption | string) => {
   const postId = post.value?.post_id;
   if (!postId) {
-    console.warn("Chýba postId v onContributeOption");
+    if (import.meta.env.DEV) {
+      console.debug("[PostDetail] Missing postId in onContributeOption");
+    }
     return;
   }
 
@@ -1335,7 +1290,9 @@ const onContributeOption = async (option: ContributeOption | string) => {
       emit("open-contribute-mentoring", { postId });
       break;
     default:
-      console.log("TODO: ďalšie typy contribute option", option);
+      if (import.meta.env.DEV) {
+        console.debug("[PostDetail] Unhandled contribute option:", option);
+      }
       break;
   }
 

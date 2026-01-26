@@ -121,7 +121,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Notify } from "quasar";
+import { notifySuccess } from "src/utils/notify";
 import { goBackOrFallback } from "src/utils/navigation";
 
 const route = useRoute();
@@ -172,12 +172,7 @@ const canSendReport = computed(() => {
 const handleSendReport = async () => {
   // TODO: Implement actual API call to report post
   // For now, just show success and redirect back
-  Notify.create({
-    type: "positive",
-    message: "Report submitted successfully",
-    position: "top",
-    timeout: 3000
-  });
+  notifySuccess("common.success.reportSubmitted", "Report submitted successfully", { position: "top", timeout: 3000 });
 
   // Redirect back to post detail or previous page
   const fallback = postId.value ? { name: "donor-post-detail", params: { id: postId.value } } : { name: "donor-posts" };

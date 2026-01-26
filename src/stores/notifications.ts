@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { notifyError } from "src/utils/notify";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 export interface Notification {
   id: number;
@@ -73,28 +76,11 @@ export const useNotificationsStore = defineStore("notifications", {
           this.unreadCount = this.items.filter((n) => !n.is_read).length;
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch notifications:", error);
-        }
-
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as {
-            response?: {
-              status?: number;
-              data?: {
-                message?: string;
-              };
-            };
-          };
-
-          if (axiosError.response?.data?.message) {
-            this.error = axiosError.response.data.message;
-          } else {
-            this.error = "Failed to load notifications.";
-          }
-        } else {
-          this.error = "Network error. Please check your connection.";
-        }
+        const mapped = mapAxiosErrorToDhError(error);
+        // Store error as user-friendly (localized) message for UI banners
+        this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);
+        // Toast (unified)
+        notifyError(mapped);
       } finally {
         this.isLoading = false;
       }
@@ -102,33 +88,16 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async fetchUnreadCount() {
       try {
-        if (process.env.NODE_ENV === "development") {
-          console.log("📡 Fetching unread count from:", "/notifications/unread-count");
-        }
         const { data } = await api.get("/notifications/unread-count");
 
         if (data.status === "success") {
           this.unreadCount = data.unread_count || 0;
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to fetch unread count:", error);
-          if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as {
-              response?: {
-                status?: number;
-                statusText?: string;
-                config?: {
-                  url?: string;
-                  baseURL?: string;
-                };
-              };
-            };
-            console.error("  Status:", axiosError.response?.status);
-            console.error("  URL:", axiosError.response?.config?.baseURL + axiosError.response?.config?.url);
-          }
+        // Silent (badge-only) failure: do not show raw errors or toasts
+        if (import.meta.env.DEV) {
+          console.debug("[Notifications] unread-count fetch failed (silent)", error);
         }
-        // Don't set error state for unread count failures
       }
     },
 
@@ -145,8 +114,8 @@ export const useNotificationsStore = defineStore("notifications", {
           }
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to mark notification as read:", error);
+        if (import.meta.env.DEV) {
+          console.debug("[Notifications] Failed to mark notification as read:", error);
         }
         throw error;
       }
@@ -164,8 +133,8 @@ export const useNotificationsStore = defineStore("notifications", {
           this.unreadCount = 0;
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Failed to mark all notifications as read:", error);
+        if (import.meta.env.DEV) {
+          console.debug("[Notifications] Failed to mark all notifications as read:", error);
         }
         throw error;
       }

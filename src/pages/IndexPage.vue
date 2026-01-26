@@ -16,12 +16,12 @@ onMounted(async () => {
   try {
     const res = await api.get("/health");
     apiResponse.value = res.data.status + " (" + res.data.environment + ")";
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ API dostupné:", res.data);
+    if (import.meta.env.DEV) {
+      console.debug("[IndexPage] API reachable");
     }
   } catch (err) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("❌ Chyba pri pripájaní k API:", err);
+    if (import.meta.env.DEV) {
+      console.debug("[IndexPage] API unreachable:", err);
     }
   }
 });

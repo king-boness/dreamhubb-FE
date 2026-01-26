@@ -2,9 +2,11 @@
   <div class="post-header">
     <div class="post-header-bg">
       <div class="post-header-imageWrapper" :style="imageWrapperStyle">
-        <PostImagesCarousel
-          v-if="images && images.length > 0"
-          :images="images"
+        <PostCover
+          :images="headerImages"
+          :post-type="postType"
+          :icon-url="iconUrl"
+          :icon-placement="iconPlacement"
           :auto-slide="autoSlide"
           :show-progress="showProgress"
           :show-arrows="showArrows"
@@ -13,11 +15,6 @@
           :image-style="imageStyle"
           @image-click="$emit('image-click', $event)"
         />
-        <div
-          v-else-if="coverImage"
-          class="post-header-img"
-          :style="{ backgroundImage: `url(${coverImage})` }"
-        ></div>
       </div>
 
       <!-- GRADIENT -->
@@ -103,19 +100,25 @@
 </template>
 
 <script setup lang="ts">
-import PostImagesCarousel from "./PostImagesCarousel.vue";
+import { computed } from "vue";
+import PostCover from "src/components/post/PostCover.vue";
+
+type PostType = "dream" | "problem" | "idea";
 
 interface Props {
   // Images
   images?: string[];
   coverImage?: string | null;
+  postType?: PostType | string | null;
+  iconUrl?: string | null;
+  iconPlacement?: "corner" | "center";
   // Carousel options
   autoSlide?: boolean;
   showProgress?: boolean;
   showArrows?: boolean;
   showDots?: boolean;
-  imageStyle?: Record<string, unknown>;
-  imageWrapperStyle?: Record<string, unknown>;
+  imageStyle?: Record<string, string>;
+  imageWrapperStyle?: Record<string, string>;
   // Content
   title: string;
   date: string;
@@ -132,9 +135,12 @@ interface Props {
   showShareAndLike?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   images: () => [],
   coverImage: null,
+  postType: null,
+  iconUrl: null,
+  iconPlacement: "corner",
   autoSlide: true,
   showProgress: true,
   showArrows: true,
@@ -154,6 +160,13 @@ defineEmits<{
   like: [];
   "image-click": [index: number];
 }>();
+
+const headerImages = computed(() => {
+  const imgs = Array.isArray(props.images) ? props.images.filter(Boolean) : [];
+  if (imgs.length > 0) return imgs;
+  if (typeof props.coverImage === "string" && props.coverImage.trim().length > 0) return [props.coverImage];
+  return [];
+});
 </script>
 
 <style lang="scss" scoped>

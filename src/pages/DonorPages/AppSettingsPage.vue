@@ -231,9 +231,7 @@ const nameShownOptions = [
 // Watch for locale changes to trigger reactivity
 watch(() => locale.value, () => {
   // Force reactivity update when locale changes
-  if (process.env.NODE_ENV === "development") {
-    console.log("Locale changed to:", locale.value);
-  }
+  // no logs
 });
 
 // Get current language label - display native name (in the language itself)
@@ -449,9 +447,6 @@ const route = useRoute();
 const routesName = route.name?.toString() || "";
 
 const routeCheck = (name: string) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(routesName);
-  }
   routesName.startsWith("donee")
     ? router.push({ name: `donee-${name}` })
     : router.push({ name: `donor-${name}` });

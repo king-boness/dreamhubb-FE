@@ -44,10 +44,7 @@ const loadInitialSubcategory = (): string => {
 const selectedCategory = ref<string>(loadInitialSubcategory());
 
 onMounted(() => {
-  // Subcategory is already loaded in loadInitialSubcategory, just log
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostCategoryPickerPage: Loaded subcategory on mount:", selectedCategory.value);
-  }
+  // no logs
 });
 
 const handleNext = () => {
@@ -58,11 +55,6 @@ const handleNext = () => {
 
   // Save to localStorage - keep legacy key for backward compatibility
   localStorage.setItem("donee_postCreation_category", selectedCategory.value);
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostCategoryPickerPage: Saved category:", selectedCategory.value);
-    console.log("📝 PostCategoryPickerPage: Navigating to submit-postCreation");
-  }
 
   // Navigate directly to final post creation page (skip duplicate subcategory picker)
   router.push({ name: "submit-postCreation" });

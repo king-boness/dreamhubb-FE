@@ -31,6 +31,8 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
+import { notifyError, notifySuccess } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const router = useRouter();
 const $q = useQuasar();
@@ -45,18 +47,10 @@ const handleSave = async () => {
 
   try {
     await authStore.updateBio(bio.value);
-    $q.notify({
-      type: "positive",
-      message: "Bio updated",
-      position: "top"
-    });
+    notifySuccess("common.success.bioUpdated", "Bio updated", { position: "top" });
     router.back();
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Failed to update bio. Please try again.",
-      position: "top"
-    });
+    notifyError(mapAxiosErrorToDhError(error));
   } finally {
     saving.value = false;
   }

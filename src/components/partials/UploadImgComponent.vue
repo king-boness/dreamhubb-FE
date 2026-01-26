@@ -307,8 +307,8 @@ const handleUpload = async (files: File[]) => {
     emit("changed", allFiles);
     emit("imagesUpdated", uploadedImages.value);
   } catch (err) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Upload failed:", err);
+    if (import.meta.env.DEV) {
+      console.debug("[UploadImg] Upload failed:", err);
     }
   } finally {
     isUploading.value = false;

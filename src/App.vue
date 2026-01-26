@@ -1,7 +1,8 @@
 <template>
   <InitialLoader v-if="appStore.isInitializing" />
-  <NoConnection v-else-if="!networkStore.isOnline" />
   <router-view v-else />
+  <OfflineBanner />
+  <DevNetStatus />
 </template>
 
 <script setup lang="ts">
@@ -11,7 +12,8 @@ import { useAuthStore } from "src/stores/auth";
 import { useAppStore } from "src/stores/app";
 import { useNetworkStore } from "src/stores/network";
 import InitialLoader from "src/components/Onboarding/InitialLoader.vue";
-import NoConnection from "src/components/common/NoConnection.vue";
+import OfflineBanner from "src/components/common/OfflineBanner.vue";
+import DevNetStatus from "src/components/common/DevNetStatus.vue";
 
 const $q = useQuasar();
 $q.dark.set(true);

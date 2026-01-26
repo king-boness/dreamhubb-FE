@@ -86,8 +86,8 @@ const goToUserProfile = (userId: number | null | undefined) => {
   const numericUserId = typeof userId === "string" ? parseInt(userId, 10) : userId;
 
   if (!numericUserId || isNaN(numericUserId)) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("No userId to navigate", {
+    if (import.meta.env.DEV) {
+      console.debug("No userId to navigate", {
         userId,
         numericUserId,
         notification: props.notification

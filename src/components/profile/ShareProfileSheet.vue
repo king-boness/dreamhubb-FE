@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from "vue";
-import { Notify } from "quasar";
+import { notifyError } from "src/utils/notify";
 
 interface Props {
   modelValue: boolean;
@@ -359,15 +359,12 @@ const shareOnPlatform = (platform: { name: string; url: (url: string, title: str
     const shareUrl = platform.url(props.profileUrl, props.profileTitle, props.profileText);
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Share error:", error);
-    }
-    Notify.create({
-      type: "negative",
-      message: "Failed to share. Please try again.",
-      position: "top",
-      timeout: 3000
-    });
+    notifyError({
+      kind: "unknown",
+      messageKey: "common.errors.shareFailed",
+      fallbackMessage: "Failed to share. Please try again.",
+      retryable: true
+    }, { timeout: 3000 });
   }
 };
 
@@ -380,9 +377,7 @@ const shareNative = async () => {
     });
   } catch (error) {
     // User cancelled or error - ignore
-    if (process.env.NODE_ENV === "development") {
-      console.log("Share cancelled or error:", error);
-    }
+    void error;
   }
 };
 

@@ -337,7 +337,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, withDefaults } from "vue";
-import { Notify } from "quasar";
+import { notifyError, notifySuccess } from "src/utils/notify";
 import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
@@ -598,9 +598,9 @@ const updateCityOptions = async () => {
       const status = getHttpStatus(error);
       // 400 here usually means the DB doesn't contain the given continent/country yet.
       // Treat it as an expected "fallback to static list" case (avoid noisy console errors).
-      if (process.env.NODE_ENV === "development") {
+      if (import.meta.env.DEV) {
         if (status && status !== 400) {
-          console.error("Failed to fetch cities with IDs:", error);
+          console.debug("Failed to fetch cities with IDs:", error);
         } else {
           // eslint-disable-next-line no-console
           console.debug("[WhereAreYou] Falling back to static cities list (no BE location match).", {
@@ -777,18 +777,15 @@ const handleGeolocationAllow = async () => {
         }
       }
 
-      Notify.create({
-        type: "positive",
-        message: "Location filled automatically. You can still edit it if needed.",
-        position: "top"
-      });
+      notifySuccess("common.success.locationAutoFilled", "Location filled automatically. You can still edit it if needed.", { position: "top" });
     }
   } catch (error) {
-    Notify.create({
-      type: "negative",
-      message: "Failed to get your location. Please select manually.",
-      position: "top"
-    });
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage: "Failed to get your location. Please select manually.",
+      retryable: true
+    }, { position: "top" });
   }
 };
 

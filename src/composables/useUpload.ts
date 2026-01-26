@@ -1,5 +1,6 @@
 import { api } from "src/boot/axios";
-import { Notify } from "quasar";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { notifyError } from "src/utils/notify";
 
 export interface UploadResponse {
   status: string;
@@ -35,10 +36,11 @@ export function useUpload() {
     try {
       // Validácia typu súboru
       if (!file.type.startsWith("image/")) {
-        Notify.create({
-          type: "negative",
-          message: "❌ Unsupported file type. Please upload an image.",
-          position: "top"
+        notifyError({
+          kind: "validation",
+          messageKey: "common.errors.uploadInvalidType",
+          fallbackMessage: "Unsupported file type. Please upload an image.",
+          retryable: false
         });
         return null;
       }
@@ -46,10 +48,11 @@ export function useUpload() {
       // Validácia veľkosti (5 MB)
       const maxSize = 5 * 1024 * 1024; // 5 MB v bytoch
       if (file.size > maxSize) {
-        Notify.create({
-          type: "negative",
-          message: "❌ File too large. Maximum size is 5 MB.",
-          position: "top"
+        notifyError({
+          kind: "validation",
+          messageKey: "common.errors.uploadTooLarge",
+          fallbackMessage: "File too large. Maximum size is 5 MB.",
+          retryable: false
         });
         return null;
       }
@@ -75,25 +78,9 @@ export function useUpload() {
       return null;
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Upload error:", error);
+        console.debug("Upload error:", error);
       }
-
-      let errorMessage = "❌ Upload failed. Please try again.";
-      const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-
-      if (axiosError.response?.status === 422) {
-        errorMessage = "❌ Invalid file. Please check file type and size.";
-      } else if (axiosError.response?.status === 401) {
-        errorMessage = "❌ Unauthorized. Please log in.";
-      } else if (axiosError.response?.data?.message) {
-        errorMessage = `❌ ${axiosError.response.data.message}`;
-      }
-
-      Notify.create({
-        type: "negative",
-        message: errorMessage,
-        position: "top"
-      });
+      notifyError(mapAxiosErrorToDhError(error));
 
       return null;
     }
@@ -109,34 +96,16 @@ export function useUpload() {
       const response = await api.delete(`/upload/${publicId}`);
 
       if (response.data.status === "success") {
-        Notify.create({
-          type: "positive",
-          message: "✅ Image deleted successfully",
-          position: "top"
-        });
+        // Avoid spamming: no toast needed here; caller UI usually updates immediately.
         return true;
       }
 
       return false;
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Delete error:", error);
+        console.debug("Delete error:", error);
       }
-
-      let errorMessage = "❌ Failed to delete image.";
-      const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-
-      if (axiosError.response?.status === 404) {
-        errorMessage = "❌ Image not found.";
-      } else if (axiosError.response?.data?.message) {
-        errorMessage = `❌ ${axiosError.response.data.message}`;
-      }
-
-      Notify.create({
-        type: "negative",
-        message: errorMessage,
-        position: "top"
-      });
+      notifyError(mapAxiosErrorToDhError(error));
 
       return false;
     }

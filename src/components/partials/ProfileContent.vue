@@ -149,7 +149,7 @@ import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import BadgeSwiperComponent from "src/components/partials/BadgeSwiperComponent.vue";
 import PageTitle from "src/components/ui/PageTitle.vue";
 import { api } from "src/boot/axios";
-import { Notify } from "quasar";
+import { notifyError, notifyInfo, notifySuccess } from "src/utils/notify";
 
 const { t, locale } = useI18n();
 
@@ -342,12 +342,7 @@ const handleViewPhoto = () => {
   if (authStore.user?.profile_picture) {
     isPhotoLightboxOpen.value = true;
   } else {
-    Notify.create({
-      type: "info",
-      message: "Profile photo is not set yet.",
-      position: "top",
-      timeout: 3000
-    });
+    notifyInfo("common.info.profilePhotoNotSet", "Profile photo is not set yet.", { position: "top", timeout: 3000 });
   }
 };
 
@@ -392,25 +387,20 @@ const handleChangePhoto = () => {
         // Refresh user data to ensure consistency
         await authStore.fetchUser();
 
-        Notify.create({
-          type: "positive",
-          message: "Profile photo updated successfully",
-          position: "top",
-          timeout: 3000
-        });
+        notifySuccess("common.success.profilePictureUpdated", "Profile photo updated successfully", { position: "top", timeout: 3000 });
       } else {
         throw new Error("Invalid response from server");
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to upload profile photo:", error);
+      if (import.meta.env.DEV) {
+        console.debug("[ProfileContent] Failed to upload profile photo:", error);
       }
-      Notify.create({
-        type: "negative",
-        message: "Failed to upload photo. Please try again.",
-        position: "top",
-        timeout: 3000
-      });
+      notifyError({
+        kind: "server",
+        messageKey: "common.errors.server",
+        fallbackMessage: "Failed to upload photo. Please try again.",
+        retryable: true
+      }, { position: "top", timeout: 3000 });
     } finally {
       isUploading.value = false;
     }
@@ -462,18 +452,13 @@ const saveBadge = async () => {
       });
     } catch (error) {
       // If BE doesn't support selected_badge yet, just use localStorage
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Failed to save badge to backend, using localStorage only:", error);
+      if (import.meta.env.DEV) {
+        console.debug("Failed to save badge to backend, using localStorage only:", error);
       }
     }
 
     closeBadgeSelector();
-    Notify.create({
-      type: "positive",
-      message: "Badge saved successfully",
-      position: "top",
-      timeout: 3000
-    });
+    notifySuccess("common.success.badgeSaved", "Badge saved successfully", { position: "top", timeout: 3000 });
   }
 };
 

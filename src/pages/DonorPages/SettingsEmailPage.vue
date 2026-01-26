@@ -56,8 +56,8 @@ onMounted(async () => {
     try {
       await authStore.fetchUser();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to fetch user:", error);
+      if (import.meta.env.DEV) {
+        console.debug("Failed to fetch user:", error);
       }
     }
   }

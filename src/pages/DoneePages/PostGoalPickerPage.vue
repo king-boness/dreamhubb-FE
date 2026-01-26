@@ -13,8 +13,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onActivated, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { notifyError } from "src/utils/notify";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import { usePostCreationStore } from "src/stores/postCreation";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const router = useRouter();
 const postCreationStore = usePostCreationStore();
@@ -59,10 +61,6 @@ const resetPostCreationFlow = () => {
 
   // Set selectedGoal to "dream"
   selectedGoal.value = "dream";
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostGoalPickerPage: Reset post creation flow to default (dream)");
-  }
 };
 
 // Function to load and sync category value (used on route re-entry)
@@ -83,9 +81,7 @@ const loadAndSyncGoal = async () => {
     }
   }
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostGoalPickerPage: Loaded category:", selectedGoal.value);
-  }
+  // no verbose logs
 };
 
 onMounted(async () => {
@@ -96,9 +92,7 @@ onMounted(async () => {
     resetPostCreationFlow();
   } else {
     // Existing post creation - category is already loaded in initialCategory, just log
-    if (process.env.NODE_ENV === "development") {
-      console.log("📝 PostGoalPickerPage: Loaded category on mount:", selectedGoal.value);
-    }
+    // no logs
   }
 });
 
@@ -109,22 +103,17 @@ onActivated(async () => {
   // Give extra time for WhatIsYourGoal component to re-mount and initialize Flicking
   await nextTick();
   await new Promise(resolve => setTimeout(resolve, 300));
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostGoalPickerPage: onActivated - Synchronizing category picker");
-  }
+  // no logs
 });
 
 const handleNext = () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostGoalPickerPage: handleNext called", {
-      selectedGoal: selectedGoal.value
-    });
-  }
-
   if (!selectedGoal.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ PostGoalPickerPage: No category selected, cannot proceed");
-    }
+    notifyError({
+      kind: "validation",
+      messageKey: "common.errors.validation",
+      fallbackMessage: "Please check your input and try again.",
+      retryable: false
+    }, { position: "top", timeout: 3500 });
     return;
   }
 
@@ -138,15 +127,10 @@ const handleNext = () => {
   postCreationStore.setSubcategory(null);
   localStorage.removeItem("donee_postCreation_category");
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 PostGoalPickerPage: Saved goal:", selectedGoal.value);
-    console.log("📝 PostGoalPickerPage: Navigating to donee-postCreation-category");
-  }
-
   // Navigate to category picker
   router.push({ name: "donee-postCreation-category" }).catch((error) => {
-    if (process.env.NODE_ENV === "development") {
-      console.error("❌ PostGoalPickerPage: Navigation error:", error);
+    if (import.meta.env.DEV) {
+      console.debug("[PostGoalPickerPage] Navigation error:", error);
     }
   });
 };

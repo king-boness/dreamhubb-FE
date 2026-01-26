@@ -41,7 +41,8 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
-import { useQuasar, Notify } from "quasar";
+import { useQuasar } from "quasar";
+import { notifySuccess } from "src/utils/notify";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { APP_LANGUAGES } from "src/config/languages";
@@ -200,12 +201,7 @@ const saveLanguage = () => {
 
     // Wait for Vue to update the UI (including CTA button text)
     nextTick(() => {
-      Notify.create({
-        type: "positive",
-        message: t("languageSaved"),
-        position: "top",
-        timeout: 2000
-      });
+      notifySuccess("common.success.languageSaved", t("languageSaved") || "Language saved successfully", { position: "top", timeout: 2000 });
 
       // Navigate back after a short delay to allow user to see the updated CTA text
       setTimeout(() => {

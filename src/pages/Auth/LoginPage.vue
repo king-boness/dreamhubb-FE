@@ -11,6 +11,7 @@
       :error="!!emailError"
       :error-message="emailError"
       ref="emailInput"
+      data-testid="dh-login-email"
     />
     <q-input
       :type="showPassword ? 'text' : 'password'"
@@ -24,6 +25,7 @@
       :error="!!passwordError"
       :error-message="passwordError"
       ref="passwordInput"
+      data-testid="dh-login-password"
     >
       <template v-slot:append>
         <q-icon
@@ -47,6 +49,7 @@
       text-color="white"
       class="LoginPage-loginButton"
       :loading="auth.loading"
+      data-testid="dh-login-submit"
     />
     <q-btn class="LoginPage-forgotPswButton" @click="handleForgotPassword">
       {{ t('forgotPassword') }}
@@ -62,11 +65,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
+import { notifyError } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const $q = useQuasar();
 const router = useRouter();
@@ -120,14 +125,21 @@ watch([email, password], () => {
   passwordError.value = "";
 });
 
+onMounted(() => {
+  const qEmail = route.query.email;
+  if (typeof qEmail === "string" && qEmail.trim()) {
+    email.value = qEmail.trim();
+  }
+});
+
 const onSubmit = async () => {
   if (!email.value || !password.value) {
-    $q.notify({
-      message: tOr("loginFillBoth", "Please fill in both email and password."),
-      color: "negative",
-      icon: "error",
-      timeout: 6500
-    });
+    notifyError({
+      kind: "validation",
+      messageKey: "loginFillBoth",
+      fallbackMessage: "Please fill in both email and password.",
+      retryable: false
+    }, { timeout: 6500 });
     return;
   }
 
@@ -141,18 +153,14 @@ const onSubmit = async () => {
     failedLoginAttempts.value = 0;
     sessionStorage.setItem(FAIL_KEY, "0");
 
-    $q.notify({
-      message: "Login successful!",
-      color: "positive",
-      icon: "check"
-    });
+    // Success handled by router redirect, no toast needed
 
     // Redirect na feed (donor-posts) alebo podľa query parametra
     const redirect = (route.query.redirect as string) || { name: "donor-posts" };
     router.push(redirect);
   } catch (err: unknown) {
     if (process.env.NODE_ENV === "development") {
-      console.error("Login error:", err);
+      console.debug("Login error:", err);
     }
 
     const anyErr = err as any;
@@ -181,12 +189,13 @@ const onSubmit = async () => {
       failedLoginAttempts.value += 1;
       sessionStorage.setItem(FAIL_KEY, String(failedLoginAttempts.value));
 
-      $q.notify({
-        message: t("badCredentials"),
-        color: "negative",
-        icon: "error",
-        timeout: 8000
-      });
+      notifyError({
+        kind: "unauthorized",
+        status: 401,
+        messageKey: "badCredentials",
+        fallbackMessage: "Incorrect email or password.",
+        retryable: true
+      }, { timeout: 8000 });
 
       safeTriggerShake();
       passwordInput.value?.focus?.();
@@ -195,63 +204,38 @@ const onSubmit = async () => {
 
     // Network / no response
     if (!hasResponse) {
-      $q.notify({
-        message: tOr("loginNetworkError", "Couldn't connect. Please try again."),
-        color: "negative",
-        icon: "error",
-        timeout: 8000
-      });
+      // Map to common network/offline/timeout messages (safe + localized)
+      notifyError(mapAxiosErrorToDhError(err), { timeout: 8000 });
       return;
     }
 
     // 5xx
     if (status >= 500) {
-      $q.notify({
-        message: tOr("loginServerError", t("loginError")),
-        color: "negative",
-        icon: "error",
-        timeout: 8000
-      });
+      notifyError({
+        kind: "server",
+        status,
+        messageKey: "loginServerError",
+        fallbackMessage: tOr("loginServerError", t("loginError")),
+        retryable: true
+      }, { timeout: 8000 });
       return;
     }
 
     // Fallback
-    $q.notify({
-      message: t("loginError"),
-      color: "negative",
-      icon: "error",
-      timeout: 8000
-    });
+    notifyError({
+      kind: "unknown",
+      status,
+      messageKey: "loginError",
+      fallbackMessage: tOr("loginError", "Something went wrong. Please try again later."),
+      retryable: true
+    }, { timeout: 8000 });
   }
 };
 
-const forgotPasswordRouteName = computed<string | null>(() => {
-  const candidates = router
-    .getRoutes()
-    .filter((r) => !r.meta?.requiresAuth && (typeof r.name === "string" || typeof r.path === "string"));
-
-  const found = candidates.find((r) => {
-    const hay = `${String(r.name || "")} ${String(r.path || "")}`.toLowerCase();
-    return hay.includes("forgot") || (hay.includes("reset") && hay.includes("password"));
-  });
-
-  return (found?.name as string | undefined) || null;
-});
-
 const handleForgotPassword = () => {
-  if (forgotPasswordRouteName.value) {
-    router.push({ name: forgotPasswordRouteName.value });
-    return;
-  }
-
-  // No guest forgot-password flow exists in router yet -> safe fallback
-  $q.dialog({
-    title: tOr("forgotPasswordUnavailableTitle", "Password reset"),
-    message: tOr(
-      "forgotPasswordUnavailableText",
-      "Password reset isn't available yet. Please contact support."
-    ),
-    ok: { label: t("close") }
+  router.push({
+    name: "forgot-password",
+    query: email.value ? { email: email.value } : undefined
   });
 };
 </script>

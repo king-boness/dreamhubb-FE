@@ -94,13 +94,7 @@ const emit = defineEmits(["changedHoriz"]);
 const selectedItemIdFromChild = ref(null);
 
 onMounted(() => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("[SubmitPage1] onMounted", {
-      category: props.category,
-      categoryLength: props.category?.length || 0,
-      horiz: horiz.value
-    });
-  }
+  // no logs
 });
 
 const changeSwiper = () => {
@@ -115,9 +109,7 @@ const changeSwiper = () => {
 const handleSelectedItemId = (itemId: any) => {
   selectedItemIdFromChild.value = itemId;
   emit("changedHoriz", { horiz: horiz.value, selectedItemId: itemId });
-  if (process.env.NODE_ENV === "development") {
-    console.log(itemId);
-  }
+  // no logs
 };
 const props = defineProps({
   nextPage: {

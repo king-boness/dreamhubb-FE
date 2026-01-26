@@ -38,9 +38,21 @@ const routes: RouteRecordRaw[] = [
     component: () => import("src/layouts/Auth/LandingLayout.vue"),
     children: [
       { path: "", component: () => import("src/pages/Auth/LandingPage.vue"), name: "landing" },
-      { path: "/login", component: () => import("src/pages/Auth/LoginPage.vue"), name: "login" }
+      { path: "/login", component: () => import("src/pages/Auth/LoginPage.vue"), name: "login" },
+      { path: "/forgot-password", component: () => import("src/pages/Auth/ForgotPasswordPage.vue"), name: "forgot-password" },
+      { path: "/reset-password", component: () => import("src/pages/Auth/ResetPasswordPage.vue"), name: "reset-password" }
     ]
   },
+  ...(typeof import.meta !== "undefined" && import.meta.env?.DEV === true
+    ? ([
+        {
+          path: "/__dev/qa",
+          component: () => import("src/pages/Dev/DevQaPage.vue"),
+          name: "dev-qa",
+          meta: { requiresAuth: true, hideFooter: true, hideMainHeader: true }
+        }
+      ] as RouteRecordRaw[])
+    : []),
   // {
   //   path: "/",
   //   component: () => import("src/layouts/Auth/LandingLayout.vue"),

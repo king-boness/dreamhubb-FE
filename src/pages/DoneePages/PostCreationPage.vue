@@ -47,6 +47,7 @@
           multiple
           accept="image/*"
           :disabled="isUploadingAdditional"
+          data-testid="dh-post-creation-upload"
         />
       </div>
       <div class="postCreation-detailContainer">
@@ -157,13 +158,13 @@
           />
         </div>
         <div class="postCreation-tokenBalance">
-          {{ t("funds") }}: {{ userTokensBalance }} tokens
+          {{ t("funds") }}: {{ remainingFunds }} tokens
         </div>
       </div>
     </div>
     <div class="postCreation-submitDreamContainer">
       <!-- Error message -->
-      <div v-if="postCreationStore.error" class="postCreation-error">
+      <div v-if="postCreationStore.error" class="postCreation-error" data-testid="dh-post-creation-error">
         {{ postCreationStore.error }}
       </div>
       <div ref="submitCtaWrapperRef" class="postCreation-submitCtaWrapper" @click.stop>
@@ -203,6 +204,7 @@
           :disabled="!postCreationStore.isValid || postCreationStore.loading"
           :ripple="!isMinTokensBlocked"
           :aria-disabled="isMinTokensBlocked ? 'true' : undefined"
+          data-testid="dh-post-creation-submit"
         >
           <span v-if="postCreationStore.loading">Creating post...</span>
           <span v-else>Submit Post</span>
@@ -219,7 +221,8 @@ import { usePostCreationStore } from "src/stores/postCreation";
 import { usePostsStore } from "src/stores/posts";
 import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
-import { Notify } from "quasar";
+import { notifyError, notifySuccess } from "src/utils/notify";
+import { tGlobal } from "src/utils/i18nGlobal";
 import UploadPostImgComponent from "src/components/partials/UploadPostImgComponent.vue";
 import { PostCategories } from "src/components/models";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
@@ -283,6 +286,12 @@ const userTokensBalance = computed(() => {
 
 const maxTokens = computed(() => {
   return Math.max(0, userTokensBalance.value);
+});
+
+// Remaining funds after choosing initial reward
+const remainingFunds = computed(() => {
+  const reward = rewardUi.value;
+  return Math.max(userTokensBalance.value - reward, 0);
 });
 
 // UX rule: always DISPLAY min reward 10 in the reward UI.
@@ -436,19 +445,7 @@ const loadSelectedCategories = () => {
     selectedSubcategory = "traveling";
   }
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 Raw values:", {
-      fromStore: {
-        category: postCreationStore.category,
-        subcategory: postCreationStore.subcategory
-      },
-      fromLocalStorage: {
-        goal: localStorage.getItem("donee_postCreation_goal"),
-        category: localStorage.getItem("donee_postCreation_category")
-      },
-      final: { goal, selectedSubcategory }
-    });
-  }
+  // Never log post creation values (can be sensitive / noisy)
 
   selectedGoal.value = goal;
 
@@ -466,14 +463,7 @@ const loadSelectedCategories = () => {
     specificGoalImg: getCategoryIcon(selectedSubcategory)
   };
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📝 Categories loaded:", {
-      goalImg: categories.value.goalImg,
-      specificGoalImg: categories.value.specificGoalImg,
-      category: goal,
-      subcategory: selectedSubcategory
-    });
-  }
+  // no logs
 };
 
 const categories = ref({
@@ -500,23 +490,11 @@ watch(() => [postCreationStore.category, postCreationStore.subcategory], () => {
 
 // Handle post submission - submit to BE
 const handleSubmitPost = async () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔵 handleSubmitPost called", {
-      isValid: postCreationStore.isValid,
-      loading: postCreationStore.loading,
-      category: postCreationStore.category,
-      subcategory: postCreationStore.subcategory,
-      title: postCreationStore.title,
-      description: postCreationStore.description
-    });
-  }
+  // Keep production console clean (no logs / no payloads)
 
   if (!postCreationStore.isValid || postCreationStore.loading) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ Submit blocked:", {
-        isValid: postCreationStore.isValid,
-        loading: postCreationStore.loading
-      });
+    if (import.meta.env.DEV) {
+      console.debug("[PostCreation] Submit blocked");
     }
     return;
   }
@@ -527,24 +505,22 @@ const handleSubmitPost = async () => {
   }
 
   try {
-    // Debug log: before submitPost()
-    console.log("[SUBMIT] before submitPost()");
+    if (import.meta.env.DEV) {
+      console.debug("[PostCreation] before createPost()");
+    }
 
     // Submit post via store
     const result = await postCreationStore.createPost();
 
-    // Debug log: after submitPost() success
-    console.log("[SUBMIT] after submitPost()", result);
-
-    if (process.env.NODE_ENV === "development") {
-      console.log("✅ Submit result:", result);
+    if (import.meta.env.DEV) {
+      console.debug("[PostCreation] createPost() result:", result);
     }
 
     // Update user tokens if returned from BE
     if (result?.user?.tokens !== undefined) {
       authStore.updateTokens(result.user.tokens);
-      if (process.env.NODE_ENV === "development") {
-        console.log("💰 Updated user tokens from response:", result.user.tokens);
+      if (import.meta.env.DEV) {
+        console.debug("[PostCreation] Updated user tokens from response");
       }
     } else {
       // If BE doesn't return tokens, refresh from API
@@ -553,18 +529,14 @@ const handleSubmitPost = async () => {
         await authStore.refreshTokenBalance();
       } catch (error) {
         // Don't block UX if refresh fails
-        if (process.env.NODE_ENV === "development") {
-          console.warn("⚠️ Failed to refresh token balance after post creation:", error);
+        if (import.meta.env.DEV) {
+          console.debug("Failed to refresh token balance after post creation:", error);
         }
       }
     }
 
     // Show success message
-    Notify.create({
-      type: "positive",
-      message: "Post created successfully!",
-      position: "top"
-    });
+    notifySuccess("common.success.postCreated", "Post created successfully!", { position: "top" });
 
     // Save registration preferences to preferences store before clearing localStorage
     // This ensures they can be used when switching to donor side
@@ -596,21 +568,24 @@ const handleSubmitPost = async () => {
     // Navigate to donee posts page (Donee home)
     router.push({ name: "donee-posts" });
   } catch (error: unknown) {
-    // Debug log: submitPost() threw
-    console.error("[SUBMIT] submitPost() threw:", error);
+    if (import.meta.env.DEV) {
+      console.debug("[PostCreation] submitPost() threw:", error);
+    }
     // Error je už nastavený v store
     if (postCreationStore.error) {
-      Notify.create({
-        type: "negative",
-        message: postCreationStore.error,
-        position: "top"
-      });
+      notifyError({
+        kind: "server",
+        messageKey: "common.errors.server",
+        fallbackMessage: postCreationStore.error,
+        retryable: true
+      }, { position: "top" });
     } else {
-      Notify.create({
-        type: "negative",
-        message: "Failed to create post. Please try again.",
-        position: "top"
-      });
+      notifyError({
+        kind: "server",
+        messageKey: "common.errors.server",
+        fallbackMessage: "Failed to create post. Please try again.",
+        retryable: true
+      }, { position: "top" });
     }
   }
 };
@@ -674,10 +649,7 @@ const handleImagesFromChild = async (imgs: UploadedImage[]) => {
   // Konvertovať UploadedImage[] na string[] (použiť secure_url)
   const imageUrls = imgs.map((img) => img.secure_url);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("📸 handleImagesFromChild called with:", imgs);
-    console.log("📸 Extracted URLs:", imageUrls);
-  }
+  // no logs (image urls can be sensitive)
 
   // Nastaviť obrázky reaktívne - použiť nový array pre lepšiu reaktivitu
   uploadedImages.value.images = [...imageUrls];
@@ -692,9 +664,7 @@ const handleIndex = (index: number) => {
   imgIndex.value = index;
 };
 watch(imgIndex, () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(imgIndex.value);
-  }
+  // no logs
 });
 const openFileInput = () => {
   if (fileInput.value) {
@@ -716,11 +686,12 @@ const handleFileChange = async (event: Event) => {
   const remainingSlots = maxImages - currentCount;
 
   if (remainingSlots <= 0) {
-    Notify.create({
-      type: "negative",
-      message: "Maximum " + maxImages + " images allowed.",
-      position: "top"
-    });
+    notifyError({
+      kind: "validation",
+      messageKey: "common.errors.validation",
+      fallbackMessage: `Maximum ${maxImages} images allowed.`,
+      retryable: false
+    }, { position: "top" });
     return;
   }
 
@@ -738,19 +709,17 @@ const handleFileChange = async (event: Event) => {
     // Aktualizovať store - using new API
     postCreationStore.setImages(uploadedImages.value.images);
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("📸 Additional images uploaded:", newImageUrls.length);
-      console.log("📸 Total images:", uploadedImages.value.images.length);
-    }
+    // no logs
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("❌ Failed to upload additional images:", error);
+    if (import.meta.env.DEV) {
+      console.debug("[PostCreation] Failed to upload additional images:", error);
     }
-    Notify.create({
-      type: "negative",
-      message: "Failed to upload images. Please try again.",
-      position: "top"
-    });
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage: "Failed to upload images. Please try again.",
+      retryable: true
+    }, { position: "top" });
   } finally {
     isUploadingAdditional.value = false;
     if (fileInput.value) {

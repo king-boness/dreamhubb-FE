@@ -3,42 +3,9 @@
     <q-page-container>
       <q-page
         class="justify-center items-center login"
-        :class="{ iphoneDevice: $q.platform.is.ios }"
+        :class="{ iphoneDevice: $q.platform.is.ios, 'login--reset': isResetFlow }"
       >
-        <div class="row col-12">
-          <!-- Offline Dialog -->
-          <q-dialog
-            v-model="showOfflineDialog"
-            persistent
-            :maximized="false"
-            class="offlineDialog"
-          >
-            <q-card class="offlineDialog-card">
-              <q-card-section class="offlineDialog-header">
-                <div class="offlineDialog-icon">
-                  <q-icon name="wifi_off" size="48px" color="white" />
-                </div>
-                <div class="offlineDialog-title">{{ t("offlineTitle") }}</div>
-                <div class="offlineDialog-message">{{ t("offlineMessage") }}</div>
-              </q-card-section>
-
-              <q-card-actions align="right" class="offlineDialog-actions">
-                <q-btn
-                  flat
-                  :label="t('close')"
-                  color="white"
-                  class="offlineDialog-btn offlineDialog-btn--close"
-                  @click="closeOfflineDialog"
-                />
-                <q-btn
-                  :label="t('openSettings')"
-                  color="primary"
-                  class="offlineDialog-btn offlineDialog-btn--settings"
-                  @click="openSettings"
-                />
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
+        <div class="row col-12" :class="{ 'landingLayout-topRow--overlay': isResetFlow }">
           <div v-if="route.name == 'login'" class="buttonDiv">
             <q-btn class="arrowButtonBack" @click="handleBack">
               <img
@@ -48,7 +15,7 @@
               />
             </q-btn>
           </div>
-          <div class="landingPage-mapImage">
+          <div v-if="!isResetFlow" class="landingPage-mapImage">
             <img
               src="/images/Auth/map-image.svg"
               spinner-color="white"
@@ -64,8 +31,11 @@
           />
           <q-img src="src/assets/Auth/teslaImg.png" class="imgMain3 imgMain" /> -->
         </div>
-        <div class="row col-12 landingPage-contentSection">
-          <h1 class="col-12 logo">dreamhubb</h1>
+        <div
+          class="row col-12 landingPage-contentSection"
+          :class="{ 'landingPage-contentSection--reset': isResetFlow }"
+        >
+          <h1 v-if="!isResetFlow" class="col-12 logo">dreamhubb</h1>
           <router-view />
         </div>
       </q-page>
@@ -74,63 +44,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-const isInternet = ref(navigator.onLine);
-const showOfflineDialog = ref(false);
-
-// Watch for online/offline status changes
-const handleOnline = () => {
-  isInternet.value = true;
-  showOfflineDialog.value = false;
-};
-
-const handleOffline = () => {
-  isInternet.value = false;
-  showOfflineDialog.value = true;
-};
-
-const closeOfflineDialog = () => {
-  showOfflineDialog.value = false;
-};
-
-const openSettings = () => {
-  // Try to open device settings
-  // For mobile devices, this might work with specific URLs
-  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-    // iOS - try to open Settings app (limited support)
-    window.location.href = "App-Prefs:root=WIFI";
-  } else if (/Android/i.test(navigator.userAgent)) {
-    // Android - try to open WiFi settings
-    window.location.href = "android.settings.WIFI_SETTINGS";
-  } else {
-    // Desktop - show a message or try to open network settings
-    alert(t("offlineDesktopMessage"));
-  }
-  closeOfflineDialog();
-};
-
-onMounted(() => {
-  // Check initial status
-  if (!isInternet.value) {
-    showOfflineDialog.value = true;
-  }
-
-  // Listen for online/offline events
-  window.addEventListener("online", handleOnline);
-  window.addEventListener("offline", handleOffline);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("online", handleOnline);
-  window.removeEventListener("offline", handleOffline);
-});
+const isResetFlow = computed(() => route.name === "forgot-password" || route.name === "reset-password");
 
 const handleBack = () => {
   router.push({ name: "auth-welcome" });
@@ -157,27 +76,45 @@ const handleBack = () => {
   background-size: cover;
   background-position: top;
 }
+
+.login--reset {
+  position: relative;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.landingLayout-topRow--overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.landingPage-contentSection--reset {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  // Quasar `.row` applies negative margins for gutters -> it can visually shift centering.
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
 .buttonDiv {
   margin-top: 0;
   margin: 1rem;
   margin-bottom: -3.5rem !important;
-}
-.offlineDialog {
-  :deep(.q-dialog__inner) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-}
-
-.offlineDialog-card {
-  background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-  border-radius: 24px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .offlineDialog-header {

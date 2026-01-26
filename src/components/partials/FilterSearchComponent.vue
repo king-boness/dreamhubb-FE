@@ -114,9 +114,7 @@ const state = reactive({
 });
 
 watch(state, () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(state);
-  }
+  // no logs
 });
 
 const countries = ["USA", "Canada", "Mexico"];

@@ -197,11 +197,12 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { Notify } from "quasar";
+import { notifyInfo, notifyError } from "src/utils/notify";
 import { useCommentsStore, type Reply } from "src/stores/comments";
 import { useAuthStore } from "src/stores/auth";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 interface Props {
   postId: number;
@@ -257,8 +258,8 @@ const replyPlaceholder = () => {
 // Navigate to user profile
 const goToUserProfile = (userId: number | null) => {
   if (!userId) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("No userId to navigate");
+    if (import.meta.env.DEV) {
+      console.debug("No userId to navigate");
     }
     return;
   }
@@ -321,11 +322,7 @@ const timeAgo = (iso: string) => {
 const toggleReplyInput = (commentId: number) => {
   const comment = commentsForPost.value.find((c) => c.id === commentId);
   if (comment && !canReply(comment)) {
-    Notify.create({
-      message: t("replyNotAllowed"),
-      color: "grey-8",
-      timeout: 2500
-    });
+    notifyInfo("common.info.replyNotAllowed", t("replyNotAllowed") || "Reply not allowed", { timeout: 2500 });
     return;
   }
   showReplyInputs.value[commentId] = !showReplyInputs.value[commentId];
@@ -351,8 +348,9 @@ const handleReplySubmit = async (commentId: number) => {
     showReplyInputs.value[commentId] = false;
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("Failed to send reply:", error);
+      console.debug("Failed to send reply:", error);
     }
+    notifyError(mapAxiosErrorToDhError(error));
   } finally {
     sendingReplies.value[commentId] = false;
   }

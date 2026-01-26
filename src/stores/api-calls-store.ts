@@ -156,8 +156,8 @@ export const useApiCallStore = defineStore("apiCall", {
         const res = await api.get(`/posts/${id}`);
         return res.data?.post ?? null;
       } catch (err) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ getPostById error:", err);
+        if (import.meta.env.DEV) {
+          console.debug("[ApiCallsStore] getPostById failed:", err);
         }
         throw err;
       }
@@ -172,9 +172,9 @@ export const useApiCallStore = defineStore("apiCall", {
         await api.post("/logout");
       } catch (error: unknown) {
         // Ignorovať chyby - redirect a token handling je v user-store.ts
-        if (process.env.NODE_ENV === "development") {
+        if (import.meta.env.DEV) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          console.warn("Logout API call failed:", errorMessage);
+          console.debug("[ApiCallsStore] Logout API call failed:", errorMessage);
         }
       } finally {
         // Vždy vymazať token a resetovať store
@@ -245,7 +245,9 @@ export const useApiCallStore = defineStore("apiCall", {
           }
         ].slice(0, limit);
       } catch (error) {
-        console.error("Failed to fetch completed dreams:", error);
+        if (import.meta.env.DEV) {
+          console.debug("Failed to fetch completed dreams:", error);
+        }
         return [];
       }
     }

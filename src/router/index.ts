@@ -25,8 +25,11 @@ export default route(function ({ store }) {
   });
 
   // Debug: Check if postCreation picker routes exist
-  if (process.env.NODE_ENV === "development") {
-    console.log("[ROUTER] has postCreation category route:", Router.getRoutes().some(r => r.path === "/donee/postCreation/category" || r.name === "donee-postCreation-category"));
+  if (typeof import.meta !== "undefined" && import.meta.env?.DEV === true) {
+    const hasPickerRoute = Router.getRoutes().some(
+      (r) => r.path === "/donee/postCreation/category" || r.name === "donee-postCreation-category"
+    );
+    console.debug("[router] has postCreation category route:", hasPickerRoute);
   }
 
   Router.beforeEach((to, from, next) => {

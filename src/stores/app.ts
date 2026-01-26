@@ -10,8 +10,8 @@ export const useAppStore = defineStore("app", {
   }),
   actions: {
     async initializeApp() {
-      if (process.env.NODE_ENV === "development") {
-        console.log("🟣 [AppStore] initializeApp called");
+      if (import.meta.env.DEV) {
+        console.debug("[AppStore] initializeApp called");
       }
 
       const authStore = useAuthStore();
@@ -26,24 +26,18 @@ export const useAppStore = defineStore("app", {
           try {
             await authStore.fetchUser();
           } catch (error) {
-            // If fetchUser fails, log out and fall back to guest flow
-            if (process.env.NODE_ENV === "development") {
-              console.warn("⚠️ [AppStore] fetchUser failed during init:", error);
+            // Requirement (auth UX): never spam console with token verification failures.
+            // If /user fails during init (401/403 OR network/CORS/timeout), silently clear session and stay in guest flow.
+            if (import.meta.env.DEV) {
+              console.debug("[AppStore] fetchUser failed during init; clearing session silently.");
             }
-            // If token is expired/invalid, avoid calling /logout (it would 401 and spam console)
-            const is401 =
-              error &&
-              typeof error === "object" &&
-              "response" in error &&
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ((error as any).response?.status === 401 || (error as any).response?.status === 403);
-            await authStore.logout({ remote: !is401, silent: true });
+            await authStore.logout({ remote: false, silent: true });
           }
         }
       } finally {
         this.isInitializingApp = false;
-        if (process.env.NODE_ENV === "development") {
-          console.log("🟢 [AppStore] initializeApp finished");
+        if (import.meta.env.DEV) {
+          console.debug("[AppStore] initializeApp finished");
         }
       }
     },

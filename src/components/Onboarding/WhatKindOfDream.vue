@@ -168,9 +168,7 @@ watch(() => flickingInstance.value, async (newInstance) => {
       await nextTick();
       await new Promise(resolve => setTimeout(resolve, 100));
       await syncFlickingToValue();
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 WhatKindOfDream: flickingInstance watch - Synchronized to value:", localValue.value);
-      }
+      // no verbose logs
     }
   }
 }, { immediate: true });
@@ -187,12 +185,9 @@ const syncFlickingToValue = async () => {
   if (targetIndex >= 0) {
     try {
       instance.moveTo(targetIndex, 0);
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 WhatKindOfDream: Synchronized Flicking to index", targetIndex, "for value", localValue.value);
-      }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("⚠️ WhatKindOfDream: Failed to sync Flicking:", error);
+      if (import.meta.env.DEV) {
+        console.debug("[WhatKindOfDream] Failed to sync Flicking:", error);
       }
     }
   }
@@ -204,17 +199,11 @@ const syncFlickingToValue = async () => {
 watch(() => props.modelValue, async (newVal, oldVal) => {
   // Skip if this is the initial watch call (oldVal is undefined) and value matches
   if (oldVal === undefined && newVal === localValue.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 WhatKindOfDream: Initial watch skipped - value already matches:", newVal);
-    }
     return;
   }
 
   if (newVal !== null && newVal !== undefined && newVal !== localValue.value) {
     localValue.value = newVal;
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 WhatKindOfDream: modelValue prop changed, updating localValue to:", newVal);
-    }
     // Only sync Flicking if it's ready (not on initial mount if value is correct)
     if (isFlickingReady.value) {
       await nextTick();
@@ -229,9 +218,7 @@ const handleFlickingReady = async () => {
   await nextTick();
   await new Promise(resolve => setTimeout(resolve, 100));
   await syncFlickingToValue();
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatKindOfDream: Flicking ready - Synchronized to value:", localValue.value);
-  }
+  // no logs
 };
 
 // Try to sync on mount as well
@@ -290,10 +277,6 @@ const handleFlickingChanged = (e: { index: number }) => {
   const selectedCategory = categories[e.index];
   localValue.value = selectedCategory.id;
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatKindOfDream: handleFlickingChanged - emitting:", localValue.value);
-  }
-
   emit("update:modelValue", localValue.value);
 };
 
@@ -308,26 +291,11 @@ const handleInfoCta = () => {
 
 const handleNext = () => {
   // Ensure we emit the current value before proceeding
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatKindOfDream: handleNext called - before emit", {
-      localValue: localValue.value,
-      modelValue: props.modelValue
-    });
-  }
-
   // Always emit update:modelValue first
   emit("update:modelValue", localValue.value);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatKindOfDream: handleNext - after emit update:modelValue, emitting next event");
-  }
-
   // Then emit next event
   emit("next");
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatKindOfDream: handleNext - next event emitted");
-  }
 };
 </script>
 

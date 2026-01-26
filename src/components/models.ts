@@ -22,6 +22,7 @@ export interface Post{
   description: string,
   goalName: string,
   goalImage: string,
+  postType?: "dream" | "problem" | "idea" | string,
   karma: number,
   image: string,
   images?: string[] | null,

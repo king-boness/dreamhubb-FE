@@ -49,6 +49,12 @@ Frontend reprezentuje **vizuálnu a interaktívnu časť platformy**, zameranú 
 ### alebo
     yarn lint
 
+### 5️⃣ Preflight Check (Všetky kontroly naraz)
+    npm run preflight
+Spustí: lint → build → guardrails → e2e → e2e:release
+
+Pozri `e2e/README.md` pre detaily a typické failure prípady.
+
 ---
 
 ## 🔑 Dôležité prepojenia

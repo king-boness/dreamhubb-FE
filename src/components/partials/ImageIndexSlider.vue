@@ -77,16 +77,8 @@ const safeImages = computed<string[]>(() => {
 });
 
 const finalImages = computed(() => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🖼️ ImageIndexSlider - props.images:", props.images);
-    console.log("🖼️ ImageIndexSlider - safeImages:", safeImages.value);
-  }
-
   // safeImages je vždy pole, ale môže byť prázdne
   if (safeImages.value.length === 0) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🖼️ ImageIndexSlider - no images, using fallback");
-    }
     return ["/images/Auth/postBackground.png"];
   }
 
@@ -98,10 +90,6 @@ const finalImages = computed(() => {
       img !== "{NULL}" &&
       img.trim() !== ""
   );
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🖼️ ImageIndexSlider - cleaned images:", clean);
-  }
 
   return clean.length > 0 ? clean : ["/images/Auth/postBackground.png"];
 });
@@ -159,8 +147,8 @@ watch(() => finalImages.value, async () => {
         // }
       };
       img.onerror = () => {
-        if (process.env.NODE_ENV === "development") {
-          console.warn("🖼️ First image failed to preload (watcher):", firstImg);
+        if (import.meta.env.DEV) {
+          console.debug("[ImageIndexSlider] First image failed to preload");
         }
       };
       img.src = firstImg;
@@ -213,8 +201,8 @@ watch(() => props.currentIndex, (newIndex) => {
     flickingInstance.moveTo(newIndex, 0);
   } catch (error) {
     // Flicking instance might not be ready yet, ignore
-    if (process.env.NODE_ENV === "development") {
-      console.warn("🖼️ ImageIndexSlider - Error updating Flicking index:", error);
+    if (import.meta.env.DEV) {
+      console.debug("[ImageIndexSlider] Error updating Flicking index:", error);
     }
     // Reset instance on error
     flickingInstance = null;
@@ -231,10 +219,7 @@ watch(() => props.images, async (newImages) => {
   // [B3] Wait for next tick to ensure component is still mounted
   await nextTick();
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("🖼️ ImageIndexSlider - images prop changed:", newImages);
-    console.log("🖼️ ImageIndexSlider - finalImages computed:", finalImages.value);
-  }
+  void newImages;
 
   // Reset selected index when images change
   selectedImageIndex.value = 0;
@@ -271,8 +256,8 @@ const onFlickingReady = async (e: any) => {
         }
       } catch (err) {
         // [B2] If accessing panels throws error, instance is invalid
-        if (process.env.NODE_ENV === "development") {
-          console.warn("🖼️ ImageIndexSlider - Error accessing panels:", err);
+        if (import.meta.env.DEV) {
+          console.debug("[ImageIndexSlider] Error accessing panels:", err);
         }
         flickingInstance = null;
         isFlickingReady.value = false;
@@ -282,30 +267,27 @@ const onFlickingReady = async (e: any) => {
       if (hasPanels) {
         flickingInstance = e;
         isFlickingReady.value = true;
-        // Only log in development if there's an actual issue
-        if (process.env.NODE_ENV === "development" && Array.isArray(panels) && panels.length === 0) {
-          console.warn("🖼️ ImageIndexSlider - Flicking instance ready but has 0 panels");
-        }
+        // no verbose logs
       } else {
         // Only warn if this is unexpected (not during initial load)
-        if (process.env.NODE_ENV === "development" && isFlickingReady.value) {
-          console.warn("🖼️ ImageIndexSlider - Flicking instance lost panels:", e);
+        if (import.meta.env.DEV && isFlickingReady.value) {
+          console.debug("[ImageIndexSlider] Flicking instance lost panels");
         }
         flickingInstance = null;
         isFlickingReady.value = false;
       }
     } else {
       // Only warn if this is unexpected
-      if (process.env.NODE_ENV === "development" && isFlickingReady.value) {
-        console.warn("🖼️ ImageIndexSlider - Flicking instance became invalid:", e);
+      if (import.meta.env.DEV && isFlickingReady.value) {
+        console.debug("[ImageIndexSlider] Flicking instance became invalid");
       }
       flickingInstance = null;
       isFlickingReady.value = false;
     }
   } catch (error) {
     // [B2] Catch any errors during initialization
-    if (process.env.NODE_ENV === "development") {
-      console.error("🖼️ ImageIndexSlider - Error in onFlickingReady:", error);
+    if (import.meta.env.DEV) {
+      console.debug("[ImageIndexSlider] Error in onFlickingReady:", error);
     }
     flickingInstance = null;
     isFlickingReady.value = false;
@@ -323,8 +305,8 @@ const handleFlickingChanged = (e: unknown) => {
 // [B2] Handle Flicking errors - catch panels errors from Flicking.js library
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleFlickingError = (error: any) => {
-  if (process.env.NODE_ENV === "development") {
-    console.warn("🖼️ ImageIndexSlider - Flicking error caught:", error);
+  if (import.meta.env.DEV) {
+    console.debug("[ImageIndexSlider] Flicking error caught:", error);
   }
   // Reset instance on error
   flickingInstance = null;
@@ -336,15 +318,13 @@ const handleFlickingError = (error: any) => {
 const handleImageLoad = (img: string) => {
   // Mark this image as loaded
   loadedImages.value.add(img);
-  // Only log first image load in development (reduce console noise)
-  if (process.env.NODE_ENV === "development" && finalImages.value.length > 0 && img === finalImages.value[0]) {
-    console.log("🖼️ First image loaded, Flicking can now initialize");
-  }
 };
 
 const handleImageError = (img: string, event: Event) => {
-  if (process.env.NODE_ENV === "development") {
-    console.error("🖼️ Image load error:", img, event);
+  void img;
+  void event;
+  if (import.meta.env.DEV) {
+    console.debug("[ImageIndexSlider] Image load error");
   }
 };
 

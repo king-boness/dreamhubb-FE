@@ -438,8 +438,8 @@ onMounted(async () => {
     try {
       await authStore.fetchUser();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Failed to fetch user data:", error);
+      if (import.meta.env.DEV) {
+        console.debug("Failed to fetch user data:", error);
       }
     }
   }
@@ -451,8 +451,8 @@ onMounted(async () => {
       // Optionally fetch full notifications list (for badge)
       // await notificationsStore.fetchNotifications();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Failed to fetch notifications:", error);
+      if (import.meta.env.DEV) {
+        console.debug("Failed to fetch notifications:", error);
       }
     }
   }

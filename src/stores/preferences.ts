@@ -207,8 +207,8 @@ export const usePreferencesStore = defineStore("preferences", {
             }
           };
         } catch (e) {
-          if (process.env.NODE_ENV === "development") {
-            console.error("Failed to parse migrated donor filters from storage", e);
+          if (import.meta.env.DEV) {
+            console.debug("Failed to parse migrated donor filters from storage", e);
           }
           this.lastUsedFeedFilters = null;
         }
@@ -227,8 +227,8 @@ export const usePreferencesStore = defineStore("preferences", {
           }
         };
       } catch (e) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Failed to parse donor filters from storage", e);
+        if (import.meta.env.DEV) {
+          console.debug("Failed to parse donor filters from storage", e);
         }
         this.lastUsedFeedFilters = null;
       }
@@ -346,8 +346,8 @@ export const usePreferencesStore = defineStore("preferences", {
           // Note: We don't remove the old key here, as it may contain other preferences
         }
       } catch (e) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Failed to migrate legacy donor filters", e);
+        if (import.meta.env.DEV) {
+          console.debug("Failed to migrate legacy donor filters", e);
         }
       }
     },

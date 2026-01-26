@@ -309,7 +309,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, withDefaults } from "vue";
 import { useOnboardingStore } from "src/stores/onboarding";
-import { Notify } from "quasar";
+import { notifyError } from "src/utils/notify";
 import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
@@ -839,12 +839,12 @@ watch(
       triedSubmit.value = true;
       // Show notification only if error is new (not on initial mount)
       if (emailError !== oldEmailError) {
-        Notify.create({
-          type: "negative",
-          message: emailError,
-          position: "top",
-          timeout: 5000
-        });
+        notifyError({
+          kind: "validation",
+          messageKey: "common.errors.validation",
+          fallbackMessage: emailError,
+          retryable: false
+        }, { position: "top", timeout: 5000 });
       }
     }
   },
@@ -1096,11 +1096,12 @@ const handleNextStep = async () => {
       firstEmailError ||
       "Please fill in all required fields including your location.";
 
-    Notify.create({
-      type: "negative",
-      message: fieldError,
-      position: "top"
-    });
+    notifyError({
+      kind: "validation",
+      messageKey: "common.errors.validation",
+      fallbackMessage: fieldError,
+      retryable: false
+    }, { position: "top" });
     return;
   }
   emit("next");

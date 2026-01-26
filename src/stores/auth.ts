@@ -113,8 +113,8 @@ export const useAuthStore = defineStore("auth", {
 
         if (data && data.status === "success") {
           this.user = data.user || null;
-          if (process.env.NODE_ENV === "development") {
-            console.log("✅ User data loaded:", {
+          if (import.meta.env.DEV) {
+            console.debug("[Auth] User data loaded:", {
               id: this.user?.id,
               username: this.user?.username,
               location_city: this.user?.location_city,
@@ -152,8 +152,8 @@ export const useAuthStore = defineStore("auth", {
         // Ignore errors - we still clear local session.
         // 401 is expected if token is already expired/invalid.
         const isExpected = this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403);
-        if (!silent && process.env.NODE_ENV === "development" && !isExpected) {
-          console.warn("Logout API call failed:", error);
+        if (!silent && import.meta.env.DEV && !isExpected) {
+          console.debug("[Auth] Logout API call failed:", error);
         }
       } finally {
         // Bez ohľadu na výsledok:
@@ -173,8 +173,8 @@ export const useAuthStore = defineStore("auth", {
           onboardingStore.reset();
         } catch (error) {
           // Ignorovať chyby - onboarding store možno nie je inicializovaný
-          if (process.env.NODE_ENV === "development") {
-            console.warn("Failed to reset onboarding store:", error);
+          if (import.meta.env.DEV) {
+            console.debug("[Auth] Failed to reset onboarding store:", error);
           }
         }
 
@@ -201,8 +201,8 @@ export const useAuthStore = defineStore("auth", {
     // (e.g., after creating a post or contributing tokens)
     async refreshTokenBalance() {
       if (!this.token) {
-        if (process.env.NODE_ENV === "development") {
-          console.warn("⚠️ [refreshTokenBalance] No token, skipping refresh");
+        if (import.meta.env.DEV) {
+          console.debug("[refreshTokenBalance] No token, skipping refresh");
         }
         return;
       }
@@ -210,13 +210,13 @@ export const useAuthStore = defineStore("auth", {
       try {
         // Use existing fetchUser() which calls /api/user and updates this.user
         await this.fetchUser();
-        if (process.env.NODE_ENV === "development") {
-          console.log("✅ [refreshTokenBalance] Token balance refreshed:", this.user?.tokens);
+        if (import.meta.env.DEV) {
+          console.debug("[refreshTokenBalance] Token balance refreshed:", this.user?.tokens);
         }
       } catch (error) {
         // Don't block UX if refresh fails - just log it
-        if (process.env.NODE_ENV === "development") {
-          console.warn("⚠️ [refreshTokenBalance] Failed to refresh token balance:", error);
+        if (import.meta.env.DEV) {
+          console.debug("[refreshTokenBalance] Failed to refresh token balance:", error);
         }
         // Don't throw - allow the operation to continue
       }

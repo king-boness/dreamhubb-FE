@@ -149,9 +149,7 @@ watch(() => flickingInstance.value, async (newInstance) => {
       await nextTick();
       await new Promise(resolve => setTimeout(resolve, 100));
       await syncFlickingToValue();
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 WhatIsYourGoal: flickingInstance watch - Synchronized to value:", localValue.value);
-      }
+      // no verbose logs
     }
   }
 }, { immediate: true });
@@ -159,17 +157,11 @@ watch(() => flickingInstance.value, async (newInstance) => {
 // Synchronize Flicking position with selected value
 const syncFlickingToValue = async () => {
   if (!flickingInstance.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 WhatIsYourGoal: syncFlickingToValue - instance not available");
-    }
     return;
   }
 
   const targetIndex = options.findIndex(opt => opt.value === localValue.value);
   if (targetIndex < 0) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ WhatIsYourGoal: targetIndex not found for value:", localValue.value);
-    }
     return;
   }
 
@@ -180,9 +172,6 @@ const syncFlickingToValue = async () => {
 
     // Check if moveTo method exists
     if (typeof flicking?.moveTo !== "function") {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("⚠️ WhatIsYourGoal: moveTo method not found on Flicking instance", flicking);
-      }
       return;
     }
 
@@ -190,13 +179,9 @@ const syncFlickingToValue = async () => {
     // Use requestAnimationFrame to ensure DOM is ready
     await new Promise(resolve => requestAnimationFrame(resolve));
     flicking.moveTo(targetIndex, 0);
-
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 WhatIsYourGoal: Synchronized Flicking to index", targetIndex, "for value", localValue.value);
-    }
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ WhatIsYourGoal: Error synchronizing Flicking:", error);
+    if (import.meta.env.DEV) {
+      console.debug("[WhatIsYourGoal] Error synchronizing Flicking:", error);
     }
   }
 };
@@ -207,17 +192,11 @@ const syncFlickingToValue = async () => {
 watch(() => props.modelValue, async (newVal, oldVal) => {
   // Skip if this is the initial watch call (oldVal is undefined) and value matches
   if (oldVal === undefined && newVal === localValue.value) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 WhatIsYourGoal: Initial watch skipped - value already matches:", newVal);
-    }
     return;
   }
 
   if (newVal !== null && newVal !== undefined && newVal !== localValue.value) {
     localValue.value = newVal;
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔍 WhatIsYourGoal: modelValue prop changed, updating localValue to:", newVal);
-    }
     // Only sync Flicking if it's ready (not on initial mount if value is correct)
     if (isFlickingReady.value) {
       await nextTick();
@@ -228,9 +207,6 @@ watch(() => props.modelValue, async (newVal, oldVal) => {
     // If modelValue is null/undefined, default to "dream"
     if (localValue.value !== "dream") {
       localValue.value = "dream";
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 WhatIsYourGoal: modelValue is null, defaulting to dream");
-      }
       // Only sync Flicking if it's ready
       if (isFlickingReady.value) {
         await nextTick();
@@ -317,10 +293,7 @@ const handleFlickingReady = async (e: any) => {
 
       // Synchronize position with current value
       await syncFlickingToValue();
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 WhatIsYourGoal: Flicking ready, synchronized to value:", localValue.value);
-      }
+      // no logs
     }
   }
 };
@@ -341,9 +314,7 @@ onMounted(async () => {
     if (instance && typeof instance.moveTo === "function") {
       isFlickingReady.value = true;
       await syncFlickingToValue();
-      if (process.env.NODE_ENV === "development") {
-        console.log("🔍 WhatIsYourGoal: onMounted - Synchronized to value:", localValue.value);
-      }
+      // no logs
     }
   }
 });
@@ -368,26 +339,11 @@ const handleInfoCta = () => {
 };
 
 const handleNext = () => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatIsYourGoal: handleNext called - before emit", {
-      localValue: localValue.value,
-      modelValue: props.modelValue
-    });
-  }
-
   // Always emit update:modelValue first
   emit("update:modelValue", localValue.value);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatIsYourGoal: handleNext - after emit update:modelValue, emitting next event");
-  }
-
   // Then emit next event
   emit("next");
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 WhatIsYourGoal: handleNext - next event emitted");
-  }
 };
 </script>
 

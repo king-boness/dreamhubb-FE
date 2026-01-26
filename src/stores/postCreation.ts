@@ -1,6 +1,8 @@
 // src/stores/postCreation.ts
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
 
 interface PostCreationState {
@@ -107,23 +109,27 @@ export const usePostCreationStore = defineStore("postCreation", {
 
       // Frontend guard (extra safety): reward must be at least 10 before hitting BE
       if ((this.tokens ?? 0) < MIN_SUBMIT_TOKENS) {
-        this.error = "Reward musí byť aspoň 10 tokenov.";
+        // Keep it user-friendly + localizable (no hardcoded strings)
+        this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
         return null;
       }
 
       // Validate required fields
       if (!this.isValid) {
-        this.error = "Please fill in all required fields (category, subcategory, title, description).";
+        this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
         return null;
       }
 
       // Fallback debug: check if category/subcategory are missing
       if (!this.category || !this.subcategory) {
-        const error = new Error(
-          `[submitPost] Missing category or subcategory: category=${this.category}, subcategory=${this.subcategory}`
-        );
-        console.error("[submitPost] Missing required fields:", error);
-        throw error;
+        if (import.meta.env.DEV) {
+          console.debug("[postCreation] Missing category/subcategory", {
+            category: this.category,
+            subcategory: this.subcategory
+          });
+        }
+        this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
+        return null;
       }
 
       this.loading = true;
@@ -173,20 +179,14 @@ export const usePostCreationStore = defineStore("postCreation", {
             post_id: data.post_id,
             user: data.user ? { tokens: data.user.tokens } : undefined
           };
-        } else {
-          throw new Error(data.message || "Post creation failed");
         }
       } catch (error: unknown) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("❌ Post creation failed:", error);
+        if (import.meta.env.DEV) {
+          console.debug("Post creation failed:", error);
         }
 
-        if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as { response?: { data?: { message?: string } } };
-          this.error = axiosError.response?.data?.message || "Failed to create post.";
-        } else {
-          this.error = "Failed to create post.";
-        }
+        const mapped = mapAxiosErrorToDhError(error);
+        this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);
         return null;
       } finally {
         this.loading = false;

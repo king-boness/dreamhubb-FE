@@ -1,6 +1,19 @@
 <template>
   <div class="stats-Page">
     <div class="stats-main" style="min-height: 740px">
+      <div v-if="loadError" class="tokenShop-error">
+        <div class="tokenShop-errorText">{{ loadError }}</div>
+        <q-btn
+          class="tokenShop-retryBtn"
+          unelevated
+          no-caps
+          color="primary"
+          :disable="authStore.loading"
+          @click="handleRetry"
+        >
+          {{ retryLabel }}
+        </q-btn>
+      </div>
       <div class="karmaAvailable-stats">
         <div class="karmaDisplay">
           <img src="/icons/KarmaIcon.png" alt="" />
@@ -41,11 +54,20 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { PriceCards, Post } from "src/components/models";
+import { useI18n } from "vue-i18n";
+import { PriceCards } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import { useAuthStore } from "src/stores/auth";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const authStore = useAuthStore();
+const { t } = useI18n();
+const loadError = ref<string | null>(null);
+const retryLabel = computed(() => {
+  const label = t("common.actions.retry");
+  return label === "common.actions.retry" ? "Retry" : label;
+});
 
 // Use auth store tokens - must match tokenBalance in DonorMainLayout
 const tokenBalance = computed(() => authStore.user?.tokens ?? 30);
@@ -54,14 +76,28 @@ const tokenBalance = computed(() => authStore.user?.tokens ?? 30);
 onMounted(async () => {
   if (authStore.isAuthenticated && !authStore.user) {
     try {
+      loadError.value = null;
       await authStore.fetchUser();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Failed to fetch user data:", error);
+      if (import.meta.env.DEV) {
+        console.debug("Failed to fetch user data:", error);
       }
+      const mapped = mapAxiosErrorToDhError(error);
+      loadError.value = tGlobal(mapped.messageKey, mapped.fallbackMessage);
     }
   }
 });
+
+const handleRetry = async () => {
+  if (!authStore.isAuthenticated) return;
+  loadError.value = null;
+  try {
+    await authStore.fetchUser();
+  } catch (error) {
+    const mapped = mapAxiosErrorToDhError(error);
+    loadError.value = tGlobal(mapped.messageKey, mapped.fallbackMessage);
+  }
+};
 const cards = ref([
   {
     description: "Fist full of",
@@ -121,6 +157,28 @@ const cards = ref([
 }
 .stats-Page {
 }
+
+.tokenShop-error {
+  width: 90%;
+  margin: 1rem auto 0.25rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.tokenShop-errorText {
+  font-family: poppins;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tokenShop-retryBtn {
+  margin-top: 0.6rem;
+}
+
 .karmaAvailable-stats {
   background: rgba(47, 42, 42, 0.499);
   display: flex;
