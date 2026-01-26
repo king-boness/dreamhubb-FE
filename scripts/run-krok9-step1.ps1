@@ -22,7 +22,7 @@ function Add-Step {
     }
     if (-not $Success) {
         $script:Pass = $false
-        $script:Errors += "$Name: $Message"
+        $script:Errors += "${Name}: ${Message}"
     }
 }
 
