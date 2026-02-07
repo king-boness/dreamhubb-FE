@@ -692,8 +692,9 @@ const updateProfileCityOptions = async () => {
       }
     });
 
-    const countryId = idsData?.location_ids?.country_id;
-    if (idsData?.status === "success" && countryId) {
+    // Support both formats: flat { continent_id, country_id, city_id } or legacy { status, location_ids }
+    const countryId = idsData?.country_id ?? idsData?.location_ids?.country_id;
+    if (countryId) {
       const { data: citiesData } = await api.get("/locations/cities", {
         params: { country_id: countryId, scope: "all" }
       });

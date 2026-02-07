@@ -568,8 +568,10 @@ const updateCityOptions = async () => {
         }
       });
 
-      if (locationData.status === "success" && locationData.location_ids?.country_id) {
-        const countryId = locationData.location_ids.country_id;
+      // Support both formats: flat { continent_id, country_id, city_id } or legacy { status, location_ids }
+      const countryId = locationData?.country_id ?? locationData?.location_ids?.country_id;
+
+      if (countryId) {
         countryIdForCities.value = countryId;
 
         // Fetch cities with IDs from BE (scope=all to show all cities, deduplicated)
@@ -577,7 +579,7 @@ const updateCityOptions = async () => {
           params: { country_id: countryId, scope: "all" }
         });
 
-        if (citiesData.status === "success" && citiesData.cities) {
+        if (citiesData?.status === "success" && citiesData?.cities) {
           const citiesMapped: CityFromBackend[] = citiesData.cities.map((c: { id: number; name: string }) => ({
             id: c.id,
             name: c.name
@@ -592,6 +594,18 @@ const updateCityOptions = async () => {
             filteredCityOptions.value = cityOptions;
             rehydrateCityModelFromOptions();
           }
+        }
+      } else {
+        // locations/ids didn't return country_id - fallback to static cities
+        const countryCode = getCountryCode(localCountry.value);
+        if (countryCode) {
+          const cities = getCitiesByCountryCode(countryCode);
+          const citiesMapped: CityFromBackend[] = cities.map((name: string) => ({ id: name, name }));
+          citiesFromBackend.value = citiesMapped;
+          const cityOptions = buildCityOptionsForCountry(countryCode, citiesMapped);
+          allCitiesForCountry.value = cityOptions;
+          filteredCityOptions.value = cityOptions;
+          rehydrateCityModelFromOptions();
         }
       }
     } catch (error) {
