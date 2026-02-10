@@ -133,12 +133,8 @@ export const useOnboardingStore = defineStore("onboarding", {
         };
       }
 
-      // If city is a numeric string (selected via BE city list), treat it as city_id directly.
-      // We still fetch continent_id/country_id via /locations/ids using names (city is resolved purely via ID).
-      const parsedCityId =
-        typeof this.profileCity === "string" && /^\d+$/.test(this.profileCity)
-          ? Number(this.profileCity)
-          : null;
+      // City ID: prefer store's profileCityId (set by WhoAreYou when user selects), else parse from profileCity (number, numeric string, or object with id/value).
+      const resolvedCityId = this.profileCityId ?? normalizeId(this.profileCity);
 
       // If we have names but not IDs, fetch IDs from BE
       if (this.profileContinent && this.profileCountry) {
@@ -154,8 +150,8 @@ export const useOnboardingStore = defineStore("onboarding", {
           const { data } = await api.get("/locations/ids", {
             params: {
               continent: this.profileContinent,
-              country: this.profileCountry
-              // IMPORTANT: city is not sent here – city_id is taken directly from parsedCityId.
+              country: this.profileCountry,
+              ...(resolvedCityId != null && { city_id: resolvedCityId })
             }
           });
 
@@ -176,10 +172,10 @@ export const useOnboardingStore = defineStore("onboarding", {
               throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
             }
 
-            // Update store with IDs; city is always taken from parsedCityId (selected city ID)
+            // Update store with IDs; city is always taken from resolvedCityId (selected city ID from QSelect)
             this.profileContinentId = continentId;
             this.profileCountryId = countryId;
-            this.profileCityId = parsedCityId;
+            this.profileCityId = resolvedCityId;
 
             if (!this.profileCityId) {
               throw new Error("City is required. Please select a valid city.");
@@ -216,7 +212,7 @@ export const useOnboardingStore = defineStore("onboarding", {
       return {
         continentId: this.profileContinentId,
         countryId: this.profileCountryId,
-        cityId: this.profileCityId
+        cityId: this.profileCityId ?? resolvedCityId
       };
     },
 
@@ -377,7 +373,13 @@ export const useOnboardingStore = defineStore("onboarding", {
           location_city_id: locationIds.cityId
         };
 
-        // Never log registration payloads (may contain PII)
+        if (import.meta.env.DEV) {
+          console.debug("NEXT STEP (register) location payload:", {
+            location_continent_id: payload.location_continent_id,
+            location_country_id: payload.location_country_id,
+            location_city_id: payload.location_city_id
+          });
+        }
 
         const { data } = await api.post("/register", payload);
 

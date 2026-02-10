@@ -537,10 +537,28 @@ watch(localRepeatPassword, (val) => {
   emit("update:repeatPassword", val);
 });
 
+// Normalize city value to numeric id for store (supports number, numeric string, or object with id/value)
+function toCityId(val: unknown): number | null {
+  if (val === null || val === undefined || val === "") return null;
+  if (typeof val === "number" && Number.isFinite(val)) return val;
+  if (typeof val === "string") {
+    const t = val.trim();
+    return /^\d+$/.test(t) ? Number(t) : null;
+  }
+  if (typeof val === "object" && val !== null) {
+    const o = val as Record<string, unknown>;
+    const id = o.id ?? o.value ?? o.cityId ?? o.city_id;
+    return id !== undefined && id !== null ? toCityId(id) : null;
+  }
+  return null;
+}
+
 // Watch only for city changes (continent and country are handled in their change handlers)
 watch(localProfileCity, (val) => {
-  onboardingStore.setStepData("profileCity", String(val || ""));
-  emit("update:profileCity", String(val || ""));
+  const id = toCityId(val);
+  onboardingStore.setStepData("profileCity", id !== null ? String(id) : "");
+  onboardingStore.setStepData("profileCityId", id);
+  emit("update:profileCity", id !== null ? String(id) : "");
 });
 
 const showPassword = ref(false);
@@ -807,6 +825,7 @@ const handleProfileCountryChange = (val: string) => {
   // Clear dependent field immediately
   localProfileCity.value = "";
   onboardingStore.setStepData("profileCity", "");
+  onboardingStore.setStepData("profileCityId", null);
   emit("update:profileCity", "");
 
   // Update options synchronously - no async operations
@@ -819,13 +838,16 @@ const handleProfileCityChange = (value: string | number) => {
     // Ignore divider selection
     localProfileCity.value = "";
     onboardingStore.setStepData("profileCity", "");
+    onboardingStore.setStepData("profileCityId", null);
     emit("update:profileCity", "");
     return;
   }
-  // Store the value (ID) - q-select will map it to label automatically
+  // Store the value (ID) - QSelect with emit-value returns number; ensure store has both profileCity and profileCityId
   localProfileCity.value = value;
-  onboardingStore.setStepData("profileCity", String(value));
-  emit("update:profileCity", String(value));
+  const cityId = toCityId(value);
+  onboardingStore.setStepData("profileCity", cityId !== null ? String(cityId) : "");
+  onboardingStore.setStepData("profileCityId", cityId);
+  emit("update:profileCity", cityId !== null ? String(cityId) : "");
 };
 
 // Initialize location options on mount
