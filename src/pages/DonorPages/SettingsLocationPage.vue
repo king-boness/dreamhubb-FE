@@ -103,18 +103,21 @@ const handleSave = async () => {
     const { data } = await api.get("/locations/ids", {
       params: {
         continent: continent.value,
-        country: country.value,
-        city: null // we already have city id
+        country: country.value
       }
     });
 
-    if (data?.status !== "success" || !data?.location_ids?.continent_id || !data?.location_ids?.country_id) {
+    // Support both flat and legacy formats
+    const continentId = data?.continent_id ?? data?.location_ids?.continent_id ?? null;
+    const countryId = data?.country_id ?? data?.location_ids?.country_id ?? null;
+
+    if (!continentId || !countryId) {
       throw new Error("Failed to resolve location IDs");
     }
 
     await authStore.updateProfile({
-      location_continent_id: data.location_ids.continent_id,
-      location_country_id: data.location_ids.country_id,
+      location_continent_id: continentId,
+      location_country_id: countryId,
       location_city_id: Number(city.value)
     });
 

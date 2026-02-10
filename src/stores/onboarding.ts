@@ -134,7 +134,7 @@ export const useOnboardingStore = defineStore("onboarding", {
       }
 
       // If city is a numeric string (selected via BE city list), treat it as city_id directly.
-      // We still fetch continent_id/country_id via /locations/ids using names.
+      // We still fetch continent_id/country_id via /locations/ids using names (city is resolved purely via ID).
       const parsedCityId =
         typeof this.profileCity === "string" && /^\d+$/.test(this.profileCity)
           ? Number(this.profileCity)
@@ -154,9 +154,8 @@ export const useOnboardingStore = defineStore("onboarding", {
           const { data } = await api.get("/locations/ids", {
             params: {
               continent: this.profileContinent,
-              country: this.profileCountry,
-              // Pass city only if it's a NAME (not an ID string)
-              city: parsedCityId ? null : (this.profileCity || null)
+              country: this.profileCountry
+              // IMPORTANT: city is not sent here – city_id is taken directly from parsedCityId.
             }
           });
 
@@ -165,46 +164,40 @@ export const useOnboardingStore = defineStore("onboarding", {
           }
 
           if (data) {
-            if (data.status === "error") {
-              // BE returned an error (do not surface raw messages)
+            // Support both formats: flat { continent_id, country_id, city_id } or legacy { status, location_ids }
+            const continentId = data.continent_id ?? data.location_ids?.continent_id ?? null;
+            const countryId = data.country_id ?? data.location_ids?.country_id ?? null;
+
+            // Check if we got valid IDs (continent and country are required)
+            if (!continentId || !countryId) {
+              if (import.meta.env.DEV) {
+                console.debug("Invalid location IDs received from server (profile):", data);
+              }
               throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
             }
 
-            if (data.status === "success" && data.location_ids) {
-              const ids = data.location_ids;
+            // Update store with IDs; city is always taken from parsedCityId (selected city ID)
+            this.profileContinentId = continentId;
+            this.profileCountryId = countryId;
+            this.profileCityId = parsedCityId;
 
-              // Check if we got valid IDs (continent and country are required)
-              if (!ids.continent_id || !ids.country_id) {
-                if (import.meta.env.DEV) {
-                  console.debug("Invalid location IDs received from server:", ids);
-                }
-                throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
-              }
-
-              // Update store with IDs
-              this.profileContinentId = ids.continent_id;
-              this.profileCountryId = ids.country_id;
-              // City must be present (either from parsed ID, or from BE lookup by name)
-              this.profileCityId = parsedCityId || ids.city_id;
-
-              if (!this.profileCityId) {
-                throw new Error("City is required. Please select a valid city.");
-              }
-
-              if (import.meta.env.DEV) {
-                console.debug("Location IDs set in store:", {
-                  continentId: ids.continent_id,
-                  countryId: ids.country_id,
-                  cityId: ids.city_id
-                });
-              }
-
-              return {
-                continentId: ids.continent_id,
-                countryId: ids.country_id,
-                cityId: this.profileCityId
-              };
+            if (!this.profileCityId) {
+              throw new Error("City is required. Please select a valid city.");
             }
+
+            if (import.meta.env.DEV) {
+              console.debug("Location IDs set in store (profile):", {
+                continentId,
+                countryId,
+                cityId: this.profileCityId
+              });
+            }
+
+            return {
+              continentId,
+              countryId,
+              cityId: this.profileCityId
+            };
           }
         } catch (error: unknown) {
           if (import.meta.env.DEV) {
@@ -250,48 +243,36 @@ export const useOnboardingStore = defineStore("onboarding", {
           const { data } = await api.get("/locations/ids", {
             params: {
               continent: this.feedContinent,
-              country: this.feedCountry,
-              // If user already picked a real city ID (emitCityId mode), don't override it via name lookup.
-              city: chosenCityId ? null : (this.feedCity || null)
+              country: this.feedCountry
+              // City is resolved purely via chosenCityId; do not send city name.
             }
           });
 
           // Do not log raw responses (may contain PII)
 
           if (data) {
-            if (data.status === "error") {
-              const errorMsg = data.message || "Failed to get feed location IDs from server";
+            // Support both formats: flat { continent_id, country_id, city_id } or legacy { status, location_ids }
+            const continentId = data.continent_id ?? data.location_ids?.continent_id ?? null;
+            const countryId = data.country_id ?? data.location_ids?.country_id ?? null;
+
+            // Check if we got valid IDs (continent and country are required)
+            if (!continentId || !countryId) {
               if (import.meta.env.DEV) {
-                console.debug("[Onboarding] BE returned error for feed location IDs:", errorMsg);
+                console.debug("[Onboarding] Invalid feed location IDs received from server.", data);
               }
               throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
             }
 
-            if (data.status === "success" && data.location_ids) {
-              const ids = data.location_ids;
+            // Update store with IDs; preserve chosen city id if already selected.
+            this.feedContinentId = continentId;
+            this.feedCountryId = countryId;
+            this.feedCityId = chosenCityId ?? null;
 
-              // Check if we got valid IDs (continent and country are required)
-              if (!ids.continent_id || !ids.country_id) {
-                if (import.meta.env.DEV) {
-                  console.debug("[Onboarding] Invalid feed location IDs received from server.");
-                }
-                throw new Error(tGlobal("common.errors.server", "Something went wrong. Please try again."));
-              }
-
-              // Update store with IDs
-              this.feedContinentId = ids.continent_id;
-              this.feedCountryId = ids.country_id;
-              // Preserve chosen city id if already selected; otherwise accept BE lookup.
-              this.feedCityId = chosenCityId ?? (ids.city_id || null);
-
-              // no verbose logs here
-
-              return {
-                continentId: ids.continent_id,
-                countryId: ids.country_id,
-                cityId: this.feedCityId || null
-              };
-            }
+            return {
+              continentId,
+              countryId,
+              cityId: this.feedCityId || null
+            };
           }
         } catch (error) {
           if (import.meta.env.DEV) {
