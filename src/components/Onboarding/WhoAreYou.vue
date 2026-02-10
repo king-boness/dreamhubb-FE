@@ -977,7 +977,11 @@ const isFormValid = computed(() => {
   const genderValid = localGender.value && localGender.value.trim() !== "";
   const continentValid = localProfileContinent.value && String(localProfileContinent.value).trim() !== "";
   const countryValid = localProfileCountry.value && String(localProfileCountry.value).trim() !== "";
-  // City is optional - user can type it manually
+  // City is required: must be selected from dropdown (value = city id)
+  const cityValid =
+    localProfileCity.value !== undefined &&
+    localProfileCity.value !== null &&
+    localProfileCity.value !== "";
 
   const isValid =
     !!usernameValid &&
@@ -988,7 +992,8 @@ const isFormValid = computed(() => {
     !!dateOfBirthValid &&
     !!genderValid &&
     !!continentValid &&
-    !!countryValid;
+    !!countryValid &&
+    !!cityValid;
 
   return isValid;
 });
@@ -1091,11 +1096,14 @@ const handleNextStep = async () => {
   if (!isFormValid.value) {
     // Prefer specific field errors for better UX
     const firstEmailError = emailError.value || emailServerError.value;
+    const cityMissing =
+      !localProfileCity.value && localProfileCity.value !== 0 &&
+      localProfileContinent.value && localProfileCountry.value;
     const fieldError =
       passwordError.value ||
       repeatPasswordError.value ||
       firstEmailError ||
-      "Please fill in all required fields including your location.";
+      (cityMissing ? "Please select a city." : "Please fill in all required fields including your location.");
 
     notifyError({
       kind: "validation",
