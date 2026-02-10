@@ -147,13 +147,15 @@ export const useOnboardingStore = defineStore("onboarding", {
             });
           }
 
-          const { data } = await api.get("/locations/ids", {
-            params: {
-              continent: this.profileContinent,
-              country: this.profileCountry,
-              ...(resolvedCityId != null && { city_id: resolvedCityId })
-            }
-          });
+          // Prefer snake_case IDs when available; fallback to names for first resolve
+          const params: Record<string, unknown> = {};
+          if (this.profileContinentId != null) params.continent_id = this.profileContinentId;
+          else if (this.profileContinent) params.continent = this.profileContinent;
+          if (this.profileCountryId != null) params.country_id = this.profileCountryId;
+          else if (this.profileCountry) params.country = this.profileCountry;
+          if (resolvedCityId != null) params.city_id = resolvedCityId;
+
+          const { data } = await api.get("/locations/ids", { params });
 
           if (import.meta.env.DEV) {
             console.debug("Location IDs response:", data);
@@ -236,13 +238,15 @@ export const useOnboardingStore = defineStore("onboarding", {
             console.debug("[Onboarding] Fetching location IDs for feed");
           }
 
-          const { data } = await api.get("/locations/ids", {
-            params: {
-              continent: this.feedContinent,
-              country: this.feedCountry
-              // City is resolved purely via chosenCityId; do not send city name.
-            }
-          });
+          // Prefer snake_case IDs when available; fallback to names
+          const feedParams: Record<string, unknown> = {};
+          if (this.feedContinentId != null) feedParams.continent_id = this.feedContinentId;
+          else if (this.feedContinent) feedParams.continent = this.feedContinent;
+          if (this.feedCountryId != null) feedParams.country_id = this.feedCountryId;
+          else if (this.feedCountry) feedParams.country = this.feedCountry;
+          if (chosenCityId != null) feedParams.city_id = chosenCityId;
+
+          const { data } = await api.get("/locations/ids", { params: feedParams });
 
           // Do not log raw responses (may contain PII)
 

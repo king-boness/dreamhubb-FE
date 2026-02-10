@@ -701,14 +701,22 @@ const updateProfileCityOptions = async () => {
 
   const countryCode = getCountryCode(localProfileCountry.value);
 
-  // Prefer BE-backed city IDs (real DB IDs). Fallback to safe "name values" if BE is unavailable.
+  // Prefer snake_case IDs when available (from store); fallback to names
+  const idsParams: Record<string, unknown> = {};
+  if (onboardingStore.profileContinentId != null && onboardingStore.profileContinent === localProfileContinent.value) {
+    idsParams.continent_id = onboardingStore.profileContinentId;
+  } else if (localProfileContinent.value) {
+    idsParams.continent = localProfileContinent.value;
+  }
+  if (onboardingStore.profileCountryId != null && onboardingStore.profileCountry === localProfileCountry.value) {
+    idsParams.country_id = onboardingStore.profileCountryId;
+  } else if (localProfileCountry.value) {
+    idsParams.country = localProfileCountry.value;
+  }
+  if (onboardingStore.profileCityId != null) idsParams.city_id = onboardingStore.profileCityId;
+
   try {
-    const { data: idsData } = await api.get("/locations/ids", {
-      params: {
-        continent: localProfileContinent.value,
-        country: localProfileCountry.value
-      }
-    });
+    const { data: idsData } = await api.get("/locations/ids", { params: idsParams });
 
     // Support both formats: flat { continent_id, country_id, city_id } or legacy { status, location_ids }
     const countryId = idsData?.country_id ?? idsData?.location_ids?.country_id;
