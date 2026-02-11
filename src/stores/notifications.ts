@@ -95,8 +95,14 @@ export const useNotificationsStore = defineStore("notifications", {
         }
       } catch (error: unknown) {
         // Silent (badge-only) failure: do not show raw errors or toasts
+        // Fallback: if 404 (endpoint not found) or any error, treat as 0 unread
+        const status = (error as { response?: { status?: number } })?.response?.status;
+        if (status === 404 || status === undefined) {
+          // Endpoint doesn't exist or network error - treat as 0 unread
+          this.unreadCount = 0;
+        }
         if (import.meta.env.DEV) {
-          console.debug("[Notifications] unread-count fetch failed (silent)", error);
+          console.debug("[Notifications] unread-count fetch failed (silent, fallback to 0)", error);
         }
       }
     },

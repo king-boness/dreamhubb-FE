@@ -212,14 +212,22 @@ const attachInterceptor = (instance: AxiosInstance) => {
         return Promise.reject(error);
       }
 
-      // Non-401 responses: map status to safe user message (avoid raw backend strings)
+      // 403 (Forbidden) - also logout (user doesn't have permission)
+      if (error.response?.status === 403 && !isAuthEndpointUrl(url)) {
+        await safeLogoutAndRedirect();
+        return Promise.reject(error);
+      }
+
+      // Non-401/403 responses: map status to safe user message (avoid raw backend strings)
+      // IMPORTANT: Do NOT logout on 404/500 - these are not auth errors
       const status = error?.response?.status;
       // IMPORTANT: let Auth pages handle their own validation UX (avoid double toasts)
       if (isAuthEndpointUrl(url)) {
         return Promise.reject(error);
       }
 
-      if (status === 403 || status === 404 || status === 422 || status === 429 || (typeof status === "number" && status >= 500)) {
+      // Show error toast for 404/422/429/500, but do NOT logout
+      if (status === 404 || status === 422 || status === 429 || (typeof status === "number" && status >= 500)) {
         notifyError(mapAxiosErrorToDhError(error));
       }
 
