@@ -39,7 +39,9 @@ const isAuthEndpointUrl = (url: string) => {
   );
 };
 
-const refreshTokenSingleFlight = async (): Promise<string | null> => {
+const refreshTokenSingleFlight = async (
+  updateTargets?: { api: AxiosInstance; axiosInstance: AxiosInstance }
+): Promise<string | null> => {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
@@ -59,6 +61,20 @@ const refreshTokenSingleFlight = async (): Promise<string | null> => {
 
       if (typeof newToken === "string" && newToken.length > 0) {
         localStorage.setItem("token", newToken);
+        // Update auth store + axios defaults so all subsequent requests use new token
+        try {
+          const { useAuthStore } = await import("src/stores/auth");
+          useAuthStore().setToken(newToken);
+        } catch {
+          // ignore (store not ready)
+        }
+        if (updateTargets) {
+          updateTargets.api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+          updateTargets.axiosInstance.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+        }
+        if (import.meta.env.DEV) {
+          console.debug("refresh ok, new token head:", newToken.slice(0, 20) + "...");
+        }
         return newToken;
       }
 
@@ -73,6 +89,7 @@ const refreshTokenSingleFlight = async (): Promise<string | null> => {
 
   return refreshPromise;
 };
+
 
 const safeLogoutAndRedirect = async () => {
   if (logoutPromise) return logoutPromise;
@@ -159,6 +176,11 @@ const attachInterceptor = (instance: AxiosInstance) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      if (import.meta.env.DEV) {
+        const endpoint = String(config.url || config.baseURL || "?");
+        const head = token ? token.slice(0, 18) + "..." : "none";
+        console.debug(`request ${endpoint} | token head: ${head}`);
+      }
 
       return config;
     },
@@ -196,7 +218,7 @@ const attachInterceptor = (instance: AxiosInstance) => {
 
         originalRequest._retry = true;
 
-        const newToken = await refreshTokenSingleFlight();
+        const newToken = await refreshTokenSingleFlight({ api, axiosInstance });
         if (!newToken) {
           await safeLogoutAndRedirect();
           return Promise.reject(error);
@@ -238,6 +260,9 @@ const attachInterceptor = (instance: AxiosInstance) => {
 
 attachInterceptor(axiosInstance);
 attachInterceptor(api);
+
+/** Proactive refresh before Donor/Donee switch. Uses single-flight lock. */
+export const refreshTokenIfNeeded = () => refreshTokenSingleFlight({ api, axiosInstance });
 
 export default boot(({ app }) => {
   app.config.globalProperties.$axios = axiosInstance;

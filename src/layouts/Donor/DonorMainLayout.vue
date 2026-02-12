@@ -183,6 +183,7 @@ import { usePreferencesStore } from "src/stores/preferences";
 import { useNotificationsStore } from "src/stores/notifications";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
+import { refreshTokenIfNeeded } from "boot/axios";
 
 const { t } = useI18n();
 
@@ -360,6 +361,8 @@ const handleNavProfile = () => {
 };
 
 const handleLogoClick = async () => {
+  // Refresh token before switch so donee fetches use new token (jwt-auth invalidates old on refresh)
+  await refreshTokenIfNeeded();
   preferencesStore.setCurrentSide("donee");
   document.body.classList.add("splash-active");
   isSwitchingRole.value = true;

@@ -191,6 +191,7 @@ import { usePostsStore } from "src/stores/posts";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
+import { refreshTokenIfNeeded } from "boot/axios";
 
 interface Props {
   karma: number;
@@ -241,6 +242,8 @@ const logoImage = computed(() => {
 });
 
 const handleLogoClick = async () => {
+  // Refresh token before switch so donor fetches use new token (jwt-auth invalidates old on refresh)
+  await refreshTokenIfNeeded();
   preferencesStore.setCurrentSide("donor");
   applyFiltersFromPreferences();
   document.body.classList.add("splash-active");

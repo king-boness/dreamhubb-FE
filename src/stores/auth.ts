@@ -237,6 +237,16 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    /** Set token (used after refresh to keep store in sync with localStorage) */
+    setToken(token: string | null) {
+      this.token = token;
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+    },
+
     // Generic profile update (supports location_city_id, etc.)
     async updateProfile(payload: Partial<Pick<User, "username" | "date_birth" | "gender" | "bio" | "location_continent_id" | "location_country_id" | "location_city_id">>) {
       if (!this.token) return;
