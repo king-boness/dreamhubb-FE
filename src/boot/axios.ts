@@ -90,7 +90,6 @@ const refreshTokenSingleFlight = async (
   return refreshPromise;
 };
 
-
 const safeLogoutAndRedirect = async () => {
   if (logoutPromise) return logoutPromise;
 
