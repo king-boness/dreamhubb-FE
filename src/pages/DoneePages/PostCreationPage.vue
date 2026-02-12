@@ -227,7 +227,6 @@ import UploadPostImgComponent from "src/components/partials/UploadPostImgCompone
 import { PostCategories } from "src/components/models";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import type { UploadedImage } from "src/composables/useUpload";
-import { useUpload } from "src/composables/useUpload";
 import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 
@@ -249,13 +248,13 @@ const handleClose = () => {
     router.push({ name: "donee-posts" });
   }
 };
-const { uploadMultipleImages } = useUpload();
-
 const fileInput = ref<HTMLInputElement | null>(null);
 const imgIndex = ref(0);
 const uploadedImages = ref<{ images: string[] }>({
   images: []
 });
+/** Pri post-create s obrázkami: súbory sa posielajú ako multipart images[] */
+const imageFilesRef = ref<File[]>([]);
 const isUploadingAdditional = ref(false);
 
 // Computed property pre kontrolu, či sú nahraté obrázky
@@ -509,8 +508,10 @@ const handleSubmitPost = async () => {
       console.debug("[PostCreation] before createPost()");
     }
 
-    // Submit post via store
-    const result = await postCreationStore.createPost();
+    // Submit post via store (ak máme súbory, pošle FormData s images[])
+    const result = await postCreationStore.createPost(
+      imageFilesRef.value.length > 0 ? imageFilesRef.value : undefined
+    );
 
     if (import.meta.env.DEV) {
       console.debug("[PostCreation] createPost() result:", result);
@@ -537,6 +538,12 @@ const handleSubmitPost = async () => {
 
     // Show success message
     notifySuccess("common.success.postCreated", "Post created successfully!", { position: "top" });
+
+    uploadedImages.value.images.forEach((url) => {
+      if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+    });
+    uploadedImages.value.images = [];
+    imageFilesRef.value = [];
 
     // Save registration preferences to preferences store before clearing localStorage
     // This ensures they can be used when switching to donor side
@@ -639,25 +646,25 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener("pointerdown", onDocPointerDown, { capture: true });
+  uploadedImages.value.images.forEach((url) => {
+    if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+  });
 });
 const deleteImg = () => {
-  uploadedImages.value.images.splice(imgIndex.value, 1);
-  // Aktualizovať store - using new API
+  const idx = imgIndex.value;
+  const url = uploadedImages.value.images[idx];
+  if (url && imageFilesRef.value[idx] && url.startsWith("blob:")) {
+    URL.revokeObjectURL(url);
+  }
+  uploadedImages.value.images.splice(idx, 1);
+  imageFilesRef.value.splice(idx, 1);
   postCreationStore.setImages(uploadedImages.value.images);
 };
 const handleImagesFromChild = async (imgs: UploadedImage[]) => {
-  // Konvertovať UploadedImage[] na string[] (použiť secure_url)
   const imageUrls = imgs.map((img) => img.secure_url);
-
-  // no logs (image urls can be sensitive)
-
-  // Nastaviť obrázky reaktívne - použiť nový array pre lepšiu reaktivitu
+  imageFilesRef.value = [];
   uploadedImages.value.images = [...imageUrls];
-
-  // Aktualizovať store - using new API
   postCreationStore.setImages(imageUrls);
-
-  // Počkať na DOM update
   await nextTick();
 };
 const handleIndex = (index: number) => {
@@ -672,19 +679,14 @@ const openFileInput = () => {
   }
 };
 
-const handleFileChange = async (event: Event) => {
+const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = target.files;
+  if (!files || files.length === 0) return;
 
-  if (!files || files.length === 0) {
-    return;
-  }
-
-  // Limit na max 5 obrázkov celkovo
   const maxImages = 5;
   const currentCount = uploadedImages.value.images.length;
   const remainingSlots = maxImages - currentCount;
-
   if (remainingSlots <= 0) {
     notifyError({
       kind: "validation",
@@ -695,37 +697,13 @@ const handleFileChange = async (event: Event) => {
     return;
   }
 
-  const filesToUpload = Array.from(files).slice(0, remainingSlots);
-  isUploadingAdditional.value = true;
-
-  try {
-    const folder = "uploads";
-    const uploaded = await uploadMultipleImages(filesToUpload, folder);
-
-    // Pridať nové Cloudinary URL-y do zoznamu
-    const newImageUrls = uploaded.map((img) => img.secure_url);
-    uploadedImages.value.images = [...uploadedImages.value.images, ...newImageUrls];
-
-    // Aktualizovať store - using new API
-    postCreationStore.setImages(uploadedImages.value.images);
-
-    // no logs
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.debug("[PostCreation] Failed to upload additional images:", error);
-    }
-    notifyError({
-      kind: "server",
-      messageKey: "common.errors.server",
-      fallbackMessage: "Failed to upload images. Please try again.",
-      retryable: true
-    }, { position: "top" });
-  } finally {
-    isUploadingAdditional.value = false;
-    if (fileInput.value) {
-      fileInput.value.value = "";
-    }
-  }
+  const filesToAdd = Array.from(files).slice(0, remainingSlots);
+  filesToAdd.forEach((file) => {
+    imageFilesRef.value.push(file);
+    uploadedImages.value.images.push(URL.createObjectURL(file));
+  });
+  postCreationStore.setImages([]);
+  if (fileInput.value) fileInput.value.value = "";
 };
 </script>
 <style lang="scss">

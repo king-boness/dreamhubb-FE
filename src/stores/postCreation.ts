@@ -103,31 +103,17 @@ export const usePostCreationStore = defineStore("postCreation", {
       this.error = null;
     },
 
-    // Create post
-    async createPost(): Promise<{ post_id: number } | null> {
+    // Create post (optional imageFiles: when provided, send multipart/form-data with images[])
+    async createPost(imageFiles?: File[]): Promise<{ post_id: number } | null> {
       const MIN_SUBMIT_TOKENS = 10;
 
       // Frontend guard (extra safety): reward must be at least 10 before hitting BE
       if ((this.tokens ?? 0) < MIN_SUBMIT_TOKENS) {
-        // Keep it user-friendly + localizable (no hardcoded strings)
         this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
         return null;
       }
 
-      // Validate required fields
-      if (!this.isValid) {
-        this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
-        return null;
-      }
-
-      // Fallback debug: check if category/subcategory are missing
-      if (!this.category || !this.subcategory) {
-        if (import.meta.env.DEV) {
-          console.debug("[postCreation] Missing category/subcategory", {
-            category: this.category,
-            subcategory: this.subcategory
-          });
-        }
+      if (!this.isValid || !this.category || !this.subcategory) {
         this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
         return null;
       }
@@ -136,16 +122,40 @@ export const usePostCreationStore = defineStore("postCreation", {
       this.error = null;
 
       try {
-        // Build payload using new API format
-        // Safely handle images - ensure it's always an array of strings
+        const hasFiles = Array.isArray(imageFiles) && imageFiles.length > 0;
+
+        if (hasFiles) {
+          // Multipart: FormData (nech axios nastaví Content-Type s boundary; Authorization pridá interceptor)
+          const fd = new FormData();
+          fd.append("title", this.title);
+          fd.append("description", this.description);
+          fd.append("subcategory", this.subcategory);
+          fd.append("category", this.category);
+          fd.append("tokens", String(this.tokens || 0));
+          if (this.dateDeadline) {
+            fd.append("date_deadline", this.dateDeadline);
+          }
+          imageFiles!.forEach((file) => {
+            fd.append("images[]", file, file.name || "image");
+          });
+
+          const { data } = await api.post("/post-create", fd);
+
+          if (data.status === "success") {
+            this.reset();
+            return {
+              post_id: data.post_id,
+              user: data.user ? { tokens: data.user.tokens } : undefined
+            };
+          }
+        }
+
+        // JSON payload (bez súborov alebo s obrázkami ako URL)
         let safeImages: string[] = [];
         if (Array.isArray(this.images)) {
           safeImages = this.images
             .map((img) => {
-              // Handle both string URLs and objects with url property
-              if (typeof img === "string") {
-                return img.trim() || null;
-              }
+              if (typeof img === "string") return img.trim() || null;
               if (img && typeof img === "object" && "url" in img && typeof img.url === "string") {
                 return img.url.trim() || null;
               }
@@ -157,23 +167,16 @@ export const usePostCreationStore = defineStore("postCreation", {
         const payload: Record<string, unknown> = {
           title: this.title,
           description: this.description,
-          category: this.category, // New API: category slug
-          subcategory: this.subcategory, // New API: subcategory slug
+          category: this.category,
+          subcategory: this.subcategory,
           tokens: this.tokens || 0
         };
-
-        if (this.dateDeadline) {
-          payload.date_deadline = this.dateDeadline;
-        }
-
-        if (safeImages.length > 0) {
-          payload.images = safeImages;
-        }
+        if (this.dateDeadline) payload.date_deadline = this.dateDeadline;
+        if (safeImages.length > 0) payload.images = safeImages;
 
         const { data } = await api.post("/post-create", payload);
 
         if (data.status === "success") {
-          // Reset form after successful creation
           this.reset();
           return {
             post_id: data.post_id,
@@ -184,13 +187,13 @@ export const usePostCreationStore = defineStore("postCreation", {
         if (import.meta.env.DEV) {
           console.debug("Post creation failed:", error);
         }
-
         const mapped = mapAxiosErrorToDhError(error);
         this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);
         return null;
       } finally {
         this.loading = false;
       }
+      return null;
     }
   }
 });
