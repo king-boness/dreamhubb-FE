@@ -705,6 +705,21 @@ const handleFileChange = (event: Event) => {
   postCreationStore.setImages([]);
   if (fileInput.value) fileInput.value.value = "";
 };
+
+/** Pre Capacitor Camera/Gallery: konvertuj photo.webPath na File a pridaj do zoznamu (FormData potom pošle ako "file"). */
+const addPhotoFromWebPath = async (photo: { webPath: string }) => {
+  if (uploadedImages.value.images.length >= 5) return;
+  try {
+    const res = await fetch(photo.webPath);
+    const blob = await res.blob();
+    const file = new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+    imageFilesRef.value.push(file);
+    uploadedImages.value.images.push(URL.createObjectURL(file));
+    postCreationStore.setImages([]);
+  } catch (e) {
+    if (import.meta.env.DEV) console.debug("[PostCreation] addPhotoFromWebPath failed", e);
+  }
+};
 </script>
 <style lang="scss">
 .postCreation-dreamDescription {

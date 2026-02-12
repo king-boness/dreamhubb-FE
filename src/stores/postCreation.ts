@@ -125,7 +125,6 @@ export const usePostCreationStore = defineStore("postCreation", {
         const hasFiles = Array.isArray(imageFiles) && imageFiles.length > 0;
 
         if (hasFiles) {
-          // Multipart: FormData (nech axios nastaví Content-Type s boundary; Authorization pridá interceptor)
           const fd = new FormData();
           fd.append("title", this.title);
           fd.append("description", this.description);
@@ -135,8 +134,12 @@ export const usePostCreationStore = defineStore("postCreation", {
           if (this.dateDeadline) {
             fd.append("date_deadline", this.dateDeadline);
           }
-          imageFiles!.forEach((file) => {
-            fd.append("images[]", file, file.name || "image");
+          imageFiles!.forEach((file, i) => {
+            if (i === 0) {
+              fd.append("file", file, file.name || "image");
+            } else {
+              fd.append("images[]", file, file.name || "image");
+            }
           });
 
           const { data } = await api.post("/post-create", fd);
