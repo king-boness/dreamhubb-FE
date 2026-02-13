@@ -103,7 +103,8 @@ export const usePostCreationStore = defineStore("postCreation", {
       this.error = null;
     },
 
-    // Create post (optional imageFiles: when provided, send multipart/form-data with images[])
+    // Create post - vždy používa FormData (multipart/form-data) pre jednotnú logiku
+    // imageFiles: voliteľné File[] - ak sú prítomné, prvý sa posiela ako 'file', ostatné ako 'images[]'
     async createPost(imageFiles?: File[]): Promise<{ post_id: number } | null> {
       const MIN_SUBMIT_TOKENS = 10;
 
@@ -122,38 +123,29 @@ export const usePostCreationStore = defineStore("postCreation", {
       this.error = null;
 
       try {
-        const hasFiles = Array.isArray(imageFiles) && imageFiles.length > 0;
+        // Vždy používaj FormData (aj bez fotky) pre jednotnú logiku
+        const fd = new FormData();
+        fd.append("title", this.title);
+        fd.append("description", this.description);
+        fd.append("subcategory", this.subcategory);
+        fd.append("category", this.category);
+        fd.append("tokens", String(this.tokens || 0));
+        if (this.dateDeadline) {
+          fd.append("date_deadline", this.dateDeadline);
+        }
 
-        if (hasFiles) {
-          const fd = new FormData();
-          fd.append("title", this.title);
-          fd.append("description", this.description);
-          fd.append("subcategory", this.subcategory);
-          fd.append("category", this.category);
-          fd.append("tokens", String(this.tokens || 0));
-          if (this.dateDeadline) {
-            fd.append("date_deadline", this.dateDeadline);
-          }
-          imageFiles!.forEach((file, i) => {
+        // Ak sú súbory, pridaj prvý ako 'file', ostatné ako 'images[]'
+        if (Array.isArray(imageFiles) && imageFiles.length > 0) {
+          imageFiles.forEach((file, i) => {
             if (i === 0) {
               fd.append("file", file, file.name || "image");
             } else {
               fd.append("images[]", file, file.name || "image");
             }
           });
-
-          const { data } = await api.post("/post-create", fd);
-
-          if (data.status === "success") {
-            this.reset();
-            return {
-              post_id: data.post_id,
-              user: data.user ? { tokens: data.user.tokens } : undefined
-            };
-          }
         }
 
-        // JSON payload (bez súborov alebo s obrázkami ako URL)
+        // Ak sú obrázky ako URL (Cloudinary), pridaj ako pole URL-ov
         let safeImages: string[] = [];
         if (Array.isArray(this.images)) {
           safeImages = this.images
@@ -166,18 +158,15 @@ export const usePostCreationStore = defineStore("postCreation", {
             })
             .filter((img): img is string => Boolean(img) && img.length > 0);
         }
+        if (safeImages.length > 0) {
+          safeImages.forEach((url) => {
+            fd.append("images[]", url);
+          });
+        }
 
-        const payload: Record<string, unknown> = {
-          title: this.title,
-          description: this.description,
-          category: this.category,
-          subcategory: this.subcategory,
-          tokens: this.tokens || 0
-        };
-        if (this.dateDeadline) payload.date_deadline = this.dateDeadline;
-        if (safeImages.length > 0) payload.images = safeImages;
-
-        const { data } = await api.post("/post-create", payload);
+        // Axios automaticky nastaví Content-Type: multipart/form-data s boundary
+        // Authorization header pridá interceptor
+        const { data } = await api.post("/post-create", fd);
 
         if (data.status === "success") {
           this.reset();

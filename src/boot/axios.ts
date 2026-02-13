@@ -175,6 +175,12 @@ const attachInterceptor = (instance: AxiosInstance) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // Pre FormData: nech axios nastaví Content-Type s boundary (odstráň default application/json)
+      if (config.data instanceof FormData) {
+        delete config.headers["Content-Type"];
+      }
+
       if (import.meta.env.DEV) {
         const endpoint = String(config.url || config.baseURL || "?");
         const head = token ? token.slice(0, 18) + "..." : "none";
