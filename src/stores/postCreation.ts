@@ -11,9 +11,9 @@ const CATEGORY_TO_BACKEND: Record<string, CategorySlug> = {
   dream: "dream",
   problem: "problem",
   idea: "idea",
-  "0": "dream",
-  "1": "problem",
-  "2": "idea"
+  0: "dream",
+  1: "problem",
+  2: "idea"
 };
 const SUBCATEGORY_TO_BACKEND: Record<string, SubcategorySlug> = {
   traveling: "traveling",

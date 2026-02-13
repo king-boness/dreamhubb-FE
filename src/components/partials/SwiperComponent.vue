@@ -103,7 +103,7 @@ const getIconName = (title: string): string => {
 };
 
 // Get icon path - use SVG for all categories
-const getIconPath = (title: string, isLight: boolean): string => {
+const getIconPath = (title: string, _isLight: boolean): string => {
   const iconName = getIconName(title);
   const basePath = "/icons/CategoryIcons/";
 
