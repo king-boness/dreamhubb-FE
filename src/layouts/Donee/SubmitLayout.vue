@@ -138,7 +138,7 @@
 }
 </style>
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Category } from "src/components/models";
 const router = useRouter();
@@ -207,14 +207,14 @@ const previousSubmit = () => {
     router.push({ name: `submit-${onSubmitIndex.value}` });
   }
 };
-const GOAL_ID_TO_SLUG: Record<string | number, string> = { 1: "problem", 2: "dream", 3: "idea", "1": "problem", "2": "dream", "3": "idea" };
+const GOAL_ID_TO_SLUG: Record<string, string> = { 1: "problem", 2: "dream", 3: "idea" };
 const toGoalSlug = (v: unknown): string | null => {
   if (v === null || v === undefined) return null;
   const s = String(v).toLowerCase().trim();
   if (["dream", "problem", "idea"].includes(s)) return s;
-  return GOAL_ID_TO_SLUG[v as string | number] ?? null;
+  return GOAL_ID_TO_SLUG[String(v)] ?? null;
 };
-const handleChangedHoriz = (data: { horiz: boolean; selectedItemId: any }) => {
+const handleChangedHoriz = (data: { horiz: boolean; selectedItemId: unknown }) => {
   const { horiz, selectedItemId } = data;
   if (onSubmitIndex.value === 1) {
     const slug = toGoalSlug(selectedItemId) ?? selectedItemId;
