@@ -680,7 +680,7 @@ const openFileInput = () => {
   }
 };
 
-const handleFileChange = (event: Event) => {
+const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = target.files;
   if (!files || files.length === 0) return;
@@ -699,11 +699,29 @@ const handleFileChange = (event: Event) => {
   }
 
   const filesToAdd = Array.from(files).slice(0, remainingSlots);
-  filesToAdd.forEach((file) => {
-    imageFilesRef.value.push(file);
-    uploadedImages.value.images.push(URL.createObjectURL(file));
-  });
-  postCreationStore.setImages([]);
+  const useDataUrlForPreview = Capacitor?.isNativePlatform?.() === true;
+
+  if (useDataUrlForPreview) {
+    for (const file of filesToAdd) {
+      const dataUrl = await new Promise<string | null>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string) || null);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+      if (dataUrl) {
+        imageFilesRef.value.push(file);
+        uploadedImages.value.images.push(dataUrl);
+      }
+    }
+    postCreationStore.setImages([]);
+  } else {
+    filesToAdd.forEach((file) => {
+      imageFilesRef.value.push(file);
+      uploadedImages.value.images.push(URL.createObjectURL(file));
+    });
+    postCreationStore.setImages([]);
+  }
   if (fileInput.value) fileInput.value.value = "";
 };
 
