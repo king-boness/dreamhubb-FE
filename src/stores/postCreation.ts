@@ -4,6 +4,38 @@ import { api } from "boot/axios";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
+import { CATEGORY_SLUGS, SUBCATEGORY_SLUGS } from "src/domain/categories";
+
+/** BE očakáva category: dream|problem|idea, subcategory: traveling|health|... (slug string). Nikdy neposielať index. */
+const CATEGORY_TO_BACKEND: Record<string, CategorySlug> = {
+  dream: "dream",
+  problem: "problem",
+  idea: "idea",
+  "0": "dream",
+  "1": "problem",
+  "2": "idea"
+};
+const SUBCATEGORY_TO_BACKEND: Record<string, SubcategorySlug> = {
+  traveling: "traveling",
+  travelling: "traveling",
+  health: "health",
+  learning: "learning",
+  possessions: "possessions",
+  relationships: "relationships",
+  profession: "profession",
+  events: "events",
+  other: "other"
+};
+function toCategorySlug(v: string | null | undefined): CategorySlug {
+  if (!v) return "dream";
+  const key = String(v).toLowerCase().trim();
+  return CATEGORY_TO_BACKEND[key] ?? (CATEGORY_SLUGS.includes(key as CategorySlug) ? (key as CategorySlug) : "dream");
+}
+function toSubcategorySlug(v: string | null | undefined): SubcategorySlug {
+  if (!v) return "other";
+  const key = String(v).toLowerCase().trim();
+  return SUBCATEGORY_TO_BACKEND[key] ?? (SUBCATEGORY_SLUGS.includes(key as SubcategorySlug) ? (key as SubcategorySlug) : "other");
+}
 
 interface PostCreationState {
   title: string;
@@ -123,12 +155,25 @@ export const usePostCreationStore = defineStore("postCreation", {
       this.error = null;
 
       try {
-        // Vždy používaj FormData (aj bez fotky) pre jednotnú logiku
+        const categorySlug = toCategorySlug(this.category);
+        const subcategorySlug = toSubcategorySlug(this.subcategory);
+        const payloadLog = {
+          title: this.title,
+          description: this.description?.slice(0, 50),
+          category: categorySlug,
+          subcategory: subcategorySlug,
+          tokens: this.tokens ?? 0,
+          date_deadline: this.dateDeadline ?? null,
+          imageFilesCount: imageFiles?.length ?? 0
+        };
+        if (import.meta.env.DEV) {
+          console.log("[postCreation] payload (BE expects category: dream|problem|idea, subcategory: slug)", payloadLog);
+        }
         const fd = new FormData();
         fd.append("title", this.title);
         fd.append("description", this.description);
-        fd.append("subcategory", this.subcategory);
-        fd.append("category", this.category);
+        fd.append("subcategory", subcategorySlug);
+        fd.append("category", categorySlug);
         fd.append("tokens", String(this.tokens || 0));
         if (this.dateDeadline) {
           fd.append("date_deadline", this.dateDeadline);

@@ -229,6 +229,7 @@ import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";
 import type { UploadedImage } from "src/composables/useUpload";
 import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
+import { Capacitor } from "@capacitor/core";
 
 const { t } = useI18n();
 
@@ -706,15 +707,31 @@ const handleFileChange = (event: Event) => {
   if (fileInput.value) fileInput.value.value = "";
 };
 
-/** Pre Capacitor Camera/Gallery: konvertuj photo.webPath na File a pridaj do zoznamu (FormData potom pošle ako "file"). */
-const addPhotoFromWebPath = async (photo: { webPath: string }) => {
+/** Pre Capacitor Camera/Gallery: preview musí používať webPath (priorita) alebo convertFileSrc(path), aby sa obrázok zobrazil na iOS. */
+const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dataUrl?: string }) => {
   if (uploadedImages.value.images.length >= 5) return;
   try {
-    const res = await fetch(photo.webPath);
+    const webPath = photo.webPath ?? null;
+    const path = photo.path ?? null;
+    let previewSrc: string;
+    if (webPath) {
+      previewSrc = webPath;
+    } else if (path && Capacitor?.convertFileSrc) {
+      previewSrc = Capacitor.convertFileSrc(path);
+    } else if (photo.dataUrl) {
+      previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
+    } else {
+      if (import.meta.env.DEV) console.debug("[PostCreation] addPhotoFromWebPath: no webPath/path/dataUrl");
+      return;
+    }
+    if (import.meta.env.DEV) {
+      console.log("[PostCreation] addPhotoFromWebPath", { webPath, path, previewSrc: previewSrc.slice(0, 60) + "..." });
+    }
+    const res = await fetch(previewSrc);
     const blob = await res.blob();
     const file = new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
     imageFilesRef.value.push(file);
-    uploadedImages.value.images.push(URL.createObjectURL(file));
+    uploadedImages.value.images.push(previewSrc);
     postCreationStore.setImages([]);
   } catch (e) {
     if (import.meta.env.DEV) console.debug("[PostCreation] addPhotoFromWebPath failed", e);

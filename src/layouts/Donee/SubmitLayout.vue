@@ -207,20 +207,27 @@ const previousSubmit = () => {
     router.push({ name: `submit-${onSubmitIndex.value}` });
   }
 };
+const GOAL_ID_TO_SLUG: Record<string | number, string> = { 1: "problem", 2: "dream", 3: "idea", "1": "problem", "2": "dream", "3": "idea" };
+const toGoalSlug = (v: unknown): string | null => {
+  if (v === null || v === undefined) return null;
+  const s = String(v).toLowerCase().trim();
+  if (["dream", "problem", "idea"].includes(s)) return s;
+  return GOAL_ID_TO_SLUG[v as string | number] ?? null;
+};
 const handleChangedHoriz = (data: { horiz: boolean; selectedItemId: any }) => {
   const { horiz, selectedItemId } = data;
-  // If we're on step 1, save as goal; if on step 2, save as category
   if (onSubmitIndex.value === 1) {
-    selectedGoal.value = selectedItemId;
-    // Save to localStorage immediately (onboarding flow uses old keys for compatibility)
-    if (selectedItemId) {
-      localStorage.setItem("postCreation_goal", selectedItemId);
+    const slug = toGoalSlug(selectedItemId) ?? selectedItemId;
+    selectedGoal.value = slug;
+    if (slug) {
+      localStorage.setItem("postCreation_goal", slug);
+      localStorage.setItem("donee_postCreation_goal", slug);
     }
   } else if (onSubmitIndex.value === 2) {
     selectedCategory.value = selectedItemId;
-    // Save to localStorage immediately (onboarding flow uses old keys for compatibility)
     if (selectedItemId) {
       localStorage.setItem("postCreation_category", selectedItemId);
+      localStorage.setItem("donee_postCreation_category", selectedItemId);
     }
   }
   horizontalSwiper.value = horiz;
