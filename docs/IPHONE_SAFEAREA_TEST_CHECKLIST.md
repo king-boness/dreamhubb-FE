@@ -27,6 +27,11 @@
 - [ ] Upload obrázkov funguje
 - [ ] Žiadne chyby v konzole
 
+### 4b. Edit post + photo change
+- [ ] Edit post → zmeň fotku → SAVE CHANGES → BE 200/204 (žiadne 500)
+- [ ] Request pri zmene fotky je multipart (FormData)
+- [ ] Ak fotku nezmením a dám SAVE CHANGES → images sa neposielajú, post sa uloží
+
 ### 5. Navigácia
 - [ ] Tab navigácia (Donor/Donee) funguje
 - [ ] Back button funguje
@@ -35,6 +40,9 @@
 ### 6. Feed (performance)
 - [ ] Feed sa plynule scrolluje
 - [ ] Obrázky sa lazy-loadujú pri scrollovaní
+
+### 7. Produkcia (Cloudinary)
+- [ ] Upload URL po nahratí je Cloudinary (žiadne /storage/... 404)
 
 ## Kroky po zmene boot / plugin
 ```bash

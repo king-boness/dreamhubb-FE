@@ -438,7 +438,7 @@
             >
               <q-card class="edit-photo-card relative-position">
                 <q-img
-                  :src="typeof img === 'string' ? img : (img.url || img.secure_url || '')"
+                  :src="getPhotoDisplayUrl(img)"
                   ratio="1"
                   class="edit-photo-image cursor-pointer"
                   fit="cover"
@@ -1720,6 +1720,8 @@ import RetryPanel from "src/components/common/RetryPanel.vue";
 import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
 import { useQuasar } from "quasar";
+import { Capacitor } from "@capacitor/core";
+import { Camera } from "@capacitor/camera";
 import { useUpload } from "src/composables/useUpload";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
@@ -1733,6 +1735,31 @@ const authStore = useAuthStore();
 const { t, locale } = useI18n();
 const $q = useQuasar();
 const { uploadMultipleImages } = useUpload();
+const useNativePhotoPicker = Capacitor?.isNativePlatform?.() === true;
+
+/** Convert Camera result to File (iOS/Android native picker) */
+async function cameraResultToFile(photo: { webPath?: string; path?: string; dataUrl?: string }): Promise<File | null> {
+  let previewSrc: string | null = null;
+  const isPhOrFile = (s: string) => s.startsWith("ph://") || s.startsWith("file://");
+  if (photo.webPath && !isPhOrFile(photo.webPath)) previewSrc = photo.webPath;
+  else if (photo.path || photo.webPath) {
+    const raw = (photo.webPath || photo.path)!;
+    previewSrc = isPhOrFile(raw) && Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(raw) : raw;
+  } else if (photo.dataUrl) {
+    previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
+  }
+  if (!previewSrc) return null;
+  const res = await fetch(previewSrc);
+  const blob = await res.blob();
+  return new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+}
+
+/** Get display URL from edit photo item (string | {url,secure_url} | {file,previewUrl}) */
+function getPhotoDisplayUrl(img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string }): string {
+  if (typeof img === "string") return img;
+  if (img.previewUrl) return img.previewUrl;
+  return img.url || img.secure_url || "";
+}
 
 const isBodyLight = ref(false);
 const loading = ref(false);
@@ -2053,9 +2080,12 @@ const mapFeCategoryToSubcategoryId = (feCategory: string | null): number | null 
 
 // Handler funkcie pre edit akcie
 const openPhotosEditor = () => {
-  // Save current photos state for cancel functionality
-  tempPhotos.value = JSON.parse(JSON.stringify(editForm.photos));
-  photosSaved.value = false; // Reset saved flag
+  tempPhotos.value = editForm.photos.map(item => {
+    if (typeof item === "string") return item;
+    if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+    return { url: item.url, secure_url: item.secure_url };
+  });
+  photosSaved.value = false;
   dialogs.photos = true;
 };
 
@@ -2089,10 +2119,9 @@ const lightboxImages = computed(() => {
     images = editForm.photos;
   }
 
-  return images.map((img: string | { url?: string; secure_url?: string }) => {
-    if (typeof img === "string") {
-      return img;
-    }
+  return images.map((img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string }) => {
+    if (typeof img === "string") return img;
+    if (img.previewUrl) return img.previewUrl;
     return img.url || img.secure_url || "";
   }).filter((url: string) => url !== "");
 });
@@ -2839,12 +2868,33 @@ const applyDeadlineChange = () => {
 
 // Photos functions
 const removePhoto = (index: number) => {
+  const item = editForm.photos[index];
+  if (item && typeof item === "object" && "previewUrl" in item && item.previewUrl) {
+    URL.revokeObjectURL(item.previewUrl);
+  }
   editForm.photos.splice(index, 1);
   markDirty();
 };
 
-const triggerAddPhoto = () => {
-  fileInput.value?.click();
+const triggerAddPhoto = async () => {
+  if (useNativePhotoPicker) {
+    try {
+      const photo = await Camera.getPhoto({
+        source: "PHOTOLIBRARY",
+        resultType: "Uri",
+        quality: 90
+      });
+      const file = await cameraResultToFile(photo);
+      if (file) {
+        editForm.photos.push({ file, previewUrl: URL.createObjectURL(file) });
+        markDirty();
+      }
+    } catch (e) {
+      if (import.meta.env.DEV) console.debug("[TopDreamPage] Camera.getPhoto cancelled or failed:", e);
+    }
+  } else {
+    fileInput.value?.click();
+  }
 };
 
 const onPhotosSelected = async (event: Event) => {
@@ -2852,72 +2902,58 @@ const onPhotosSelected = async (event: Event) => {
   const files = target.files;
   if (!files?.length) return;
 
-  // Reuse the same upload / preview logic as in the post creation page
-  try {
-    const folder = "post-images";
-    const uploaded = await uploadMultipleImages(Array.from(files), folder);
-    const imageUrls = uploaded.map(img => img.secure_url || "");
-    editForm.photos.push(...imageUrls);
-    markDirty();
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.debug("[TopDreamPage] Failed to upload images:", error);
+  // Don't pre-upload – add as File + previewUrl, send as multipart on SAVE CHANGES
+  for (const file of Array.from(files)) {
+    if (file.type.startsWith("image/")) {
+      editForm.photos.push({ file, previewUrl: URL.createObjectURL(file) });
     }
-    notifyError(mapAxiosErrorToDhError(error));
   }
+  markDirty();
 
-  // Reset input
-  if (target) {
-    target.value = "";
-  }
+  if (target) target.value = "";
 };
 
 const cancelPhotosEdit = () => {
-  // Restore original photos state
-  editForm.photos = JSON.parse(JSON.stringify(tempPhotos.value));
+  editForm.photos = tempPhotos.value.map(item => {
+    if (typeof item === "string") return item;
+    if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+    return { url: item.url, secure_url: item.secure_url };
+  });
   dialogs.photos = false;
 };
 
 // Handle photos dialog close (when clicking outside or ESC)
 const onPhotosDialogHide = () => {
-  // If dialog is being closed and photos were not saved, restore original photos state
-  // This ensures that if user clicks outside or presses ESC, changes are discarded
   if (!photosSaved.value) {
-    editForm.photos = JSON.parse(JSON.stringify(tempPhotos.value));
+    editForm.photos = tempPhotos.value.map(item => {
+      if (typeof item === "string") return item;
+      if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+      return { url: item.url, secure_url: item.secure_url };
+    });
   }
-  // Reset flag for next time
   photosSaved.value = false;
 };
 
 const applyPhotosChange = () => {
-  // Mark as saved so @hide handler doesn't restore tempPhotos
   photosSaved.value = true;
-
-  if (editedPost.value) {
-    // Update images array
-    const imageUrls = editForm.photos.map(img =>
-      typeof img === "string" ? img : (img.url || img.secure_url || "")
-    );
-    editedPost.value.images = imageUrls;
-
-    // Update postsStore.currentPost.images immediately for UI reactivity
-    if (postsStore.currentPost) {
-      postsStore.currentPost.images = imageUrls;
-    }
-  }
-  // Update tempPhotos to match current state after save
-  tempPhotos.value = JSON.parse(JSON.stringify(editForm.photos));
+  // tempPhotos = clone (items with file can't be JSON stringified)
+  tempPhotos.value = editForm.photos.map(item => {
+    if (typeof item === "string") return item;
+    if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+    return { url: item.url, secure_url: item.secure_url };
+  });
   dialogs.photos = false;
   markDirty();
 };
 
 // Mark form as dirty
 const markDirty = () => {
-  // Sync draft images from editForm.photos so hasChanges reflects photo edits.
   if (draft.value) {
-    draft.value.images = editForm.photos
-      .map((img) => (typeof img === "string" ? img : (img.url || img.secure_url || "")))
-      .filter((url) => typeof url === "string" && url.length > 0);
+    draft.value.images = editForm.photos.map((img) => {
+      if (typeof img === "string") return img;
+      if ("file" in img && img.file) return "__new__"; // placeholder so hasChanges is true
+      return img.url || img.secure_url || "";
+    }).filter((url) => typeof url === "string" && url.length > 0);
   }
 };
 
@@ -3189,31 +3225,39 @@ const onSaveChanges = async () => {
       payload.deadline = d.deadline;
     }
 
-    // Send images if they changed (backend supports URL array after BE update)
-    if (JSON.stringify(o.images || []) !== JSON.stringify(d.images || [])) {
-      payload.images = d.images || [];
-    }
+    // Images changed: send FormData (existing_image_urls + images[]); otherwise JSON (never send images as URLs)
+    const imagesChanged = JSON.stringify(o.images || []) !== JSON.stringify(d.images || []);
+    const existingUrls = editForm.photos
+      .map((img) => (typeof img === "string" ? img : ("url" in img ? img.url || img.secure_url : "") || ""))
+      .filter((url) => url.length > 0);
+    const newFiles = editForm.photos
+      .filter((img): img is { file: File; previewUrl: string } => typeof img === "object" && "file" in img && img.file instanceof File)
+      .map((img) => img.file);
 
-    // Always send tokens_to_top_up (it's additive)
-    if (form.tokensToTopUp > 0) {
-      payload.tokens_to_top_up = form.tokensToTopUp;
-    }
+    if (form.tokensToTopUp > 0) payload.tokens_to_top_up = form.tokensToTopUp;
 
-    // Debug log before API call (dev-only)
-    if (import.meta.env.DEV) {
-      console.debug("[onSaveChanges] About to send update request:", {
-        postId: postId.value,
-        payload,
-        hasChanges: hasChanges.value,
-        isSaving: isSaving.value
+    let responseData: unknown;
+    if (imagesChanged) {
+      const formData = new FormData();
+      formData.append("existing_image_urls", JSON.stringify(existingUrls));
+      for (const file of newFiles) formData.append("images[]", file);
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && k !== "images")
+          formData.append(k, typeof v === "object" ? JSON.stringify(v) : String(v));
       });
+      const { data } = await api.put(`/post-update/${postId.value}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      responseData = data;
+    } else {
+      if (import.meta.env.DEV) console.debug("[onSaveChanges] Sending JSON:", { postId: postId.value, payload });
+      const { data } = await api.put(`/post-update/${postId.value}`, payload);
+      responseData = data;
     }
-
-    const { data } = await api.put(`/post-update/${postId.value}`, payload);
 
     // Debug log after API call (dev-only)
     if (import.meta.env.DEV) {
-      console.debug("[onSaveChanges] Update response:", data);
+      console.debug("[onSaveChanges] Update response:", responseData);
     }
 
     // IMPORTANT: Refetch post detail to get updated data from backend

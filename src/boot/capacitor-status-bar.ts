@@ -8,7 +8,7 @@ import { Capacitor } from "@capacitor/core";
  * Only runs on native iOS. Android/web unchanged.
  */
 export default boot(async () => {
-  if (Capacitor?.getPlatform?.() !== "ios") {
+  if (!Capacitor?.isNativePlatform?.() || Capacitor?.getPlatform?.() !== "ios") {
     return;
   }
   document.body.classList.add("platform-ios");
