@@ -1,17 +1,25 @@
-/* iOS safe-area + unified background (ružový roh fix) - SAFE MODE */
+/* iOS safe-area + unified background (ružový roh fix) - globálne */
 /* Platform class .platform-ios added by boot/capacitor-status-bar.ts */
-html, body, #q-app {
+
+/* Unified background - žiadny ružový roh */
+html, body, #q-app, .q-layout {
   background-color: #0a0a0a;
 }
-.body--light html, .body--light body, .body--light #q-app {
+.body--light html, .body--light body, .body--light #q-app, .body--light .q-layout {
   background-color: #f5f5f5;
 }
-.platform-ios html, .platform-ios body, .platform-ios #q-app {
+.platform-ios html, .platform-ios body, .platform-ios #q-app, .platform-ios .q-layout {
   background-color: #0a0a0a;
 }
-.body--light.platform-ios html, .body--light.platform-ios body, .body--light.platform-ios #q-app {
+.body--light.platform-ios html, .body--light.platform-ios body,
+.body--light.platform-ios #q-app, .body--light.platform-ios .q-layout {
   background-color: #f5f5f5;
 }
+
+/* Safe-area: q-page-container + overflow - iphoneDevice v _background.scss rieši TopBar/Footer */
 .platform-ios .q-layout, .platform-ios .q-page-container {
   overflow-x: hidden;
+}
+.platform-ios .q-page-container {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

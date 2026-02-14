@@ -75,17 +75,23 @@
         <p v-else>{{ t("noPosts") }}</p>
       </div>
 
-      <!-- Posts list -->
+      <!-- Posts list (QVirtualScroll = reálne zrýchlenie scrollu) -->
       <template v-else>
-        <div
-          v-for="post in sortedPosts"
-          :key="post.id"
-          class="postCard"
-          role="button"
-          tabindex="0"
-          @click="emitOpenPost(post)"
-          @keyup.enter.space="emitOpenPost(post)"
+        <q-virtual-scroll
+          :items="sortedPosts"
+          virtual-scroll-item-size="380"
+          separator
+          class="donorPosts-feed donorPosts-feed--virtual"
         >
+          <template v-slot="{ item: post }">
+            <div
+              :key="post.id"
+              class="postCard"
+              role="button"
+              tabindex="0"
+              @click="emitOpenPost(post)"
+              @keyup.enter.space="emitOpenPost(post)"
+            >
           <!-- Hero image with overlay -->
           <div class="postCard-imageWrapper">
             <PostCover
@@ -147,6 +153,8 @@
           <p class="postCard-preview">{{ post.previewText }}</p>
           </div>
         </div>
+          </template>
+        </q-virtual-scroll>
       </template>
     </div>
   </q-page>
@@ -637,8 +645,12 @@ const emitOpenAuthor = (post: DonorPost) => {
 .donorPosts-feed {
   display: flex;
   flex-direction: column;
-  gap: 18px; // Slightly tighter gap between cards
+  gap: 18px;
   padding-bottom: 20px;
+}
+.donorPosts-feed--virtual {
+  max-height: calc(100vh - 240px);
+  flex: 1;
 }
 
 .donorPosts-state {

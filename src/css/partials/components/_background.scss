@@ -2,15 +2,15 @@
   min-height: 70vh;
 }
 .iphoneDevice{
-  padding-top: max(2.8rem, env(safe-area-inset-top, 0px)) !important;
+  padding-top: max(2.8rem, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
 }
 .iphoneDevice-large{
-  padding-top: max(3rem, env(safe-area-inset-top, 0px)) !important;
+  padding-top: max(3rem, calc(env(safe-area-inset-top, 0px) + 10px)) !important;
 }
 .iphoneDevice-small{
-  padding-top: max(1.8rem, env(safe-area-inset-top, 0px)) !important;
+  padding-top: max(1.8rem, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
 }
 .iphoneDevice-footer{
   height: 5.7rem !important;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: max(1rem, calc(env(safe-area-inset-bottom, 0px) + 8px)) !important;
 }

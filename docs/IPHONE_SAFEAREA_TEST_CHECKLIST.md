@@ -28,8 +28,9 @@
 - [ ] Žiadne chyby v konzole
 
 ### 4b. Edit post + photo change
-- [ ] Edit post → zmeň fotku → SAVE CHANGES → BE 200/204 (žiadne 500)
-- [ ] Request pri zmene fotky je multipart (FormData)
+- [ ] Edit post → "+ add photo" v iOS modale reaguje (touchend + Camera.getPhoto)
+- [ ] Zmeň fotku → SAVE CHANGES → BE 200/204 (žiadne 500, žiadne "images.0 must be a file")
+- [ ] Request pri zmene fotky je multipart FormData (images[] = File objekty)
 - [ ] Ak fotku nezmením a dám SAVE CHANGES → images sa neposielajú, post sa uloží
 
 ### 5. Navigácia
@@ -37,9 +38,9 @@
 - [ ] Back button funguje
 - [ ] Routing bez chýb
 
-### 6. Feed (performance)
-- [ ] Feed sa plynule scrolluje
-- [ ] Obrázky sa lazy-loadujú pri scrollovaní
+### 6. Feed (performance – QVirtualScroll)
+- [ ] Feed sa plynule scrolluje (virtualizovaný zoznam)
+- [ ] Obrázky sa lazy-loadujú (loading="lazy")
 
 ### 7. Produkcia (Cloudinary)
 - [ ] Upload URL po nahratí je Cloudinary (žiadne /storage/... 404)

@@ -454,11 +454,12 @@
                 />
               </q-card>
       </div>
-            <!-- Add new photo card -->
+            <!-- Add new photo card (touchend pre iOS - v modale click môže nefungovať) -->
             <div class="edit-photo-wrapper">
               <q-card
                 class="edit-photo-card edit-photo-add-card cursor-pointer"
                 @click="triggerAddPhoto"
+                @touchend="handleAddPhotoTouch"
               >
                 <img
                   src="/icons/addImg-icon.svg"
@@ -2875,6 +2876,14 @@ const removePhoto = (index: number) => {
   markDirty();
 };
 
+/** iOS: touchend v modale spoľahlivejšie ako click */
+const handleAddPhotoTouch = (e: TouchEvent) => {
+  if (useNativePhotoPicker) {
+    e.preventDefault();
+    void triggerAddPhoto();
+  }
+};
+
 const triggerAddPhoto = async () => {
   if (useNativePhotoPicker) {
     try {
@@ -3239,13 +3248,26 @@ const onSaveChanges = async () => {
     if (imagesChanged) {
       const formData = new FormData();
       formData.append("existing_image_urls", JSON.stringify(existingUrls));
-      for (const file of newFiles) formData.append("images[]", file);
+      for (const file of newFiles) {
+        if (file instanceof File) {
+          formData.append("images[]", file);
+        }
+      }
       Object.entries(payload).forEach(([k, v]) => {
         if (v !== undefined && v !== null && k !== "images") {
           formData.append(k, typeof v === "object" ? JSON.stringify(v) : String(v));
         }
       });
-      const { data } = await api.put(`/post-update/${postId.value}`, formData, {
+      if (import.meta.env.DEV) {
+        const entries: string[] = [];
+        formData.forEach((val, key) => {
+          entries.push(`${key}: ${val instanceof File ? `File(${val.name},${val.size}b)` : typeof val}`);
+        });
+        console.debug("[onSaveChanges] FormData fields:", entries.join(", "));
+      }
+      // POST + _method=PUT: iOS PUT + FormData môže zlyhať, Laravel podporuje _method spoof
+      formData.append("_method", "PUT");
+      const { data } = await api.post(`/post-update/${postId.value}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       responseData = data;
