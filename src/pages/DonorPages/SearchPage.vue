@@ -53,7 +53,7 @@
         <!-- <SearchTopicComponent :topic="topic" /> -->
       </div>
       <div v-if="showPosts || selectedHistory">
-        <div v-for="(post, i) in filteredPosts" :key="i" class="postComponent">
+        <div v-for="(post, i) in filteredPosts" :key="post.post_id ?? post.id ?? i" class="postComponent">
           <PostComponent :post="post" />
         </div>
       </div>

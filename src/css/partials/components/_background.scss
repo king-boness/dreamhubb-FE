@@ -2,16 +2,15 @@
   min-height: 70vh;
 }
 .iphoneDevice{
-  padding-top: 2.8rem !important;
+  padding-top: max(2.8rem, env(safe-area-inset-top, 0px)) !important;
 }
 .iphoneDevice-large{
-  padding-top: 3rem !important;
+  padding-top: max(3rem, env(safe-area-inset-top, 0px)) !important;
 }
 .iphoneDevice-small{
-  padding-top: 1.8rem !important;
-
+  padding-top: max(1.8rem, env(safe-area-inset-top, 0px)) !important;
 }
 .iphoneDevice-footer{
   height: 5.7rem !important;
-  padding-bottom: 1rem !important;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
 }

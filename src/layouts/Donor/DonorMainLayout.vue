@@ -17,7 +17,7 @@
       :class="{ 'navbar--hidden': !shouldShowHeader }"
       v-if="!isSwitchingRole"
     >
-      <div class="donorLayout-topBar row">
+      <div class="donorLayout-topBar row" :class="{ 'iphoneDevice-large': $q.platform.is.ios }">
         <!-- Logo + switch icon OR Back button -->
         <div class="row">
           <template v-if="!shouldShowHeaderBack">
@@ -496,7 +496,7 @@ onBeforeUnmount(() => {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 3rem 1rem 1rem 1rem; // Match donee header padding
+    padding: 1rem; // Base padding; top uses iphoneDevice-large on iOS (safe-area)
     width: 100%;
 
     .iconContainer {

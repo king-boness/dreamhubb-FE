@@ -23,7 +23,8 @@ module.exports = configure(function (/* ctx */) {
       "i18n",
       "axios",
       "auth",
-      "resume-check"
+      "resume-check",
+      "capacitor-status-bar"
     ],
 
     // App CSS

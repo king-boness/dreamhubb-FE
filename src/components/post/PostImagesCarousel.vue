@@ -23,6 +23,7 @@
         class="postCarousel-image"
         :src="currentImage"
         :alt="alt || 'Post image'"
+        loading="lazy"
         @click="handleImageClick"
         @touchstart.passive="onTouchStart"
         @touchend.passive="onTouchEnd"

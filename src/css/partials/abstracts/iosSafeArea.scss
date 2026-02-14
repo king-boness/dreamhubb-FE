@@ -1,0 +1,17 @@
+/* iOS safe-area + unified background (ružový roh fix) - SAFE MODE */
+/* Platform class .platform-ios added by boot/capacitor-status-bar.ts */
+html, body, #q-app {
+  background-color: #0a0a0a;
+}
+.body--light html, .body--light body, .body--light #q-app {
+  background-color: #f5f5f5;
+}
+.platform-ios html, .platform-ios body, .platform-ios #q-app {
+  background-color: #0a0a0a;
+}
+.body--light.platform-ios html, .body--light.platform-ios body, .body--light.platform-ios #q-app {
+  background-color: #f5f5f5;
+}
+.platform-ios .q-layout, .platform-ios .q-page-container {
+  overflow-x: hidden;
+}

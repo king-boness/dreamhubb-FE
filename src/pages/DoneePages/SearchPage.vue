@@ -32,7 +32,7 @@
         behavior="menu"
       />
     </div>
-    <div class="searchPage-dreamsContainer" v-for="(post, i) in posts" :key="i">
+    <div class="searchPage-dreamsContainer" v-for="(post, i) in posts" :key="post.post_id ?? post.id ?? i">
       <PostComponent :post="post"></PostComponent>
     </div>
   </div>
