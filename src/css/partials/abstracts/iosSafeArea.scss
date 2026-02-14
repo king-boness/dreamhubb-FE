@@ -1,25 +1,30 @@
-/* iOS safe-area + unified background (ružový roh fix) - globálne */
-/* Platform class .platform-ios added by boot/capacitor-status-bar.ts */
+/* iOS safe-area + ružový roh fix – globálne pre VŠETKY screens */
+/* Platform class .platform-ios on body added by boot/capacitor-status-bar.ts */
 
-/* Unified background - žiadny ružový roh */
-html, body, #q-app, .q-layout {
-  background-color: #0a0a0a;
+/* Jednotné pozadie – žiadny ružový roh nikde */
+html, body, #q-app, .q-layout, .q-page-container {
+  background: #0a0a0a !important;
 }
-.body--light html, .body--light body, .body--light #q-app, .body--light .q-layout {
-  background-color: #f5f5f5;
+.body--light html, .body--light body, .body--light #q-app,
+.body--light .q-layout, .body--light .q-page-container {
+  background: #f5f5f5 !important;
 }
-.platform-ios html, .platform-ios body, .platform-ios #q-app, .platform-ios .q-layout {
-  background-color: #0a0a0a;
+.platform-ios html, .platform-ios body, .platform-ios #q-app,
+.platform-ios .q-layout, .platform-ios .q-page-container {
+  background: #0a0a0a !important;
 }
 .body--light.platform-ios html, .body--light.platform-ios body,
-.body--light.platform-ios #q-app, .body--light.platform-ios .q-layout {
-  background-color: #f5f5f5;
+.body--light.platform-ios #q-app, .body--light.platform-ios .q-layout,
+.body--light.platform-ios .q-page-container {
+  background: #f5f5f5 !important;
 }
 
-/* Safe-area: q-page-container + overflow - iphoneDevice v _background.scss rieši TopBar/Footer */
-.platform-ios .q-layout, .platform-ios .q-page-container {
+/* Overflow – zabráň gradientom/radius presvitu */
+html, body, #q-app, .q-layout, .q-page-container {
   overflow-x: hidden;
 }
+
+/* Safe-area – q-page-container bottom; topbar/footer cez iphoneDevice (_background.scss) */
 .platform-ios .q-page-container {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

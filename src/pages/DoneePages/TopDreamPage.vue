@@ -454,19 +454,20 @@
                 />
               </q-card>
       </div>
-            <!-- Add new photo card (touchend pre iOS - v modale click môže nefungovať) -->
-            <div class="edit-photo-wrapper">
-              <q-card
-                class="edit-photo-card edit-photo-add-card cursor-pointer"
-                @click="triggerAddPhoto"
-                @touchend="handleAddPhotoTouch"
+            <!-- Add new photo card (z-index/pointer-events + stop.prevent pre iOS) -->
+            <div class="edit-photo-wrapper edit-photo-add-wrapper">
+              <button
+                type="button"
+                class="edit-photo-add-card edit-photo-add-card-btn"
+                @click.stop.prevent="onAddPhotoClick"
+                @touchend.stop="onAddPhotoTouch"
               >
                 <img
                   src="/icons/addImg-icon.svg"
                   alt="Add photo"
                   class="edit-photo-add-icon"
                 />
-              </q-card>
+              </button>
     </div>
       </div>
           <input
@@ -1236,7 +1237,12 @@
   }
 }
 
-.edit-photo-add-card {
+.edit-photo-add-wrapper {
+  position: relative;
+  z-index: 10;
+}
+.edit-photo-add-card,
+.edit-photo-add-card-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 2px dashed rgba(255, 255, 255, 0.3);
   border-radius: 12px;
@@ -1246,12 +1252,27 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.05);
-  }
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+  -webkit-tap-highlight-color: transparent;
+}
+.edit-photo-add-card-btn {
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.edit-photo-add-card:hover,
+.edit-photo-add-card-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+}
+.edit-photo-add-card:active,
+.edit-photo-add-card-btn:active {
+  transform: scale(0.98);
 }
 
 .edit-photo-add-icon {
@@ -1260,11 +1281,13 @@
   opacity: 0.7;
   transition: opacity 0.2s ease, transform 0.2s ease;
   filter: brightness(0) invert(1);
+  pointer-events: none;
+}
 
-  .edit-photo-add-card:hover & {
-    opacity: 1;
-    transform: scale(1.1);
-  }
+.edit-photo-add-card:hover .edit-photo-add-icon,
+.edit-photo-add-card-btn:hover .edit-photo-add-icon {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* Edit category dialog styles */
@@ -2876,15 +2899,8 @@ const removePhoto = (index: number) => {
   markDirty();
 };
 
-/** iOS: touchend v modale spoľahlivejšie ako click */
-const handleAddPhotoTouch = (e: TouchEvent) => {
-  if (useNativePhotoPicker) {
-    e.preventDefault();
-    void triggerAddPhoto();
-  }
-};
-
-const triggerAddPhoto = async () => {
+/** Jednotná funkcia pre výber fotky - iOS: Camera.getPhoto, web: input[type=file] */
+async function pickImage(): Promise<void> {
   if (useNativePhotoPicker) {
     try {
       const photo = await Camera.getPhoto({
@@ -2898,10 +2914,29 @@ const triggerAddPhoto = async () => {
         markDirty();
       }
     } catch (e) {
-      if (import.meta.env.DEV) console.debug("[TopDreamPage] Camera.getPhoto cancelled or failed:", e);
+      if (import.meta.env.DEV) {
+        console.debug("[TopDreamPage] pickImage (Camera.getPhoto) cancelled or failed:", e);
+      }
     }
   } else {
     fileInput.value?.click();
+  }
+}
+
+const onAddPhotoClick = () => {
+  if (import.meta.env.DEV) {
+    console.debug("[TopDreamPage] + Add photo CLICK fired, useNative:", useNativePhotoPicker);
+  }
+  void pickImage();
+};
+
+const onAddPhotoTouch = (e: TouchEvent) => {
+  if (useNativePhotoPicker) {
+    e.preventDefault();
+    if (import.meta.env.DEV) {
+      console.debug("[TopDreamPage] + Add photo TOUCH fired");
+    }
+    void pickImage();
   }
 };
 

@@ -45,5 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>dreamhubb needs access to your photo library to let you choose images for your posts.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>dreamhubb needs camera access to let you take photos for your posts.</string>
 </dict>
 </plist>

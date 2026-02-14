@@ -1,8 +1,13 @@
 # iPhone Safe-Area + Performance Test Checklist
 
+## Build kroky
+```bash
+quasar build -m capacitor -T ios
+npx cap sync ios
+# V Xcode: Product → Clean Build Folder, potom Run na fyzickom iPhone
+```
+
 ## Predpoklady
-- Projekt zostavený: `quasar build`
-- iOS sync: `npx cap sync ios`
 - App otvorená na fyzickom iPhone (simulátor nemusí mať notch)
 
 ## Checklist
@@ -27,8 +32,9 @@
 - [ ] Upload obrázkov funguje
 - [ ] Žiadne chyby v konzole
 
-### 4b. Edit post + photo change
-- [ ] Edit post → "+ add photo" v iOS modale reaguje (touchend + Camera.getPhoto)
+### 4b. Edit post + photo change (3 screens: Edit post, Donor feed, Donee feed)
+- [ ] Edit post → "+ add photo" v modale reaguje na tap (native button + z-index)
+- [ ] Po tlapnutí sa otvorí Photos picker (Info.plist NSPhotoLibraryUsageDescription)
 - [ ] Zmeň fotku → SAVE CHANGES → BE 200/204 (žiadne 500, žiadne "images.0 must be a file")
 - [ ] Request pri zmene fotky je multipart FormData (images[] = File objekty)
 - [ ] Ak fotku nezmením a dám SAVE CHANGES → images sa neposielajú, post sa uloží
