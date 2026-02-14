@@ -230,6 +230,7 @@ import type { UploadedImage } from "src/composables/useUpload";
 import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import { Capacitor } from "@capacitor/core";
+import { Camera } from "@capacitor/camera";
 
 const { t } = useI18n();
 
@@ -674,8 +675,20 @@ const handleIndex = (index: number) => {
 watch(imgIndex, () => {
   // no logs
 });
-const openFileInput = () => {
-  if (fileInput.value) {
+const openFileInput = async () => {
+  const isNative = Capacitor?.isNativePlatform?.() === true;
+  if (isNative) {
+    try {
+      const photo = await Camera.getPhoto({
+        source: "PHOTOLIBRARY",
+        resultType: "Uri",
+        quality: 90
+      });
+      await addPhotoFromWebPath(photo as unknown as { webPath?: string; path?: string; dataUrl?: string; uri?: string });
+    } catch (e) {
+      if (import.meta.env.DEV) console.debug("[PostCreation] Camera.getPhoto cancelled or failed:", e);
+    }
+  } else if (fileInput.value) {
     fileInput.value.click();
   }
 };
@@ -725,17 +738,22 @@ const handleFileChange = async (event: Event) => {
   if (fileInput.value) fileInput.value.value = "";
 };
 
-/** Pre Capacitor Camera/Gallery: preview musí používať webPath (priorita) alebo convertFileSrc(path), aby sa obrázok zobrazil na iOS. */
-const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dataUrl?: string }) => {
+/** Pre Capacitor Camera/Gallery: preview musí používať webPath (priorita) alebo base64 data URL, aby sa obrázok zobrazil v iOS WKWebView.
+ * Ak path/uri vyzerá ph:// alebo file://, použije convertFileSrc. */
+const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dataUrl?: string; uri?: string }) => {
   if (uploadedImages.value.images.length >= 5) return;
   try {
     const webPath = photo.webPath ?? null;
-    const path = photo.path ?? null;
+    const path = photo.path ?? photo.uri ?? null;
     let previewSrc: string;
-    if (webPath) {
+    const isPhOrFile = (s: string) => s.startsWith("ph://") || s.startsWith("file://");
+    if (webPath && !isPhOrFile(webPath)) {
       previewSrc = webPath;
-    } else if (path && Capacitor?.convertFileSrc) {
-      previewSrc = Capacitor.convertFileSrc(path);
+    } else if (webPath || path) {
+      const raw = (webPath || path)!;
+      previewSrc = (isPhOrFile(raw) && Capacitor?.convertFileSrc)
+        ? Capacitor.convertFileSrc(raw)
+        : raw;
     } else if (photo.dataUrl) {
       previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
     } else {
@@ -743,7 +761,11 @@ const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dat
       return;
     }
     if (import.meta.env.DEV) {
-      console.log("[PostCreation] addPhotoFromWebPath", { webPath, path, previewSrc: previewSrc.slice(0, 60) + "..." });
+      console.debug("[PostCreation] Image preview source (dev):", {
+        webPath: webPath?.slice(0, 60),
+        path: path?.slice(0, 60),
+        previewSrc: previewSrc.slice(0, 80) + "..."
+      });
     }
     const res = await fetch(previewSrc);
     const blob = await res.blob();

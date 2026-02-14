@@ -7,7 +7,13 @@
     <div class="drop" v-show="dropped == 2"></div>
 
     <div v-show="uploadedImages.length == 0 && !isUploading" class="beforeUpload">
+      <div
+        v-if="useNativePicker"
+        class="native-picker-overlay"
+        @click="triggerImagePick"
+      />
       <input
+        v-show="!useNativePicker"
         type="file"
         style="z-index: 1"
         accept="image/*"
@@ -31,7 +37,7 @@
         </div>
         <div
           class="plus uploadImgIcon-Div"
-          @click="append"
+          @click="triggerImagePick"
           v-if="i === uploadedImages.length - 1 && !isUploading"
         >
           <img src="/icons/uploadImg-icon.svg" alt="" class="uploadImg-icon" />
@@ -75,6 +81,12 @@
       font-family: poppinsSemiBold;
       font-size: 1.2rem;
     }
+  }
+  .native-picker-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    cursor: pointer;
   }
   .beforeUpload input {
     width: 100%;
@@ -148,8 +160,12 @@
 </style>
 <style lang="scss" scoped></style>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { Capacitor } from "@capacitor/core";
+import { Camera } from "@capacitor/camera";
 import { useUpload, type UploadedImage } from "src/composables/useUpload";
+
+const useNativePicker = computed(() => Capacitor?.isNativePlatform?.() === true);
 
 const props = defineProps<{
   max?: number;
@@ -198,9 +214,48 @@ const drop = async (e: DragEvent) => {
   dropped.value = 0;
 };
 
-const append = () => {
-  uploadInput.value?.click();
+const triggerImagePick = async () => {
+  if (useNativePicker.value) {
+    try {
+      const photo = await Camera.getPhoto({
+        source: "PHOTOLIBRARY",
+        resultType: "Uri",
+        quality: 90
+      });
+      const file = await cameraResultToFile(photo);
+      if (file) await handleUpload([file]);
+    } catch (e) {
+      if (import.meta.env.DEV) console.debug("[UploadPostImg] Camera.getPhoto cancelled or failed:", e);
+    }
+  } else {
+    uploadInput.value?.click();
+  }
 };
+
+const append = () => {
+  triggerImagePick();
+};
+
+async function cameraResultToFile(photo: { webPath?: string; path?: string; dataUrl?: string }): Promise<File | null> {
+  let previewSrc: string | null = null;
+  const isPhOrFile = (s: string) => s.startsWith("ph://") || s.startsWith("file://");
+  if (photo.webPath && !isPhOrFile(photo.webPath)) previewSrc = photo.webPath;
+  else if (photo.path || photo.webPath) {
+    const raw = (photo.webPath || photo.path)!;
+    previewSrc = isPhOrFile(raw) && Capacitor?.convertFileSrc
+      ? Capacitor.convertFileSrc(raw)
+      : raw;
+  } else if (photo.dataUrl) {
+    previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
+  }
+  if (!previewSrc) return null;
+  if (import.meta.env.DEV) {
+    console.debug("[UploadPostImg] Image source (dev):", { webPath: photo.webPath?.slice(0, 50), path: photo.path?.slice(0, 50) });
+  }
+  const res = await fetch(previewSrc);
+  const blob = await res.blob();
+  return new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+}
 
 const handleUpload = async (files: File[]) => {
   if (props.max && uploadedImages.value.length + files.length > props.max) {
