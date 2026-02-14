@@ -1719,31 +1719,30 @@ import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
-import { useQuasar } from "quasar";
 import { Capacitor } from "@capacitor/core";
 import { Camera } from "@capacitor/camera";
-import { useUpload } from "src/composables/useUpload";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifySuccess } from "src/utils/notify";
-import { tGlobal } from "src/utils/i18nGlobal";
 
 const route = useRoute();
 const router = useRouter();
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const { t, locale } = useI18n();
-const $q = useQuasar();
-const { uploadMultipleImages } = useUpload();
 const useNativePhotoPicker = Capacitor?.isNativePlatform?.() === true;
 
 /** Convert Camera result to File (iOS/Android native picker) */
 async function cameraResultToFile(photo: { webPath?: string; path?: string; dataUrl?: string }): Promise<File | null> {
   let previewSrc: string | null = null;
   const isPhOrFile = (s: string) => s.startsWith("ph://") || s.startsWith("file://");
-  if (photo.webPath && !isPhOrFile(photo.webPath)) previewSrc = photo.webPath;
-  else if (photo.path || photo.webPath) {
-    const raw = (photo.webPath || photo.path)!;
+  if (photo.webPath && !isPhOrFile(photo.webPath)) {
+    previewSrc = photo.webPath;
+  } else if (photo.path || photo.webPath) {
+    const raw = photo.webPath ?? photo.path ?? "";
+    if (!raw) {
+      return null;
+    }
     previewSrc = isPhOrFile(raw) && Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(raw) : raw;
   } else if (photo.dataUrl) {
     previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
@@ -3242,8 +3241,9 @@ const onSaveChanges = async () => {
       formData.append("existing_image_urls", JSON.stringify(existingUrls));
       for (const file of newFiles) formData.append("images[]", file);
       Object.entries(payload).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && k !== "images")
+        if (v !== undefined && v !== null && k !== "images") {
           formData.append(k, typeof v === "object" ? JSON.stringify(v) : String(v));
+        }
       });
       const { data } = await api.put(`/post-update/${postId.value}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
