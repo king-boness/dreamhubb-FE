@@ -22,6 +22,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>dreamhubb needs camera access to let you take photos for your posts.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>dreamhubb needs access to your photo library to let you choose images for your posts.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,11 +49,23 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+<<<<<<< HEAD
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to take photos for your posts.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to select images for your posts.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need permission to save photos to your library.</string>
+=======
+<<<<<<< HEAD
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>dreamhubb needs access to your photo library to let you choose images for your posts.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>dreamhubb may save selected photos to your library when you add them to a post.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>dreamhubb needs camera access to let you take photos for your posts.</string>
+=======
+>>>>>>> 8fd87ab (ios: add photo/camera permissions (Info.plist))
+>>>>>>> 2da77e2 (ios: add photo/camera permissions (Info.plist))
 </dict>
 </plist>
