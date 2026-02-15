@@ -479,6 +479,19 @@ const sortedPosts = computed(() => {
   });
 });
 
+// Dev: performance mark when feed renders (before/after meranie v console)
+watch(
+  () => ({ loading: loading.value, count: sortedPosts.value.length }),
+  ({ loading: l, count }) => {
+    if (import.meta.env.DEV && !l && count > 0) {
+      performance.mark("dh-feed-ready");
+      performance.measure("dh-feed-load", "navigationStart", "dh-feed-ready");
+      console.debug("[PostsPage] feed ready, posts:", count, "measure: dh-feed-load");
+    }
+  },
+  { immediate: true }
+);
+
 // Mock posts data removed - now using data from BE via posts store
 
 const handleOpenFilters = () => {

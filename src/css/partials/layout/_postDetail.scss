@@ -16,7 +16,7 @@
   /* HEADER IMAGE / SLIDER - Hero Card (Full-bleed) */
   .postDetailBg {
     position: relative;
-    width: 100vw; // Full viewport width
+    width: 100%; max-width: 100%; // iOS: 100vw spôsoboval horizontálny overflow (ružový roh)
     left: 50%;
     right: 50%;
     margin-left: -50vw;

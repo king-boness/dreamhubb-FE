@@ -24,7 +24,12 @@ html, body, #q-app, .q-layout, .q-page-container {
   overflow-x: hidden;
 }
 
-/* Safe-area – q-page-container bottom; topbar/footer cez iphoneDevice (_background.scss) */
+/* Safe-area – globálne na root level */
 .platform-ios .q-page-container {
+  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+/* Layouts s q-header: header má iphoneDevice, top padding by bol duplicitný – použij 0 */
+.platform-ios .q-layout:has(.q-header) .q-page-container {
+  padding-top: 0;
 }

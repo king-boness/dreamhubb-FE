@@ -454,13 +454,13 @@
                 />
               </q-card>
       </div>
-            <!-- Add new photo card (z-index/pointer-events + stop.prevent pre iOS) -->
+            <!-- Add new photo: touchstart.prevent pre iOS (scroll v QDialog môže "ukradnúť" touchend) -->
             <div class="edit-photo-wrapper edit-photo-add-wrapper">
               <button
                 type="button"
                 class="edit-photo-add-card edit-photo-add-card-btn"
+                @touchstart.stop.prevent="onAddPhotoTouchStart"
                 @click.stop.prevent="onAddPhotoClick"
-                @touchend.stop="onAddPhotoTouch"
               >
                 <img
                   src="/icons/addImg-icon.svg"
@@ -2924,18 +2924,16 @@ async function pickImage(): Promise<void> {
 }
 
 const onAddPhotoClick = () => {
-  if (import.meta.env.DEV) {
-    console.debug("[TopDreamPage] + Add photo CLICK fired, useNative:", useNativePhotoPicker);
-  }
+  console.debug("[TopDreamPage] + Add photo CLICK, useNative:", useNativePhotoPicker);
   void pickImage();
 };
 
-const onAddPhotoTouch = (e: TouchEvent) => {
+/** iOS: touchstart fires pred scroll – v QDialog touchend môže byť "ukradnutý" scrollom */
+const onAddPhotoTouchStart = (e: TouchEvent) => {
   if (useNativePhotoPicker) {
     e.preventDefault();
-    if (import.meta.env.DEV) {
-      console.debug("[TopDreamPage] + Add photo TOUCH fired");
-    }
+    e.stopPropagation();
+    console.debug("[TopDreamPage] + Add photo TOUCHSTART (iOS), opening picker");
     void pickImage();
   }
 };

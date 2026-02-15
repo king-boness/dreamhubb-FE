@@ -34,7 +34,7 @@ onMounted(() => {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  width: 100vw !important;
+  width: 100% !important; max-width: 100%;
   height: 100vh !important;
   min-height: 100vh !important;
   background-color: #0f0026;

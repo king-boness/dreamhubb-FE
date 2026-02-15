@@ -1,5 +1,5 @@
 <template>
-  <div class="submit-layout">
+  <div class="submit-layout" :class="{ iphoneDevice: $q.platform.is.ios }">
     <div class="submit-header">
       <q-btn @click="previousSubmit" class="submit-buttonPrevious">
         <img src="/icons/arrowButton-icon.svg" alt="" />
@@ -22,7 +22,7 @@
         :specificCategory="specificCategory"
       ></RouterView>
     </div>
-    <div class="submit-footer">
+    <div class="submit-footer" :class="{ 'iphoneDevice-footer': $q.platform.is.ios }">
       <span v-if="!horizontalSwiper" class="submit-description"
         >Choose by swiping up or down</span
       >
