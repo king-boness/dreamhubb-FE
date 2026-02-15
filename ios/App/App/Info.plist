@@ -47,6 +47,8 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>dreamhubb needs access to your photo library to let you choose images for your posts.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>dreamhubb may save selected photos to your library when you add them to a post.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>dreamhubb needs camera access to let you take photos for your posts.</string>
 </dict>

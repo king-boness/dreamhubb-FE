@@ -34,10 +34,16 @@ npx cap sync ios
 
 ### 4b. Edit post + photo change (3 screens: Edit post, Donor feed, Donee feed)
 - [ ] Edit post → "+ add photo" v modale reaguje na tap (native button + z-index)
-- [ ] Po tlapnutí sa otvorí Photos picker (Info.plist NSPhotoLibraryUsageDescription)
+- [ ] Po tlapnutí sa otvorí Photos picker (Info.plist: NSPhotoLibraryUsageDescription + NSPhotoLibraryAddUsageDescription)
 - [ ] Zmeň fotku → SAVE CHANGES → BE 200/204 (žiadne 500, žiadne "images.0 must be a file")
 - [ ] Request pri zmene fotky je multipart FormData (images[] = File objekty)
 - [ ] Ak fotku nezmením a dám SAVE CHANGES → images sa neposielajú, post sa uloží
+
+**How to test "+ Add photo" after Info.plist change:**
+1. `npx cap sync ios`
+2. Xcode → **Product → Clean Build Folder**
+3. Run na fyzickom iPhone
+4. Otvor post v edit mode → "+ Add photo" → over, že sa otvorí Photos picker (žiadna chyba v Xcode logu o missing NSPhotoLibraryAddUsageDescription)
 
 ### 5. Navigácia
 - [ ] Tab navigácia (Donor/Donee) funguje
