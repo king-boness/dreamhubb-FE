@@ -433,12 +433,12 @@
             <!-- Existing photos -->
             <div
               v-for="(img, index) in editForm.photos"
-              :key="`photo-${index}-${typeof img === 'string' ? img : (img.url || img.secure_url || '')}`"
+              :key="getPhotoKey(img, index)"
               class="edit-photo-wrapper"
             >
               <q-card class="edit-photo-card relative-position">
                 <q-img
-                  :src="getPhotoDisplayUrl(img)"
+                  :src="getPhotoDisplaySrc(img)"
                   ratio="1"
                   class="edit-photo-image cursor-pointer"
                   fit="cover"
@@ -1744,7 +1744,7 @@ import RetryPanel from "src/components/common/RetryPanel.vue";
 import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
 import { Capacitor } from "@capacitor/core";
-import { Camera } from "@capacitor/camera";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifySuccess } from "src/utils/notify";
@@ -1755,33 +1755,125 @@ const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const { t, locale } = useI18n();
 const useNativePhotoPicker = Capacitor?.isNativePlatform?.() === true;
+const DEBUG_PHOTO_PICKER = import.meta.env.DEV;
 
-/** Convert Camera result to File (iOS/Android native picker) */
-async function cameraResultToFile(photo: { webPath?: string; path?: string; dataUrl?: string }): Promise<File | null> {
-  let previewSrc: string | null = null;
-  const isPhOrFile = (s: string) => s.startsWith("ph://") || s.startsWith("file://");
-  if (photo.webPath && !isPhOrFile(photo.webPath)) {
-    previewSrc = photo.webPath;
-  } else if (photo.path || photo.webPath) {
-    const raw = photo.webPath ?? photo.path ?? "";
-    if (!raw) {
-      return null;
-    }
-    previewSrc = isPhOrFile(raw) && Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(raw) : raw;
-  } else if (photo.dataUrl) {
-    previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
-  }
-  if (!previewSrc) return null;
-  const res = await fetch(previewSrc);
-  const blob = await res.blob();
-  return new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+type CameraPhotoResult = {
+  webPath?: string;
+  path?: string;
+  dataUrl?: string;
+  base64String?: string;
+  format?: string;
+};
+
+/** Convert data URL to File (no fetch – reliable on iOS) */
+function dataUrlToFile(dataUrl: string, filename: string): File {
+  const arr = dataUrl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
+  const bstr = atob(arr[1]);
+  const u8arr = new Uint8Array(bstr.length);
+  for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
+  return new File([u8arr], filename, { type: mime });
 }
 
-/** Get display URL from edit photo item (string | {url,secure_url} | {file,previewUrl}) */
+/** Convert Camera result to File (handles dataUrl, base64String+format, webPath/path) */
+async function cameraResultToFile(photo: CameraPhotoResult): Promise<File | null> {
+  if (photo.dataUrl) {
+    const dataUrl = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
+    return dataUrlToFile(dataUrl, `photo_${Date.now()}.jpg`);
+  }
+  if (photo.base64String) {
+    const format = photo.format || "jpeg";
+    const dataUrl = `data:image/${format};base64,${photo.base64String}`;
+    return dataUrlToFile(dataUrl, `photo_${Date.now()}.${format}`);
+  }
+  const raw = photo.webPath ?? photo.path ?? "";
+  if (!raw) return null;
+  const isPhOrFile = raw.startsWith("ph://") || raw.startsWith("file://");
+  const previewSrc = isPhOrFile && Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(raw) : raw;
+  try {
+    const res = await fetch(previewSrc);
+    const blob = await res.blob();
+    return new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+  } catch (e) {
+    if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] cameraResultToFile fetch failed:", e);
+    return null;
+  }
+}
+
+/** Convert Camera.getPhoto result to display src string (robust, handles all iOS return shapes) */
+function toDisplaySrcFromPhoto(photo: CameraPhotoResult): string {
+  if (photo.dataUrl) {
+    return photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
+  }
+  if (photo.base64String) {
+    const format = photo.format || "jpeg";
+    return `data:image/${format};base64,${photo.base64String}`;
+  }
+  if (photo.webPath) {
+    return Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.webPath) : photo.webPath;
+  }
+  if (photo.path) {
+    return Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.path) : photo.path;
+  }
+  return "";
+}
+
+/** Get display src for <img> – priority: previewUrl > dataUrl > base64String+format > webPath/path > secure_url/url */
+function getPhotoDisplaySrc(
+  p: string | { 
+    previewUrl?: string; 
+    dataUrl?: string; 
+    base64String?: string; 
+    format?: string; 
+    webPath?: string; 
+    path?: string; 
+    secure_url?: string; 
+    url?: string;
+    id?: string | number;
+    localId?: string;
+  }
+): string {
+  if (typeof p === "string") return p;
+  // 1) previewUrl (highest priority - already processed)
+  if (p.previewUrl) return p.previewUrl;
+  // 2) dataUrl (if already "data:...")
+  if (p.dataUrl) return p.dataUrl.startsWith("data:") ? p.dataUrl : `data:image/jpeg;base64,${p.dataUrl}`;
+  // 3) base64String + format -> "data:image/<format>;base64,<base64>"
+  if (p.base64String) {
+    const format = p.format || "jpeg";
+    return `data:image/${format};base64,${p.base64String}`;
+  }
+  // 4) webPath / path -> Capacitor.convertFileSrc(...)
+  if (p.webPath) return Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(p.webPath) : p.webPath;
+  if (p.path) return Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(p.path) : p.path;
+  // 5) secure_url || url (existing backend photos)
+  if (p.secure_url) return p.secure_url;
+  if (p.url) return p.url;
+  // 6) fallback ""
+  return "";
+}
+
+/** Alias for backward compatibility */
+function toDisplaySrc(
+  img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string; dataUrl?: string; webPath?: string; path?: string; base64String?: string; format?: string }
+): string {
+  return getPhotoDisplaySrc(img);
+}
+
+/** Alias for compatibility */
 function getPhotoDisplayUrl(img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string }): string {
-  if (typeof img === "string") return img;
-  if (img.previewUrl) return img.previewUrl;
-  return img.url || img.secure_url || "";
+  return toDisplaySrc(img);
+}
+
+/** Stable key for v-for (localId | id | secure_url | url | fallback) - NEVER use index */
+function getPhotoKey(img: string | { localId?: string; id?: string | number; url?: string; secure_url?: string }, index: number): string {
+  if (typeof img === "string") return `str-${img.slice(0, 80)}`;
+  if (img.localId) return img.localId;
+  if (img.id !== undefined) return `id-${img.id}`;
+  if (img.secure_url) return `url-${img.secure_url.slice(0, 80)}`;
+  if (img.url) return `url-${img.url.slice(0, 80)}`;
+  // Fallback: use timestamp + index to ensure uniqueness (avoid pure index)
+  return `fallback-${Date.now()}-${index}`;
 }
 
 const isBodyLight = ref(false);
@@ -2103,9 +2195,20 @@ const mapFeCategoryToSubcategoryId = (feCategory: string | null): number | null 
 
 // Handler funkcie pre edit akcie
 const openPhotosEditor = () => {
-  tempPhotos.value = editForm.photos.map(item => {
+  tempPhotos.value = editForm.photos.map((item) => {
     if (typeof item === "string") return item;
-    if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+    if ("file" in item && item.file) {
+      return {
+        file: item.file,
+        previewUrl: item.previewUrl,
+        localId: (item as { localId?: string }).localId,
+        dataUrl: (item as { dataUrl?: string }).dataUrl,
+        base64String: (item as { base64String?: string }).base64String,
+        format: (item as { format?: string }).format,
+        webPath: (item as { webPath?: string }).webPath,
+        path: (item as { path?: string }).path
+      };
+    }
     return { url: item.url, secure_url: item.secure_url };
   });
   photosSaved.value = false;
@@ -2142,10 +2245,8 @@ const lightboxImages = computed(() => {
     images = editForm.photos;
   }
 
-  return images.map((img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string }) => {
-    if (typeof img === "string") return img;
-    if (img.previewUrl) return img.previewUrl;
-    return img.url || img.secure_url || "";
+  return images.map((img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string; dataUrl?: string; base64String?: string; format?: string; webPath?: string; path?: string }) => {
+    return getPhotoDisplaySrc(img);
   }).filter((url: string) => url !== "");
 });
 
@@ -2892,31 +2993,82 @@ const applyDeadlineChange = () => {
 // Photos functions
 const removePhoto = (index: number) => {
   const item = editForm.photos[index];
-  if (item && typeof item === "object" && "previewUrl" in item && item.previewUrl) {
+  if (item && typeof item === "object" && "previewUrl" in item && item.previewUrl && item.previewUrl.startsWith("blob:")) {
     URL.revokeObjectURL(item.previewUrl);
   }
-  editForm.photos.splice(index, 1);
+  editForm.photos = editForm.photos.filter((_, i) => i !== index);
   markDirty();
 };
 
-/** Jednotná funkcia pre výber fotky - iOS: Camera.getPhoto, web: input[type=file] */
+/** Jednotná funkcia pre výber fotky – iOS: DataUrl (najmenej problémové render+upload), web: input[type=file] */
 async function pickImage(): Promise<void> {
   if (useNativePhotoPicker) {
     try {
       const photo = await Camera.getPhoto({
-        source: "PHOTOLIBRARY",
-        resultType: "Uri",
-        quality: 90
+        quality: 90,
+        source: CameraSource.Photos,
+        resultType: CameraResultType.DataUrl
       });
+      const displaySrc = toDisplaySrcFromPhoto(photo);
       const file = await cameraResultToFile(photo);
-      if (file) {
-        editForm.photos.push({ file, previewUrl: URL.createObjectURL(file) });
+      if (DEBUG_PHOTO_PICKER && import.meta.env.DEV) {
+        console.debug("[EditAddPhoto]", {
+          picked: {
+            dataUrl: photo.dataUrl ? "present" : undefined,
+            base64StringLen: photo.base64String ? photo.base64String.length : 0,
+            format: photo.format,
+            webPath: photo.webPath,
+            path: photo.path
+          },
+          displaySrcPreview: displaySrc ? displaySrc.slice(0, 80) + "..." : "",
+          hasFile: !!file
+        });
+      }
+      if (file && displaySrc) {
+        const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const newItem = {
+          file,
+          previewUrl: displaySrc,
+          localId,
+          dataUrl: photo.dataUrl,
+          base64String: photo.base64String,
+          format: photo.format,
+          webPath: photo.webPath,
+          path: photo.path
+        };
+        editForm.photos = [...editForm.photos, newItem];
         markDirty();
+        // Debug log (temporarily enabled even without flag to debug 404 issue)
+        if (import.meta.env.DEV) {
+          console.debug("[EditAddPhoto] Added to gallery:", {
+            count: editForm.photos.length,
+            lastItem: {
+              localId: newItem.localId,
+              hasFile: !!newItem.file,
+              previewUrl: newItem.previewUrl ? newItem.previewUrl.slice(0, 80) + "..." : "",
+              displaySrc: getPhotoDisplaySrc(newItem).slice(0, 80) + "..."
+            },
+            allItems: editForm.photos.map((p, i) => ({
+              index: i,
+              key: getPhotoKey(p, i),
+              displaySrc: getPhotoDisplaySrc(p).slice(0, 60) + "...",
+              hasPreviewUrl: typeof p === "object" && "previewUrl" in p && !!p.previewUrl,
+              hasFile: typeof p === "object" && "file" in p && !!p.file
+            }))
+          });
+        }
+        if (DEBUG_PHOTO_PICKER) {
+          console.debug("[TopDreamPage] pickImage added to gallery:", {
+            localId,
+            displaySrc: displaySrc.slice(0, 50) + "...",
+            totalPhotos: editForm.photos.length
+          });
+        }
+      } else if (DEBUG_PHOTO_PICKER && import.meta.env.DEV) {
+        console.debug("[TopDreamPage] pickImage: failed to add photo", { hasFile: !!file, hasDisplaySrc: !!displaySrc });
       }
     } catch (e) {
-      if (import.meta.env.DEV) {
-        console.debug("[TopDreamPage] pickImage (Camera.getPhoto) cancelled or failed:", e);
-      }
+      if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] pickImage (Camera.getPhoto) cancelled or failed:", e);
     }
   } else {
     fileInput.value?.click();
@@ -2924,7 +3076,7 @@ async function pickImage(): Promise<void> {
 }
 
 const onAddPhotoClick = () => {
-  console.debug("[TopDreamPage] + Add photo CLICK, useNative:", useNativePhotoPicker);
+  if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] + Add photo CLICK, useNative:", useNativePhotoPicker);
   void pickImage();
 };
 
@@ -2933,7 +3085,7 @@ const onAddPhotoTouchStart = (e: TouchEvent) => {
   if (useNativePhotoPicker) {
     e.preventDefault();
     e.stopPropagation();
-    console.debug("[TopDreamPage] + Add photo TOUCHSTART (iOS), opening picker");
+    if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] + Add photo TOUCHSTART (iOS), opening picker");
     void pickImage();
   }
 };
@@ -2943,21 +3095,34 @@ const onPhotosSelected = async (event: Event) => {
   const files = target.files;
   if (!files?.length) return;
 
-  // Don't pre-upload – add as File + previewUrl, send as multipart on SAVE CHANGES
-  for (const file of Array.from(files)) {
-    if (file.type.startsWith("image/")) {
-      editForm.photos.push({ file, previewUrl: URL.createObjectURL(file) });
-    }
-  }
+  const toAdd = Array.from(files)
+    .filter((f) => f.type.startsWith("image/"))
+    .map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+      localId: `local-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    }));
+  editForm.photos = [...editForm.photos, ...toAdd];
   markDirty();
 
   if (target) target.value = "";
 };
 
 const cancelPhotosEdit = () => {
-  editForm.photos = tempPhotos.value.map(item => {
+  editForm.photos = tempPhotos.value.map((item) => {
     if (typeof item === "string") return item;
-    if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+    if ("file" in item && item.file) {
+      return {
+        file: item.file,
+        previewUrl: item.previewUrl,
+        localId: (item as { localId?: string }).localId,
+        dataUrl: (item as { dataUrl?: string }).dataUrl,
+        base64String: (item as { base64String?: string }).base64String,
+        format: (item as { format?: string }).format,
+        webPath: (item as { webPath?: string }).webPath,
+        path: (item as { path?: string }).path
+      };
+    }
     return { url: item.url, secure_url: item.secure_url };
   });
   dialogs.photos = false;
@@ -2966,9 +3131,20 @@ const cancelPhotosEdit = () => {
 // Handle photos dialog close (when clicking outside or ESC)
 const onPhotosDialogHide = () => {
   if (!photosSaved.value) {
-    editForm.photos = tempPhotos.value.map(item => {
+    editForm.photos = tempPhotos.value.map((item) => {
       if (typeof item === "string") return item;
-      if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+      if ("file" in item && item.file) {
+        return {
+          file: item.file,
+          previewUrl: item.previewUrl,
+          localId: (item as { localId?: string }).localId,
+          dataUrl: (item as { dataUrl?: string }).dataUrl,
+          base64String: (item as { base64String?: string }).base64String,
+          format: (item as { format?: string }).format,
+          webPath: (item as { webPath?: string }).webPath,
+          path: (item as { path?: string }).path
+        };
+      }
       return { url: item.url, secure_url: item.secure_url };
     });
   }
@@ -2977,10 +3153,20 @@ const onPhotosDialogHide = () => {
 
 const applyPhotosChange = () => {
   photosSaved.value = true;
-  // tempPhotos = clone (items with file can't be JSON stringified)
-  tempPhotos.value = editForm.photos.map(item => {
+  tempPhotos.value = editForm.photos.map((item) => {
     if (typeof item === "string") return item;
-    if ("file" in item && item.file) return { file: item.file, previewUrl: item.previewUrl };
+    if ("file" in item && item.file) {
+      return {
+        file: item.file,
+        previewUrl: item.previewUrl,
+        localId: (item as { localId?: string }).localId,
+        dataUrl: (item as { dataUrl?: string }).dataUrl,
+        base64String: (item as { base64String?: string }).base64String,
+        format: (item as { format?: string }).format,
+        webPath: (item as { webPath?: string }).webPath,
+        path: (item as { path?: string }).path
+      };
+    }
     return { url: item.url, secure_url: item.secure_url };
   });
   dialogs.photos = false;
@@ -3395,7 +3581,21 @@ const onSaveChanges = async () => {
       }
       editForm.subcategoryId = subcategoryId;
       editForm.deadline = postsStore.currentPost.date_deadline || null;
-      editForm.photos = Array.isArray(postsStore.currentPost.images) ? postsStore.currentPost.images.map(img => typeof img === "string" ? img : { url: img, secure_url: img }) : [];
+      // IMPORTANT: Update editForm.photos from refetched post images (BE returns Cloudinary URLs)
+      // This replaces local previews with actual uploaded URLs
+      if (imagesChanged && Array.isArray(postsStore.currentPost.images)) {
+        editForm.photos = postsStore.currentPost.images.map((img) => {
+          if (typeof img === "string") return img;
+          // BE returns Cloudinary URLs or local storage URLs
+          return { url: img, secure_url: img };
+        });
+        if (import.meta.env.DEV) {
+          console.debug("[onSaveChanges] Updated editForm.photos from BE:", {
+            count: editForm.photos.length,
+            images: editForm.photos.map((p) => getPhotoDisplaySrc(p).slice(0, 60) + "...")
+          });
+        }
+      }
     }
 
     // Show success toast

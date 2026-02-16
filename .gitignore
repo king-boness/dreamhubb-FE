@@ -39,8 +39,19 @@ resources/android/**/*
 # Build artifacts (do not commit)
 /ios/App/App/public 2/
 
+# iOS/Xcode artifacts (do not commit)
+ios/App/Pods/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+*.xcuserstate
+# Podfile.lock – uncomment to ignore (team may prefer committing for reproducibility)
+# ios/App/Podfile.lock
+
 # Temporary/debug files
-exit
+*.swp
+.git/.COMMIT_EDITMSG.swp
 
 # Test results and reports
 test-results/

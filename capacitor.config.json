@@ -1,0 +1,9 @@
+{
+  "appId": "com.dreamhubb",
+  "appName": "dreamhubb",
+  "webDir": "dist/spa",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
