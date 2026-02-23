@@ -1765,16 +1765,6 @@ type CameraPhotoResult = {
   format?: string;
 };
 
-/** Convert data URL to File (no fetch – reliable on iOS) */
-function dataUrlToFile(dataUrl: string, filename: string): File {
-  const arr = dataUrl.split(",");
-  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
-  const bstr = atob(arr[1]);
-  const u8arr = new Uint8Array(bstr.length);
-  for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
-  return new File([u8arr], filename, { type: mime });
-}
-
 /** Create blob URL from base64 string */
 function blobUrlFromBase64(base64: string, mime: string): string {
   const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
@@ -1956,11 +1946,6 @@ function toDisplaySrc(
   img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string; dataUrl?: string; webPath?: string; path?: string; base64String?: string; format?: string }
 ): string {
   return getPhotoDisplaySrc(img);
-}
-
-/** Alias for compatibility */
-function getPhotoDisplayUrl(img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string }): string {
-  return toDisplaySrc(img);
 }
 
 /** Stable key for v-for (localId | id | secure_url | url | fallback) - NEVER use index */
