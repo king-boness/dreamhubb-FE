@@ -1775,59 +1775,150 @@ function dataUrlToFile(dataUrl: string, filename: string): File {
   return new File([u8arr], filename, { type: mime });
 }
 
-/** Convert Camera result to File (handles dataUrl, base64String+format, webPath/path) */
-async function cameraResultToFile(photo: CameraPhotoResult): Promise<File | null> {
-  if (photo.dataUrl) {
-    const dataUrl = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
-    return dataUrlToFile(dataUrl, `photo_${Date.now()}.jpg`);
-  }
-  if (photo.base64String) {
-    const format = photo.format || "jpeg";
-    const dataUrl = `data:image/${format};base64,${photo.base64String}`;
-    return dataUrlToFile(dataUrl, `photo_${Date.now()}.${format}`);
-  }
-  const raw = photo.webPath ?? photo.path ?? "";
-  if (!raw) return null;
-  const isPhOrFile = raw.startsWith("ph://") || raw.startsWith("file://");
-  const previewSrc = isPhOrFile && Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(raw) : raw;
+/** Create blob URL from base64 string */
+function blobUrlFromBase64(base64: string, mime: string): string {
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const blob = new Blob([bytes], { type: mime });
+  return URL.createObjectURL(blob);
+}
+
+/** Convert Camera result to File (iOS/Android native picker) */
+async function cameraResultToFile(photo: {
+  webPath?: string;
+  path?: string;
+  dataUrl?: string;
+  base64String?: string;
+  format?: string;
+}): Promise<File | null> {
   try {
-    const res = await fetch(previewSrc);
-    const blob = await res.blob();
-    return new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+    const mime = photo.format ? `image/${photo.format}` : "image/jpeg";
+    const filename = `photo_${Date.now()}.${photo.format || "jpg"}`;
+
+    // 1) Prefer Base64 (typicky iOS, keď používaš resultType: Base64)
+    if (photo.base64String && photo.base64String.length > 0) {
+      const blob = base64ToBlob(photo.base64String, mime);
+      return new File([blob], filename, { type: mime });
+    }
+
+    // 2) dataUrl (niekedy web / hybrid)
+    if (photo.dataUrl) {
+      const dataUrl = photo.dataUrl.startsWith("data:")
+        ? photo.dataUrl
+        : `data:${mime};base64,${photo.dataUrl}`;
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: blob.type || mime });
+    }
+
+    // 3) webPath (fetch blob)
+    if (photo.webPath) {
+      const res = await fetch(photo.webPath);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: blob.type || mime });
+    }
+
+    // 4) path (file:// alebo ph://) cez convertFileSrc, potom fetch
+    if (photo.path) {
+      const src = Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.path) : photo.path;
+      const res = await fetch(src);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: blob.type || mime });
+    }
+
+    return null;
   } catch (e) {
-    if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] cameraResultToFile fetch failed:", e);
+    if (import.meta.env.DEV) {
+      console.error("[cameraResultToFile] failed", e, photo);
+    }
     return null;
   }
 }
 
-/** Convert Camera.getPhoto result to display src string (robust, handles all iOS return shapes) */
+function base64ToBlob(base64: string, mime: string): Blob {
+  const cleaned = base64.replace(/\s/g, "").replace(/^data:.*;base64,/, "");
+  const byteChars = atob(cleaned);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+  return new Blob([new Uint8Array(byteNumbers)], { type: mime });
+}
+
+/** Convert Camera.getPhoto result to display src string (prefer file paths, then blob URLs, avoid data: URLs) */
 function toDisplaySrcFromPhoto(photo: CameraPhotoResult): string {
-  if (photo.dataUrl) {
-    return photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
+  if (import.meta.env.DEV) {
+    console.debug("[toDisplaySrcFromPhoto] Input photo:", {
+      hasDataUrl: !!photo.dataUrl,
+      hasBase64String: !!photo.base64String,
+      base64StringLen: photo.base64String?.length || 0,
+      format: photo.format,
+      hasWebPath: !!photo.webPath,
+      hasPath: !!photo.path
+    });
   }
+  // 1) Prefer webPath (file path - best for iOS)
+  if (photo.webPath) {
+    const result = Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.webPath) : photo.webPath;
+    if (import.meta.env.DEV) {
+      console.debug("[toDisplaySrcFromPhoto] RETURN webPath:", result);
+    }
+    return result;
+  }
+  // 2) Prefer path (alternative file path)
+  if (photo.path) {
+    const result = Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.path) : photo.path;
+    if (import.meta.env.DEV) {
+      console.debug("[toDisplaySrcFromPhoto] RETURN path:", result);
+    }
+    return result;
+  }
+  // 3) base64String -> create blob URL (better than data: URL for q-img)
   if (photo.base64String) {
     const format = photo.format || "jpeg";
-    return `data:image/${format};base64,${photo.base64String}`;
+    const mime = `image/${format}`;
+    const result = blobUrlFromBase64(photo.base64String, mime);
+    if (import.meta.env.DEV) {
+      console.debug("[toDisplaySrcFromPhoto] RETURN base64String as blob URL:", result);
+    }
+    return result;
   }
-  if (photo.webPath) {
-    return Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.webPath) : photo.webPath;
+  // 4) dataUrl -> always convert to blob URL (never return data: URL for q-img compatibility)
+  if (photo.dataUrl) {
+    let base64: string;
+    let mime = "image/jpeg";
+    if (photo.dataUrl.startsWith("data:") && photo.dataUrl.includes(";base64,")) {
+      const parts = photo.dataUrl.split(";base64,");
+      base64 = parts.length === 2 ? parts[1] : photo.dataUrl;
+      const mimeMatch = parts[0]?.match(/data:image\/([a-zA-Z+]+)/);
+      if (mimeMatch) mime = `image/${mimeMatch[1]}`;
+    } else if (photo.dataUrl.startsWith("data:")) {
+      const commaIdx = photo.dataUrl.indexOf(",");
+      base64 = commaIdx >= 0 ? photo.dataUrl.slice(commaIdx + 1) : "";
+    } else {
+      base64 = photo.dataUrl;
+    }
+    if (base64) {
+      const result = blobUrlFromBase64(base64, mime);
+      if (import.meta.env.DEV) {
+        console.debug("[toDisplaySrcFromPhoto] RETURN dataUrl as blob URL:", result);
+      }
+      return result;
+    }
   }
-  if (photo.path) {
-    return Capacitor?.convertFileSrc ? Capacitor.convertFileSrc(photo.path) : photo.path;
+  if (import.meta.env.DEV) {
+    console.debug("[toDisplaySrcFromPhoto] RETURN EMPTY (no valid source)");
   }
   return "";
 }
 
 /** Get display src for <img> – priority: previewUrl > dataUrl > base64String+format > webPath/path > secure_url/url */
 function getPhotoDisplaySrc(
-  p: string | { 
-    previewUrl?: string; 
-    dataUrl?: string; 
-    base64String?: string; 
-    format?: string; 
-    webPath?: string; 
-    path?: string; 
-    secure_url?: string; 
+  p: string | {
+    previewUrl?: string;
+    dataUrl?: string;
+    base64String?: string;
+    format?: string;
+    webPath?: string;
+    path?: string;
+    secure_url?: string;
     url?: string;
     id?: string | number;
     localId?: string;
@@ -1837,7 +1928,9 @@ function getPhotoDisplaySrc(
   // 1) previewUrl (highest priority - already processed)
   if (p.previewUrl) return p.previewUrl;
   // 2) dataUrl (if already "data:...")
-  if (p.dataUrl) return p.dataUrl.startsWith("data:") ? p.dataUrl : `data:image/jpeg;base64,${p.dataUrl}`;
+  if (p.dataUrl) {
+    return p.dataUrl.startsWith("data:") ? p.dataUrl : `data:image/jpeg;base64,${p.dataUrl}`;
+  }
   // 3) base64String + format -> "data:image/<format>;base64,<base64>"
   if (p.base64String) {
     const format = p.format || "jpeg";
@@ -1850,6 +1943,11 @@ function getPhotoDisplaySrc(
   if (p.secure_url) return p.secure_url;
   if (p.url) return p.url;
   // 6) fallback ""
+  if (import.meta.env.DEV) {
+    console.debug("[getPhotoDisplaySrc] RETURN EMPTY", {
+      objectKeys: Object.keys(p)
+    });
+  }
   return "";
 }
 
@@ -1914,7 +2012,22 @@ const dialogs = reactive({
 
 // Edit form state
 const editForm = reactive({
-  photos: [] as Array<string | { url?: string; secure_url?: string; public_id?: string }>,
+  photos: [] as Array<
+    string |
+    {
+      localId?: string
+      file?: File
+      previewUrl?: string
+      dataUrl?: string
+      base64String?: string
+      format?: string
+      webPath?: string
+      path?: string
+      url?: string
+      secure_url?: string
+      public_id?: string
+    }
+  >,
   categoryId: null as number | null,
   subcategoryId: null as number | null,
   headline: "",
@@ -1924,8 +2037,43 @@ const editForm = reactive({
 // File input ref for photos
 const fileInput = ref<HTMLInputElement | null>(null);
 
-// Temporary photos state for cancel functionality
-const tempPhotos = ref<Array<string | { url?: string; secure_url?: string; public_id?: string }>>([]);
+// Watch editForm.photos for debugging (DEV only)
+if (import.meta.env.DEV) {
+  watch(
+    () => editForm.photos,
+    (newPhotos, oldPhotos) => {
+      console.debug("[WATCH editForm.photos] Changed:", {
+        oldLength: oldPhotos?.length || 0,
+        newLength: newPhotos.length,
+        lastItem: newPhotos.length > 0 ? {
+          type: typeof newPhotos[newPhotos.length - 1],
+          hasPreviewUrl: typeof newPhotos[newPhotos.length - 1] === "object" && newPhotos[newPhotos.length - 1] !== null && "previewUrl" in newPhotos[newPhotos.length - 1] ? !!newPhotos[newPhotos.length - 1].previewUrl : false,
+          displaySrc: getPhotoDisplaySrc(newPhotos[newPhotos.length - 1]).slice(0, 80) + "..."
+        } : null
+      });
+    },
+    { deep: true }
+  );
+}
+
+// Temporary photos state for cancel functionality (same shape as editForm.photos)
+const tempPhotos = ref<
+  Array<
+    string | {
+      localId?: string;
+      file?: File;
+      previewUrl?: string;
+      dataUrl?: string;
+      base64String?: string;
+      format?: string;
+      webPath?: string;
+      path?: string;
+      url?: string;
+      secure_url?: string;
+      public_id?: string;
+    }
+  >
+>([]);
 // Flag to track if photos were saved (to prevent restore on dialog close)
 const photosSaved = ref(false);
 const headlineInputRef = ref<{ focus:() => void; $el?: { querySelector: (selector: string) => HTMLInputElement | null } } | null>(null);
@@ -2195,6 +2343,10 @@ const mapFeCategoryToSubcategoryId = (feCategory: string | null): number | null 
 
 // Handler funkcie pre edit akcie
 const openPhotosEditor = () => {
+  if (import.meta.env.DEV) {
+    console.debug("[openPhotosEditor] Opening photos dialog");
+    console.debug("[openPhotosEditor] editForm.photos.length:", editForm.photos.length);
+  }
   tempPhotos.value = editForm.photos.map((item) => {
     if (typeof item === "string") return item;
     if ("file" in item && item.file) {
@@ -2211,6 +2363,10 @@ const openPhotosEditor = () => {
     }
     return { url: item.url, secure_url: item.secure_url };
   });
+  if (import.meta.env.DEV) {
+    console.debug("[openPhotosEditor] tempPhotos.value.length:", tempPhotos.value.length);
+    console.debug("[openPhotosEditor] Template will render editForm.photos (not tempPhotos)");
+  }
   photosSaved.value = false;
   dialogs.photos = true;
 };
@@ -2363,8 +2519,9 @@ const openCategoryPicker = () => {
   let currentCategoryId: number | null = null;
 
   // First try to get from draft (most up-to-date, what user is currently editing)
-  if (draft.value?.categorySlug) {
-    const categoryOption = categoryOptions.value.find(opt => opt.name === draft.value.categorySlug);
+  const draftCategorySlug = draft.value?.categorySlug;
+  if (draftCategorySlug) {
+    const categoryOption = categoryOptions.value.find((opt) => opt.name === draftCategorySlug);
     if (categoryOption) {
       currentCategoryId = categoryOption.id;
     }
@@ -2657,8 +2814,9 @@ const openSubcategoryPicker = () => {
   let currentSubcategoryId: number | null = null;
 
   // First try to get from draft (most up-to-date, what user is currently editing)
-  if (draft.value?.subcategorySlug) {
-    const subcategoryOption = subcategoryOptions.value.find(opt => opt.name === draft.value.subcategorySlug);
+  const draftSubcategorySlug = draft.value?.subcategorySlug;
+  if (draftSubcategorySlug) {
+    const subcategoryOption = subcategoryOptions.value.find((opt) => opt.name === draftSubcategorySlug);
     if (subcategoryOption) {
       currentSubcategoryId = subcategoryOption.id;
     }
@@ -3000,14 +3158,14 @@ const removePhoto = (index: number) => {
   markDirty();
 };
 
-/** Jednotná funkcia pre výber fotky – iOS: DataUrl (najmenej problémové render+upload), web: input[type=file] */
+/** Jednotná funkcia pre výber fotky – iOS: Uri (prefer file paths for better q-img rendering), web: input[type=file] */
 async function pickImage(): Promise<void> {
   if (useNativePhotoPicker) {
     try {
       const photo = await Camera.getPhoto({
         quality: 90,
         source: CameraSource.Photos,
-        resultType: CameraResultType.DataUrl
+        resultType: CameraResultType.Base64
       });
       const displaySrc = toDisplaySrcFromPhoto(photo);
       const file = await cameraResultToFile(photo);
@@ -3036,26 +3194,51 @@ async function pickImage(): Promise<void> {
           webPath: photo.webPath,
           path: photo.path
         };
+
+        // DEBUG: Log newItem details after creation
+        if (import.meta.env.DEV) {
+          console.debug("[pickImage] newItem created:", {
+            previewUrl: newItem.previewUrl,
+            previewUrlStartsWith: {
+              blob: newItem.previewUrl.startsWith("blob:"),
+              file: newItem.previewUrl.startsWith("file:"),
+              capacitor: newItem.previewUrl.startsWith("capacitor:")
+            },
+            file: {
+              exists: !!newItem.file,
+              type: newItem.file?.type,
+              size: newItem.file?.size
+            },
+            flags: {
+              hasWebPath: !!newItem.webPath,
+              hasPath: !!newItem.path,
+              hasBase64String: !!newItem.base64String,
+              hasDataUrl: !!newItem.dataUrl
+            }
+          });
+        }
+
         editForm.photos = [...editForm.photos, newItem];
         markDirty();
-        // Debug log (temporarily enabled even without flag to debug 404 issue)
+
+        // DEBUG: Log after adding to editForm.photos
         if (import.meta.env.DEV) {
-          console.debug("[EditAddPhoto] Added to gallery:", {
-            count: editForm.photos.length,
-            lastItem: {
-              localId: newItem.localId,
-              hasFile: !!newItem.file,
-              previewUrl: newItem.previewUrl ? newItem.previewUrl.slice(0, 80) + "..." : "",
-              displaySrc: getPhotoDisplaySrc(newItem).slice(0, 80) + "..."
-            },
-            allItems: editForm.photos.map((p, i) => ({
-              index: i,
-              key: getPhotoKey(p, i),
-              displaySrc: getPhotoDisplaySrc(p).slice(0, 60) + "...",
-              hasPreviewUrl: typeof p === "object" && "previewUrl" in p && !!p.previewUrl,
-              hasFile: typeof p === "object" && "file" in p && !!p.file
-            }))
+          const lastItem = editForm.photos[editForm.photos.length - 1];
+          const displaySrc = getPhotoDisplaySrc(lastItem);
+          console.debug("[pickImage] After adding to editForm.photos:", {
+            length: editForm.photos.length,
+            lastItem: typeof lastItem === "object" && lastItem !== null ? {
+              previewUrl: "previewUrl" in lastItem ? lastItem.previewUrl : undefined,
+              hasFile: "file" in lastItem ? !!lastItem.file : false,
+              webPath: "webPath" in lastItem ? lastItem.webPath : undefined,
+              path: "path" in lastItem ? lastItem.path : undefined
+            } : null
           });
+          if (!displaySrc || displaySrc === "") {
+            console.debug("[pickImage] getPhotoDisplaySrc returned empty", {
+              objectKeys: typeof lastItem === "object" && lastItem !== null ? Object.keys(lastItem) : []
+            });
+          }
         }
         if (DEBUG_PHOTO_PICKER) {
           console.debug("[TopDreamPage] pickImage added to gallery:", {
@@ -3109,6 +3292,32 @@ const onPhotosSelected = async (event: Event) => {
 };
 
 const cancelPhotosEdit = () => {
+  // Cleanup: revoke blob URLs for items that will be discarded (new items not in tempPhotos)
+  const tempPhotoLocalIds = new Set(
+    tempPhotos.value
+      .map((item) => (typeof item === "object" && item !== null && "localId" in item ? item.localId : null))
+      .filter((id): id is string => !!id)
+  );
+  editForm.photos.forEach((item) => {
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      "previewUrl" in item &&
+      item.previewUrl &&
+      typeof item.previewUrl === "string" &&
+      item.previewUrl.startsWith("blob:")
+    ) {
+      const localId = "localId" in item ? item.localId : null;
+      // If this item is not in tempPhotos, revoke its blob URL
+      if (!localId || !tempPhotoLocalIds.has(localId)) {
+        if (import.meta.env.DEV) {
+          console.debug("[cancelPhotosEdit] Revoking blob URL for discarded item:", localId);
+        }
+        URL.revokeObjectURL(item.previewUrl);
+      }
+    }
+  });
+
   editForm.photos = tempPhotos.value.map((item) => {
     if (typeof item === "string") return item;
     if ("file" in item && item.file) {
@@ -3130,7 +3339,41 @@ const cancelPhotosEdit = () => {
 
 // Handle photos dialog close (when clicking outside or ESC)
 const onPhotosDialogHide = () => {
+  if (import.meta.env.DEV) {
+    console.debug("[onPhotosDialogHide] Dialog closing, photosSaved:", photosSaved.value);
+    console.debug("[onPhotosDialogHide] editForm.photos.length before restore:", editForm.photos.length);
+    console.debug("[onPhotosDialogHide] tempPhotos.value.length:", tempPhotos.value.length);
+  }
   if (!photosSaved.value) {
+    if (import.meta.env.DEV) {
+      console.debug("[onPhotosDialogHide] Restoring editForm.photos from tempPhotos (CANCEL)");
+    }
+    // Cleanup: revoke blob URLs for items that will be discarded (new items not in tempPhotos)
+    const tempPhotoLocalIds = new Set(
+      tempPhotos.value
+        .map((item) => (typeof item === "object" && item !== null && "localId" in item ? item.localId : null))
+        .filter((id): id is string => !!id)
+    );
+    editForm.photos.forEach((item) => {
+      if (
+        typeof item === "object" &&
+        item !== null &&
+        "previewUrl" in item &&
+        item.previewUrl &&
+        typeof item.previewUrl === "string" &&
+        item.previewUrl.startsWith("blob:")
+      ) {
+        const localId = "localId" in item ? item.localId : null;
+        // If this item is not in tempPhotos, revoke its blob URL
+        if (!localId || !tempPhotoLocalIds.has(localId)) {
+          if (import.meta.env.DEV) {
+            console.debug("[onPhotosDialogHide] Revoking blob URL for discarded item:", localId);
+          }
+          URL.revokeObjectURL(item.previewUrl);
+        }
+      }
+    });
+
     editForm.photos = tempPhotos.value.map((item) => {
       if (typeof item === "string") return item;
       if ("file" in item && item.file) {
@@ -3147,6 +3390,13 @@ const onPhotosDialogHide = () => {
       }
       return { url: item.url, secure_url: item.secure_url };
     });
+    if (import.meta.env.DEV) {
+      console.debug("[onPhotosDialogHide] editForm.photos.length after restore:", editForm.photos.length);
+    }
+  } else {
+    if (import.meta.env.DEV) {
+      console.debug("[onPhotosDialogHide] Keeping editForm.photos (SAVED)");
+    }
   }
   photosSaved.value = false;
 };
@@ -3335,8 +3585,8 @@ const fillFormFromPost = (p: PostDetail) => {
   editForm.headline = p.title || "";
   editForm.deadline = p.date_deadline || null;
 
-  // Initialize tempPhotos to match current photos
-  tempPhotos.value = JSON.parse(JSON.stringify(editForm.photos));
+  // Initialize tempPhotos to match current photos (shallow clone to preserve File, previewUrl, dataUrl)
+  tempPhotos.value = editForm.photos.map((p) => (typeof p === "string" ? p : { ...p }));
 };
 
 // Computed property to check if there are changes
