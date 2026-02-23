@@ -63,6 +63,19 @@ module.exports = configure(function (/* ctx */) {
           __VUE_OPTIONS_API__: true,
           __VUE_PROD_DEVTOOLS__: false
         }
+        cfg.build = cfg.build || {}
+        cfg.build.rollupOptions = cfg.build.rollupOptions || {}
+        const output = cfg.build.rollupOptions.output || {}
+        cfg.build.rollupOptions.output = {
+          ...output,
+          manualChunks: {
+            ...(typeof output.manualChunks === "object" ? output.manualChunks : {}),
+            vue: ["vue", "vue-router", "pinia"],
+            axios: ["axios"],
+            i18n: ["vue-i18n"],
+            capacitor: ["@capacitor/core", "@capacitor/camera", "@capacitor/app", "@capacitor/haptics", "@capacitor/keyboard", "@capacitor/status-bar"]
+          }
+        }
       }
     },
 
