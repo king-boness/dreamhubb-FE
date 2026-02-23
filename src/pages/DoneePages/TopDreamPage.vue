@@ -1941,13 +1941,6 @@ function getPhotoDisplaySrc(
   return "";
 }
 
-/** Alias for backward compatibility */
-function toDisplaySrc(
-  img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string; dataUrl?: string; webPath?: string; path?: string; base64String?: string; format?: string }
-): string {
-  return getPhotoDisplaySrc(img);
-}
-
 /** Stable key for v-for (localId | id | secure_url | url | fallback) - NEVER use index */
 function getPhotoKey(img: string | { localId?: string; id?: string | number; url?: string; secure_url?: string }, index: number): string {
   if (typeof img === "string") return `str-${img.slice(0, 80)}`;
