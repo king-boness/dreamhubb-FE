@@ -3600,16 +3600,20 @@ const hasChanges = computed(() => {
   const o = originalDraft.value;
   const d = draft.value;
 
-  const currentUrls = (editForm.photos || [])
+  const existingUrls = (editForm.photos || [])
     .map((img) => (typeof img === "string" ? img : (img.url || img.secure_url || "")))
     .filter((url) => url.length > 0);
+
+  const newFilesCount = (editForm.photos || []).filter((img) =>
+    typeof img === "object" && img !== null && "file" in img && (img as { file?: unknown }).file instanceof File
+  ).length;
 
   // Compare using primitives (slugs) - this ensures reliable comparison
   const sameTitle = o.title === d.title;
   const sameCategory = o.categorySlug === d.categorySlug;
   const sameSubcategory = o.subcategorySlug === d.subcategorySlug;
   const sameDeadline = o.deadline === d.deadline;
-  const sameImages = JSON.stringify(o.images || []) === JSON.stringify(currentUrls);
+  const sameImages = newFilesCount === 0 && JSON.stringify(o.images || []) === JSON.stringify(existingUrls);
   const sameTokens = form.tokensToTopUp === 0; // tokens_to_top_up starts at 0
 
   const hasChangesResult = !(
