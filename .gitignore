@@ -63,3 +63,7 @@ playwright-report/
 
 # Build artifacts
 dist/
+
+# local dev artifacts
+build-output.txt
+docs/GIT_EDITOR_TIP.md
