@@ -122,11 +122,6 @@ const model = ref("onDream");
 
 // TODO: Replace with API data when BE endpoint is ready
 // Computed properties for stats data
-const totalTokensDonated = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/total-donated')
-  return 0;
-});
-
 const remainingKarma = computed(() => {
   // TODO: Replace with API data: await api.get('/user/stats/remaining-karma')
   return 0;

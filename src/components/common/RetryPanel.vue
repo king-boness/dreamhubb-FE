@@ -44,12 +44,6 @@ const retryLabel = computed(() => {
   return label === "common.actions.retry" ? "Retry" : label;
 });
 
-const displayMessage = computed(() => {
-  if (props.message) return props.message;
-  if (props.messageKey) return t(props.messageKey);
-  return undefined;
-});
-
 const handleRetry = async () => {
   await props.onRetry();
 };

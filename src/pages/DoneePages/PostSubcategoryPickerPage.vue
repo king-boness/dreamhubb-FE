@@ -16,7 +16,6 @@ import { useRouter } from "vue-router";
 import { notifyError } from "src/utils/notify";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import { usePostCreationStore } from "src/stores/postCreation";
-import { tGlobal } from "src/utils/i18nGlobal";
 
 const router = useRouter();
 const postCreationStore = usePostCreationStore();

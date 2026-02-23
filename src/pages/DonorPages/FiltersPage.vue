@@ -82,7 +82,6 @@ import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
 import { api } from "boot/axios";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
-import { tGlobal } from "src/utils/i18nGlobal";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";

@@ -207,8 +207,6 @@ export const useApiCallStore = defineStore("apiCall", {
         // return res.data;
 
         // Zatiaľ hardcoded data - používame externé placeholder URL, aby sme nemali 404
-        const placeholderAvatar = "https://picsum.photos/seed/avatar/80/80";
-
         return [
           {
             id: 1,

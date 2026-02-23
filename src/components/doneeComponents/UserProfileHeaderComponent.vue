@@ -63,9 +63,7 @@
 import { ref, computed } from "vue";
 
 import { UserProfile } from "src/components/models";
-import { useUserStore } from "src/stores/user-store";
 const progress1 = ref(0.8);
-const userStore = useUserStore();
 const progressLabel1 = computed(() => progress1.value * 100 + "%");
 
 const profile = ref({

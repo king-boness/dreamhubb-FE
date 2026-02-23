@@ -24,13 +24,7 @@ import { defineProps, PropType } from "vue";
 import ReviewComponent from "./ReviewComponent.vue";
 import { UserProfile } from "src/components/models";
 
-interface Props {
-  profile: UserProfile;
-  onGoing?: UserProfile[];
-  accomplished?: UserProfile[];
-}
-
-const props: Props = defineProps({
+defineProps({
   profile: {
     type: Object as PropType<UserProfile>,
     required: true

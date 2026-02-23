@@ -25,8 +25,6 @@ interface User {
   updated_at?: string;
 }
 
-type Status = "idle" | "loading" | "success" | "error";
-
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: (localStorage.getItem(TOKEN_KEY) || null) as string | null,

@@ -65,7 +65,6 @@
 import { ref, computed } from "vue";
 import { History, Topic, Post } from "src/components/models";
 import SearchHistoryComponent from "src/components/partials/SearchHistoryComponent.vue";
-import SearchTopicComponent from "src/components/partials/SearchTopicComponent.vue";
 import PostComponent from "src/components/partials/PostComponent.vue";
 import FilterSearchComponent from "src/components/partials/FilterSearchComponent.vue";
 

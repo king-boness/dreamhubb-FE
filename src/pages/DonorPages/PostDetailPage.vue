@@ -374,7 +374,6 @@ import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import PageTitle from "src/components/ui/PageTitle.vue";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
-import { tGlobal } from "src/utils/i18nGlobal";
 import { useCommentsStore } from "src/stores/comments";
 import { api } from "boot/axios";
 

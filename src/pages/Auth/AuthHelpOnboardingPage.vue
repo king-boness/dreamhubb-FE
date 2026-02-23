@@ -191,10 +191,6 @@ function handleMapError(event: Event) {
 const imageErrors = ref<Set<string>>(new Set());
 const loadedImages = ref<Set<string>>(new Set());
 
-const isImageLoaded = (imageSrc: string): boolean => {
-  return loadedImages.value.has(imageSrc) && !imageErrors.value.has(imageSrc);
-};
-
 function handleImageError(event: Event) {
   const img = event.target as HTMLImageElement;
   if (img.src) {

@@ -181,7 +181,7 @@ const emit = defineEmits<{
   imagesUpdated: [images: UploadedImage[]];
 }>();
 
-const { uploadImage, deleteImage, uploadMultipleImages } = useUpload();
+const { deleteImage, uploadMultipleImages } = useUpload();
 
 const uploadInput = ref<HTMLInputElement | null>(null);
 const dropped = ref(0);
@@ -230,10 +230,6 @@ const triggerImagePick = async () => {
   } else {
     uploadInput.value?.click();
   }
-};
-
-const append = () => {
-  triggerImagePick();
 };
 
 async function cameraResultToFile(photo: { webPath?: string; path?: string; dataUrl?: string }): Promise<File | null> {

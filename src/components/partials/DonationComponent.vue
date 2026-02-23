@@ -50,10 +50,7 @@ import { defineProps, PropType } from "vue";
 import { UserProfile } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 
-interface Props {
-  profile: UserProfile;
-}
-const props: Props = defineProps({
+defineProps({
   profile: {
     type: Object as PropType<UserProfile>,
     required: true

@@ -71,11 +71,7 @@ import { useQuasar } from "quasar";
 import InspirationComponent from "src/components/partials/InspirationComponent.vue";
 import StorieShowComponent from "src/components/partials/StorieShowComponent.vue";
 import ImageUploader from "../../components/partials/UploadImgComponent.vue";
-import MyStoryComponent from "src/components/partials/MyStoryComponent.vue";
 const insiparionMessage = ref("");
-const onRefresh = (done: any) => {
-  done();
-};
 const refresh = (done: any) => {
   setTimeout(() => {
     done();

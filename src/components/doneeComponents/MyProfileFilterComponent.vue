@@ -103,10 +103,7 @@ import UserAvatar from "src/components/common/UserAvatar.vue";
 const { t } = useI18n();
 const authStore = useAuthStore();
 const tab = ref("Profile");
-interface Props {
-  post: Post;
-}
-const props: Props = defineProps({
+defineProps({
   post: {
     type: Object as PropType<Post>,
     required: true

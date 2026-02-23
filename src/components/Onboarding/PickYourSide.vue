@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Fade, Perspective } from "@egjs/flicking-plugins";
 import Flicking from "@egjs/vue3-flicking";

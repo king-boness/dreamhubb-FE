@@ -222,7 +222,6 @@ import { usePostsStore } from "src/stores/posts";
 import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
 import { notifyError, notifySuccess } from "src/utils/notify";
-import { tGlobal } from "src/utils/i18nGlobal";
 import UploadPostImgComponent from "src/components/partials/UploadPostImgComponent.vue";
 import { PostCategories } from "src/components/models";
 import ImageIndexSlider from "src/components/partials/ImageIndexSlider.vue";

@@ -41,7 +41,7 @@ import { useI18n } from "vue-i18n";
 const router = useRouter();
 const notificationsStore = useNotificationsStore();
 const { items, isLoading, error } = storeToRefs(notificationsStore);
-const { t } = useI18n();
+useI18n();
 
 const notifications = computed(() => items.value);
 

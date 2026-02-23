@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineProps, PropType, provide, ref } from "vue";
+import { defineProps, PropType } from "vue";
 import { Topic } from "src/components/models";
 interface Props {
   topic: Topic;

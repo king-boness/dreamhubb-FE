@@ -174,7 +174,6 @@ import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 import type { UploadedImage } from "src/composables/useUpload";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
-import { tGlobal } from "src/utils/i18nGlobal";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -183,10 +182,6 @@ const postsStore = usePostsStore();
 const commentsStore = useCommentsStore();
 const authStore = useAuthStore();
 const notificationsStore = useNotificationsStore();
-const retryLabel = computed(() => {
-  const label = t("common.actions.retry");
-  return label === "common.actions.retry" ? "Retry" : label;
-});
 
 // State for active mode in Help to Fulfill
 const activeMode = ref<"help" | "return">("help"); // Default to "I'll help with"

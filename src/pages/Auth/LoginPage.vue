@@ -66,14 +66,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from "vue";
-import { useQuasar } from "quasar";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
 import { notifyError } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
-const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();

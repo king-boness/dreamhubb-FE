@@ -16,7 +16,6 @@ import { useRouter } from "vue-router";
 import { notifyError } from "src/utils/notify";
 import WhatIsYourGoal from "src/components/Onboarding/WhatIsYourGoal.vue";
 import { usePostCreationStore } from "src/stores/postCreation";
-import { tGlobal } from "src/utils/i18nGlobal";
 
 const router = useRouter();
 const postCreationStore = usePostCreationStore();

@@ -16,12 +16,12 @@
         @click="nextPage"
       >
         <q-img
-          :src="getIconPath(item.title, false)"
+          :src="getIconPath(item.title)"
           class="img"
           v-if="!lightMode"
         />
         <q-img
-          :src="getIconPath(item.title, true)"
+          :src="getIconPath(item.title)"
           class="img img-light"
           v-else
         />
@@ -103,7 +103,7 @@ const getIconName = (title: string): string => {
 };
 
 // Get icon path - use SVG for all categories
-const getIconPath = (title: string, _isLight: boolean): string => {
+const getIconPath = (title: string): string => {
   const iconName = getIconName(title);
   const basePath = "/icons/CategoryIcons/";
 

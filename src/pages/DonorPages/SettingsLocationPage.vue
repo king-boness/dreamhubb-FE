@@ -44,7 +44,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useQuasar } from "quasar";
 import { api } from "boot/axios";
 import { useAuthStore } from "src/stores/auth";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
@@ -54,7 +53,6 @@ import { notifyError, notifySuccess } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const router = useRouter();
-const $q = useQuasar();
 const authStore = useAuthStore();
 const { t, locale } = useI18n();
 

@@ -20,13 +20,7 @@ import { defineProps, PropType } from "vue";
 import { UserProfile } from "src/components/models";
 import PostFilterComponent from "./PostFilterComponent.vue";
 
-interface Props {
-  onGoing: UserProfile[];
-  accomplished: UserProfile[];
-  profile: UserProfile;
-}
-
-const props: Props = defineProps({
+defineProps({
   onGoing: {
     type: Array as PropType<UserProfile[]>,
     required: true

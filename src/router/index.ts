@@ -9,7 +9,6 @@ import {
 
 import routes from "./routes";
 import { useAuthStore } from "src/stores/auth";
-import { useOnboardingStore } from "src/stores/onboarding";
 
 export default route(function ({ store }) {
   const createHistory = process.env.SERVER

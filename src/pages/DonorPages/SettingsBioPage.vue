@@ -29,13 +29,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const router = useRouter();
-const $q = useQuasar();
 const authStore = useAuthStore();
 
 const bio = ref(authStore.user?.bio || "");

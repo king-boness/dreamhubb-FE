@@ -62,12 +62,7 @@ import CommentComponent from "./CommentComponent.vue";
 
 const tab = ref("Help");
 
-interface Props {
-  Help: UserProfile[];
-  Contribution: UserProfile[];
-}
-
-const props: Props = defineProps({
+defineProps({
   Help: {
     type: Array as PropType<UserProfile[]>,
     required: true

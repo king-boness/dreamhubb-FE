@@ -74,7 +74,6 @@ import { useI18n } from "vue-i18n";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { api } from "boot/axios";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
-import { tGlobal } from "src/utils/i18nGlobal";
 
 const route = useRoute();
 const router = useRouter();

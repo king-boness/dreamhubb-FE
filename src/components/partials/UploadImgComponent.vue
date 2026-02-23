@@ -218,7 +218,7 @@ const emit = defineEmits<{
   imagesUpdated: [images: UploadedImage[]];
 }>();
 
-const { uploadImage, deleteImage, uploadMultipleImages } = useUpload();
+const { deleteImage, uploadMultipleImages } = useUpload();
 
 const uploadInput = ref<HTMLInputElement | null>(null);
 const dropped = ref(0);
