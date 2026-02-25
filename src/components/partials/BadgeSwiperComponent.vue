@@ -89,13 +89,13 @@
   </div>
 </template>
 <script setup>
-import { Pagination, Navigation, Grid, Mousewheel, FreeMode } from "swiper";
+import { Pagination, Navigation, Grid, Mousewheel, FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { ref } from "vue";
 
-import "swiper/scss";
-import "swiper/scss/navigation";
-import "swiper/scss/pagination";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 defineProps({
   openedFully: {
