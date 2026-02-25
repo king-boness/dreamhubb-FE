@@ -19,8 +19,8 @@
     <template v-else-if="postDetail">
       <!-- HERO + SLIDER (rovnaký komponent ako na detaile) -->
       <PostHeader
-        v-if="postDetail.images && postDetail.images.length > 0"
-        :images="postDetail.images"
+        v-if="heroImages.length > 0"
+        :images="heroImages"
         :auto-slide="true"
         :show-progress="true"
         :show-arrows="true"
@@ -2357,32 +2357,26 @@ const openLightbox = (imageIndex: number) => {
   }
 };
 
+// Source of truth for HERO: editForm.photos (with preview) or postDetail.images
+const heroImages = computed(() => {
+  if (editForm.photos && editForm.photos.length > 0) {
+    return editForm.photos
+      .map((p) => getPhotoDisplaySrc(p))
+      .filter(Boolean);
+  }
+  return (postDetail.value?.images ?? []).filter(Boolean);
+});
+
 // Open lightbox for hero image click (from PostHeader)
 const onHeroImageClick = (index: number) => {
-  if (postDetail.value?.images && postDetail.value.images.length > 0) {
+  if (heroImages.value.length > 0) {
     lightboxInitialIndex.value = index;
     isLightboxOpen.value = true;
   }
 };
 
-// Get image URLs array for lightbox
-// Uses images from postDetail (hero) or editForm.photos (edit dialog)
-const lightboxImages = computed(() => {
-  // Priority: use postDetail.images if available (from hero), otherwise use editForm.photos (from edit dialog)
-  let images: Array<string | { url?: string; secure_url?: string }> = [];
-
-  if (postDetail.value?.images && postDetail.value.images.length > 0) {
-    // Use images from postDetail (hero section)
-    images = postDetail.value.images;
-  } else if (editForm.photos && editForm.photos.length > 0) {
-    // Fallback to editForm.photos (edit photos dialog)
-    images = editForm.photos;
-  }
-
-  return images.map((img: string | { url?: string; secure_url?: string; file?: File; previewUrl?: string; dataUrl?: string; base64String?: string; format?: string; webPath?: string; path?: string }) => {
-    return getPhotoDisplaySrc(img);
-  }).filter((url: string) => url !== "");
-});
+// Get image URLs array for lightbox – same as HERO so lightbox matches what is shown
+const lightboxImages = computed(() => heroImages.value);
 
 const categoryPickerContainer = ref<HTMLElement | null>(null);
 let categoryPickerScrollHandler: (() => void) | null = null;
