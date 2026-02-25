@@ -3141,7 +3141,7 @@ const removePhoto = (index: number) => {
 /** Jednotná funkcia pre výber fotky – iOS: Uri (prefer file paths for better q-img rendering), web: input[type=file] */
 async function pickImage(): Promise<void> {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyError("photos.limit", `Maximum ${MAX_PHOTOS} photos allowed.`, {});
+    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
     return;
   }
   if (useNativePhotoPicker) {
@@ -3264,7 +3264,7 @@ const onPhotosSelected = async (event: Event) => {
 
   const remaining = MAX_PHOTOS - editForm.photos.length;
   if (remaining <= 0) {
-    notifyError("photos.limit", `Maximum ${MAX_PHOTOS} photos allowed.`, {});
+    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
     if (target) target.value = "";
     return;
   }
