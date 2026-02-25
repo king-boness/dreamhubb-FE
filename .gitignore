@@ -67,3 +67,6 @@ dist/
 # local dev artifacts
 build-output.txt
 docs/GIT_EDITOR_TIP.md
+
+# Xcode local data
+ios/App/App.xcodeproj/xcshareddata/
