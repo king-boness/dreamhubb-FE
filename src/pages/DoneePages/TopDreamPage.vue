@@ -1747,7 +1747,7 @@ import { Capacitor } from "@capacitor/core";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
-import { notifyError, notifySuccess } from "src/utils/notify";
+import { notifyError, notifyNegative, notifySuccess } from "src/utils/notify";
 
 const route = useRoute();
 const router = useRouter();
@@ -3135,7 +3135,7 @@ const removePhoto = (index: number) => {
 /** Jednotná funkcia pre výber fotky – iOS: Uri (prefer file paths for better q-img rendering), web: input[type=file] */
 async function pickImage(): Promise<void> {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
+    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
     return;
   }
   if (useNativePhotoPicker) {
@@ -3238,7 +3238,7 @@ async function pickImage(): Promise<void> {
 
 const onAddPhotoClick = () => {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
+    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
     return;
   }
   if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] + Add photo CLICK, useNative:", useNativePhotoPicker);
@@ -3248,7 +3248,7 @@ const onAddPhotoClick = () => {
 /** iOS: touchstart fires pred scroll – v QDialog touchend môže byť "ukradnutý" scrollom */
 const onAddPhotoTouchStart = (e: TouchEvent) => {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
+    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
     return;
   }
   if (useNativePhotoPicker) {
@@ -3266,7 +3266,7 @@ const onPhotosSelected = async (event: Event) => {
 
   const remaining = MAX_PHOTOS - editForm.photos.length;
   if (remaining <= 0) {
-    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
+    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
     if (target) target.value = "";
     return;
   }

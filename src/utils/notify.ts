@@ -45,3 +45,13 @@ export function notifyInfo(messageKey: string, fallback: string, opts?: NotifyOp
     timeout: opts?.timeout ?? 4500
   });
 }
+
+/** Show a negative toast with a plain message (no i18n). Use for client-only limits (e.g. max photos). */
+export function notifyNegative(message: string, opts?: NotifyOpts) {
+  Notify.create({
+    type: "negative",
+    message,
+    position: opts?.position ?? "top",
+    timeout: opts?.timeout ?? 2000
+  });
+}
