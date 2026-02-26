@@ -248,6 +248,10 @@ const headerImages = computed(() => {
       }
     }
 
+    .platform-ios .post-header-topIcons {
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+    }
+
     .post-header-iconBtn {
       width: 40px;
       height: 40px;
