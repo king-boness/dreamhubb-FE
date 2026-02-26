@@ -33,3 +33,20 @@ html, body, #q-app, .q-layout, .q-page-container {
 .platform-ios .q-layout:has(.q-header) .q-page-container {
   padding-top: 0;
 }
+
+/* Safe-area na q-header – header sa neprekrýva so status barom */
+.platform-ios .q-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.platform-ios .q-header .q-toolbar,
+.platform-ios .q-header .q-toolbar__title {
+  min-height: calc(56px + env(safe-area-inset-top, 0px));
+}
+
+/* Bottom safe-area – sticky CTA, bottom nav, bottom sheet */
+.platform-ios .q-footer,
+.platform-ios .q-page-sticky,
+.platform-ios .bottom-cta,
+.platform-ios .q-bottom-sheet__content {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
