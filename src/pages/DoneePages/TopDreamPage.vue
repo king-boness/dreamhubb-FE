@@ -3237,12 +3237,20 @@ async function pickImage(): Promise<void> {
 }
 
 const onAddPhotoClick = () => {
+  if (editForm.photos.length >= MAX_PHOTOS) {
+    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
+    return;
+  }
   if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] + Add photo CLICK, useNative:", useNativePhotoPicker);
   void pickImage();
 };
 
 /** iOS: touchstart fires pred scroll – v QDialog touchend môže byť "ukradnutý" scrollom */
 const onAddPhotoTouchStart = (e: TouchEvent) => {
+  if (editForm.photos.length >= MAX_PHOTOS) {
+    notifyError("photos.limit", `Maximálne ${MAX_PHOTOS} fotiek.`, {});
+    return;
+  }
   if (useNativePhotoPicker) {
     e.preventDefault();
     e.stopPropagation();
