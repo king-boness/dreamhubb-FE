@@ -252,7 +252,12 @@ const headerImages = computed(() => {
       top: max(3rem, calc(env(safe-area-inset-top, 0px) + 10px));
     }
 
-    .post-header-iconBtn {
+@supports (padding: env(safe-area-inset-top)) {
+  .post-header-topIcons {
+    top: max(3rem, calc(env(safe-area-inset-top, 0px) + 10px)) !important;
+  }
+}
+.post-header-iconBtn {
       width: 40px;
       height: 40px;
       border-radius: 999px;

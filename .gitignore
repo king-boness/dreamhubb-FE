@@ -70,3 +70,6 @@ docs/GIT_EDITOR_TIP.md
 
 # Xcode local data
 ios/App/App.xcodeproj/xcshareddata/
+_cursor_chat_backup_*.md
+_cursor_chat_backup_*.txt
+*.bak_safearea
