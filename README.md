@@ -1,6 +1,6 @@
-# 🌐 Dreamhubb Frontend (Vue 3 + Quasar)
+# 🌐 dreamhubb Frontend (Vue 3 + Quasar)
 
-Tento priečinok obsahuje frontendovú časť aplikácie **Dreamhubb**, postavenú na frameworku **Vue 3 + Quasar**.
+Tento priečinok obsahuje frontendovú časť aplikácie **dreamhubb**, postavenú na frameworku **Vue 3 + Quasar**.
 
 Frontend komunikuje s backend API (Laravel + PostgreSQL) a zabezpečuje používateľské rozhranie pre **Donees** aj **Donors**.
 
@@ -90,7 +90,7 @@ Pozri `e2e/README.md` pre detaily a typické failure prípady.
 
 ---
 
-Tento súbor slúži ako hlavný orientačný bod pre FE vývoj Dreamhubb.
+Tento súbor slúži ako hlavný orientačný bod pre FE vývoj dreamhubb.
 Nadväzuje na backendovú dokumentáciu (v1.1.0-docs-frontend-init)
 a otvára novú vývojovú fázu: 2.0 / Frontend – Integrácia s Backend-om (Start FE).
 

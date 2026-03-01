@@ -1,6 +1,6 @@
 # E2E Tests - Playwright
 
-Tento adresár obsahuje end-to-end (E2E) testy pre Dreamhubb aplikáciu pomocou Playwright.
+Tento adresár obsahuje end-to-end (E2E) testy pre dreamhubb aplikáciu pomocou Playwright.
 
 ## 📋 Požiadavky
 
