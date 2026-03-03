@@ -1,8 +1,18 @@
 import { boot } from "quasar/wrappers";
 import { getLastRequest, pushRequest } from "src/utils/diagnostics-buffer";
 
+const dev = !!import.meta.env.DEV;
+const forced =
+  (typeof window !== "undefined" &&
+    (window as any).__diagnosticsForce === true) ||
+  (typeof localStorage !== "undefined" &&
+    localStorage.getItem("__diagnostics") === "1");
+// Opt-in: dev mode or explicit flag (no auto-enable on iOS)
+const ENABLE_DIAG = dev || forced;
+
 const SPAM_WINDOW_MS = 10_000;
 const SPAM_THRESHOLD = 5;
+const MATCH_NO_RATE_LIMIT_COUNT = 10;
 
 function normalizeMessage(text: string): string {
   return text.replace(/\s+/g, " ").trim().slice(0, 120);
@@ -16,9 +26,12 @@ function matchesDownloadFailed(text: string): boolean {
 }
 
 export default boot(() => {
-  if (!import.meta.env.DEV) return;
+  if (!ENABLE_DIAG) return;
+
+  console.log("[diagnostics] enabled", { dev, forced, ENABLE_DIAG });
 
   const spamCounts: { key: string; count: number; firstAt: number }[] = [];
+  let matchCount = 0;
 
   function pruneSpam() {
     const now = Date.now();
@@ -83,8 +96,10 @@ export default boot(() => {
         .join(" ");
 
       if (matchesDownloadFailed(text)) {
+        matchCount++;
         const key = normalizeMessage(text);
-        if (recordSpam(key)) {
+        const skipRateLimit = matchCount <= MATCH_NO_RATE_LIMIT_COUNT;
+        if (!skipRateLimit && recordSpam(key)) {
           orig.call(
             console,
             "[diagnostics] MATCH DownloadFailed — suppressed (rate limit)."
@@ -92,24 +107,10 @@ export default boot(() => {
           return;
         }
         const stack = new Error("[diagnostics] call stack").stack;
-        const lastNetwork = getLastRequest();
         orig.apply(console, args);
-        orig.call(console, "[diagnostics] MATCH DownloadFailed");
-        orig.call(console, "stack:", stack);
-        orig.call(
-          console,
-          "lastNetwork:",
-          lastNetwork
-            ? {
-                url: lastNetwork.url,
-                method: lastNetwork.method,
-                status: lastNetwork.status,
-                durationMs: lastNetwork.durationMs,
-                kind: lastNetwork.kind,
-                errorMessage: lastNetwork.errorMessage
-              }
-            : "(none)"
-        );
+        console.warn("[diagnostics] MATCH", { msg: text });
+        console.warn("[diagnostics] stack", stack);
+        console.warn("[diagnostics] lastNetwork", getLastRequest());
         return;
       }
       return orig.apply(console, args);
