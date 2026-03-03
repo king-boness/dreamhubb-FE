@@ -7,17 +7,12 @@ import { Capacitor } from "@capacitor/core";
  * Adds .platform-ios to body for CSS safe-area targeting.
  * Only runs on native iOS. Android/web unchanged.
  */
-export default boot(async () => {
+export default boot(() => {
   if (!Capacitor?.isNativePlatform?.() || Capacitor?.getPlatform?.() !== "ios") {
     return;
   }
   document.body.classList.add("platform-ios");
-  try {
-    const { StatusBar } = await import("@capacitor/status-bar");
-    await StatusBar.setOverlaysWebView({ overlay: false });
-  } catch (e) {
-    if (import.meta.env.DEV) {
-      console.debug("[capacitor-status-bar] setOverlaysWebView failed (non-blocking):", e);
-    }
-  }
+  // setOverlaysWebView is UNIMPLEMENTED on iOS (@capacitor/status-bar native plugin);
+  // calling it would spam logs with {"code":"UNIMPLEMENTED"}. Skip on iOS.
+  // Other StatusBar methods (setStyle, setBackgroundColor) work and can be used elsewhere.
 });
