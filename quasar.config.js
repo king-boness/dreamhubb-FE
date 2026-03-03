@@ -20,6 +20,8 @@ module.exports = configure(function (/* ctx */) {
 
     // Boot files
     boot: [
+      "diagnostics",
+      "capacitor-debug",
       "i18n",
       "axios",
       "auth",

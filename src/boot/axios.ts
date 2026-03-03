@@ -1,8 +1,17 @@
 import { boot } from "quasar/wrappers";
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { mapAxiosErrorToDhError, isNetworkError, isTimeoutError } from "src/utils/httpError";
 import { notifyError } from "src/utils/notify";
 import { tGlobal } from "src/utils/i18nGlobal";
+import { pushRequest } from "src/utils/diagnostics-buffer";
+
+declare module "axios" {
+  interface InternalAxiosRequestConfig {
+    _diagnosticsStart?: number;
+    _diagnosticsUrl?: string;
+    _diagnosticsMethod?: string;
+  }
+}
 
 if (import.meta.env.DEV) {
   console.debug("Boot axios.ts loaded");
@@ -169,7 +178,7 @@ const attachInterceptor = (instance: AxiosInstance) => {
   };
 
   instance.interceptors.request.use(
-    async (config) => {
+    async (config: InternalAxiosRequestConfig) => {
       const token = localStorage.getItem("token");
 
       if (token) {
@@ -182,6 +191,9 @@ const attachInterceptor = (instance: AxiosInstance) => {
       }
 
       if (import.meta.env.DEV) {
+        config._diagnosticsStart = Date.now();
+        config._diagnosticsUrl = config.url ?? "";
+        config._diagnosticsMethod = config.method ?? "GET";
         const endpoint = String(config.url || config.baseURL || "?");
         const head = token ? token.slice(0, 18) + "..." : "none";
         console.debug(`request ${endpoint} | token head: ${head}`);
@@ -197,14 +209,40 @@ const attachInterceptor = (instance: AxiosInstance) => {
   // ------------------------------------
   instance.interceptors.response.use(
     (response) => {
+      if (import.meta.env.DEV && response.config) {
+        const c = response.config as InternalAxiosRequestConfig;
+        const start = c._diagnosticsStart ?? Date.now();
+        pushRequest({
+          ts: start,
+          kind: "axios",
+          method: c._diagnosticsMethod ?? c.method ?? "GET",
+          url: c._diagnosticsUrl ?? c.url ?? "",
+          status: response.status,
+          ok: true,
+          durationMs: Date.now() - start
+        });
+      }
       // If we get any successful response, we're effectively online.
       // This also clears "offline banner" after flaky network recovers.
       void setOnlineSafe(true);
       return response;
     },
     async (error) => {
-      const originalRequest = error.config;
+      const originalRequest = error.config as InternalAxiosRequestConfig | undefined;
       const url = String(originalRequest?.url || "");
+      if (import.meta.env.DEV && originalRequest) {
+        const start = originalRequest._diagnosticsStart ?? Date.now();
+        pushRequest({
+          ts: start,
+          kind: "axios",
+          method: originalRequest._diagnosticsMethod ?? originalRequest.method ?? "GET",
+          url: originalRequest._diagnosticsUrl ?? originalRequest.url ?? "",
+          status: error.response?.status,
+          ok: false,
+          durationMs: Date.now() - start,
+          errorMessage: error.message ?? String(error)
+        });
+      }
 
       // Network/offline/timeout -> unified notify (non-raw) + let callers decide UI state
       if (isTimeoutError(error) || isNetworkError(error)) {
