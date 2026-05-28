@@ -240,7 +240,7 @@ function handleImageLoad(event: Event) {
 </script>
 
 <style lang="scss" scoped>
-// Shared background styles (same as AuthWelcomePage)
+/* Unified app background (iosSafeArea.scss) */
 .auth-help-onboarding {
   position: relative;
   min-height: 100vh;
@@ -251,8 +251,7 @@ function handleImageLoad(event: Event) {
   justify-content: center;
   padding: 2rem 1rem;
   overflow: hidden;
-  // Gradient podľa dizajnu - tmavý fialovo-modrý, smeruje zhora nadol
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: transparent;
 }
 
 .auth-help-background {

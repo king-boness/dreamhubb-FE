@@ -60,7 +60,7 @@
       ></q-tab>
     </q-tabs>
 
-    <q-tab-panels v-model="tab" animated class="panel" swipeable>
+    <q-tab-panels v-model="tab" animated class="panel">
       <q-tab-panel class="panel" name="funds"
         ><TokenShopPage></TokenShopPage>
       </q-tab-panel>
@@ -104,8 +104,20 @@ const tab = ref("funds");
 }
 .stats-filter {
   width: 100%;
+  overflow-anchor: none !important;
+  scroll-snap-type: none !important;
+  overscroll-behavior-y: contain;
+
+  .panel,
+  .q-tab-panels,
+  .q-panel-parent {
+    overflow-anchor: none !important;
+    scroll-snap-type: none !important;
+  }
+
   .q-tab-panel {
     padding: 0 !important;
+    overflow-anchor: none !important;
   }
   .q-ripple {
     display: none;

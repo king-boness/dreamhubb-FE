@@ -10,7 +10,7 @@
         dark
         class="inputSearch"
         borderless
-        placeholder="Search anything"
+        placeholder="Search my dreams"
         dense
       >
         <template v-slot:prepend>
@@ -32,63 +32,70 @@
         behavior="menu"
       />
     </div>
-    <div class="searchPage-dreamsContainer" v-for="(post, i) in posts" :key="post.post_id ?? post.id ?? i">
-      <PostComponent :post="post"></PostComponent>
+    <div v-if="postsStore.myDreamsLoading" class="searchPage-empty">Loading...</div>
+    <div v-else-if="filteredPosts.length === 0" class="searchPage-empty">
+      {{ search ? "No dreams match your search." : "No dreams yet." }}
     </div>
+    <ul v-else class="searchPage-resultsList">
+      <li
+        v-for="(post, i) in filteredPosts"
+        :key="post.post_id ?? post.id ?? i"
+        class="searchPage-resultItem"
+      >
+        <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
+        <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { Post } from "src/components/models";
-import PostComponent from "src/components/partials/PostComponent.vue";
-
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { usePostsStore } from "src/stores/posts";
+
 const router = useRouter();
+const postsStore = usePostsStore();
 
 const search = ref("");
 const sorting = ref("Newest");
-const posts = ref([
-  {
-    description:
-      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-    goalName: "Ukraine Help",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: "Jakub Perdoch",
-      userPicture: "/images/Auth/profilePicture.jpeg"
-    }
-  },
-  {
-    description:
-      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-    goalName: "Aurora Expedition",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: "Jakub Perdoch",
-      userPicture: "/images/Auth/profilePicture.jpeg"
-    }
-  },
-  {
-    description:
-      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-    goalName: "Finding the purpose",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: "Jakub Perdoch",
-      userPicture: "/images/Auth/profilePicture.jpeg"
-    }
+
+function getPostTitle(p: Record<string, unknown>): string {
+  const t = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
+  return t || "Untitled";
+}
+
+function getPostSnippet(p: Record<string, unknown>): string {
+  const d = String(p.description ?? "").trim();
+  if (!d) return "";
+  return d.length > 120 ? d.slice(0, 120) + "…" : d;
+}
+
+const filteredPosts = computed(() => {
+  const list = postsStore.myDreams;
+  const term = search.value.trim().toLowerCase();
+  if (!term) {
+    return [...list];
   }
-] as Post[]);
+  const filtered = list.filter((p: Record<string, unknown>) => {
+    const goalName = String(p.goal_name ?? p.goalName ?? "").toLowerCase();
+    const description = String(p.description ?? "").toLowerCase();
+    const title = String(p.title ?? "").toLowerCase();
+    return goalName.includes(term) || description.includes(term) || title.includes(term);
+  });
+  const sorted = [...filtered];
+  const order = sorting.value === "Oldest" ? 1 : -1;
+  sorted.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+    const dateA = new Date((a.created_at ?? a.createdAt ?? 0) as string | number).getTime();
+    const dateB = new Date((b.created_at ?? b.createdAt ?? 0) as string | number).getTime();
+    return order * (dateA - dateB);
+  });
+  return sorted;
+});
+
+onMounted(() => {
+  postsStore.fetchMyDreams({ category: "dream" });
+});
 
 function handleCloseIconClick() {
   if (search.value !== "") {
@@ -102,6 +109,9 @@ function handleCloseIconClick() {
 <style scoped lang="scss">
 .search-page {
   padding: 0;
+  min-height: 100%;
+  background: #0a0a0a;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 
   .search-barDiv {
     display: flex;
@@ -156,6 +166,43 @@ function handleCloseIconClick() {
       font-family: montseraat;
       font-size: 1rem;
     }
+  }
+  .searchPage-empty {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 2rem 1.3rem;
+    font-size: 1rem;
+  }
+  .searchPage-resultsList {
+    list-style: none;
+    margin: 0;
+    padding: 0 1.3rem 2rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .searchPage-resultItem {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  .searchPage-resultTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    font-family: poppinsSemiBold;
+  }
+  .searchPage-resultSnippet {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    font-family: poppins;
   }
 }
 </style>

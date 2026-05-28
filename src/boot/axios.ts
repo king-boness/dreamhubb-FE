@@ -4,6 +4,7 @@ import { mapAxiosErrorToDhError, isNetworkError, isTimeoutError } from "src/util
 import { notifyError } from "src/utils/notify";
 import { tGlobal } from "src/utils/i18nGlobal";
 import { pushRequest } from "src/utils/diagnostics-buffer";
+import { API_BASE_SOURCE, API_BASE_URL, IS_NATIVE_RUNTIME } from "src/config/apiBase";
 
 declare module "axios" {
   interface InternalAxiosRequestConfig {
@@ -24,9 +25,18 @@ declare module "@vue/runtime-core" {
   }
 }
 
-// 🔥 Použi .env hodnotu (ALWAYS!!)
-// .env = VITE_API_BASE=http://localhost:8000/api
-const BASE = import.meta.env.VITE_API_BASE;
+// Base URL resolver:
+// - Browser dev/prod: VITE_API_BASE
+// - Native live-reload dev (Capacitor on device): VITE_API_BASE_NATIVE_DEV (if set)
+const BASE = API_BASE_URL;
+
+if (import.meta.env.DEV) {
+  console.info("[DH-API-BASE]", {
+    selectedBase: BASE || "(empty)",
+    source: API_BASE_SOURCE,
+    nativeRuntime: IS_NATIVE_RUNTIME
+  });
+}
 
 // ------------------------------------
 //  401 refresh single-flight (queue)
@@ -167,6 +177,37 @@ if (savedToken) {
 //  Request interceptor (token)
 // ------------------------------------
 const attachInterceptor = (instance: AxiosInstance) => {
+  const summarizeBodyPreview = (data: unknown) => {
+    if (!data || typeof data !== "object") return data;
+    const rec = data as Record<string, unknown>;
+    return {
+      status: rec.status,
+      message: rec.message,
+      errorKeys:
+        rec.errors && typeof rec.errors === "object"
+          ? Object.keys(rec.errors as Record<string, unknown>)
+          : undefined
+    };
+  };
+
+  const payloadKeysFromConfig = (config: InternalAxiosRequestConfig): string[] => {
+    const payload = config.data as unknown;
+    if (!payload) return [];
+    if (payload instanceof FormData) {
+      const keys = new Set<string>();
+      try {
+        for (const key of payload.keys()) keys.add(String(key));
+      } catch {
+        // ignore
+      }
+      return Array.from(keys);
+    }
+    if (typeof payload === "object") {
+      return Object.keys(payload as Record<string, unknown>);
+    }
+    return [];
+  };
+
   const setOnlineSafe = async (value: boolean) => {
     try {
       const mod = await import("src/stores/network");
@@ -185,9 +226,44 @@ const attachInterceptor = (instance: AxiosInstance) => {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
-      // Pre FormData: nech axios nastaví Content-Type s boundary (odstráň default application/json)
+      const rel = String(config.url || "");
+      const method = String(config.method || "get").toLowerCase();
+      if (method === "post" && rel.includes("/login") && !rel.includes("forgot")) {
+        const base = String(config.baseURL || "").replace(/\/$/, "");
+        const path = rel.startsWith("/") ? rel : `/${rel}`;
+        console.info("[DH-LOGIN-DIAG]", "axios.request.out", {
+          method,
+          baseURL: config.baseURL ?? "(empty)",
+          url: rel,
+          resolvedUrl: base ? `${base}${path}` : path,
+          navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null
+        });
+      }
+      if (method === "post" && rel.includes("/register")) {
+        const base = String(config.baseURL || "").replace(/\/$/, "");
+        const path = rel.startsWith("/") ? rel : `/${rel}`;
+        console.info("[DH-REGISTER-DIAG]", "axios.request.out", {
+          method,
+          baseURL: config.baseURL ?? "(empty)",
+          url: rel,
+          resolvedUrl: base ? `${base}${path}` : path,
+          payloadKeys: payloadKeysFromConfig(config),
+          navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null
+        });
+      }
+
+      // Pre FormData: nech axios/XHR nastaví Content-Type vrátane boundary.
+      // Len `delete headers["Content-Type"]` na AxiosHeaders 1.x nemusí stačiť;
+      // ručne nastavené `multipart/form-data` bez boundary potom láme opakované uploady (BE: has_file=false).
       if (config.data instanceof FormData) {
-        delete config.headers["Content-Type"];
+        const h = config.headers;
+        if (h && typeof (h as { delete?: (k: string) => void }).delete === "function") {
+          (h as { delete: (k: string) => void }).delete("Content-Type");
+          (h as { delete: (k: string) => void }).delete("content-type");
+        } else {
+          delete (config.headers as Record<string, unknown>)["Content-Type"];
+          delete (config.headers as Record<string, unknown>)["content-type"];
+        }
       }
 
       if (import.meta.env.DEV) {
@@ -209,6 +285,17 @@ const attachInterceptor = (instance: AxiosInstance) => {
   // ------------------------------------
   instance.interceptors.response.use(
     (response) => {
+      const rel = String(response.config?.url || "");
+      const method = String(response.config?.method || "get").toLowerCase();
+      if (method === "post" && rel.includes("/register")) {
+        console.info("[DH-REGISTER-DIAG]", "axios.response.success", {
+          method,
+          url: rel,
+          baseURL: response.config?.baseURL ?? "(empty)",
+          status: response.status,
+          bodyPreview: summarizeBodyPreview(response.data)
+        });
+      }
       if (import.meta.env.DEV && response.config) {
         const c = response.config as InternalAxiosRequestConfig;
         const start = c._diagnosticsStart ?? Date.now();
@@ -230,6 +317,24 @@ const attachInterceptor = (instance: AxiosInstance) => {
     async (error) => {
       const originalRequest = error.config as InternalAxiosRequestConfig | undefined;
       const url = String(originalRequest?.url || "");
+      const method = String(originalRequest?.method || "get").toLowerCase();
+      if (method === "post" && url.includes("/register")) {
+        const mapped = mapAxiosErrorToDhError(error);
+        console.info("[DH-REGISTER-DIAG]", "axios.response.error", {
+          method,
+          url,
+          baseURL: originalRequest?.baseURL ?? "(empty)",
+          status: error.response?.status,
+          code: (error as { code?: string }).code,
+          message: (error as { message?: string }).message,
+          isTimeout: isTimeoutError(error),
+          isNetwork: isNetworkError(error),
+          mappedKind: mapped.kind,
+          mappedAsOffline: mapped.kind === "offline",
+          navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+          bodyPreview: summarizeBodyPreview(error.response?.data)
+        });
+      }
       if (import.meta.env.DEV && originalRequest) {
         const start = originalRequest._diagnosticsStart ?? Date.now();
         pushRequest({
@@ -244,13 +349,29 @@ const attachInterceptor = (instance: AxiosInstance) => {
         });
       }
 
-      // Network/offline/timeout -> unified notify (non-raw) + let callers decide UI state
+      // Network/offline/timeout -> unified notify + offline banner (non-auth only).
+      // Auth pages (login/register/forgot/…) already map errors and show toasts; notifying here
+      // duplicated messages. ERR_NETWORK on auth also wrongly forced OfflineBanner via setOnline(false).
       if (isTimeoutError(error) || isNetworkError(error)) {
-        // Requirement: show offline banner also on ERR_NETWORK (even if navigator.onLine is true).
-        if (isNetworkError(error)) {
+        const authUrl = isAuthEndpointUrl(url);
+        if (authUrl) {
+          console.info("[DH-LOGIN-DIAG]", "axios.response.authTransportFailure", {
+            url,
+            method: originalRequest?.method,
+            baseURL: originalRequest?.baseURL ?? "(empty)",
+            code: (error as { code?: string }).code,
+            message: (error as { message?: string }).message,
+            isTimeout: isTimeoutError(error),
+            isNetwork: isNetworkError(error),
+            navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null
+          });
+        } else if (isNetworkError(error)) {
+          // Requirement: show offline banner also on ERR_NETWORK (even if navigator.onLine is true).
           void setOnlineSafe(false);
+          notifyError(mapAxiosErrorToDhError(error));
+        } else {
+          notifyError(mapAxiosErrorToDhError(error));
         }
-        notifyError(mapAxiosErrorToDhError(error));
         return Promise.reject(error);
       }
 

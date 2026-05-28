@@ -162,7 +162,7 @@ const handleNext = () => {
   flex-direction: column;
   padding: 24px 20px 40px;
   margin: 0 auto;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: transparent;
   overflow: hidden;
   position: relative;
 }

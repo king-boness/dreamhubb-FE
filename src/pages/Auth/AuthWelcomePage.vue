@@ -248,11 +248,9 @@ const handleMapError = (event: Event) => {
   justify-content: center;
   padding: 0;
   overflow: hidden;
-  background-image: none;
-  background-image: url("/images/Auth/bg-explain.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
+  /* Background from global app (iosSafeArea.scss) */
+  background-image: none !important;
+  background-color: transparent !important;
 }
 
 .authWelcome-background {

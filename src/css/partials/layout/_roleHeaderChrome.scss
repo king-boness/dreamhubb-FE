@@ -1,0 +1,35 @@
+/**
+ * Shared horizontal chrome for role main headers (donor integrated stack + tabs).
+ * Aligns with q-page gutter (--dh-page-gutter-x) — no negative bleed to screen edge.
+ */
+
+:root {
+  --dh-page-gutter-x: 16px;
+  --dh-header-pad-x: 1rem;
+}
+
+.donorPosts-integratedChrome.roleChrome-topStack {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.donorPosts-integratedChrome .header.row {
+  padding-left: var(--dh-header-pad-x);
+  padding-right: var(--dh-header-pad-x);
+  box-sizing: border-box;
+}
+
+.donorPosts-integratedChrome .donorFeed-topControls {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: var(--dh-header-pad-x);
+  padding-right: var(--dh-header-pad-x);
+  box-sizing: border-box;
+}
+
+.donorPosts-integratedChrome .donor-tabs {
+  width: 100%;
+  box-sizing: border-box;
+}

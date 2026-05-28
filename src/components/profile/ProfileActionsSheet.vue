@@ -151,6 +151,10 @@ const handleViewPhoto = () => {
 };
 
 const handleChangePhoto = () => {
+  console.info("[DH-PROFILE-UPLOAD]", "ACTIVE_HANDLER_REACHED", {
+    stage: "ProfileActionsSheet.emit-change-photo",
+    component: "ProfileActionsSheet.vue"
+  });
   emit("change-photo");
 };
 

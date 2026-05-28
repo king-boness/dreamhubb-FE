@@ -106,7 +106,7 @@ const changeSwiper = () => {
   });
 };
 
-const handleSelectedItemId = (itemId: any) => {
+const handleSelectedItemId = (itemId: string | number | null) => {
   selectedItemIdFromChild.value = itemId;
   emit("changedHoriz", { horiz: horiz.value, selectedItemId: itemId });
   // no logs

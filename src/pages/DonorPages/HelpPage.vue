@@ -56,7 +56,7 @@
     </div>
 
     <!-- Conditional layouts based on contributionType -->
-    <div v-if="contributionType === 'accomplish'" class="helpPage-content">
+    <div v-if="contributionType === 'accomplish'" class="helpPage-content helpPage-content--accomplish">
       <!-- Accomplish Dream Layout -->
       <div class="helpPage-donorInputsDiv">
         <q-input
@@ -81,63 +81,71 @@
         ></ImageUploader>
       </div>
 
-      <!-- Sticky Footer CTA - placed immediately after "add image" -->
-      <BottomCtaButton
-        :label="t('helpAccomplish')"
-        icon-src="/icons/giftIcon.svg"
-        :loading="submitting"
-        :disabled="submitting || !message.trim()"
-        @click="handleSubmit"
-      />
-    </div>
-
-    <div v-else-if="contributionType === 'help'" class="helpPage-content">
-      <!-- Help to Fulfill Layout -->
-      <!-- Heading: "How you can help and what you want in return." -->
-      <div class="helpPage-helpHeading">
-        <h2>{{ t("howYouCanHelp") }}</h2>
-      </div>
-
-      <!-- Segmented Toggle: "I'll help with" / "In return, I want" -->
-      <div class="helpPage-switcherContainer">
-        <SegmentedToggle
-          v-model="helpMode"
-          :options="[t('illHelpWith'), t('inReturnIWant')]"
+      <!-- CTA last in flow -->
+      <div class="helpPage-bottomCtaBar">
+        <BottomCtaButton
+          :label="t('helpAccomplish')"
+          icon-src="/icons/giftIcon.svg"
+          :loading="submitting"
+          :disabled="submitting || !message.trim()"
+          @click="handleSubmit"
         />
       </div>
+    </div>
 
-      <!-- Single text field (switched by switcher) -->
-      <div class="helpPage-donorInputsDiv">
-        <q-input
-          v-model="activeText"
-          borderless
-          dark
-          hide-bottom-space
-          bottom-slots
-          :placeholder="currentPlaceholder"
-          class="registerDatas registerSecrete donorHelpMessage messageInput"
-          type="textarea"
-        >
-        </q-input>
-      </div>
-      <div class="helpPage-imageUploadDiv">
-        <ImageUploader
-          ref="imageUploaderRef"
-          class="helpPage-imageUploadComponent"
-          :max="5"
-          upload-msg="add image"
-          @imagesUpdated="handleImagesUpdated"
-        ></ImageUploader>
+    <div v-else-if="contributionType === 'help'" class="helpPage-content helpPage-content--help">
+      <!-- Help to Fulfill Layout – same principle as accomplish: content then CTA last, scrollable -->
+      <div class="helpPage-contentBody">
+        <!-- Heading: "How you can help and what you want in return." -->
+        <div class="helpPage-helpHeading">
+          <h2>{{ t("howYouCanHelp") }}</h2>
+        </div>
+
+        <!-- Segmented Toggle: "I'll help with" / "In return, I want" -->
+        <div class="helpPage-switcherContainer">
+          <SegmentedToggle
+            v-model="helpMode"
+            :options="[t('illHelpWith'), t('inReturnIWant')]"
+          />
+        </div>
+
+        <!-- Single text field (switched by switcher) -->
+        <div class="helpPage-donorInputsDiv">
+          <q-input
+            v-model="activeText"
+            borderless
+            dark
+            hide-bottom-space
+            bottom-slots
+            :placeholder="currentPlaceholder"
+            class="registerDatas registerSecrete donorHelpMessage messageInput"
+            type="textarea"
+          >
+          </q-input>
+        </div>
+
+        <!-- Upload / add image – above CTA -->
+        <div class="helpPage-imageUploadDiv">
+          <ImageUploader
+            ref="imageUploaderRef"
+            class="helpPage-imageUploadComponent"
+            :max="5"
+            upload-msg="add image"
+            @imagesUpdated="handleImagesUpdated"
+          ></ImageUploader>
+        </div>
       </div>
 
-      <!-- Sticky Footer CTA - placed immediately after "add image" -->
-      <BottomCtaButton
-        :label="contributionType === 'accomplish' ? t('helpAccomplish') : t('helpToFulfill')"
-        icon-src="/icons/giftIcon.svg"
-        :loading="submitting"
-        :disabled="submitting || (contributionType === 'accomplish' ? !message.trim() : !helpWithText.trim())"
-        @click="handleSubmit"
-      />
+      <!-- CTA last in flow -->
+      <div class="helpPage-bottomCtaBar">
+        <BottomCtaButton
+          :label="contributionType === 'accomplish' ? t('helpAccomplish') : t('helpToFulfill')"
+          icon-src="/icons/giftIcon.svg"
+          :loading="submitting"
+          :disabled="submitting || (contributionType === 'accomplish' ? !message.trim() : !helpWithText.trim())"
+          @click="handleSubmit"
+        />
+      </div>
     </div>
 
     <!-- Share Sheet -->
@@ -569,14 +577,18 @@ onMounted(async () => {
   }
 }
 
+/* Unified app background (iosSafeArea.scss) */
 .help-page {
-  min-height: 100vh;
-  padding-bottom: 6rem !important; // Space for sticky footer (increased to ensure content is not hidden)
-  background: radial-gradient(ellipse at top, #12192f 0, #050710 60%, #020307 100%);
+  min-height: 100dvh;
+  max-height: 100dvh; // BUG 1: make this the scroll container so page scroll works
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: transparent;
   display: flex;
   flex-direction: column;
-  margin-top: 0 !important; // Start from top of screen - override any layout padding
-  padding-top: 0 !important; // No top padding - override any layout padding
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0;
   position: relative;
 
   // Header wrapper - scoped to help-page to prevent affecting PostDetail
@@ -653,13 +665,44 @@ onMounted(async () => {
     }
   }
 
-  // Content wrapper with consistent padding (20-24px as per spec)
+  // Content column base
   .helpPage-content {
-    padding: 0 20px; // Consistent horizontal padding (20-24px range)
-    padding-bottom: 1rem; // Space for sticky footer
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0 20px;
+    padding-bottom: 0;
     max-width: 390px;
     margin: 0 auto;
     width: 100%;
+  }
+
+  // BUG 1: Accomplish – natural height so .help-page overflows and scrolls
+  .helpPage-content--accomplish {
+    flex: 0 1 auto;
+  }
+
+  // Help – same layout principle as accomplish: natural height, scroll, CTA last
+  .helpPage-content--help {
+    flex: 0 1 auto;
+  }
+
+  // Content body: heading + toggle + textarea + upload (above CTA); natural height like accomplish content
+  .helpPage-contentBody {
+    flex: 0 1 auto;
+  }
+
+  // CTA wrapper: last in layout, no gap (same as accomplish – no margin-top: auto)
+  .helpPage-bottomCtaBar {
+    background: linear-gradient(to top, rgba(2, 3, 7, 0.98) 0%, rgba(2, 3, 7, 1) 100%);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    margin-bottom: 0;
+    width: 100%;
+    // Keep CTA in flow so no gap under it (q-page-sticky would be fixed and leave a hole)
+    :deep(.dhBottomCta) {
+      position: relative !important;
+      inset: auto !important;
+    }
   }
 
   // Heading: "How you can help and what you want in return."

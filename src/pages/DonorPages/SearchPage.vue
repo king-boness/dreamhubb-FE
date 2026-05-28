@@ -21,155 +21,68 @@
         <img src="/icons/closeIcon.svg" alt="" />
       </q-btn>
     </div>
-    <div v-if="search === ''">
-      <div
-        v-for="(history, i) in histories"
-        :key="i"
-        class="histories historyDiv"
-        @click="filterPostsByTitle(history.historyTitle)"
+    <div v-if="postsStore.loading" class="searchPage-empty">Loading...</div>
+    <div v-else-if="search.trim() === ''" class="searchPage-empty">
+      Enter a keyword to search posts.
+    </div>
+    <div v-else-if="filteredPosts.length === 0" class="searchPage-empty">
+      No posts match your search.
+    </div>
+    <ul v-else class="searchPage-resultsList">
+      <li
+        v-for="(post, i) in filteredPosts"
+        :key="post.post_id ?? post.id ?? i"
+        class="searchPage-resultItem"
       >
-        <SearchHistoryComponent :history="history" />
-      </div>
-    </div>
-    <div
-      v-else-if="search !== '' && filteredTopics.length === 0"
-      class="errorDiv"
-    >
-      <span>Nothing like that</span>
-    </div>
-    <div v-else>
-      <div class="filterButtonContainer">
-        <FilterSearchComponent></FilterSearchComponent>
-      </div>
-      <div
-        v-for="(topic, i) in filteredTopics"
-        :key="i"
-        class="histories historyDiv"
-        @click="
-          filterPostsByTitle(topic.topicTitle);
-          showPosts = true;
-        "
-      >
-        <!-- <SearchTopicComponent :topic="topic" /> -->
-      </div>
-      <div v-if="showPosts || selectedHistory">
-        <div v-for="(post, i) in filteredPosts" :key="post.post_id ?? post.id ?? i" class="postComponent">
-          <PostComponent :post="post" />
-        </div>
-      </div>
-    </div>
+        <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
+        <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { History, Topic, Post } from "src/components/models";
-import SearchHistoryComponent from "src/components/partials/SearchHistoryComponent.vue";
-import PostComponent from "src/components/partials/PostComponent.vue";
-import FilterSearchComponent from "src/components/partials/FilterSearchComponent.vue";
-
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { usePostsStore } from "src/stores/posts";
+
 const router = useRouter();
+const postsStore = usePostsStore();
 
 const search = ref("");
-const showPosts = ref(false);
-const selectedHistory = ref<History | null>(null);
 
-const histories = ref([
-  {
-    historyTitle: "Ukraine Help"
-  },
-  {
-    historyTitle: "Charity helping organizations"
-  },
-  {
-    historyTitle: "Finding the purpose of life"
-  }
-] as History[]);
+function getPostTitle(p: Record<string, unknown>): string {
+  const t = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
+  return t || "Untitled";
+}
 
-const topics = ref([
-  {
-    topicTitle: "Ukraine Help"
-  },
-  {
-    topicTitle: "Ukraine Help People"
-  },
-  {
-    topicTitle: "Finding the purpose"
-  },
-  {
-    topicTitle: "Aurora Expedition"
-  }
-] as Topic[]);
-
-const posts = ref([
-  {
-    description:
-      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-    goalName: "Ukraine Help",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: "Jakub Perdoch",
-      userPicture: "/images/Auth/profilePicture.jpeg"
-    }
-  },
-  {
-    description:
-      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-    goalName: "Aurora Expedition",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: "Jakub Perdoch",
-      userPicture: "/images/Auth/profilePicture.jpeg"
-    }
-  },
-  {
-    description:
-      "Adipiscing viverra netus ultricies lacus consectetur. Neque nulla fusce lorem ac nunc semper pellentesque vitae enim.",
-    goalName: "Finding the purpose",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: 230000000,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: "Jakub Perdoch",
-      userPicture: "/images/Auth/profilePicture.jpeg"
-    }
-  }
-] as Post[]);
-
-const filteredTopics = computed(() => {
-  const searchTerm = search.value.toLowerCase();
-  return topics.value
-    .filter((topic) => topic.topicTitle.toLowerCase().includes(searchTerm))
-    .sort((a, b) => a.topicTitle.localeCompare(b.topicTitle));
-});
+function getPostSnippet(p: Record<string, unknown>): string {
+  const d = String(p.description ?? "").trim();
+  if (!d) return "";
+  return d.length > 120 ? d.slice(0, 120) + "…" : d;
+}
 
 const filteredPosts = computed(() => {
-  const searchTerm = search.value.toLowerCase();
-  const selectedHistoryTitle =
-    selectedHistory.value?.historyTitle.toLowerCase();
-  return posts.value.filter((post) => {
-    const matchesSearch = post.goalName.toLowerCase().includes(searchTerm);
-    const matchesHistory =
-      !selectedHistoryTitle ||
-      post.goalName.toLowerCase().includes(selectedHistoryTitle);
-    return matchesSearch && matchesHistory;
+  const list = postsStore.posts;
+  const term = search.value.trim().toLowerCase();
+  if (!term) return [];
+  return list.filter((p: Record<string, unknown>) => {
+    const goalName = String(p.goal_name ?? p.goalName ?? "").toLowerCase();
+    const title = String(p.title ?? "").toLowerCase();
+    const description = String(p.description ?? "").toLowerCase();
+    return (
+      goalName.includes(term) ||
+      title.includes(term) ||
+      description.includes(term)
+    );
   });
 });
 
-function filterPostsByTitle(title: string) {
-  const history = histories.value.find((h) => h.historyTitle === title);
-  search.value = title;
-  showPosts.value = false;
-  selectedHistory.value = history || null;
-}
+onMounted(async () => {
+  if (postsStore.posts.length === 0) {
+    await postsStore.fetchPosts({});
+  }
+});
 
 function handleCloseIconClick() {
   if (search.value !== "") {
@@ -183,16 +96,17 @@ function handleCloseIconClick() {
 <style scoped lang="scss">
 .search-page {
   padding: 0;
-  min-height: 100vh;
-  .filterButtonContainer {
-    padding: 0 0.5rem;
-  }
+  min-height: 100%;
+  background: #0a0a0a;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
+
   .search-barDiv {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    padding: 0.4rem 1rem 0.5rem;
     padding-bottom: 0.5rem;
 
     .inputSearch {
@@ -222,17 +136,47 @@ function handleCloseIconClick() {
       );
     }
   }
-  .histories {
-    padding: 0 1.5rem;
-    margin: 1.5rem 0;
+
+  .searchPage-empty {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 2rem 1.3rem;
+    font-size: 1rem;
   }
-}
-.errorDiv {
-  color: $primary;
-  font-family: poppinsBold;
-  justify-content: center;
-  display: flex;
-  padding-top: 1rem;
-  text-align: center;
+
+  .searchPage-resultsList {
+    list-style: none;
+    margin: 0;
+    padding: 0 1.3rem 2rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .searchPage-resultItem {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .searchPage-resultTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    font-family: poppinsSemiBold;
+  }
+
+  .searchPage-resultSnippet {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    font-family: poppins;
+  }
 }
 </style>

@@ -1,6 +1,16 @@
 <template>
   <div class="postCreation-page">
     <div class="postCreation-headerWrapper">
+      <q-btn
+        round
+        flat
+        dense
+        class="postCreation-stepBackBtn"
+        aria-label="Back"
+        @click="handleStepBack"
+      >
+        <q-icon name="chevron_left" size="24px" class="postCreation-stepBackIcon" />
+      </q-btn>
       <CloseOverlayButton @click="handleClose" />
     </div>
     <div class="postCreation-uploadedImgContainer">
@@ -29,6 +39,7 @@
           />Remove Image</q-btn
         >
         <q-btn
+          ref="postCreationAddImgAnchorRef"
           class="postCreation-addImgButton"
           @click="openFileInput"
           :disabled="isUploadingAdditional || uploadedImages.images.length >= 5"
@@ -229,7 +240,7 @@ import type { UploadedImage } from "src/composables/useUpload";
 import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import { Capacitor } from "@capacitor/core";
-import { Camera } from "@capacitor/camera";
+import { resolvePickAnchorEl, useImagePickMenu } from "src/composables/useImagePickMenu";
 
 const { t } = useI18n();
 
@@ -249,7 +260,12 @@ const handleClose = () => {
     router.push({ name: "donee-posts" });
   }
 };
+
+const handleStepBack = () => {
+  router.push({ name: "donee-postCreation-category" });
+};
 const fileInput = ref<HTMLInputElement | null>(null);
+const postCreationAddImgAnchorRef = ref<HTMLElement | null>(null);
 const imgIndex = ref(0);
 const uploadedImages = ref<{ images: string[] }>({
   images: []
@@ -650,6 +666,7 @@ onBeforeUnmount(() => {
   uploadedImages.value.images.forEach((url) => {
     if (url.startsWith("blob:")) URL.revokeObjectURL(url);
   });
+  uploadedImages.value.images = [];
 });
 const deleteImg = () => {
   const idx = imgIndex.value;
@@ -662,8 +679,14 @@ const deleteImg = () => {
   postCreationStore.setImages(uploadedImages.value.images);
 };
 const handleImagesFromChild = async (imgs: UploadedImage[]) => {
-  const imageUrls = imgs.map((img) => img.secure_url);
+  const imageUrls = imgs
+    .map((img) => img.secure_url)
+    .filter((u): u is string => typeof u === "string" && u.length > 0);
   imageFilesRef.value = [];
+  // Revoke only blob URLs we are replacing (not in new list) to avoid revoking too early
+  uploadedImages.value.images.forEach((url) => {
+    if (url.startsWith("blob:") && !imageUrls.includes(url)) URL.revokeObjectURL(url);
+  });
   uploadedImages.value.images = [...imageUrls];
   postCreationStore.setImages(imageUrls);
   await nextTick();
@@ -674,22 +697,18 @@ const handleIndex = (index: number) => {
 watch(imgIndex, () => {
   // no logs
 });
-const openFileInput = async () => {
-  const isNative = Capacitor?.isNativePlatform?.() === true;
-  if (isNative) {
-    try {
-      const photo = await Camera.getPhoto({
-        source: "PHOTOLIBRARY",
-        resultType: "Uri",
-        quality: 90
-      });
-      await addPhotoFromWebPath(photo as unknown as { webPath?: string; path?: string; dataUrl?: string; uri?: string });
-    } catch (e) {
-      if (import.meta.env.DEV) console.debug("[PostCreation] Camera.getPhoto cancelled or failed:", e);
+const { openImagePickMenu } = useImagePickMenu();
+
+const openFileInput = () => {
+  openImagePickMenu({
+    getFileInput: () => fileInput.value,
+    getAnchorEl: () => resolvePickAnchorEl(postCreationAddImgAnchorRef.value),
+    onCameraFiles: async (files) => {
+      const dt = new DataTransfer();
+      files.forEach((f) => dt.items.add(f));
+      await handleFileChange({ target: { files: dt.files } } as Event);
     }
-  } else if (fileInput.value) {
-    fileInput.value.click();
-  }
+  });
 };
 
 const handleFileChange = async (event: Event) => {
@@ -737,28 +756,45 @@ const handleFileChange = async (event: Event) => {
   if (fileInput.value) fileInput.value.value = "";
 };
 
-/** Pre Capacitor Camera/Gallery: preview musí používať webPath (priorita) alebo base64 data URL, aby sa obrázok zobrazil v iOS WKWebView.
- * Ak path/uri vyzerá ph:// alebo file://, použije convertFileSrc. */
-const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dataUrl?: string; uri?: string }) => {
+/** Pre Capacitor Camera/Gallery: preview musí používať webPath (priorita), base64String/dataUrl alebo path, aby sa obrázok zobrazil v iOS WKWebView.
+ * Na iOS môže plugin vrátiť base64String namiesto Uri – v tom prípade vytvoríme data URL pre preview. */
+const addPhotoFromWebPath = async (photo: {
+  webPath?: string;
+  path?: string;
+  dataUrl?: string;
+  uri?: string;
+  base64String?: string;
+  format?: string;
+}) => {
   if (uploadedImages.value.images.length >= 5) return;
+  let previewSrc: string | undefined;
   try {
     const webPath = photo.webPath ?? null;
     const path = photo.path ?? photo.uri ?? null;
-    let previewSrc: string;
     const isPhOrFile = (s: string) => s.startsWith("ph://") || s.startsWith("file://");
-    if (webPath && !isPhOrFile(webPath)) {
+
+    if (photo.base64String) {
+      // iOS často vracia base64String; preview musí byť data URL, aby sa obrázok zobrazil
+      const mime =
+        (photo.format && String(photo.format).toLowerCase() === "png") ? "image/png" : "image/jpeg";
+      previewSrc = `data:${mime};base64,${photo.base64String}`;
+    } else if (webPath && !isPhOrFile(webPath)) {
       previewSrc = webPath;
     } else if (webPath || path) {
-      const raw = (webPath || path)!;
+      const raw = webPath || path;
+      if (!raw) {
+        return;
+      }
       previewSrc = (isPhOrFile(raw) && Capacitor?.convertFileSrc)
         ? Capacitor.convertFileSrc(raw)
         : raw;
     } else if (photo.dataUrl) {
       previewSrc = photo.dataUrl.startsWith("data:") ? photo.dataUrl : `data:image/jpeg;base64,${photo.dataUrl}`;
     } else {
-      if (import.meta.env.DEV) console.debug("[PostCreation] addPhotoFromWebPath: no webPath/path/dataUrl");
+      if (import.meta.env.DEV) console.debug("[PostCreation] addPhotoFromWebPath: no webPath/path/dataUrl/base64String");
       return;
     }
+
     if (import.meta.env.DEV) {
       console.debug("[PostCreation] Image preview source (dev):", {
         webPath: webPath?.slice(0, 60),
@@ -766,14 +802,31 @@ const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dat
         previewSrc: previewSrc.slice(0, 80) + "..."
       });
     }
-    const res = await fetch(previewSrc);
-    const blob = await res.blob();
-    const file = new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
-    imageFilesRef.value.push(file);
+    // Show preview immediately so it appears on screen
     uploadedImages.value.images.push(previewSrc);
     postCreationStore.setImages([]);
+
+    if (photo.base64String) {
+      // Pri base64 netreba fetch – dekódujeme priamo (spoľahlivejšie na iOS)
+      const mime =
+        (photo.format && String(photo.format).toLowerCase() === "png") ? "image/png" : "image/jpeg";
+      const binary = atob(photo.base64String);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: mime });
+      const ext = mime === "image/png" ? "png" : "jpg";
+      imageFilesRef.value.push(new File([blob], `photo_${Date.now()}.${ext}`, { type: mime }));
+    } else {
+      const res = await fetch(previewSrc);
+      const blob = await res.blob();
+      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: blob.type || "image/jpeg" });
+      imageFilesRef.value.push(file);
+    }
   } catch (e) {
     if (import.meta.env.DEV) console.debug("[PostCreation] addPhotoFromWebPath failed", e);
+    if (previewSrc != null && uploadedImages.value.images[uploadedImages.value.images.length - 1] === previewSrc) {
+      uploadedImages.value.images.pop();
+    }
   }
 };
 </script>
@@ -845,6 +898,9 @@ const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dat
 }
 // Removed ::after gradient to prevent visual split
 .postCreation-page {
+  /* Edge-to-edge hero: avoid artificial top gap above image area */
+  padding-top: 0;
+
   .postCreation-headerWrapper {
     position: relative;
     width: 100%;
@@ -855,16 +911,56 @@ const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dat
     > * {
       pointer-events: auto;
     }
+
+    :deep(.close-overlay-button) {
+      left: auto;
+      right: 1rem;
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+    }
   }
 
-  .postCreation-uploadedImgContainer {
+  .postCreation-stepBackBtn {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    left: 1rem;
+    z-index: 16;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(0, 0, 0, 0.45) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(14px);
+  }
+
+  .postCreation-stepBackIcon {
+    color: #fff !important;
+  }
+
+  /* Unified app background – image area transparent so global app-bg-main shows */
+    .postCreation-uploadedImgContainer {
     position: relative;
     width: 100%;
     height: 40rem;
-    background: #161616;
+    --dh-upload-stage-height: calc(31.5rem - 10px);
+    background: transparent;
     overflow: hidden;
-    // Ensure consistent background color
-    background-color: #161616 !important;
+    background-color: transparent !important;
+
+    :deep(.uploadImgConponent) {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: auto;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      box-sizing: border-box;
+    }
+
+    :deep(.uploadImg-placeholderStage) {
+      height: var(--dh-upload-stage-height);
+    }
 
     .postCreation-imageSlider {
       position: absolute;
@@ -1202,6 +1298,7 @@ const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dat
     align-items: center;
     justify-content: center;
     padding: 0 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
     gap: 0.5rem;
 
     .postCreation-submitCtaWrapper {
@@ -1287,6 +1384,50 @@ const addPhotoFromWebPath = async (photo: { webPath?: string; path?: string; dat
         cursor: not-allowed;
       }
     }
+  }
+}
+</style>
+
+<style lang="scss">
+// Light header: scoped + q-btn::before majú vyššiu špecificitu než .body--light v _darkMode — jeden biely kruh ako na pickeroch.
+body.body--light .postCreation-page .postCreation-headerWrapper {
+  .postCreation-stepBackBtn.q-btn.q-btn--round.q-btn--flat,
+  .close-overlay-button .close-overlay-button__btn.q-btn.q-btn--round.q-btn--flat {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 2px solid rgba(0, 0, 0, 0.22) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .postCreation-stepBackBtn.q-btn.q-btn--round.q-btn--flat::before,
+  .close-overlay-button .close-overlay-button__btn.q-btn.q-btn--round.q-btn--flat::before {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .postCreation-stepBackBtn .postCreation-stepBackIcon {
+    color: #0a0a0a !important;
+  }
+
+  .close-overlay-button .close-overlay-button__btn img {
+    filter: brightness(0) saturate(100%);
+    opacity: 0.88;
+  }
+
+  .postCreation-stepBackBtn.q-btn:hover,
+  .postCreation-stepBackBtn.q-btn:active,
+  .close-overlay-button .close-overlay-button__btn.q-btn:hover,
+  .close-overlay-button .close-overlay-button__btn.q-btn:active {
+    background: rgba(255, 255, 255, 1) !important;
+    border-color: rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .postCreation-stepBackBtn.q-btn:hover::before,
+  .postCreation-stepBackBtn.q-btn:active::before,
+  .close-overlay-button .close-overlay-button__btn.q-btn:hover::before,
+  .close-overlay-button .close-overlay-button__btn.q-btn:active::before {
+    background: transparent !important;
   }
 }
 </style>

@@ -118,6 +118,9 @@ defineProps({
   }
 }
 .stats-filter {
+  overflow-anchor: none !important;
+  scroll-snap-type: none !important;
+
   .scroll {
     -webkit-overflow-scrolling: auto !important;
     will-change: auto;
@@ -146,6 +149,13 @@ defineProps({
 }
 .q-tab-panel {
   padding: 0 !important;
+  overflow-anchor: none !important;
+}
+
+.stats-filter .panel,
+.stats-filter .tabPanel {
+  overflow-anchor: none !important;
+  scroll-snap-type: none !important;
 }
 
 .profileTab {

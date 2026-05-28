@@ -69,12 +69,17 @@ import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
+import { useNetworkStore } from "src/stores/network";
+import { api } from "boot/axios";
 import { notifyError } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { logLoginDiag, redactEmail, summarizeAxiosError } from "src/utils/loginDiagnostics";
+import { API_BASE_SOURCE, API_BASE_URL } from "src/config/apiBase";
 
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+const networkStore = useNetworkStore();
 const { t } = useI18n();
 
 const email = ref("");
@@ -91,11 +96,13 @@ const FAIL_KEY = "dh_failed_login_attempts";
 const failedLoginAttempts = ref<number>(Number(sessionStorage.getItem(FAIL_KEY) || 0));
 const showForgotHint = computed(() => failedLoginAttempts.value >= 3);
 
-const emailInput = ref<any>(null);
-const passwordInput = ref<any>(null);
+type FocusableElement = { focus?: () => void } | HTMLElement | null;
+
+const emailInput = ref<FocusableElement>(null);
+const passwordInput = ref<FocusableElement>(null);
 
 const tOr = (key: string, fallback: string) => {
-  const res = t(key as any);
+  const res = t(key as unknown as string);
   return res === key ? fallback : res;
 };
 
@@ -124,6 +131,18 @@ watch([email, password], () => {
 });
 
 onMounted(() => {
+  const viteBase = import.meta.env.VITE_API_BASE;
+  logLoginDiag("mount", {
+    navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+    networkStoreIsOnline: networkStore.isOnline,
+    viteApiBase: typeof viteBase === "string" && viteBase.length > 0 ? viteBase : "(empty — check .env.production / build mode)",
+    resolvedApiBase: API_BASE_URL || "(empty)",
+    resolvedApiBaseSource: API_BASE_SOURCE,
+    axiosDefaultBaseURL: api.defaults.baseURL ?? "(empty)",
+    mode: import.meta.env.MODE,
+    href: typeof window !== "undefined" ? window.location.href : ""
+  });
+
   const qEmail = route.query.email;
   if (typeof qEmail === "string" && qEmail.trim()) {
     email.value = qEmail.trim();
@@ -145,10 +164,20 @@ const onSubmit = async () => {
     emailError.value = "";
     passwordError.value = "";
 
+    const loginUrl = `${String(api.defaults.baseURL || "").replace(/\/$/, "")}/login`;
+    logLoginDiag("submit.start", {
+      emailRedacted: redactEmail(email.value),
+      requestUrl: loginUrl,
+      navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+      networkStoreIsOnline: networkStore.isOnline
+    });
+
     await auth.login({ email: email.value, password: password.value });
+    logLoginDiag("submit.login.ok", { step: "api.post /login resolved" });
     await auth.fetchUser();
 
     failedLoginAttempts.value = 0;
+    logLoginDiag("submit.done", { step: "fetchUser ok, redirecting" });
     sessionStorage.setItem(FAIL_KEY, "0");
 
     // Success handled by router redirect, no toast needed
@@ -161,15 +190,21 @@ const onSubmit = async () => {
       console.debug("Login error:", err);
     }
 
-    const anyErr = err as any;
-    const status: number | undefined = anyErr?.response?.status;
+    logLoginDiag("submit.error", {
+      ...summarizeAxiosError(err),
+      emailRedacted: redactEmail(email.value),
+      dhMappedKind: mapAxiosErrorToDhError(err).kind
+    });
+
+    const errorWithResponse = err as {
+      response?: { status?: number; data?: { errors?: { email?: string[]; password?: string[] } } };
+    } | null;
+    const status: number | undefined = errorWithResponse?.response?.status;
     const hasResponse = typeof status === "number";
 
     // 422: validation -> field-level messages, don't increment fail counter
     if (status === 422) {
-      const errors = anyErr?.response?.data?.errors as
-        | { email?: string[]; password?: string[] }
-        | undefined;
+      const errors = errorWithResponse?.response?.data?.errors;
       emailError.value = errors?.email?.[0] || "";
       passwordError.value = errors?.password?.[0] || "";
 

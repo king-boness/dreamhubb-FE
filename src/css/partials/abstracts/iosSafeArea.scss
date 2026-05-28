@@ -1,9 +1,14 @@
 /* iOS safe-area + ružový roh fix – globálne pre VŠETKY screens */
 /* Platform class .platform-ios on body added by boot/capacitor-status-bar.ts */
 
-/* Jednotné pozadie – žiadny ružový roh nikde */
+/* Jednotné pozadie – shared app background (app-bg-main.png) + fallback farba */
+$app-bg-url: url("~assets/backgrounds/app-bg-main.png");
 html, body, #q-app, .q-layout, .q-page-container {
-  background: #0a0a0a !important;
+  background-color: #0a0a0a !important;
+  background-image: $app-bg-url !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
 }
 .body--light html, .body--light body, .body--light #q-app,
 .body--light .q-layout, .body--light .q-page-container {
@@ -11,7 +16,11 @@ html, body, #q-app, .q-layout, .q-page-container {
 }
 .platform-ios html, .platform-ios body, .platform-ios #q-app,
 .platform-ios .q-layout, .platform-ios .q-page-container {
-  background: #0a0a0a !important;
+  background-color: #0a0a0a !important;
+  background-image: $app-bg-url !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
 }
 .body--light.platform-ios html, .body--light.platform-ios body,
 .body--light.platform-ios #q-app, .body--light.platform-ios .q-layout,
@@ -29,9 +38,85 @@ html, body, #q-app, .q-layout, .q-page-container {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+/* Donor routes without header (e.g. donor-search): page handles safe-area itself */
+.platform-ios .q-page-container.donor-no-header {
+  padding-top: 0;
+}
 /* Layouts s q-header: header má iphoneDevice, top padding by bol duplicitný – použij 0 */
 .platform-ios .q-layout:has(.q-header) .q-page-container {
   padding-top: 0;
+}
+
+/* Role main layouts: sticky/custom header stack (donee + donor) má vlastný safe-area (.iphoneDevice-large) — bez duplicitného padding-top na kontajneri */
+.platform-ios .q-page-container.role-has-custom-header {
+  padding-top: 0;
+}
+
+/* donor-posts / inspirations / myprofile: chrome vnútri q-page — kontajner bez horného insetu (safe-area v HeaderDonor .iphoneDevice-large) */
+.platform-ios .q-page-container.donor-feed-unified-scroll {
+  padding-top: 0;
+  overflow-anchor: none;
+}
+
+/* Donor post detail: spolu s donor-no-header — výnimka s !important, aby horný inset platil nad „padding-top: 0“ */
+.platform-ios .q-page-container.donor-no-header.dh-donor-post-detail {
+  padding-top: env(safe-area-inset-top, 0px) !important;
+}
+
+.platform-ios .q-page.donorPostsPage--unifiedScroll {
+  overflow-anchor: none;
+}
+
+/*
+ * Donor: .roleChrome-topStack sa pri hide zbalí (max-height) — header už nedrží safe-area.
+ * Susedný page container dostane top inset, aby feed nesadol pod notch (iba keď je stack skrytý).
+ * Settings tree používa .dh-use-transform-chrome-hide (skrytie transformom, nie kolapsom) — extra
+ * padding-top by menil scrollHeight počas scrollu a spôsobil skok.
+ */
+.roleChrome-topStack.navbar--hidden:not(.dh-use-transform-chrome-hide)
+  ~ .q-page-container.role-has-custom-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+/* Edit post: žiadny header, hero má ísť hore; platí len keď je v kontajneri .postEditPage, po návrate sa neaplikuje */
+.platform-ios .q-page-container:has(.postEditPage) {
+  padding-top: 0;
+}
+
+/* Post-creation flow (goal/category/postCreation): žiadny extra top padding – stránky majú vlastný header/back, obsah neposúvať nadol; CTA ostáva v viewporte */
+.platform-ios .q-page-container.post-creation-flow {
+  padding-top: 0;
+}
+
+/* Post-creation PICKER only (goal/category): ukotviť do viewportu, zakázať page scroll / rubber-band; picker a CTA ostávajú funkčné */
+.platform-ios .q-page-container.post-creation-picker {
+  overflow: hidden !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: auto;
+  padding-bottom: 0 !important; /* picker root už má safe-area v padding-bottom */
+}
+/* Všetky prehliadače (aj ne‑iOS): rovnaké ukotvenie pre picker, aby sa celý screen nedal potiahnuť */
+.q-page-container.post-creation-picker {
+  overflow: hidden !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overscroll-behavior: none !important;
+  padding-bottom: 0 !important;
+}
+
+/* Auth/login: jeden top offset (safe-area na .login), žiadny na container – aby obsah nebol príliš nízko */
+.platform-ios .landingLayout .q-page-container {
+  padding-top: 0;
+}
+.platform-ios .landingLayout .q-page.login {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+/* Znížiť horný priestor nad mapou na logine, aby formulár nebol posunutý príliš dole */
+.platform-ios .landingLayout .landingPage-mapImage {
+  padding-top: 1.5rem;
 }
 
 /* Safe-area na q-header – header sa neprekrýva so status barom */
@@ -41,6 +126,11 @@ html, body, #q-app, .q-layout, .q-page-container {
 .platform-ios .q-header .q-toolbar,
 .platform-ios .q-header .q-toolbar__title {
   min-height: calc(56px + env(safe-area-inset-top, 0px));
+}
+
+/* Register flow: progress bar + back button under safe area (status bar / Dynamic Island) */
+.platform-ios .LayoutBackground .bgExplain {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
 }
 
 /* Bottom safe-area – sticky CTA, bottom nav, bottom sheet */

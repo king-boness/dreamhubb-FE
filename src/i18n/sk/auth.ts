@@ -99,6 +99,20 @@ export default {
   // Navigation
   home: "Domov",
   inspirations: "Inšpirácie",
+  inspirationsForYou: "Inšpirácie pre teba",
+  inspirationsYourStory: "Tvoj príbeh",
+  inspirationsEmptyTitle: "Zatiaľ žiadne inšpirácie",
+  inspirationsEmptyHint:
+    "Keď pridáš príspevok, zobrazí sa tu na tomto zariadení. Potiahni nadol pre obnovenie.",
+  addInspirationPost: "Pridať inšpiračný príspevok",
+  inspirationAddImage: "Pridať obrázok",
+  inspirationPostPlaceholder: "Napíš o svojej inšpirácii…",
+  postInspiration: "Zverejniť inšpiráciu",
+  inspirationNeedTextOrImage: "Pridaj krátky text alebo aspoň jeden obrázok.",
+  inspirationPosted: "Tvoja inšpirácia bola pridaná.",
+  inspirationNoLinkedPost:
+    "Táto inšpirácia zatiaľ nie je prepojená s príspevkom snov. Otvor príspevky cez domovský feed.",
+  inspirationProfileUnavailable: "Pre túto inšpiráciu profil nie je k dispozícii.",
   notificationsLabel: "Notifikácie",
   profile: "profil",
   settings: "Nastavenia",

@@ -50,8 +50,9 @@
   width: 18rem;
   height: 13rem;
   margin: 0 1rem;
-  border-radius: 1.25rem;
-  padding: 0.7rem;
+  /* 24px — same outer radius as donor feed .postCard */
+  border-radius: 24px;
+  padding: 16px;
   overflow: hidden;
 
   .post-component-imageWrapper {
@@ -61,7 +62,7 @@
     width: 100%;
     height: 100%;
     z-index: 0;
-    border-radius: 1.25rem;
+    border-radius: inherit;
   }
   .postComponent-valueContainer {
     display: flex;

@@ -1,0 +1,53 @@
+/* iOS anchored image pick menu — no scale/jump bubble glitch */
+.dh-imagePick-menu.q-menu {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45) !important;
+  transform: none !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.dh-imagePick-menu.q-menu--square {
+  border-radius: 12px !important;
+}
+
+.dh-imagePick-menuList {
+  min-width: 220px;
+  padding: 0.25rem 0;
+  background: #1c1c1e;
+}
+
+.dh-imagePick-menuList .q-item {
+  min-height: 48px;
+  color: #fff;
+  font-family: poppinsSemiBold, poppins, system-ui, sans-serif;
+}
+
+.dh-imagePick-menuCancel {
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-size: 0.95rem;
+}
+
+.body--light .dh-imagePick-menuList {
+  background: #f5f5f5 !important;
+}
+
+.body--light .dh-imagePick-menuList .q-item {
+  color: #0a0a0a !important;
+}
+
+/* Quasar bottom sheet — image source (Android) */
+.q-bottom-sheet.dh-imagePick-sheet {
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.body--light .q-bottom-sheet.dh-imagePick-sheet {
+  background: #f5f5f5 !important;
+}
+
+.body--light .q-bottom-sheet.dh-imagePick-sheet .q-bottom-sheet__item {
+  color: #0a0a0a !important;
+}

@@ -208,18 +208,20 @@ const headerImages = computed(() => {
       background-repeat: no-repeat;
     }
 
+    /* Celoplošný gradient (to top) — žiadny „polovičný“ blur ani ostrý rez výšky ~50 % */
     .post-header-blurContainer {
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 175px;
+      inset: 0;
+      height: auto;
       border-radius: 0 0 24px 24px;
+      /* Jemný scrim: silnejší pri spodku fotky, dlhý priesvit smerom hore — bez tvrdého „rezu“ */
       background: linear-gradient(
-        to bottom,
-        rgba(1, 3, 16, 0) 0%,
-        rgba(1, 3, 16, 0.9) 60%,
-        rgba(1, 3, 16, 1) 100%
+        to top,
+        rgba(1, 3, 16, 0.88) 0%,
+        rgba(1, 3, 16, 0.5) 22%,
+        rgba(1, 3, 16, 0.18) 42%,
+        rgba(1, 3, 16, 0.06) 58%,
+        rgba(1, 3, 16, 0) 78%
       );
       pointer-events: none;
       z-index: 1;
@@ -227,7 +229,7 @@ const headerImages = computed(() => {
 
     .post-header-topIcons {
       position: absolute;
-      top: calc(3rem - 21px); // Moved up by 21px (was 3rem, now calc(3rem - 21px) to move icons 21px higher)
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
       left: 0;
       right: 0;
       display: flex;
@@ -248,16 +250,7 @@ const headerImages = computed(() => {
       }
     }
 
-    .platform-ios .post-header-topIcons {
-      top: max(3rem, calc(env(safe-area-inset-top, 0px) + 10px));
-    }
-
-@supports (padding: env(safe-area-inset-top)) {
-  .post-header-topIcons {
-    top: max(3rem, calc(env(safe-area-inset-top, 0px) + 10px)) !important;
-  }
-}
-.post-header-iconBtn {
+    .post-header-iconBtn {
       width: 40px;
       height: 40px;
       border-radius: 999px;
@@ -347,29 +340,37 @@ const headerImages = computed(() => {
       z-index: 12;
       pointer-events: none;
       width: 100%;
+      overflow: visible;
     }
 
     .post-header-categoryPill {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.4rem 0.75rem;
+      min-height: 32px;
+      box-sizing: border-box;
+      padding: 0.5rem 0.85rem 0.42rem;
+      line-height: 1.25;
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(14px);
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       pointer-events: auto;
+      overflow: visible;
+      flex-wrap: nowrap;
     }
 
     .post-header-categoryIcon {
       width: 16px;
       height: 16px;
+      flex-shrink: 0;
       object-fit: contain;
     }
 
     .post-header-categoryText {
       font-size: 0.75rem;
       font-weight: 600;
+      line-height: 1.25;
       color: #ffffff;
       /* text-transform removed - formatting is handled by formatSubcategoryLabel() in JavaScript */
     }

@@ -21,7 +21,14 @@
     </button>
 
     <div class="dhHintBubble-content">
-      <h3 v-if="title" class="dhHintBubble-title">{{ title }}</h3>
+      <div
+        v-if="title"
+        class="dhHintBubble-title"
+        role="heading"
+        aria-level="3"
+      >
+        {{ title }}
+      </div>
       <p class="dhHintBubble-text">{{ text }}</p>
       <slot />
     </div>
@@ -52,7 +59,11 @@ const emit = defineEmits<{
 
 <style scoped lang="scss">
 .dhHintBubble {
+  --dh-hint-fg: #ffffff;
+  --dh-hint-fg-muted: rgba(255, 255, 255, 0.95);
+
   position: relative;
+  color: #ffffff !important;
   background: linear-gradient(135deg, rgba(189, 0, 67, 0.95), rgba(255, 0, 110, 0.95));
   border-radius: 1rem;
   padding: 1rem 1.5rem;
@@ -106,7 +117,7 @@ const emit = defineEmits<{
 }
 
 .dhHintBubble-content {
-  color: white;
+  color: var(--dh-hint-fg);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -121,8 +132,9 @@ const emit = defineEmits<{
 .dhHintBubble-title {
   font-family: poppinsSemiBold;
   font-size: 1rem;
+  font-weight: 600;
   margin: 0 0 0.5rem 0;
-  color: white;
+  color: #ffffff !important;
   text-align: center;
 }
 
@@ -130,7 +142,7 @@ const emit = defineEmits<{
   font-family: poppins;
   font-size: 0.85rem;
   margin: 0;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.95) !important;
   line-height: 1.4;
   text-align: center;
 }
@@ -143,15 +155,31 @@ const emit = defineEmits<{
   height: 0;
   border-left: 0.75rem solid transparent;
   border-right: 0.75rem solid transparent;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .dhHintBubble--arrow-down .dhHintBubble-arrow {
   bottom: -0.5rem;
-  border-top: 0.75rem solid rgba(189, 0, 67, 0.95);
+  border-top: 0.75rem solid #bd0043;
 }
 
+/* arrow-up: draw via ::after on root so it stays opaque and stable (no pop/fade on Safari when parent animates) */
 .dhHintBubble--arrow-up .dhHintBubble-arrow {
+  display: none;
+}
+
+.dhHintBubble--arrow-up::after {
+  content: "";
+  position: absolute;
   top: -0.5rem;
-  border-bottom: 0.75rem solid rgba(189, 0, 67, 0.95);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 0.75rem solid transparent;
+  border-right: 0.75rem solid transparent;
+  border-bottom: 0.75rem solid #bd0043;
+  pointer-events: none;
 }
 </style>

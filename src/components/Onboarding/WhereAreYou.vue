@@ -19,12 +19,12 @@
         </div>
 
         <!-- Dropdowns -->
-        <div class="location-form">
+        <div class="location-form" :class="{ 'location-form--embed': isEmbedMode }">
           <q-select
             v-model="localContinent"
             :options="continentOptions"
             label="Choose your continent"
-            dark
+            :dark="!isEmbedMode"
             outlined
             class="location-select"
             fit
@@ -35,7 +35,7 @@
             v-model="localCountry"
             :options="countryOptions"
             label="Choose your country"
-            dark
+            :dark="!isEmbedMode"
             outlined
             class="location-select"
             :disable="!localContinent"
@@ -60,7 +60,7 @@
             :options="filteredCityOptions"
             option-label="label"
             label="Choose your city"
-            dark
+            :dark="!isEmbedMode"
             outlined
             class="location-select"
             :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
@@ -112,7 +112,7 @@
             :display-value="localCity ? cityDisplayValue : undefined"
             :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
             label="Choose your city"
-            dark
+            :dark="!isEmbedMode"
             outlined
             class="location-select"
             :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
@@ -162,12 +162,12 @@
       </div>
 
       <!-- Dropdowns -->
-      <div class="location-form">
+      <div class="location-form" :class="{ 'location-form--embed': isEmbedMode }">
         <q-select
           v-model="localContinent"
           :options="continentOptions"
           label="Choose your continent"
-          dark
+          :dark="!isEmbedMode"
           outlined
           class="location-select"
           fit
@@ -178,7 +178,7 @@
           v-model="localCountry"
           :options="countryOptions"
           label="Choose your country"
-          dark
+          :dark="!isEmbedMode"
           outlined
           class="location-select"
           :disable="!localContinent"
@@ -203,7 +203,7 @@
           :options="filteredCityOptions"
           option-label="label"
           label="Choose your city"
-          dark
+          :dark="!isEmbedMode"
           outlined
           class="location-select"
           :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
@@ -255,7 +255,7 @@
           :display-value="localCity ? cityDisplayValue : undefined"
           :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
           label="Choose your city"
-          dark
+          :dark="!isEmbedMode"
           outlined
           class="location-select"
           :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
@@ -373,6 +373,9 @@ const emit = defineEmits<{
   next: [];
   back: [];
 }>();
+
+/** Settings / filters: light q-fields on pale card — not full-screen dark onboarding */
+const isEmbedMode = computed(() => props.hideHeader && props.hideFooter);
 
 const authStore = useAuthStore();
 
@@ -889,7 +892,7 @@ watch(localCityId, (newVal) => {
   flex-direction: column;
   padding: 24px 20px 40px;
   margin: 0 auto;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: transparent;
   overflow: hidden;
   position: relative;
 
@@ -898,7 +901,9 @@ watch(localCityId, (newVal) => {
     padding: 0;
     margin: 0;
     background: transparent;
-    height: 100%;
+    /* Avoid stretching inside q-card: flex:1 + form auto-margins created a large empty “pit”. */
+    height: auto;
+    min-height: 0;
     max-width: 100%;
   }
 }
@@ -974,6 +979,8 @@ watch(localCityId, (newVal) => {
     justify-content: flex-start;
     padding-top: 0;
     gap: 0;
+    flex: 0 1 auto;
+    min-height: 0;
   }
 }
 
@@ -1000,6 +1007,10 @@ watch(localCityId, (newVal) => {
   }
 }
 
+.whereAreYou--filter-mode .location-map {
+  margin-bottom: 0.75rem;
+}
+
 .location-form {
   width: 100%;
   display: flex;
@@ -1009,6 +1020,12 @@ watch(localCityId, (newVal) => {
   margin-top: auto;
   margin-bottom: auto;
   flex-shrink: 0;
+}
+
+/* Settings / embedded card: no vertical auto-margins — they reserve empty space under the last select. */
+.location-form--embed {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .location-select {
@@ -1080,6 +1097,55 @@ watch(localCityId, (newVal) => {
   }
 }
 
+/* Embedded (settings): light q-fields only in light mode */
+:global(.body--light) .location-form--embed .location-select {
+  :deep(.q-field__control) {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #1a1a1a;
+  }
+
+  :deep(.q-field__label) {
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  :deep(.q-field__native) {
+    color: #1a1a1a;
+  }
+
+  :deep(.q-field--disabled .q-field__native),
+  :deep(.q-field--disabled .q-field__input) {
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+    opacity: 1 !important;
+  }
+
+  :deep(.q-field--disabled .q-field__native *),
+  :deep(.q-field--disabled .q-field__input *),
+  :deep(.q-field--disabled .q-placeholder) {
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+    opacity: 1 !important;
+  }
+
+  :deep(.q-field--disabled),
+  :deep(.q-field--disabled .q-field__control),
+  :deep(.q-field--disabled .q-field__inner) {
+    opacity: 1 !important;
+  }
+
+  :deep(.q-field--disabled .q-field__label) {
+    color: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  :deep(.q-icon) {
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  :deep(.cities-divider .q-separator) {
+    background-color: rgba(0, 0, 0, 0.12);
+  }
+}
+
 .location-instruction {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.6);
@@ -1114,7 +1180,7 @@ watch(localCityId, (newVal) => {
 }
 
 .geolocation-dialog {
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: rgba(10, 10, 10, 0.98);
   color: #ffffff;
   min-width: 300px;
 

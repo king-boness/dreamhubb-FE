@@ -3,6 +3,7 @@
   <router-view v-else />
   <OfflineBanner />
   <DevNetStatus />
+  <ImagePickIosMenu />
 </template>
 
 <script setup lang="ts">
@@ -14,6 +15,7 @@ import { useNetworkStore } from "src/stores/network";
 import InitialLoader from "src/components/Onboarding/InitialLoader.vue";
 import OfflineBanner from "src/components/common/OfflineBanner.vue";
 import DevNetStatus from "src/components/common/DevNetStatus.vue";
+import ImagePickIosMenu from "src/components/common/ImagePickIosMenu.vue";
 
 const $q = useQuasar();
 $q.dark.set(true);

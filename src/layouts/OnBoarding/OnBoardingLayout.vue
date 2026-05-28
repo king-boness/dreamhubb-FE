@@ -11,8 +11,9 @@
 </script>
 
 <style lang="scss" scoped>
+/* Unified app background (iosSafeArea.scss) */
 .onboardingLayout {
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: transparent;
   min-height: 100vh;
 }
 

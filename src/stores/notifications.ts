@@ -63,7 +63,7 @@ export const useNotificationsStore = defineStore("notifications", {
       this.error = null;
 
       try {
-        const { data } = await api.get("/notifications", {
+        const { data } = await api.get("/donor/notifications", {
           params: {
             per_page: 50, // Fetch enough for initial display
             page: 1
@@ -109,7 +109,7 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async markAsRead(notificationId: number) {
       try {
-        const { data } = await api.patch(`/notifications/${notificationId}/read`);
+        const { data } = await api.patch(`/donor/notifications/${notificationId}/read`);
 
         if (data.status === "success") {
           // Update local state
@@ -129,7 +129,7 @@ export const useNotificationsStore = defineStore("notifications", {
 
     async markAllAsRead() {
       try {
-        const { data } = await api.patch("/notifications/read-all");
+        const { data } = await api.patch("/donor/notifications/read-all");
 
         if (data.status === "success") {
           // Update local state

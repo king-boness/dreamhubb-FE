@@ -73,9 +73,12 @@ module.exports = configure(function (/* ctx */) {
           manualChunks: {
             ...(typeof output.manualChunks === "object" ? output.manualChunks : {}),
             vue: ["vue", "vue-router", "pinia"],
+            quasar: ["quasar", "@quasar/extras"],
             axios: ["axios"],
             i18n: ["vue-i18n"],
-            capacitor: ["@capacitor/core", "@capacitor/camera", "@capacitor/app", "@capacitor/haptics", "@capacitor/keyboard", "@capacitor/status-bar"]
+            capacitor: ["@capacitor/core", "@capacitor/camera", "@capacitor/app", "@capacitor/haptics", "@capacitor/keyboard", "@capacitor/status-bar"],
+            swiper: ["swiper", "swiper/vue", "swiper/modules"],
+            flicking: ["@egjs/vue3-flicking", "@egjs/flicking-plugins"]
           }
         }
       }
@@ -91,7 +94,7 @@ module.exports = configure(function (/* ctx */) {
     // Quasar framework config
     framework: {
       config: {},
-      plugins: ["Notify"]
+      plugins: ["Notify", "BottomSheet"]
     },
 
     animations: ['fadeIn', 'fadeOut', 'backInRight', 'backInLeft', 'flipInY'],

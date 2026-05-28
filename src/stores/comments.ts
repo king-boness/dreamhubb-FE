@@ -32,10 +32,41 @@ export interface Comment {
   replies?: Reply[];
 }
 
+interface ReplyApi {
+  id: number;
+  post_id: number;
+  parent_id: number;
+  user_id: number;
+  user_name: string;
+  user_avatar_url?: string | null;
+  type: "help" | "accomplish";
+  message: string;
+  is_owner_reply: boolean;
+  created_at: string;
+}
+
 interface CommentsState {
   itemsByPostId: Record<number, Comment[]>;
   loadingByPostId: Record<number, boolean>;
   errorByPostId: Record<number, string | null>;
+}
+
+interface ContributionApi {
+  id: number;
+  post_id: number;
+  user_id: number;
+  user_name: string;
+  user_avatar_url?: string | null;
+  type: "help" | "accomplish";
+  message: string;
+  return_message?: string | null;
+  images?: unknown;
+  image_urls?: unknown;
+  attachments?: unknown;
+  photos?: unknown;
+  is_private?: boolean;
+  created_at: string;
+  replies?: ReplyApi[];
 }
 
 export const useCommentsStore = defineStore("comments", {
@@ -106,7 +137,7 @@ export const useCommentsStore = defineStore("comments", {
 
         if (data.status === "success") {
           // Map contributions to comments format with replies
-          this.itemsByPostId[postId] = (data.contributions || []).map((contrib: any) => ({
+          this.itemsByPostId[postId] = (data.contributions || []).map((contrib: ContributionApi) => ({
             id: contrib.id,
             post_id: contrib.post_id,
             user_id: contrib.user_id,
@@ -120,7 +151,7 @@ export const useCommentsStore = defineStore("comments", {
             ),
             is_private: contrib.is_private,
             created_at: contrib.created_at,
-            replies: (contrib.replies || []).map((reply: any) => ({
+            replies: (contrib.replies || []).map((reply: ReplyApi) => ({
               id: reply.id,
               post_id: reply.post_id,
               parent_id: reply.parent_id,

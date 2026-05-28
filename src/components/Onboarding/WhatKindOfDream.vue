@@ -13,87 +13,109 @@
       <div class="dream-content">
         <h1 class="dream-title">{{ title }}</h1>
 
-        <!-- Flicking carousel -->
-        <div class="dream-carousel-wrapper">
-          <Flicking
-            ref="flickingInstance"
-            :options="flickingOptions"
-            :plugins="flickingPlugins"
-            @changed="handleFlickingChanged"
-            @ready="handleFlickingReady"
-            class="dream-flicking"
-          >
-            <div
-              v-for="category in categories"
-              :key="category.id"
-              class="dream-option"
-              :class="{ 'is-active': localValue === category.id }"
-            >
-              <div class="dream-content-wrapper">
-                <div class="dream-icon">
-                  <img
-                    :src="`/icons/CategoryIcons/${category.iconFile}.svg`"
-                    :alt="category.label"
-                    class="dream-icon-img"
-                  />
-                </div>
-              </div>
+        <div class="dream-carousel-wrapper" :style="dreamCarouselWrapperStyle">
+          <div class="dream-carousel-stage" :style="dreamCarouselStageStyle">
+            <div class="dream-swiper-shell">
+              <Swiper
+                class="dream-swiper"
+                direction="vertical"
+                :loop="true"
+                :loop-additional-slides="2"
+                :watch-overflow="true"
+                :centered-slides="true"
+                slides-per-view="auto"
+                :space-between="0"
+                :speed="320"
+                :threshold="5"
+                :free-mode="false"
+                :mousewheel="{ forceToAxis: true, releaseOnEdges: false, sensitivity: 0.85 }"
+                :modules="swiperModules"
+                @swiper="onSwiperReady"
+                @slideChange="handleSwiperChanged"
+              >
+                <SwiperSlide
+                  v-for="category in categories"
+                  :key="category.id"
+                  class="dream-option"
+                >
+                  <div class="dream-content-wrapper">
+                    <div class="dream-icon">
+                      <img
+                        :src="`/icons/CategoryIcons/${category.iconFile}.svg`"
+                        :alt="category.label"
+                        class="dream-icon-img"
+                      />
+                    </div>
+                  </div>
+                </SwiperSlide>
+              </Swiper>
             </div>
-          </Flicking>
-
-          <button class="dream-helpBtn" @click="handleInfoClick">
+          </div>
+          <button type="button" class="dream-helpBtn" @click="handleInfoClick">
             <q-icon name="help_outline" />
           </button>
         </div>
 
-        <p class="dream-instruction">choose by swiping up or down</p>
+        <p v-if="hideFooter" class="dream-instruction dream-instruction--inline">
+          choose by swiping up or down
+        </p>
       </div>
     </template>
     <template v-else>
       <div class="dream-content">
-        <!-- Flicking carousel -->
-      <div class="dream-carousel-wrapper">
-        <Flicking
-          ref="flickingInstance"
-          :options="flickingOptions"
-          :plugins="flickingPlugins"
-          @changed="handleFlickingChanged"
-          @ready="handleFlickingReady"
-          class="dream-flicking"
-        >
-          <div
-            v-for="category in categories"
-            :key="category.id"
-            class="dream-option"
-            :class="{ 'is-active': localValue === category.id }"
-          >
-            <div class="dream-content-wrapper">
-              <div class="dream-icon">
-                <img
-                  :src="`/icons/CategoryIcons/${category.iconFile}.svg`"
-                  :alt="category.label"
-                  class="dream-icon-img"
-                />
-              </div>
+        <div class="dream-carousel-wrapper" :style="dreamCarouselWrapperStyle">
+          <div class="dream-carousel-stage" :style="dreamCarouselStageStyle">
+            <div class="dream-swiper-shell">
+              <Swiper
+                class="dream-swiper"
+                direction="vertical"
+                :loop="true"
+                :loop-additional-slides="2"
+                :watch-overflow="true"
+                :centered-slides="true"
+                slides-per-view="auto"
+                :space-between="0"
+                :speed="320"
+                :threshold="5"
+                :free-mode="false"
+                :mousewheel="{ forceToAxis: true, releaseOnEdges: false, sensitivity: 0.85 }"
+                :modules="swiperModules"
+                @swiper="onSwiperReady"
+                @slideChange="handleSwiperChanged"
+              >
+                <SwiperSlide
+                  v-for="category in categories"
+                  :key="category.id"
+                  class="dream-option"
+                >
+                  <div class="dream-content-wrapper">
+                    <div class="dream-icon">
+                      <img
+                        :src="`/icons/CategoryIcons/${category.iconFile}.svg`"
+                        :alt="category.label"
+                        class="dream-icon-img"
+                      />
+                    </div>
+                  </div>
+                </SwiperSlide>
+              </Swiper>
             </div>
           </div>
-        </Flicking>
-
-        <button class="dream-helpBtn" @click="handleInfoClick">
-          <q-icon name="help_outline" />
-        </button>
-      </div>
+          <button type="button" class="dream-helpBtn" @click="handleInfoClick">
+            <q-icon name="help_outline" />
+          </button>
+        </div>
       </div>
     </template>
 
-    <!-- Action buttons (hidden if hideFooter is true) -->
-    <template v-if="!hideFooter">
+    <div v-if="!hideFooter" class="dream-bottom">
+      <p class="dream-instruction">choose by swiping up or down</p>
       <div class="dream-actions" v-if="showSearchButton">
         <button class="dream-searchBtn" @click="handleSearch">SEARCH</button>
         <button class="dream-nextBtn" @click="handleNext">{{ nextButtonLabel }}</button>
       </div>
       <button v-else class="dream-nextBtn dream-nextBtn-single" @click="handleNext">{{ nextButtonLabel }}</button>
-    </template>
+    </div>
 
     <!-- Info Modal -->
     <InfoModal
@@ -109,9 +131,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted } from "vue";
-import { Fade, Perspective } from "@egjs/flicking-plugins";
-import Flicking from "@egjs/vue3-flicking";
+import { ref, computed, watch, nextTick } from "vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Mousewheel } from "swiper/modules";
+import type { Swiper as SwiperClass } from "swiper";
+import "swiper/css";
 import InfoModal from "./InfoModal.vue";
 import { categoryInfo } from "src/config/onboardingInfo";
 
@@ -130,7 +154,12 @@ const props = defineProps<{
   showSearchButton?: boolean; // Show search button, defaults to false
   hideHeader?: boolean; // Hide header (back button + title), defaults to false
   hideFooter?: boolean; // Hide footer (CTA buttons), defaults to false
+  centerOffsetY?: number; // Vertical shift of the whole roller block (px)
+  rollerAxisOffsetY?: number; // Vertical shift of wheel axis only (px), keeps ? fixed
 }>();
+
+const POST_CREATION_CENTER_OFFSET_Y = -17;
+const POST_CREATION_ROLLER_AXIS_OFFSET_Y = -19;
 
 const emit = defineEmits<{
   "update:modelValue": [value: string];
@@ -154,79 +183,8 @@ const categories: Category[] = [
 // This allows the parent to control the initial value
 const localValue = ref<string>(props.modelValue ?? categories[0].id);
 const showInfoModal = ref(false);
-const flickingInstance = ref<InstanceType<typeof Flicking> | null>(null);
-const isFlickingReady = ref(false);
-
-// Watch for flickingInstance changes and synchronize when it becomes available
-watch(() => flickingInstance.value, async (newInstance) => {
-  if (newInstance && !isFlickingReady.value) {
-    // Check if it's a Vue component wrapper
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const instance = (newInstance as any)?.flicking || newInstance;
-    if (instance && typeof instance.moveTo === "function") {
-      isFlickingReady.value = true;
-      await nextTick();
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await syncFlickingToValue();
-      // no verbose logs
-    }
-  }
-}, { immediate: true });
-
-// Synchronize Flicking position with selected value
-const syncFlickingToValue = async () => {
-  if (!flickingInstance.value || !isFlickingReady.value) return;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const instance = (flickingInstance.value as any)?.flicking || flickingInstance.value;
-  if (!instance || typeof instance.moveTo !== "function") return;
-
-  const targetIndex = categories.findIndex(cat => cat.id === localValue.value);
-  if (targetIndex >= 0) {
-    try {
-      instance.moveTo(targetIndex, 0);
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.debug("[WhatKindOfDream] Failed to sync Flicking:", error);
-      }
-    }
-  }
-};
-
-// Watch for changes to modelValue prop and update localValue immediately (but only if different)
-// IMPORTANT: We don't sync Flicking here on initial mount if value is already correct
-// This prevents animation when returning to the page
-watch(() => props.modelValue, async (newVal, oldVal) => {
-  // Skip if this is the initial watch call (oldVal is undefined) and value matches
-  if (oldVal === undefined && newVal === localValue.value) {
-    return;
-  }
-
-  if (newVal !== null && newVal !== undefined && newVal !== localValue.value) {
-    localValue.value = newVal;
-    // Only sync Flicking if it's ready (not on initial mount if value is correct)
-    if (isFlickingReady.value) {
-      await nextTick();
-      await syncFlickingToValue();
-    }
-  }
-}, { immediate: true });
-
-// Handle Flicking ready event
-const handleFlickingReady = async () => {
-  isFlickingReady.value = true;
-  await nextTick();
-  await new Promise(resolve => setTimeout(resolve, 100));
-  await syncFlickingToValue();
-  // no logs
-};
-
-// Try to sync on mount as well
-onMounted(async () => {
-  await nextTick();
-  await new Promise(resolve => setTimeout(resolve, 200));
-  await syncFlickingToValue();
-});
+const swiperRef = ref<SwiperClass | null>(null);
+const swiperModules = [Mousewheel];
 
 const progressWidth = computed(() => {
   return `${props.progress ?? 60}%`;
@@ -234,6 +192,12 @@ const progressWidth = computed(() => {
 
 const title = computed(() => props.title ?? "from category");
 const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
+const dreamCarouselWrapperStyle = computed(() => ({
+  transform: `translateY(${props.centerOffsetY ?? POST_CREATION_CENTER_OFFSET_Y}px)`
+}));
+const dreamCarouselStageStyle = computed(() => ({
+  transform: `translateY(${props.rollerAxisOffsetY ?? POST_CREATION_ROLLER_AXIS_OFFSET_Y}px)`
+}));
 
 const handleSearch = () => {
   emit("search");
@@ -251,34 +215,35 @@ const infoModalDescription = computed(() => currentInfo.value?.description || ""
 const infoModalCta = computed(() => currentInfo.value?.ctaLabel || "");
 const infoModalIcon = computed(() => currentInfo.value?.icon || "");
 
-const flickingOptions = computed(() => {
-  const defaultIdx = categories.findIndex(cat => cat.id === localValue.value);
-  return {
-    horizontal: false, // Vertical scrolling
-    inputType: ["mouse", "touch", "pointer"],
-    defaultIndex: defaultIdx >= 0 ? defaultIdx : 0,
-    align: "center",
-    circular: true,
-    duration: 300, // Faster transition
-    easing: (x: number) => 1 - Math.pow(1 - x, 3), // Ease-out cubic
-    deceleration: 0.0075, // Smoother deceleration
-    threshold: 40, // Lower threshold for easier swiping
-    interruptable: true, // Allow interrupting animations
-    bounce: 0 // No bounce for smoother feel
-  };
-});
-
-const flickingPlugins = [
-  new Fade("", 0.3), // Very tight fade range - only active item visible
-  new Perspective({ rotate: 0.2, scale: 1.3 }) // Minimal perspective effect
-];
-
-const handleFlickingChanged = (e: { index: number }) => {
-  const selectedCategory = categories[e.index];
+const handleSwiperChanged = (swiper: SwiperClass) => {
+  const selectedCategory = categories[swiper.realIndex] ?? categories[0];
   localValue.value = selectedCategory.id;
-
   emit("update:modelValue", localValue.value);
 };
+
+const onSwiperReady = async (swiper: SwiperClass) => {
+  swiperRef.value = swiper;
+  await nextTick();
+  const idx = categories.findIndex(cat => cat.id === localValue.value);
+  if (idx >= 0) swiper.slideToLoop(idx, 0, false);
+};
+
+watch(
+  () => props.modelValue,
+  async (newVal) => {
+    const normalized = newVal ?? categories[0].id;
+    if (normalized !== localValue.value) {
+      localValue.value = normalized;
+    }
+    if (!swiperRef.value) return;
+    await nextTick();
+    const idx = categories.findIndex(cat => cat.id === normalized);
+    if (idx >= 0 && swiperRef.value.realIndex !== idx) {
+      swiperRef.value.slideToLoop(idx, 0, false);
+    }
+  },
+  { immediate: true }
+);
 
 const handleInfoClick = () => {
   showInfoModal.value = true;
@@ -301,24 +266,41 @@ const handleNext = () => {
 
 <style lang="scss" scoped>
 .whatKindOfDream {
+  --goal-wheel-shell-height: 400px;
+  --goal-wheel-shell-min-height: 320px;
+  --goal-wheel-shell-max-height: 48vh;
+  --goal-wheel-slide-size: 152px;
+  --goal-wheel-wrapper-pad-y: 0.5rem;
+  --goal-wheel-track-pad-y: 20px;
+  --goal-inline-instruction-gap: 0.9rem;
+  --goal-bottom-top-gap: 10px;
+  --goal-instruction-bottom-gap: 14px;
+
   width: 100%;
   max-width: 390px;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 24px 20px 40px;
+  padding-bottom: max(33px, env(safe-area-inset-bottom, 0px));
   margin: 0 auto;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
-  overflow: hidden;
+  background: transparent;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
+  box-sizing: border-box;
 
   // When used in filters (hide-header and hide-footer), remove padding and background
   &.whatKindOfDream--filter-mode {
     padding: 0;
     margin: 0;
     background: transparent;
-    height: 100%;
     max-width: 100%;
+    width: 100%;
+    flex: 0 1 auto;
+    min-height: 0;
   }
 }
 
@@ -329,6 +311,7 @@ const handleNext = () => {
   margin-bottom: 20px;
   flex-shrink: 0;
   position: relative;
+  padding-top: 41px;
 }
 
 .dream-backBtn {
@@ -382,13 +365,13 @@ const handleNext = () => {
   justify-content: center;
   padding: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible !important;
   position: relative;
 
-  // In filter mode, content should fill available space
   .whatKindOfDream--filter-mode & {
-    flex: 1;
+    flex: 0 0 auto;
     width: 100%;
+    justify-content: flex-start;
   }
 }
 
@@ -396,7 +379,7 @@ const handleNext = () => {
   font-size: 1.5rem;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 20px 0;
+  margin: 0 0 8px 0;
   text-align: center;
   flex-shrink: 0;
   line-height: 1.2;
@@ -405,43 +388,98 @@ const handleNext = () => {
 .dream-carousel-wrapper {
   position: relative;
   width: 100%;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 0;
+  align-items: center;
   margin: 0;
+  transform: translateY(var(--goal-center-offset-y, 0px));
+  padding: var(--goal-wheel-wrapper-pad-y) 0;
+  box-sizing: border-box;
+  overflow: visible !important;
+
+  .whatKindOfDream--filter-mode & {
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 0;
+    margin: 0;
+    padding: var(--goal-wheel-wrapper-pad-y) 0;
+  }
 }
 
-.dream-flicking {
+.dream-carousel-stage {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  height: 100%;
-  max-height: 450px;
+  max-width: 280px;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: visible !important;
 }
 
-:deep(.flicking-viewport) {
+.dream-swiper-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 280px;
+  margin: 0 auto;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.dream-swiper {
+  width: 100%;
+  max-width: 280px;
+  height: var(--goal-wheel-shell-height);
+  min-height: var(--goal-wheel-shell-min-height);
+  max-height: var(--goal-wheel-shell-max-height);
+  overflow: visible !important;
+  flex-shrink: 0;
+}
+
+:deep(.swiper.swiper-vertical) {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: visible !important;
   pointer-events: auto;
+  z-index: 1;
 }
 
-:deep(.flicking-camera) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 80px; // Reduced gap to make transitions smoother
+:deep(.swiper-wrapper) {
+  flex-direction: column !important;
+  box-sizing: border-box;
+  padding-top: var(--goal-wheel-track-pad-y);
+  padding-bottom: var(--goal-wheel-track-pad-y);
+  overflow: visible !important;
 }
 
-:deep(.flicking-panel) {
+/* Numeric slidesPerView would force each slide to (containerH/3); auto uses this row height */
+:deep(.swiper-slide) {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  height: var(--goal-wheel-slide-size) !important;
+  min-height: var(--goal-wheel-slide-size);
+  max-height: var(--goal-wheel-slide-size);
+  box-sizing: border-box;
+  transition: transform 0.25s ease;
+  overflow: visible !important;
 }
 
 .dream-option {
@@ -451,25 +489,49 @@ const handleNext = () => {
   justify-content: center;
   gap: 0;
   width: 100%;
-  min-height: 200px;
-  opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  min-height: var(--goal-wheel-slide-size);
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
-  will-change: opacity, transform;
+  pointer-events: auto;
+  overflow: visible !important;
+}
+
+:deep(.swiper-slide-active) {
+  z-index: 2;
+}
+
+:deep(.swiper-slide-active .dream-content-wrapper::before) {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 124px;
+  height: 124px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 0;
   pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(189, 0, 67, 0.35) 0%,
+    rgba(189, 0, 67, 0.12) 45%,
+    transparent 72%
+  );
+  box-shadow:
+    0 0 22px 10px rgba(189, 0, 67, 0.28),
+    0 0 42px 18px rgba(189, 0, 67, 0.12);
+}
 
-  &.is-active {
-    opacity: 1;
-    transform: scale(1.2);
-    pointer-events: auto;
-  }
+:deep(.swiper-slide:not(.swiper-slide-active) .dream-icon) {
+  opacity: 0.42;
+  transform: scale(0.94);
+}
 
-  // Show icon even when not active, but very faint
-  &:not(.is-active) .dream-icon {
-    opacity: 0.1;
-  }
+:deep(.swiper-slide-prev .dream-icon),
+:deep(.swiper-slide-next .dream-icon) {
+  opacity: 0.58;
+  transform: scale(0.98);
 }
 
 .dream-content-wrapper {
@@ -481,49 +543,63 @@ const handleNext = () => {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: visible !important;
 }
 
 .dream-icon {
-  width: 160px;
-  height: 160px;
+  width: 108px;
+  height: 108px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
-  opacity: 0.3;
+  opacity: 1;
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
-  margin-top: 0;
+}
 
-  .dream-option.is-active & {
-    opacity: 1;
-    transform: scale(1.1);
-  }
+:deep(.swiper-slide-active .dream-icon) {
+  opacity: 1;
+  transform: scale(1.12);
+  z-index: 1;
+  filter: brightness(1.08);
 }
 
 .dream-icon-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(189, 0, 67, 0.5));
+  filter: drop-shadow(0 0 16px rgba(189, 0, 67, 0.45));
+}
+
+:deep(.swiper-slide-active .dream-icon-img) {
+  filter: brightness(1.1) drop-shadow(0 0 18px rgba(189, 0, 67, 0.65))
+    drop-shadow(0 0 34px rgba(189, 0, 67, 0.35));
 }
 
 .dream-helpBtn {
   position: absolute;
-  right: 20px;
-  top: calc(50% - 40px);
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  .whatKindOfDream--filter-mode & {
+    top: 50%;
+    transform: translateY(-50%);
+  }
   width: 40px;
   height: 40px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
+  background: rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 50;
   pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
     border-color: rgba(255, 255, 255, 0.6);
@@ -537,12 +613,29 @@ const handleNext = () => {
   }
 }
 
+.dream-bottom {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--goal-bottom-top-gap);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  z-index: 20;
+}
+
 .dream-instruction {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 20px 0;
+  margin: 0 0 var(--goal-instruction-bottom-gap) 0;
   text-align: center;
   flex-shrink: 0;
+}
+
+.dream-instruction--inline {
+  margin-top: var(--goal-inline-instruction-gap);
+  margin-bottom: 0;
 }
 
 .dream-actions {

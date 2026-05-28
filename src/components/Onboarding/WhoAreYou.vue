@@ -46,18 +46,45 @@
           class="who-input"
         />
 
-        <q-input
-          v-model="localDateOfBirth"
-          label="Date of birth"
-          dark
-          outlined
-          class="who-input"
-          type="date"
-        >
-          <template #append>
-            <q-icon name="event" />
-          </template>
-        </q-input>
+        <!-- Date of birth: trigger + inline Apple-like wheel picker -->
+        <div class="who-date-wrapper" ref="datePickerWrapperRef">
+          <div
+            class="who-input who-input--date-trigger"
+            role="button"
+            tabindex="0"
+            @click="toggleDatePicker"
+            @keydown.enter.prevent="toggleDatePicker"
+            @keydown.space.prevent="toggleDatePicker"
+          >
+            <span class="who-input--date-trigger__label">Date of birth</span>
+            <span class="who-input--date-trigger__value">{{ dateOfBirthDisplay }}</span>
+            <q-icon name="event" class="who-input--date-trigger__icon" />
+          </div>
+
+          <!-- Inline wheel picker (bez toolbaru, Apple-like) -->
+          <Transition name="who-date-picker-fade">
+            <div v-if="showDatePicker" class="who-date-inline-picker">
+              <div class="who-date-inline-picker__backdrop" @click="closeDatePicker" aria-hidden="true" />
+              <div class="who-date-inline-picker__wheels">
+                <div class="who-date-inline-picker__column-wrap">
+                  <div ref="dayColumnRef" class="who-date-inline-picker__column" @scroll="onDateWheelScroll">
+                    <div v-for="d in dayOptions" :key="d" class="who-date-inline-picker__item">{{ String(d).padStart(2, '0') }}</div>
+                  </div>
+                </div>
+                <div class="who-date-inline-picker__column-wrap">
+                  <div ref="monthColumnRef" class="who-date-inline-picker__column" @scroll="onDateWheelScroll">
+                    <div v-for="m in monthOptions" :key="m" class="who-date-inline-picker__item">{{ String(m).padStart(2, '0') }}</div>
+                  </div>
+                </div>
+                <div class="who-date-inline-picker__column-wrap">
+                  <div ref="yearColumnRef" class="who-date-inline-picker__column" @scroll="onDateWheelScroll">
+                    <div v-for="y in yearOptions" :key="y" class="who-date-inline-picker__item">{{ y }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </div>
 
         <!-- Gender dropdown -->
         <div class="who-genderWrapper">
@@ -307,7 +334,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, withDefaults } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, withDefaults } from "vue";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { notifyError } from "src/utils/notify";
 import { api } from "boot/axios";
@@ -349,6 +376,107 @@ const emit = defineEmits<{
 
 const localUsername = ref(props.username || "");
 const localDateOfBirth = ref(props.dateOfBirth || "");
+const showDatePicker = ref(false);
+const datePickerWrapperRef = ref<HTMLElement | null>(null);
+const dayColumnRef = ref<HTMLElement | null>(null);
+const monthColumnRef = ref<HTMLElement | null>(null);
+const yearColumnRef = ref<HTMLElement | null>(null);
+let dateWheelScrollTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const DATE_WHEEL_ITEM_HEIGHT = 44;
+const currentYear = new Date().getFullYear();
+const dayOptions = Array.from({ length: 31 }, (_, i) => i + 1);
+const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+const yearOptions = Array.from({ length: currentYear - 13 - (currentYear - 100) + 1 }, (_, i) => currentYear - 100 + i);
+
+function getMaxDayInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+function buildDateFromWheels(day: number, month: number, year: number): string {
+  const maxDay = getMaxDayInMonth(year, month);
+  const clampedDay = Math.min(Math.max(1, day), maxDay);
+  const y = String(year);
+  const m = String(month).padStart(2, "0");
+  const d = String(clampedDay).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getWheelIndex(el: HTMLElement | null): number {
+  if (!el) return 0;
+  const index = Math.round(el.scrollTop / DATE_WHEEL_ITEM_HEIGHT);
+  return Math.max(0, index);
+}
+
+function setWheelScroll(el: HTMLElement | null, index: number) {
+  if (!el) return;
+  el.scrollTop = index * DATE_WHEEL_ITEM_HEIGHT;
+}
+
+/** Display formát DD.MM.RRRR (interná hodnota ostáva YYYY-MM-DD pre backend) */
+const dateOfBirthDisplay = computed(() => {
+  const v = localDateOfBirth.value?.trim();
+  if (!v) return "";
+  const match = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return v;
+  const [, y, m, d] = match;
+  return `${d}.${m}.${y}`;
+});
+
+function toggleDatePicker() {
+  showDatePicker.value = !showDatePicker.value;
+  if (showDatePicker.value) {
+    nextTick(() => syncDateWheelsFromValue());
+  }
+}
+
+function closeDatePicker() {
+  showDatePicker.value = false;
+}
+
+function syncDateWheelsFromValue() {
+  const v = localDateOfBirth.value?.trim();
+  let dayIdx = 0;
+  let monthIdx = 0;
+  let yearIdx = yearOptions.length - 1;
+  if (v) {
+    const match = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      const [, y, m, d] = match;
+      const year = parseInt(y, 10);
+      const month = parseInt(m, 10);
+      const day = parseInt(d, 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const yi = yearOptions.indexOf(year);
+        if (yi >= 0) yearIdx = yi;
+        monthIdx = Math.max(0, Math.min(11, month - 1));
+        dayIdx = Math.max(0, Math.min(30, day - 1));
+      }
+    }
+  }
+  setWheelScroll(dayColumnRef.value, dayIdx);
+  setWheelScroll(monthColumnRef.value, monthIdx);
+  setWheelScroll(yearColumnRef.value, yearIdx);
+}
+
+function applyDateFromWheels() {
+  const dayIdx = getWheelIndex(dayColumnRef.value);
+  const monthIdx = getWheelIndex(monthColumnRef.value);
+  const yearIdx = getWheelIndex(yearColumnRef.value);
+  const day = dayOptions[Math.min(dayIdx, dayOptions.length - 1)] ?? 1;
+  const month = monthOptions[Math.min(monthIdx, monthOptions.length - 1)] ?? 1;
+  const year = yearOptions[Math.min(yearIdx, yearOptions.length - 1)] ?? currentYear - 18;
+  localDateOfBirth.value = buildDateFromWheels(day, month, year);
+}
+
+function onDateWheelScroll() {
+  if (dateWheelScrollTimeout) clearTimeout(dateWheelScrollTimeout);
+  dateWheelScrollTimeout = setTimeout(() => {
+    dateWheelScrollTimeout = null;
+    applyDateFromWheels();
+  }, 100);
+}
+
 const localGender = ref(props.gender || "");
 const localEmail = ref(props.email || "");
 const localPassword = ref(props.password || "");
@@ -1174,6 +1302,7 @@ const handleNextStep = async () => {
   transition: opacity 0.01s ease !important;
 }
 
+/* Unified app background (iosSafeArea.scss) */
 .whoAreYou {
   width: 100%;
   max-width: 390px;
@@ -1182,7 +1311,7 @@ const handleNextStep = async () => {
   flex-direction: column;
   padding: 16px 20px 40px;
   margin: 0 auto;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: transparent;
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -1196,6 +1325,8 @@ const handleNextStep = async () => {
   margin-bottom: 12px;
   flex-shrink: 0;
   position: relative;
+  /* Register/onboarding flow: jemný iOS safe-area top; −10px (posun o 1px vyššie) */
+  padding-top: max(0px, calc(env(safe-area-inset-top, 0px) - 10px));
 }
 
 .who-backBtn {
@@ -1353,6 +1484,144 @@ const handleNextStep = async () => {
   :deep(.q-icon) {
     color: rgba(255, 255, 255, 0.6);
   }
+}
+
+/* Date of birth trigger (otvorí custom wheel picker) */
+.who-input--date-trigger {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  .who-input--date-trigger__label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+  }
+
+  .who-input--date-trigger__value {
+    flex: 1;
+    color: #ffffff;
+    font-size: 1rem;
+    min-height: 1.2em;
+  }
+
+  .who-input--date-trigger__icon {
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+  }
+}
+
+/* Inline Apple-like date wheel picker */
+.who-date-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.who-date-inline-picker {
+  position: relative;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.who-date-inline-picker__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: transparent;
+}
+
+.who-date-inline-picker__wheels {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+  align-items: stretch;
+  min-height: 220px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 0 0.5rem;
+}
+
+.who-date-inline-picker__column-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 4.5rem;
+  height: 220px;
+  overflow: hidden;
+
+  /* Fade okolité riadky (Apple-like) */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(11, 0, 28, 0.95) 0%,
+      transparent 18%,
+      transparent 82%,
+      rgba(11, 0, 28, 0.95) 100%
+    );
+  }
+
+  /* Stredový zvýraznený pruh */
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.who-date-inline-picker__column {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 88px 0;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    display: none;
+  }
+}
+
+.who-date-inline-picker__item {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.05rem;
+  font-weight: 500;
+  scroll-snap-align: center;
+  flex-shrink: 0;
+}
+
+.who-date-picker-fade-enter-active,
+.who-date-picker-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.who-date-picker-fade-enter-from,
+.who-date-picker-fade-leave-to {
+  opacity: 0;
 }
 
 .who-genderWrapper {

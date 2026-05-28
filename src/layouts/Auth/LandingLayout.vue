@@ -69,12 +69,10 @@ const handleBack = () => {
   width: 100%;
   margin-bottom: 2rem;
 }
+/* Background from global app (iosSafeArea.scss) */
 .login {
-  background-image: none;
-  background-image: url("/images/Auth/bg-explain.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 
 .login--reset {

@@ -22,6 +22,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -29,30 +30,47 @@ const router = useRouter();
 const handleBack = () => {
   router.push({ name: "donee-token" });
 };
+
+onMounted(() => {
+  document.body.classList.add("onboarding-page-locked");
+});
+
+onBeforeUnmount(() => {
+  document.body.classList.remove("onboarding-page-locked");
+});
 </script>
 
 <style scoped lang="scss">
+/* Unified app background (iosSafeArea.scss) */
 .onBoarding-page1 {
-  max-width: 390px;
-  height: 100vh;
+  width: min(390px, 100vw);
+  height: 100svh;
   padding: 24px 20px 40px;
   margin: 0 auto;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
-  overflow: hidden;
-  position: relative;
+  background: transparent;
+  overflow: clip;
+  position: fixed;
+  inset: 0;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 
   .onBoarding-header {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    left: 20px;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0 0 1rem 0;
+    padding: 0;
     flex-shrink: 0;
+    z-index: 2;
 
     .onBoarding-backBtn {
       border: none;
-      background: transparent;
+      background: rgba(255, 255, 255, 0.92);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -61,29 +79,32 @@ const handleBack = () => {
       min-width: 40px;
       min-height: 40px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(0, 0, 0, 0.22);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
       cursor: pointer;
       transition: all 0.2s ease;
       flex-shrink: 0;
 
       &:hover {
-        border-color: rgba(255, 255, 255, 0.6);
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.28);
       }
 
       .q-icon {
         font-size: 24px;
-        color: #ffffff;
+        color: #111111;
       }
     }
   }
 
   .onBoarding-body {
-    flex: 1;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 0;
+    padding: 0 0 0;
     min-height: 0;
     overflow: hidden;
     position: relative;
@@ -120,5 +141,10 @@ const handleBack = () => {
       line-height: 1.5;
     }
   }
+}
+
+:global(body.onboarding-page-locked) {
+  overflow: hidden;
+  touch-action: none;
 }
 </style>

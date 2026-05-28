@@ -172,7 +172,7 @@ const loadCategoryCount = async (category: "dream" | "problem" | "idea"): Promis
       signal: countsAbort?.signal
     });
     const rawPosts = (data?.data || data?.posts || data || []) as unknown[];
-    const normalized = rawPosts.map((p) => normalizePost(p as any));
+    const normalized = rawPosts.map((p) => normalizePost(p as never));
     return normalized.filter((p) => (p.user_id || p.author_id) === userId).length;
   } catch {
     return 0;

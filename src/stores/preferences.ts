@@ -256,10 +256,10 @@ export const usePreferencesStore = defineStore("preferences", {
       if (raw) {
         try {
           const parsed = JSON.parse(raw) as Partial<FeedFilters>;
-          const loc = (parsed as any)?.location as Partial<FeedLocation> | undefined;
+          const loc = parsed.location;
           const hasAny =
-            !!(parsed as any)?.postType ||
-            !!(parsed as any)?.subcategory ||
+            !!parsed.postType ||
+            !!parsed.subcategory ||
             !!loc?.continentId ||
             !!loc?.countryId ||
             !!loc?.cityId;

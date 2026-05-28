@@ -3,6 +3,8 @@
     :model-value="selectedCategory || null"
     @update:model-value="selectedCategory = $event || ''"
     :progress="50"
+    :center-offset-y="-17"
+    :roller-axis-offset-y="-19"
     title="from category"
     next-button-label="NEXT STEP"
     @next="handleNext"
@@ -64,7 +66,3 @@ const handleBack = () => {
   router.push({ name: "donee-postCreation-goal" });
 };
 </script>
-
-<style lang="scss" scoped>
-// Styles are handled by WhatKindOfDream component
-</style>

@@ -28,7 +28,8 @@
     "preflight:ci": "node scripts/preflight.js --ci",
     "release:gate": "node scripts/release-gate.js",
     "ios:release-sanity": "node scripts/ios-release-sanity.js",
-    "ios:sync-version": "node scripts/ios-sync-version.js"
+    "ios:sync-version": "node scripts/ios-sync-version.js",
+    "icons:generate": "capacitor-assets generate --assetPath resources"
   },
   "dependencies": {
     "@capacitor/android": "5.7.8",
@@ -39,6 +40,7 @@
     "@capacitor/ios": "5.7.8",
     "@capacitor/keyboard": "5.0.6",
     "@capacitor/status-bar": "5.0.6",
+    "@capgo/native-purchases": "0.0.72",
     "@egjs/flicking-plugins": "^4.7.0",
     "@egjs/vue3-flicking": "^4.10.7",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
@@ -61,6 +63,7 @@
     "vue3-insta-stories": "^0.1.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "5.7.8",
     "@intlify/vite-plugin-vue-i18n": "^3.3.1",
     "@playwright/test": "^1.51.1",
@@ -76,6 +79,7 @@
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-vue": "^9.0.0",
+    "postcss-preset-env": "^10.6.1",
     "typescript": "^4.5.4"
   },
   "engines": {

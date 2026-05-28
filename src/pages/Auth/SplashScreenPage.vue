@@ -7,34 +7,43 @@
 <script setup>
 import lottie from "lottie-web";
 import animationData from "src/assets/Auth/splash-dark.json";
-import { onMounted } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { useUserStore } from "src/stores/user-store";
+import { useAuthStore } from "src/stores/auth";
 
 const router = useRouter();
-const userStore = useUserStore();
+const authStore = useAuthStore();
+let lottieInstance = null;
 
 onMounted(() => {
   const animationContainer = document.getElementById("animation-container");
-  const animation = lottie.loadAnimation({
+  if (!animationContainer) return;
+  lottieInstance = lottie.loadAnimation({
     container: animationContainer,
     renderer: "canvas",
-    loop: false, // Set loop to false to play the animation only once
+    loop: false,
     autoplay: true,
     animationData
   });
 
-  animation.addEventListener("complete", () => {
-    const token = userStore.token || localStorage.getItem("jwtToken") || "";
+  lottieInstance.addEventListener("complete", () => {
+    // Router bootstrap must not depend on legacy jwtToken store.
+    // Canonical key is "token" (auth store + axios boot).
+    const token = authStore.token || localStorage.getItem("token") || "";
 
     if (!token) {
-      // Ak nemá token, presmerovať na auth-welcome
-      router.push({ name: "auth-welcome" });
+      router.replace({ name: "auth-welcome-page" });
     } else {
-      // Ak má token, presmerovať na donor-posts
-      router.push({ name: "donor-posts" });
+      router.replace({ name: "donor-posts" });
     }
   });
+});
+
+onBeforeUnmount(() => {
+  if (lottieInstance) {
+    lottieInstance.destroy();
+    lottieInstance = null;
+  }
 });
 </script>
 

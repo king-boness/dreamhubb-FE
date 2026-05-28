@@ -1,43 +1,6 @@
 <template>
-  <q-page class="donorPostsPage">
-    <!-- Tabs: by help / by pay / by top -->
-    <div class="donor-tabs">
-      <div class="donor-tabs_indicator" :style="indicatorStyle"></div>
-      <button
-        v-for="(tab, index) in tabs"
-        :key="tab.value"
-        :ref="el => { if (el) tabRefs[index] = el as HTMLElement }"
-        class="donor-tabs_button"
-        :class="{ 'donor-tabs_button--active': activeTab === tab.value }"
-        type="button"
-        @click="setTab(tab.value)"
-      >
-        <img
-          :src="getTabIcon(tab.value)"
-          :alt="tab.label"
-          class="donor-tabs_icon"
-        />
-        <span class="donor-tabs_label">{{ tab.label }}</span>
-      </button>
-    </div>
-
-    <!-- Filters button -->
-    <div class="donorPosts-filtersWrapper">
-      <button
-        class="donor-filters_button"
-        type="button"
-        @click="handleOpenFilters"
-      >
-        <img
-          :src="filtersIcon"
-          alt=""
-          class="donor-filters_icon"
-        />
-        <span>{{ t("filters") }}</span>
-      </button>
-    </div>
-
-    <!-- Feed of posts -->
+  <!-- Jeden scroll na q-page-container; zoznam je natívny v-for (bez QVirtualScroll — ten programovo nastavuje scrollTop a robí „snap“). -->
+  <q-page class="donorPostsPage donorPostsPage--unifiedScroll">
     <div class="donorPosts-feed" data-testid="dh-feed-container">
       <!-- Loading state -->
       <div v-if="loading" class="donorPosts-state">
@@ -60,7 +23,10 @@
            In practice, the common "error" here is a transient fetch failure or an empty DB;
            showing "Failed..." is poor UX for the donor feed. -->
       <div v-else-if="!loading && sortedPosts.length === 0" class="donorPosts-state">
-        <div v-if="!isEmptyFiltersHintDismissed" class="donorPosts-emptyHint">
+        <div
+          v-if="$route.name === 'donor-posts' && emptyFiltersHintVisible"
+          class="donorPosts-emptyHint"
+        >
           <HintBubble
             class="donorPosts-emptyHintBubble"
             :title="emptyStateTitle"
@@ -75,23 +41,18 @@
         <p v-else>{{ t("noPosts") }}</p>
       </div>
 
-      <!-- Posts list (QVirtualScroll = reálne zrýchlenie scrollu) -->
+      <!-- Natívny zoznam: rovnaké karty ako predtým; žiadna programatická korekcia scrollu (Quasar QVirtualScroll). -->
       <template v-else>
-        <q-virtual-scroll
-          :items="sortedPosts"
-          virtual-scroll-item-size="380"
-          separator
-          class="donorPosts-feed donorPosts-feed--virtual"
-        >
-          <template v-slot="{ item: post }">
-            <div
-              :key="post.id"
-              class="postCard"
-              role="button"
-              tabindex="0"
-              @click="emitOpenPost(post)"
-              @keyup.enter.space="emitOpenPost(post)"
-            >
+        <div class="donorPosts-feed--nativeList" role="list">
+          <div
+            v-for="post in sortedPosts"
+            :key="post.id"
+            class="postCard"
+            role="listitem"
+            tabindex="0"
+            @click="emitOpenPost(post)"
+            @keyup.enter.space="emitOpenPost(post)"
+          >
           <!-- Hero image with overlay -->
           <div class="postCard-imageWrapper">
             <PostCover
@@ -153,8 +114,7 @@
           <p class="postCard-preview">{{ post.previewText }}</p>
           </div>
         </div>
-          </template>
-        </q-virtual-scroll>
+        </div>
       </template>
     </div>
   </q-page>
@@ -162,9 +122,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, onActivated, watch } from "vue";
+import { useDeferredOverlay } from "src/composables/useDeferredOverlay";
 import { useI18n } from "vue-i18n";
 import { getLocationLabel } from "src/utils/cityNames";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
 import { useAuthStore } from "src/stores/auth";
@@ -176,11 +137,11 @@ import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
+import { useDonorPostsUiStore } from "src/stores/donorPostsUi";
 
 const { t, locale } = useI18n();
 
 const router = useRouter();
-const route = useRoute();
 const postsStore = usePostsStore();
 const preferencesStore = usePreferencesStore();
 const authStore = useAuthStore();
@@ -191,89 +152,12 @@ const dismissEmptyFiltersHint = () => {
   isEmptyFiltersHintDismissed.value = true;
 };
 
-// Tab interface
-interface DonorTab {
-  value: "help" | "pay" | "top";
-  label: string;
-  icon: string;
-}
-
-// Tab icons - using header_icons with _ns.svg (non-selected) and _s.svg (selected) variants
-const getTabIcon = (tabValue: "help" | "pay" | "top") => {
-  const isActive = activeTab.value === tabValue;
-  const iconMap: Record<string, { selected: string; nonSelected: string }> = {
-    help: {
-      selected: "/header_icons/hearth_s.svg",
-      nonSelected: "/header_icons/hearth_ns.svg"
-    },
-    pay: {
-      selected: "/header_icons/star_s.svg",
-      nonSelected: "/header_icons/star_ns.svg"
-    },
-    top: {
-      selected: "/header_icons/top_s.svg",
-      nonSelected: "/header_icons/top_ns.svg"
-    }
-  };
-  const icons = iconMap[tabValue];
-  return icons ? (isActive ? icons.selected : icons.nonSelected) : "/header_icons/hearth_ns.svg";
-};
-
-// Filters icon - use _s.svg when on filters page, _ns.svg otherwise
-const filtersIcon = computed(() => {
-  const isOnFiltersPage = route.name === "donor-filters";
-  return isOnFiltersPage ? "/header_icons/filters_s.svg" : "/header_icons/filters_ns.svg";
-});
-
-// Tabs definition
-const tabs = computed<DonorTab[]>(() => [
-  { value: "help", label: t("byHelp"), icon: getTabIcon("help") },
-  { value: "pay", label: t("byPay"), icon: getTabIcon("pay") },
-  { value: "top", label: t("byTop"), icon: getTabIcon("top") }
-]);
-
-// Active tab
-const activeTab = ref<"help" | "pay" | "top">("help");
+const donorPostsUiStore = useDonorPostsUiStore();
 
 const feedError = computed(() => postsStore.error);
 
 const retryFetch = async () => {
-  await postsStore.fetchPosts({ sort: activeTab.value });
-};
-
-// Tab refs for indicator positioning
-const tabRefs = ref<(HTMLElement | null)[]>([]);
-
-// Indicator style computed
-const indicatorStyle = computed(() => {
-  const activeIndex = tabs.value.findIndex(tab => tab.value === activeTab.value);
-  if (activeIndex === -1 || !tabRefs.value[activeIndex]) {
-    return { width: "0", left: "0", opacity: "0" };
-  }
-  const activeButton = tabRefs.value[activeIndex];
-  if (!activeButton) {
-    return { width: "0", left: "0", opacity: "0" };
-  }
-  const tabsContainer = activeButton.parentElement;
-  if (!tabsContainer) {
-    return { width: "0", left: "0", opacity: "0" };
-  }
-  const containerRect = tabsContainer.getBoundingClientRect();
-  const buttonRect = activeButton.getBoundingClientRect();
-  const left = buttonRect.left - containerRect.left;
-  const width = buttonRect.width;
-  return {
-    left: `${left}px`,
-    width: `${width}px`,
-    opacity: "1"
-  };
-});
-
-// Set tab handler
-const setTab = (value: "help" | "pay" | "top") => {
-  activeTab.value = value;
-  // Fetch posts with sort parameter
-  postsStore.fetchPosts({ sort: value });
+  await postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
 };
 
 // Function to apply initial filters from preferences (must be defined before watcher)
@@ -325,7 +209,7 @@ watch(
     applyInitialFiltersFromPreferences();
     // Načítať posty s novými filtrami (len ak už máme user ID a došlo k zmene)
     if (newId && newId !== oldId) {
-      postsStore.fetchPosts({ sort: activeTab.value });
+      postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
     }
   },
   { immediate: true }
@@ -338,7 +222,7 @@ onMounted(() => {
   isEmptyFiltersHintDismissed.value = false;
 
   nextTick(() => {
-    // Indicator position will be computed automatically via computed property
+    // Indicator position updates via computed + DOM refs
   });
 
   // Load filters from storage first, then apply them
@@ -347,7 +231,7 @@ onMounted(() => {
   applyInitialFiltersFromPreferences();
 
   // Fetch initial posts with default "help" sort (filters sa automaticky použijú z store)
-  postsStore.fetchPosts({ sort: activeTab.value });
+  postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
 });
 
 // Reload posts when returning from filters page (kept-alive component)
@@ -359,7 +243,7 @@ onActivated(() => {
   applyInitialFiltersFromPreferences();
 
   // Načítať posty s aktuálnymi filtrami pri návrate na stránku
-  postsStore.fetchPosts({ sort: activeTab.value });
+  postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
 });
 
 // Computed properties from store
@@ -446,7 +330,7 @@ const mapPostData = (post: Record<string, unknown>): DonorPost => {
   return {
     id: normalized.post_id,
     backendPostId: normalized.post_id,
-    tab: activeTab.value, // Use current active tab
+    tab: donorPostsUiStore.activeTab, // Use current active tab
     type: categorySlug as "dream" | "problem" | "idea", // Category slug for icon
     authorId,
     authorName,
@@ -477,6 +361,22 @@ const sortedPosts = computed(() => {
     const bTokens = b.tokenReward ?? 0;
     return bTokens - aTokens;
   });
+});
+
+const route = useRoute();
+
+const shouldShowEmptyFiltersHint = computed(
+  () =>
+    route.name === "donor-posts" &&
+    !loading.value &&
+    sortedPosts.value.length === 0 &&
+    !isEmptyFiltersHintDismissed.value
+);
+
+const { visible: emptyFiltersHintVisible } = useDeferredOverlay(shouldShowEmptyFiltersHint, {
+  routeName: "donor-posts",
+  requiredSide: "donor",
+  minDelayMs: 380
 });
 
 // Dev: performance mark when feed renders (before/after meranie v console)
@@ -540,136 +440,26 @@ const emitOpenAuthor = (post: DonorPost) => {
 </script>
 
 <style lang="scss" scoped>
-.donorPostsPage {
-  padding: 0 16px 80px;
-  min-height: 100vh;
-}
+/* Padding unified-scroll q-page: globálne v _roleMainChrome.scss (.donorPostsPage--unifiedScroll). */
 
-// TABS
-.donor-tabs {
-  display: flex;
-  gap: 12px;
-  margin: 8px 0 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  position: relative;
-}
-
-.donor-tabs_indicator {
-  position: absolute;
-  bottom: -1px;
-  height: 2px;
-  background: #ff2c8b;
-  transition: left 0.3s ease, width 0.3s ease, opacity 0.3s ease;
-  opacity: 0;
-}
-
-.donor-tabs_button {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 12px;
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-
-  &.donor-tabs_button--active {
-    color: #ff2c8b;
-
-    .donor-tabs_icon {
-      transform: scale(1.1);
-    }
-  }
-
-  &:hover:not(.donor-tabs_button--active) {
-    color: rgba(255, 255, 255, 0.8);
-
-    .donor-tabs_icon {
-      transform: scale(1.1);
-    }
-  }
-
-  &:active {
-    .donor-tabs_icon {
-      transform: scale(0.95);
-    }
-  }
-}
-
-.donor-tabs_icon {
-  width: 16px;
-  height: 16px;
-  display: block;
-  transition: transform 0.2s ease;
-}
-
-.donor-tabs_label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: lowercase;
-}
-
-// FILTERS
-.donorPosts-filtersWrapper {
-    display: flex;
-    justify-content: center;
-  margin: 18px 0;
-}
-
-.donor-filters_button {
-  display: flex;
-    align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 10px 32px;
-  width: 85%;
-  max-width: 300px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  text-transform: lowercase;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.12);
-  }
-}
-
-.donor-filters_icon {
-  width: 14px;
-  height: 14px;
-  display: block;
-  flex-shrink: 0;
-  filter: brightness(0) invert(1); // White color
-  opacity: 0.8;
-  }
-
-// FEED
 .donorPosts-feed {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  padding-top: 16px;
   padding-bottom: 20px;
 }
-.donorPosts-feed--virtual {
-  max-height: calc(100vh - 240px);
-  flex: 1;
+
+.donorPosts-feed--nativeList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .donorPosts-state {
   text-align: center;
   padding: 2rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: #bbbbbb;
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;
@@ -706,6 +496,8 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 .donorPosts-emptyHint {
   /* Break out of .donorPosts-state horizontal padding (2rem) so bubble matches donee sizing */
+  position: relative;
+  z-index: 11;
   width: calc(100% + 4rem);
   margin-left: -2rem;
   margin-right: -2rem;
@@ -719,17 +511,19 @@ const emitOpenAuthor = (post: DonorPost) => {
   white-space: nowrap;
 }
 
-// POST CARD
+// POST CARD — surface + body text tokens from global _darkMode.scss (.postCard / .body--light .postCard)
 .postCard {
-  border-radius: 24px; // Matching detail screen radius
+  border-radius: 24px;
   overflow: hidden;
-  background: linear-gradient(180deg, #17151f 0%, #0d0b13 100%);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  background: var(--pc-surface);
+  border: var(--pc-border);
+  box-shadow: var(--pc-shadow);
+  box-sizing: border-box;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+    box-shadow: var(--pc-shadow-hover);
   }
 }
 
@@ -737,7 +531,8 @@ const emitOpenAuthor = (post: DonorPost) => {
   position: relative;
   height: 240px;
   overflow: hidden;
-  border-radius: 1.25rem; // podľa existujúceho dizajnu
+  /* Clip to card top corners only via parent .postCard overflow + radius (no inner radius mismatch / black seam) */
+  border-radius: 0;
 }
 
 .postCard-authorBadge {
@@ -787,7 +582,7 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 .postCard-titleRow {
   position: absolute;
-  bottom: 10px; // Smaller offset from bottom
+  bottom: 12px;
   left: 12px;
   right: 10px; // Reward pill closer to right edge
   display: flex;
@@ -795,25 +590,34 @@ const emitOpenAuthor = (post: DonorPost) => {
   justify-content: space-between;
   gap: 8px;
   z-index: 2;
+  overflow: visible;
+  min-height: 0;
+  padding-top: 6px;
+  box-sizing: border-box;
 }
 
 .postCard-categoryPill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-height: 28px;
+  box-sizing: border-box;
   padding: 5px 10px;
+  line-height: 1.25;
   border-radius: 18px;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
-  line-height: 1.2;
+  overflow: visible;
+  flex-wrap: nowrap;
 }
 
 .postCard-categoryIcon {
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
   object-fit: contain;
 }
 
@@ -846,7 +650,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   padding: 0;
   font-size: 1.15rem; // Slightly larger, bold
   font-weight: 700;
-  color: #fff;
+  color: var(--pc-body-title);
   line-height: 1.3;
   text-align: left;
   width: 100%;
@@ -863,7 +667,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   padding: 0;
   padding-left: 0;
   font-size: 0.72rem; // Fine-tuned font size
-  color: rgba(255, 255, 255, 0.55); // Fine-tuned color
+  color: var(--pc-body-meta);
   text-align: left;
   width: 100%;
   box-sizing: border-box;
@@ -879,6 +683,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   padding: 0;
   padding-left: 0;
   vertical-align: baseline;
+  color: inherit;
 
   i {
     font-size: 11px;
@@ -887,6 +692,7 @@ const emitOpenAuthor = (post: DonorPost) => {
     flex-shrink: 0;
     display: inline-block;
     width: auto;
+    color: inherit;
   }
 }
 
@@ -894,7 +700,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   margin: 0;
   padding: 0;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--pc-body-preview);
   line-height: 1.5;
   text-align: left;
   width: 100%;

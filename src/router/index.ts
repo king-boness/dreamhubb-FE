@@ -31,6 +31,34 @@ export default route(function ({ store }) {
     console.debug("[router] has postCreation category route:", hasPickerRoute);
   }
 
+  if (typeof import.meta !== "undefined" && import.meta.env?.DEV === true) {
+    let firstNavLogged = false;
+    Router.beforeEach((to, from, next) => {
+      if (!firstNavLogged) {
+        firstNavLogged = true;
+        console.info("[router-bootstrap] first navigation", {
+          toName: String(to.name || ""),
+          toPath: to.path,
+          fromName: String(from.name || ""),
+          fromPath: from.path
+        });
+      }
+      next();
+    });
+
+    Router.onError((error, to, from) => {
+      console.error("[router-bootstrap] router.onError", {
+        toName: String(to?.name || ""),
+        toPath: to?.path || "",
+        fromName: String(from?.name || ""),
+        fromPath: from?.path || "",
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        rawError: error
+      });
+    });
+  }
+
   Router.beforeEach((to, from, next) => {
     try {
       // Použiť authStore.isAuthenticated

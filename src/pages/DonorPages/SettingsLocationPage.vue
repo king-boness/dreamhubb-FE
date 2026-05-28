@@ -141,6 +141,7 @@ const handleCancel = () => {
 <style scoped lang="scss">
 .settingsLocation-page {
   padding: 16px;
+  /* Bottom inset + tab-bar clearance: see _roleMainChrome.scss (.settingsLocation-page overrides Quasar QPage minHeight). */
 }
 
 .settingsLocation-container {
@@ -148,8 +149,8 @@ const handleCancel = () => {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  gap: 10px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .settingsLocation-header {
@@ -175,7 +176,7 @@ const handleCancel = () => {
 }
 
 .settingsLocation-cardSection {
-  padding: 12px;
+  padding: 10px 10px 8px;
 }
 
 /* Tame the onboarding component so it doesn't feel "stretched" on settings page */
@@ -193,6 +194,22 @@ const handleCancel = () => {
 
 :deep(.q-field) {
   margin-top: 10px;
+}
+
+/* Light mode: titles are `div`s — not covered by `.body--light h2` */
+.body--light .settingsLocation-page .settingsLocation-title {
+  color: #1a1a1a !important;
+}
+
+.body--light .settingsLocation-page .settingsLocation-current {
+  color: var(--dh-text-muted, rgba(0, 0, 0, 0.62)) !important;
+}
+
+.body--light .settingsLocation-page .settingsLocation-card {
+  background: var(--dh-float-surface, #ffffff) !important;
+  border-color: var(--dh-float-border, rgba(0, 0, 0, 0.12)) !important;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .settingsLocation-actions {
@@ -218,5 +235,18 @@ const handleCancel = () => {
   font-size: 1.05rem;
   height: 3.15rem;
   border-radius: 0.75rem;
+}
+</style>
+
+<style lang="scss">
+/* Force strong contrast for city value in light mode (including disabled/loading field state). */
+.body--light .settingsLocation-page .location-select .q-field--disabled .q-field__native,
+.body--light .settingsLocation-page .location-select .q-field--disabled .q-field__input,
+.body--light .settingsLocation-page .location-select .q-field__native,
+.body--light .settingsLocation-page .location-select .q-field__input,
+.body--light .settingsLocation-page .location-select .q-select__display-value {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
 }
 </style>

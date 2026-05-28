@@ -48,7 +48,7 @@ const handleClick = () => {
 <style lang="scss" scoped>
 .close-overlay-button {
   position: absolute;
-  top: calc(3rem - 21px);
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
   left: 1rem;
   z-index: 15;
   pointer-events: none;

@@ -1,0 +1,293 @@
+/**
+ * Shared donor + donee main chrome: header/footer hide-show, splash, fixed footer shell.
+ * Imported by DoneeMainLayout.vue and DonorMainLayout.vue.
+ */
+
+/* Role switch: hide stale integrated headers until splash / new layout is ready */
+body.dh-role-switching .donorPosts-integratedChrome {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Fast footer tabs: hide integrated chrome while route settles (prevents two headers for one frame) */
+body.dh-route-settling .donorPosts-integratedChrome {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+/* Role switch: fixed hint bubbles must not linger on wrong layout */
+body.dh-role-switching .postPage-firstPostHint,
+body.dh-role-switching .donorPosts-emptyHint {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.roleChrome-topStack {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  width: 100%;
+  /*
+   * Donor: wrapper drží výšku aj keď má .navbar--hidden len transform (layout box sa nezmenší).
+   * max-height + overflow zbalí priestor; transform na stacku vypneme (stačí collapse).
+   */
+  max-height: min(80vh, 720px);
+  transition: max-height 0.25s ease;
+}
+
+/*
+ * Len donor stack (.roleChrome-topStack): po hide zbalí miesto v toku — žiadny čierny pás.
+ * Donee: koreň hlavičky je .header.navbar (bez roleChrome obalu) — rovnaký transform-hide cez .dh-use-transform-chrome-hide.
+ */
+.roleChrome-topStack.navbar--hidden {
+  max-height: 0 !important;
+  min-height: 0;
+  overflow: hidden;
+  transform: none !important;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/*
+ * Settings (donor stack aj donee header): skrytie len transform + opacity — bez max-height:0 na kolaps toku (žiadny skok scrollHeight).
+ * Donor: .roleChrome-topStack …
+ * Donee: HeaderDoneeComponent root = .header.row + z layoutu .navbar → .header.navbar …
+ */
+.roleChrome-topStack.dh-use-transform-chrome-hide.navbar--hidden {
+  max-height: min(80vh, 720px) !important;
+  min-height: 0;
+  overflow: hidden;
+  transform: translate3d(0, -100%, 0) !important;
+  opacity: 0 !important;
+  box-shadow: none;
+  pointer-events: none;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.header.navbar.dh-use-transform-chrome-hide.navbar--hidden {
+  max-height: min(80vh, 720px) !important;
+  min-height: 0;
+  overflow: hidden;
+  transform: translate3d(0, -100%, 0) !important;
+  opacity: 0 !important;
+  box-shadow: none;
+  pointer-events: none;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+/* Settings: rovnaký princíp ako donor Home — stabilný scroll anchoring. */
+.dh-settings-scroll-root {
+  overflow-anchor: none !important;
+  scroll-snap-type: none !important;
+}
+
+/* Settings: fixná rezerva pre footer — skrytie futra len transformom, bez zmeny padding-bottom (žiadny skok scrollu). */
+.dh-settings-scroll-root .q-page {
+  padding-bottom: calc(5.7rem + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box;
+}
+
+/*
+ * Change Location: QPage sets inline minHeight ≈ viewport (Quasar QPage.js) — creates a large empty band under CTAs while scrolling.
+ * Shrink to content + keep only real clearance above the fixed tab bar (.footer height 4.5rem).
+ */
+.dh-settings-scroll-root .q-page.settingsLocation-page {
+  min-height: auto !important;
+  height: auto !important;
+  padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* donor-posts / inspirations / myprofile: header (+ panel) vnútri q-page — rovnaký scroll ako feed (nie sticky pred kontajnerom) */
+.donorPosts-integratedChrome.roleChrome-topStack {
+  position: static;
+  top: auto;
+  z-index: 2;
+  max-height: min(80vh, 720px);
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Schovanie len transform + opacity — žiadne max-height:0 (to mení výšku toku a skáče scroll). */
+.donorPosts-integratedChrome.roleChrome-topStack.navbar--hidden {
+  max-height: min(80vh, 720px) !important;
+  min-height: 0;
+  overflow: hidden;
+  transform: translate3d(0, -100%, 0) !important;
+  opacity: 0 !important;
+  box-shadow: none;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.navbar--hidden {
+  box-shadow: none;
+  transform: translate3d(0, -100%, 0);
+}
+
+.footer--hidden {
+  box-shadow: none;
+  transform: translate3d(0, 160%, 0);
+}
+
+body.splash-active .footer {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.splash-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: 100%;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
+}
+
+body:has(.splash-overlay) .q-layout {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body:has(.splash-overlay),
+html:has(.splash-overlay) {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  max-width: 100%;
+  height: 100vh !important;
+}
+
+body:has(.splash-overlay) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.navbar {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.footer.navbar {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/*
+ * Po skrytí futra: zníženie padding-bottom na q-page mení scrollHeight → skok obsahu.
+ * donor-feed-unified-scroll má vždy fixnú rezervu v stránke (footer sa skrýva len transformom).
+ */
+.LayoutBackground:has(.footer.navbar.footer--hidden)
+  .q-page-container:not(.donor-feed-unified-scroll):not(.dh-settings-scroll-root)
+  .q-page {
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+/* Jeden zdroj pravdy: rovnaký padding ako donor Home (PostsPage) pre všetky unified-scroll stránky. */
+.q-page.donorPostsPage--unifiedScroll {
+  padding: 0 16px;
+  padding-bottom: calc(5.7rem + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  overflow: visible !important;
+  min-height: auto;
+}
+
+.q-layout .q-page-container {
+  padding-bottom: 0 !important;
+}
+
+.LayoutBackground {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2000 !important;
+
+  .button-footer {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-width: 0 !important;
+    outline: none !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+      content: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      background: none !important;
+      background-color: transparent !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    .q-btn__wrapper {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    .q-btn__content {
+      background: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-width: 0 !important;
+      outline: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-width: 0 !important;
+        background: none !important;
+        background-color: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+  }
+}

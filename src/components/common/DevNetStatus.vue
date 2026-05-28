@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useNetworkStore } from "src/stores/network";
+import { API_BASE_SOURCE, API_BASE_URL } from "src/config/apiBase";
 
 const networkStore = useNetworkStore();
 
@@ -24,7 +25,7 @@ const enabled = computed(() => {
 });
 
 const isOnline = computed(() => networkStore.isOnline);
-const base = computed(() => String(import.meta.env.VITE_API_BASE || ""));
+const base = computed(() => `${API_BASE_URL || "(empty)"} (${API_BASE_SOURCE})`);
 </script>
 
 <style scoped lang="scss">

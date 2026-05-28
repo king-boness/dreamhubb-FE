@@ -4,14 +4,16 @@
     <div class="myProfile-header">
       <div class="myProfile-avatarContainer" @click="openProfileActions">
         <div class="myProfile-avatarWrapper">
-          <div class="myProfile-avatar" v-if="!authStore.user?.profile_picture">
+          <div class="myProfile-avatar" v-if="!profileImageSrc || isProfileImageBroken">
             <span class="myProfile-avatarInitials">{{ userInitials }}</span>
           </div>
           <img
             v-else
-            :src="authStore.user.profile_picture"
+            :src="profileImageSrc"
             alt="Profile"
             class="myProfile-avatarImg"
+            @load="handleProfileImgLoad"
+            @error="handleProfileImgError"
           />
           <!-- Badge display on avatar -->
           <img
@@ -60,27 +62,23 @@
       @share-profile="handleShareProfile"
     />
 
-    <!-- Profile Photo Lightbox -->
-    <q-dialog v-model="isPhotoLightboxOpen" maximized class="photo-lightbox-dialog">
-      <q-card class="photo-lightbox-card">
-        <q-btn
-          flat
-          round
-          dense
-          icon="close"
-          class="photo-lightbox-close"
-          @click="closePhotoLightbox"
-        />
-        <div class="photo-lightbox-content">
-          <img
-            v-if="authStore.user?.profile_picture"
-            :src="authStore.user.profile_picture"
-            alt="Profile photo"
-            class="photo-lightbox-image"
-          />
-        </div>
-      </q-card>
-    </q-dialog>
+    <!-- iOS/WKWebView: stabilný file input v DOM (nie createElement + click) + musí byť .click() v tom istom user-gesture ako tap -->
+    <input
+      ref="profilePhotoFileInputRef"
+      type="file"
+      accept="image/*"
+      class="myProfile-hiddenFileInput"
+      aria-hidden="true"
+      tabindex="-1"
+      @change="onProfilePhotoFileInputChange"
+    />
+
+    <!-- Profile Photo Lightbox (shared viewer) -->
+    <ImagePreviewModal
+      v-model="isPhotoLightboxOpen"
+      :images="profilePhotoLightboxImages"
+      :initial-index="0"
+    />
 
     <!-- Share Profile Sheet -->
     <ShareProfileSheet
@@ -99,23 +97,18 @@
       <q-card
         class="badgeSelector-drawer"
         :class="{ dragging: badgeIsDragging }"
-        :style="{ transform: `translateY(${badgeDragOffset}px)` }"
+        :style="{ height: badgeDrawerHeightStyle }"
         @click.stop
-        @touchstart.passive="onBadgeTouchStart"
-        @touchmove.passive="onBadgeTouchMove"
-        @touchend.passive="onBadgeTouchEnd"
-        @mousedown="onBadgeMouseDown"
       >
         <q-card-section
           class="badgeSelector-header"
-          @touchstart.passive="onBadgeTouchStart"
+          @touchstart="onBadgeTouchStart"
+          @touchmove="onBadgeTouchMove"
+          @touchend="onBadgeTouchEnd"
           @mousedown="onBadgeMouseDown"
         >
-          <div
-            class="badgeSelector-handle"
-            @touchstart.passive="onBadgeTouchStart"
-            @mousedown="onBadgeMouseDown"
-          ></div>
+          <div class="badgeSelector-handle"></div>
+          <p class="badgeSelector-pullHint">Pull up to see all badges</p>
           <h3 class="badgeSelector-title">{{ t("selectBadgeToDisplay") }}</h3>
         </q-card-section>
         <q-card-section
@@ -129,7 +122,12 @@
         </q-card-section>
         <q-card-section class="badgeSelector-footer">
           <p class="badgeSelector-description">{{ t("earnMoreBadges") }}</p>
-          <q-btn class="badgeSelector-saveBtn" @click="saveBadge">
+          <q-btn
+            class="badgeSelector-saveBtn"
+            unelevated
+            text-color="white"
+            @click="saveBadge"
+          >
             {{ t("saveBadge") }}
           </q-btn>
         </q-card-section>
@@ -147,9 +145,12 @@ import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import ProfileActionsSheet from "src/components/profile/ProfileActionsSheet.vue";
 import ShareProfileSheet from "src/components/profile/ShareProfileSheet.vue";
 import BadgeSwiperComponent from "src/components/partials/BadgeSwiperComponent.vue";
+import ImagePreviewModal from "src/components/common/ImagePreviewModal.vue";
 import PageTitle from "src/components/ui/PageTitle.vue";
+import axios from "axios";
 import { api } from "src/boot/axios";
 import { notifyError, notifyInfo, notifySuccess } from "src/utils/notify";
+import { resolveProfileImageSrc } from "src/utils/avatar";
 
 const { t, locale } = useI18n();
 
@@ -159,26 +160,98 @@ const route = useRoute();
 
 const isProfileActionsOpen = ref(false);
 const isPhotoLightboxOpen = ref(false);
+const reopenProfileActionsAfterPhoto = ref(false);
 const isShareProfileOpen = ref(false);
 const isBadgeSelectorOpen = ref(false);
 const isUploading = ref(false);
+const profilePhotoFileInputRef = ref<HTMLInputElement | null>(null);
+let profilePickerDiagCleanup: (() => void) | null = null;
+const isProfileImageBroken = ref(false);
+const avatarCacheBuster = ref<number>(0);
 const selectedBadge = ref<{ image: string; title: string } | null>(null);
 const tempSelectedBadge = ref<{ image: string; title: string } | null>(null);
 
-// Badge selector drag handlers
+const profileImageRaw = computed(() => authStore.user?.profile_picture ?? null);
+const profileImageSrc = computed(() =>
+  resolveProfileImageSrc(profileImageRaw.value, {
+    cacheBuster: avatarCacheBuster.value || authStore.user?.updated_at || null
+  })
+);
+
+const profilePhotoLightboxImages = computed(() => {
+  if (profileImageSrc.value && !isProfileImageBroken.value) {
+    return [profileImageSrc.value];
+  }
+  return [];
+});
+
+watch(profileImageSrc, () => {
+  isProfileImageBroken.value = false;
+});
+
+const handleProfileImgError = () => {
+  isProfileImageBroken.value = true;
+  if (import.meta.env.DEV) {
+    console.info("[DH-PROFILE-UPLOAD]", "img onerror", {
+      reason: "img.onerror",
+      rawValue: profileImageRaw.value,
+      resolvedSrc: profileImageSrc.value ?? "(none)"
+    });
+  }
+};
+
+const handleProfileImgLoad = () => {
+  if (import.meta.env.DEV) {
+    console.info("[DH-PROFILE-UPLOAD]", "img onload", {
+      resolvedSrc: profileImageSrc.value ?? "(none)"
+    });
+  }
+};
+
+if (import.meta.env.DEV) {
+  watch(
+    [profileImageRaw, profileImageSrc, isProfileImageBroken],
+    ([raw, resolved, broken]) => {
+      console.info("[DH-PROFILE-UPLOAD]", "render src", {
+        rawValue: raw,
+        src: resolved ?? "(none)",
+        fallbackUsed: broken || !resolved
+      });
+    },
+    { immediate: true }
+  );
+}
+
+// Badge selector drag handlers (cumulative offset so drawer follows finger)
 const badgeDragOffset = ref(0);
 const badgeStartY = ref(0);
+const badgeLastY = ref(0);
 const badgeIsDragging = ref(false);
 const badgeSelectorFullyOpened = ref(false);
 const BADGE_DRAG_THRESHOLD = 60;
-const BADGE_EXPAND_THRESHOLD = -80; // Negative for upward drag
+const BADGE_EXPAND_THRESHOLD = 80; // px upward drag to snap expanded
 
-// Computed max height for badge selector content
+// Content area grows with drawer when dragging up (so pull-up is visible)
+const BADGE_DRAWER_EXPANDED_VH = "90vh"; // high bottom sheet (~88–90% of viewport)
+
 const badgeSelectorMaxHeight = computed(() => {
   if (badgeSelectorFullyOpened.value) {
-    return "60vh";
+    // Let flex + overflow handle scrolling in expanded state (no cap)
+    return "none";
   }
-  return "300px"; // Height for 6 badges (2 rows x 3 columns)
+  const off = badgeDragOffset.value;
+  const pullUp = off < 0 ? -off : 0;
+  return `min(${BADGE_DRAWER_EXPANDED_VH}, ${300 + pullUp}px)`;
+});
+
+// Drawer height: always anchored to bottom, expands upward (no translateY)
+const badgeDrawerHeightStyle = computed(() => {
+  const off = badgeDragOffset.value;
+  if (badgeSelectorFullyOpened.value) {
+    if (off <= 0) return BADGE_DRAWER_EXPANDED_VH;
+    return `max(300px, calc(${BADGE_DRAWER_EXPANDED_VH} - ${off}px))`;
+  }
+  return `max(0px, calc(300px - ${off}px))`;
 });
 
 // Watch badge selector open/close to hide footer
@@ -190,28 +263,37 @@ watch(
     } else {
       document.body.classList.remove("bottom-sheet-open");
       badgeDragOffset.value = 0;
+      badgeLastY.value = 0;
     }
   }
 );
 
 const onBadgeTouchStart = (e: TouchEvent) => {
-  badgeStartY.value = e.touches[0].clientY;
+  e.stopPropagation();
+  const y = e.touches[0].clientY;
+  badgeStartY.value = y;
+  badgeLastY.value = y;
   badgeIsDragging.value = true;
 };
 
 const onBadgeTouchMove = (e: TouchEvent) => {
   if (!badgeIsDragging.value) return;
+  e.preventDefault();
+  e.stopPropagation();
   const currentY = e.touches[0].clientY;
-  const deltaY = currentY - badgeStartY.value;
-  // Allow both downward (close) and upward (expand) drag
-  if (deltaY > 0) {
-    badgeDragOffset.value = deltaY;
-  } else if (deltaY < 0 && !badgeSelectorFullyOpened.value) {
-    // Upward drag to expand
-    badgeDragOffset.value = deltaY;
-    if (Math.abs(deltaY) >= Math.abs(BADGE_EXPAND_THRESHOLD)) {
+  const deltaY = currentY - badgeLastY.value;
+  badgeLastY.value = currentY;
+  if (badgeSelectorFullyOpened.value) {
+    if (deltaY > 0) {
+      badgeDragOffset.value = Math.max(0, badgeDragOffset.value + deltaY);
+    }
+  } else {
+    badgeDragOffset.value += deltaY;
+    if (badgeDragOffset.value <= -BADGE_EXPAND_THRESHOLD) {
       badgeSelectorFullyOpened.value = true;
       badgeDragOffset.value = 0;
+    } else if (badgeDragOffset.value > 0) {
+      badgeDragOffset.value = Math.min(badgeDragOffset.value, 400);
     }
   }
 };
@@ -221,6 +303,8 @@ const onBadgeTouchEnd = () => {
   badgeIsDragging.value = false;
   if (badgeDragOffset.value >= BADGE_DRAG_THRESHOLD) {
     closeBadgeSelector();
+  } else if (!badgeSelectorFullyOpened.value) {
+    badgeDragOffset.value = 0;
   } else {
     badgeDragOffset.value = 0;
   }
@@ -228,6 +312,7 @@ const onBadgeTouchEnd = () => {
 
 const onBadgeMouseDown = (e: MouseEvent) => {
   badgeStartY.value = e.clientY;
+  badgeLastY.value = e.clientY;
   badgeIsDragging.value = true;
   document.addEventListener("mousemove", onBadgeMouseMove);
   document.addEventListener("mouseup", onBadgeMouseUp);
@@ -235,16 +320,20 @@ const onBadgeMouseDown = (e: MouseEvent) => {
 
 const onBadgeMouseMove = (e: MouseEvent) => {
   if (!badgeIsDragging.value) return;
-  const deltaY = e.clientY - badgeStartY.value;
-  // Allow both downward (close) and upward (expand) drag
-  if (deltaY > 0) {
-    badgeDragOffset.value = deltaY;
-  } else if (deltaY < 0 && !badgeSelectorFullyOpened.value) {
-    // Upward drag to expand
-    badgeDragOffset.value = deltaY;
-    if (Math.abs(deltaY) >= Math.abs(BADGE_EXPAND_THRESHOLD)) {
+  const currentY = e.clientY;
+  const deltaY = currentY - badgeLastY.value;
+  badgeLastY.value = currentY;
+  if (badgeSelectorFullyOpened.value) {
+    if (deltaY > 0) {
+      badgeDragOffset.value = Math.max(0, badgeDragOffset.value + deltaY);
+    }
+  } else {
+    badgeDragOffset.value += deltaY;
+    if (badgeDragOffset.value <= -BADGE_EXPAND_THRESHOLD) {
       badgeSelectorFullyOpened.value = true;
       badgeDragOffset.value = 0;
+    } else if (badgeDragOffset.value > 0) {
+      badgeDragOffset.value = Math.min(badgeDragOffset.value, 400);
     }
   }
 };
@@ -256,6 +345,8 @@ const onBadgeMouseUp = () => {
   document.removeEventListener("mouseup", onBadgeMouseUp);
   if (badgeDragOffset.value >= BADGE_DRAG_THRESHOLD) {
     closeBadgeSelector();
+  } else if (!badgeSelectorFullyOpened.value) {
+    badgeDragOffset.value = 0;
   } else {
     badgeDragOffset.value = 0;
   }
@@ -339,74 +430,400 @@ const openProfileActions = () => {
 // Handle view photo
 const handleViewPhoto = () => {
   isProfileActionsOpen.value = false;
-  if (authStore.user?.profile_picture) {
+  if (profileImageSrc.value && !isProfileImageBroken.value) {
+    reopenProfileActionsAfterPhoto.value = true;
     isPhotoLightboxOpen.value = true;
   } else {
     notifyInfo("common.info.profilePhotoNotSet", "Profile photo is not set yet.", { position: "top", timeout: 3000 });
   }
 };
 
-// Close photo lightbox and return to profile actions
-const closePhotoLightbox = () => {
-  isPhotoLightboxOpen.value = false;
-  // Return to profile actions sheet after a short delay
+watch(isPhotoLightboxOpen, (open) => {
+  if (open) return;
+  if (!reopenProfileActionsAfterPhoto.value) return;
+  reopenProfileActionsAfterPhoto.value = false;
   setTimeout(() => {
     isProfileActionsOpen.value = true;
   }, 300);
+});
+
+const logDhProfileUpload = (tag: string, payload: unknown) => {
+  console.info("[DH-PROFILE-UPLOAD]", tag, payload);
 };
 
-// Handle change photo
-const handleChangePhoto = () => {
-  isProfileActionsOpen.value = false;
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.onchange = async (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+/** JSON string pre konzolu (Xcode); pri veľkom tele osekne. */
+function dhProfileUploadJsonPreview(data: unknown, maxLen = 6000): string {
+  try {
+    const s = typeof data === "string" ? data : JSON.stringify(data);
+    return s.length > maxLen ? `${s.slice(0, maxLen)}…(truncated)` : s;
+  } catch {
+    return String(data);
+  }
+}
 
-    isUploading.value = true;
-    try {
-      // Use the backend endpoint directly - it handles upload and DB update
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await api.post("/user/profile-picture", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
+/** Pri 422 z backendu vypíše celý kontext (vždy, nie len DEV – viditeľné v Xcode). */
+function logDhProfileUpload422Response(error: unknown) {
+  if (!axios.isAxiosError(error) || error.response?.status !== 422) {
+    return;
+  }
+  const res = error.response;
+  const data = res.data as Record<string, unknown> | undefined;
+  console.info("[DH-PROFILE-UPLOAD]", "response.422", {
+    "response.status": res.status,
+    "response.data": data,
+    "response.dataPreview": data !== undefined ? dhProfileUploadJsonPreview(data) : undefined,
+    "response.data.errors": data?.errors,
+    "response.data.code": data?.code,
+    "response.data.max_image_upload_kb": data?.max_image_upload_kb,
+    "response.data.message": data?.message,
+    "response.data.status": data?.status
+  });
+}
+
+const pickedKind = (x: unknown): string => {
+  if (x === undefined) return "undefined";
+  if (x === null) return "null";
+  if (typeof x === "string") return "string";
+  if (typeof File !== "undefined" && x instanceof File) return "File";
+  if (x instanceof Blob) return "Blob";
+  if (typeof x === "object") return "object";
+  return typeof x;
+};
+
+const serializablePickedRaw = (x: unknown): unknown => {
+  if (typeof File !== "undefined" && x instanceof File) {
+    return {
+      kind: "File",
+      name: x.name,
+      size: x.size,
+      type: x.type,
+      lastModified: x.lastModified
+    };
+  }
+  if (x instanceof Blob) {
+    return { kind: "Blob", size: x.size, type: x.type };
+  }
+  if (typeof x === "string") {
+    return { kind: "string", length: x.length, head: x.slice(0, 100) };
+  }
+  if (x && typeof x === "object") {
+    const o = x as Record<string, unknown>;
+    return {
+      kind: "object",
+      keys: Object.keys(o),
+      webPath:
+        typeof o.webPath === "string" ? String(o.webPath).slice(0, 160) : undefined,
+      path: typeof o.path === "string" ? String(o.path).slice(0, 160) : undefined,
+      hasDataUrl: typeof o.dataUrl === "string"
+    };
+  }
+  return { kind: "other", repr: String(x) };
+};
+
+/**
+ * Vždy nový File s vlastným bufferom – na iOS/WKWebView sa vyhne „spotrebovanému“ File z prvého uploadu.
+ * Ak picker vráti len path/webPath/dataUrl (objekt alebo reťazec), skonvertuje cez fetch → Blob.
+ */
+const ensureProfileUploadFile = async (picked: unknown): Promise<File> => {
+  if (typeof File !== "undefined" && picked instanceof File) {
+    const ab = await picked.arrayBuffer();
+    const name = picked.name?.length ? picked.name : "profile.jpg";
+    const type = picked.type?.length ? picked.type : "image/jpeg";
+    return new File([ab], name, { type });
+  }
+  if (picked instanceof Blob) {
+    const ab = await picked.arrayBuffer();
+    const type = picked.type?.length ? picked.type : "image/jpeg";
+    return new File([ab], "profile.jpg", { type });
+  }
+  if (typeof picked === "string" && picked.length > 0) {
+    const res = await fetch(picked);
+    const blob = await res.blob();
+    const ab = await blob.arrayBuffer();
+    const type = blob.type?.length ? blob.type : "image/jpeg";
+    return new File([ab], "profile.jpg", { type });
+  }
+  if (picked && typeof picked === "object") {
+    const o = picked as { webPath?: unknown; path?: unknown; dataUrl?: unknown };
+    if (typeof o.dataUrl === "string" && o.dataUrl.length > 0) {
+      return ensureProfileUploadFile(o.dataUrl);
+    }
+    if (typeof o.webPath === "string" && o.webPath.length > 0) {
+      return ensureProfileUploadFile(o.webPath);
+    }
+    if (typeof o.path === "string" && o.path.length > 0) {
+      const p = o.path;
+      if (/^https?:\/\//i.test(p) || p.startsWith("blob:") || p.startsWith("data:")) {
+        return ensureProfileUploadFile(p);
+      }
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (Capacitor.isNativePlatform()) {
+          const clean = p.replace(/^file:\/\//, "");
+          return ensureProfileUploadFile(Capacitor.convertFileSrc(clean));
         }
+      } catch {
+        // fall through
+      }
+      const fileUrl = p.startsWith("file:") ? p : `file://${p}`;
+      return ensureProfileUploadFile(fileUrl);
+    }
+  }
+  throw new Error("Invalid profile photo selection – no usable file or URL.");
+};
+
+function attachProfilePickerReturnDiagnostics() {
+  profilePickerDiagCleanup?.();
+  const onVis = () => {
+    logDhProfileUpload("picker.diag.visibility", {
+      visibilityState: document.visibilityState,
+      filesLength: profilePhotoFileInputRef.value?.files?.length ?? null
+    });
+  };
+  const onFocus = () => {
+    logDhProfileUpload("picker.diag.windowFocus", {
+      filesLength: profilePhotoFileInputRef.value?.files?.length ?? null
+    });
+  };
+  document.addEventListener("visibilitychange", onVis);
+  window.addEventListener("focus", onFocus, true);
+  const t = window.setTimeout(() => {
+    document.removeEventListener("visibilitychange", onVis);
+    window.removeEventListener("focus", onFocus, true);
+  }, 120_000);
+  profilePickerDiagCleanup = () => {
+    window.clearTimeout(t);
+    document.removeEventListener("visibilitychange", onVis);
+    window.removeEventListener("focus", onFocus, true);
+    profilePickerDiagCleanup = null;
+  };
+}
+
+// Handle change photo — iOS: .click() musí ísť v tom istom stacku ako tap; sheet zatvoríme až po click()
+const handleChangePhoto = () => {
+  console.info("[DH-PROFILE-UPLOAD]", "ACTIVE_HANDLER_REACHED", {
+    stage: "ProfileContent.handleChangePhoto",
+    component: "ProfileContent.vue"
+  });
+
+  const input = profilePhotoFileInputRef.value;
+  logDhProfileUpload("picker.beforeClick", {
+    hasInputRef: Boolean(input),
+    id: input?.id ?? "(no id)"
+  });
+
+  if (!input) {
+    logDhProfileUpload("picker.fail", { reason: "missing profilePhotoFileInputRef" });
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage: "Failed to open photo picker.",
+      retryable: true
+    }, { position: "top", timeout: 3000 });
+    return;
+  }
+
+  input.value = "";
+  attachProfilePickerReturnDiagnostics();
+
+  logDhProfileUpload("picker.immediateBeforeProgrammaticClick", { ts: Date.now() });
+  input.click();
+  logDhProfileUpload("picker.immediateAfterProgrammaticClick", { ts: Date.now() });
+
+  queueMicrotask(() => {
+    logDhProfileUpload("picker.afterClick.queueMicrotask", {
+      filesLength: input.files?.length ?? null
+    });
+  });
+  window.setTimeout(() => {
+    logDhProfileUpload("picker.afterClick.setTimeout0ms", {
+      filesLength: input.files?.length ?? null
+    });
+  }, 0);
+
+  isProfileActionsOpen.value = false;
+};
+
+async function onProfilePhotoFileInputChange(e: Event) {
+  const target = e.target as HTMLInputElement;
+
+  logDhProfileUpload("picker.onchange.entry", {
+    filesLength: target.files?.length ?? 0,
+    fileItemNames:
+      target.files && target.files.length
+        ? Array.from(target.files).map((f) => f.name)
+        : []
+  });
+
+  const rawPick = target.files?.[0] ?? null;
+
+  logDhProfileUpload("picked.raw", { raw: serializablePickedRaw(rawPick) });
+  logDhProfileUpload("picked.kind", { kind: pickedKind(rawPick) });
+
+  if (!rawPick) {
+    logDhProfileUpload("picker.cancelOrEmptyFiles", {
+      filesLength: target.files?.length ?? 0,
+      note: "Žiadny súbor — používateľ zrušil alebo prázdny výber."
+    });
+    target.value = "";
+    return;
+  }
+
+  let uploadFile: File;
+  try {
+    uploadFile = await ensureProfileUploadFile(rawPick);
+  } catch (normErr) {
+    logDhProfileUpload("normalize.fail", {
+      message: normErr instanceof Error ? normErr.message : String(normErr)
+    });
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage: "Failed to prepare photo. Please try again.",
+      retryable: true
+    }, { position: "top", timeout: 3000 });
+    target.value = "";
+    return;
+  }
+
+  isUploading.value = true;
+  const formKeys: string[] = [];
+  const formDataProbe = new FormData();
+  formDataProbe.append("file", uploadFile);
+  for (const key of formDataProbe.keys()) formKeys.push(String(key));
+  logDhProfileUpload("request.start", {
+    name: uploadFile.name,
+    type: uploadFile.type,
+    size: uploadFile.size,
+    formFieldNames: formKeys,
+    endpoint: `${String(api.defaults.baseURL || "").replace(/\/$/, "")}/user/profile-picture`
+  });
+
+  try {
+    logDhProfileUpload("formdata.file.meta", {
+      name: uploadFile.name,
+      type: uploadFile.type,
+      size: uploadFile.size,
+      isFile: uploadFile instanceof File,
+      isBlob: uploadFile instanceof Blob
+    });
+
+    const formData = new FormData();
+    formData.append("file", uploadFile, uploadFile.name);
+
+    const response = await api.post("/user/profile-picture", formData, {
+      transformRequest: [
+        (data, headers) => {
+          const h = headers as Record<string, unknown> & {
+            get?: (n: string) => string | undefined;
+          };
+          let ct = "(unset)";
+          try {
+            if (typeof h.get === "function") {
+              ct = h.get("Content-Type") ?? h.get("content-type") ?? "(unset)";
+            } else {
+              ct =
+                (h["Content-Type"] as string) ||
+                (h["content-type"] as string) ||
+                "(unset)";
+            }
+          } catch {
+            ct = "(error reading)";
+          }
+          logDhProfileUpload("request.isFormData", { isFormData: data instanceof FormData });
+          logDhProfileUpload("request.headers", {
+            ContentType: ct,
+            hasAuthorization: Boolean(
+              (typeof h.get === "function" && (h.get("Authorization") || h.get("authorization"))) ||
+                h.Authorization ||
+                h.authorization
+            )
+          });
+          return data;
+        }
+      ]
+    });
+    if (import.meta.env.DEV) {
+      console.info("[DH-PROFILE-UPLOAD]", "response.status", response.status);
+      console.info("[DH-PROFILE-UPLOAD]", "response.body", response.data);
+      console.info("[DH-PROFILE-UPLOAD]", "response.profile_picture", response.data?.profile_picture ?? response.data?.user?.profile_picture ?? null);
+      console.info("[DH-PROFILE-UPLOAD]", "response.user", response.data?.user ?? null);
+    }
+
+    const backendUser = response.data?.user;
+    const backendStatus = response.data?.status;
+    if (response.status >= 200 && response.status < 300 && backendStatus === "success" && backendUser) {
+      if (response.data.user) {
+        if (authStore.user) {
+          authStore.user.profile_picture = response.data.user.profile_picture;
+          authStore.user.profile_picture_public_id = response.data.user.profile_picture_public_id;
+        }
+      }
+      isProfileImageBroken.value = false;
+      await authStore.fetchUser();
+      if (import.meta.env.DEV) {
+        console.info("[DH-PROFILE-UPLOAD]", "refreshed user raw", authStore.user ?? null);
+      }
+      const refreshedRaw = authStore.user?.profile_picture ?? null;
+      avatarCacheBuster.value = Date.now();
+      const finalSrc = resolveProfileImageSrc(refreshedRaw, {
+        cacheBuster: avatarCacheBuster.value
       });
 
-      if (response.data && (response.data.status === "success" || response.data.user)) {
-        // Update auth store with response data
-        if (response.data.user) {
-          if (authStore.user) {
-            authStore.user.profile_picture = response.data.user.profile_picture;
-            authStore.user.profile_picture_public_id = response.data.user.profile_picture_public_id;
-          }
-        }
-        // Refresh user data to ensure consistency
-        await authStore.fetchUser();
-
-        notifySuccess("common.success.profilePictureUpdated", "Profile photo updated successfully", { position: "top", timeout: 3000 });
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (error) {
       if (import.meta.env.DEV) {
-        console.debug("[ProfileContent] Failed to upload profile photo:", error);
+        console.info("[DH-PROFILE-UPLOAD]", "refreshed user.profile_picture", refreshedRaw);
+        console.info("[DH-PROFILE-UPLOAD]", "authStore.avatarUrl", authStore.avatarUrl ?? null);
+        console.info("[DH-PROFILE-UPLOAD]", "final resolved avatar src", finalSrc ?? "(none)");
       }
-      notifyError({
-        kind: "server",
-        messageKey: "common.errors.server",
-        fallbackMessage: "Failed to upload photo. Please try again.",
-        retryable: true
-      }, { position: "top", timeout: 3000 });
-    } finally {
-      isUploading.value = false;
+
+      if (!finalSrc) {
+        throw new Error("Profile picture missing/invalid after refresh");
+      }
+
+      if (import.meta.env.DEV) {
+        console.info("[DH-PROFILE-UPLOAD]", "request.success", {
+          status: response.status,
+          profile_picture: refreshedRaw
+        });
+      }
+
+      notifySuccess("common.success.profilePictureUpdated", "Profile photo updated successfully", { position: "top", timeout: 3000 });
+    } else {
+      if (import.meta.env.DEV) {
+        console.info("[DH-PROFILE-UPLOAD]", "request.fail", {
+          reason: "unexpected response shape",
+          status: response.status,
+          body: response.data
+        });
+      }
+      throw new Error("Invalid response from server");
     }
-  };
-  input.click();
-};
+  } catch (error) {
+    logDhProfileUpload422Response(error);
+    const is422 = axios.isAxiosError(error) && error.response?.status === 422;
+    if (import.meta.env.DEV && !is422) {
+      console.info("[DH-PROFILE-UPLOAD]", "request.fail", {
+        message: error instanceof Error ? error.message : String(error),
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        dataPreview: axios.isAxiosError(error)
+          ? dhProfileUploadJsonPreview(error.response?.data)
+          : undefined
+      });
+      console.debug("[ProfileContent] Failed to upload profile photo:", error);
+    }
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage: "Failed to upload photo. Please try again.",
+      retryable: true
+    }, { position: "top", timeout: 3000 });
+  } finally {
+    isUploading.value = false;
+    target.value = "";
+    profilePickerDiagCleanup?.();
+    profilePickerDiagCleanup = null;
+  }
+}
 
 // Handle select badge
 const handleSelectBadge = () => {
@@ -420,7 +837,8 @@ const handleSelectBadge = () => {
       // Ignore parse errors
     }
   }
-  badgeSelectorFullyOpened.value = false;
+  // Start expanded so the sheet is fully visible on open.
+  badgeSelectorFullyOpened.value = true;
   badgeDragOffset.value = 0;
   isBadgeSelectorOpen.value = true;
 };
@@ -482,6 +900,7 @@ const loadSavedBadge = () => {
 
 // Fetch user data on mount if not loaded
 onMounted(async () => {
+  isProfileImageBroken.value = false;
   loadSavedBadge();
   if (authStore.isAuthenticated && !authStore.user) {
     try {
@@ -493,6 +912,8 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  profilePickerDiagCleanup?.();
+  profilePickerDiagCleanup = null;
   document.removeEventListener("mousemove", onBadgeMouseMove);
   document.removeEventListener("mouseup", onBadgeMouseUp);
   document.body.classList.remove("bottom-sheet-open");
@@ -500,11 +921,25 @@ onBeforeUnmount(() => {
 </script>
 <style scoped lang="scss">
 .myProfile {
+  position: relative;
   padding: 2rem 1rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Skrytý file input ostáva v DOM pre spoľahlivý iOS/WKWebView picker (nie createElement). */
+.myProfile-hiddenFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  left: 0;
+  top: 0;
+  opacity: 0.01;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .myProfile-header {
@@ -655,49 +1090,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 18px 40px rgba(255, 0, 110, 0.35);
 }
 
-// Photo lightbox styles
-.photo-lightbox-dialog {
-  :deep(.q-dialog__inner) {
-    padding: 0;
-  }
-}
-
-.photo-lightbox-card {
-  background: rgba(0, 0, 0, 0.95);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.photo-lightbox-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
-  color: white;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-}
-
-.photo-lightbox-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.photo-lightbox-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
 // Badge selector drawer styles
 .badgeSelector-overlay {
   position: fixed;
@@ -715,12 +1107,12 @@ onBeforeUnmount(() => {
   max-width: 600px;
   background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
   border-radius: 24px 24px 0 0;
-  max-height: 90vh;
+  min-height: 0;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   animation: slideUp 0.3s ease-out;
-  cursor: grab;
-  user-select: none;
 
   &:active {
     cursor: grabbing;
@@ -731,43 +1123,59 @@ onBeforeUnmount(() => {
     transition: none;
   }
 
-  // Add transition only when not dragging
+  // Add transition only when not dragging (height changes)
   &:not(.dragging) {
-    transition: transform 0.2s ease-out;
+    transition: height 0.2s ease-out;
   }
 }
 
 .badgeSelector-header {
   display: flex;
   flex-direction: column;
+  align-items: center;
   padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
-}
-
-.badgeSelector-handle {
-  width: 40px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  margin: 0 auto 1rem;
-  cursor: grab;
+  flex-shrink: 0;
   touch-action: none;
+  user-select: none;
+  cursor: grab;
 
   &:active {
     cursor: grabbing;
   }
 }
 
+.badgeSelector-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 2px;
+  margin: 0 auto 0.5rem;
+  cursor: grab;
+  touch-action: none;
+}
+
+.badgeSelector-pullHint {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.75rem;
+  text-align: center;
+  margin: 0 0 0.75rem;
+  font-family: poppins;
+}
+
 .badgeSelector-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #fff;
-  margin: 0;
+  margin: 0 auto;
   font-family: poppinsSemiBold;
   text-align: center;
-  position: relative;
-  padding-right: 2rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .badgeSelector-header .q-btn {
@@ -779,15 +1187,27 @@ onBeforeUnmount(() => {
 
 .badgeSelector-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
   padding: 1rem;
   transition: max-height 0.3s ease-out;
+
+  :deep(.badges-column) {
+    overflow: visible;
+    max-height: none;
+  }
 }
 
 .badgeSelector-footer {
   padding: 1.5rem;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   text-align: center;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .badgeSelector-description {
@@ -806,7 +1226,7 @@ onBeforeUnmount(() => {
   font-size: 1.2rem;
   border-radius: 0.5rem;
   font-family: montseraatSemiBold;
-  text-transform: uppercase;
+  text-transform: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
 
@@ -831,5 +1251,22 @@ onBeforeUnmount(() => {
   to {
     transform: translateY(0);
   }
+}
+</style>
+
+<style lang="scss">
+/* Dark app: „okienka“ okolo odznakov — rovnaký padding/radius ako light sheet, tmavšia plocha + jemný lift */
+body:not(.body--light) .badgeSelector-drawer .badgeIconDiv {
+  padding: 0.45rem 0.35rem 0.25rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+body:not(.body--light) .badgeSelector-drawer .badgeIconImg {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55));
 }
 </style>

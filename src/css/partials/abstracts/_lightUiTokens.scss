@@ -1,0 +1,92 @@
+/*
+ * Light mode UI tokens (contrast / floating actions / search / forms).
+ * Použitie: var(--dh-float-surface) v pravidlách pod .body--light v _darkMode.scss.
+ * Dark mode tieto premenné nedefinuje — ostáva pôvodný vzhľad.
+ */
+body.body--light,
+.body--light {
+  /*
+   * Svetlé plochy (search, karty, formuláre) — „plávajúce“ biele tlačidlá
+   */
+  --dh-float-surface: rgba(255, 255, 255, 0.98);
+  --dh-float-surface-hover: #ffffff;
+  --dh-float-surface-pressed: rgba(228, 228, 232, 0.98);
+  --dh-float-border: rgba(0, 0, 0, 0.18);
+  --dh-float-shadow: 0 4px 22px rgba(0, 0, 0, 0.16), 0 1px 4px rgba(0, 0, 0, 0.1);
+  --dh-float-shadow-pressed: 0 2px 12px rgba(0, 0, 0, 0.12);
+  --dh-float-icon-filter: brightness(0) saturate(100%) opacity(0.78);
+
+  /*
+   * Tmavý hero (fotka + overlay) — v light app stále „cinematic“: svetlý text + tmavé sklo na akciách
+   */
+  /* Súlad s PostHeader: gradient smerom hore = plynulý fade, nie tvrdá línia v strede */
+  /* Svetlá app: rovnaký tvar ako dark hero — dlhší priesvit; biely text na fotke ostáva čitateľný */
+  --dh-hero-fade: linear-gradient(
+    to top,
+    rgba(1, 3, 16, 0.88) 0%,
+    rgba(1, 3, 16, 0.48) 24%,
+    rgba(1, 3, 16, 0.14) 44%,
+    rgba(1, 3, 16, 0.04) 60%,
+    rgba(1, 3, 16, 0) 80%
+  );
+  --dh-hero-text: #ffffff;
+  --dh-hero-meta: rgba(255, 255, 255, 0.92);
+  --dh-hero-pill-bg: rgba(0, 0, 0, 0.52);
+  --dh-hero-pill-border: rgba(255, 255, 255, 0.28);
+  --dh-hero-action-bg: rgba(0, 0, 0, 0.58);
+  --dh-hero-action-bg-hover: rgba(0, 0, 0, 0.7);
+  --dh-hero-action-bg-active: rgba(0, 0, 0, 0.82);
+  --dh-hero-action-border: rgba(255, 255, 255, 0.32);
+  --dh-hero-action-shadow: 0 10px 28px rgba(0, 0, 0, 0.48);
+
+  --dh-hero-card-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
+
+  /* Pomocné / ? na svetlom formulári — tmavý disk + biela ikona */
+  --dh-form-aux-btn-bg: rgba(15, 0, 38, 0.9);
+  --dh-form-aux-btn-border: rgba(255, 255, 255, 0.12);
+  --dh-form-aux-btn-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+
+  /* Tmavé bottom sheety nad svetlým canvasom */
+  --dh-modal-backdrop: rgba(0, 0, 0, 0.52);
+  --dh-modal-handle: rgba(255, 255, 255, 0.45);
+
+  --dh-search-field-bg: #ffffff;
+  --dh-search-border: rgba(0, 0, 0, 0.16);
+  --dh-search-text: #0a0a0a;
+  --dh-search-placeholder: rgba(0, 0, 0, 0.48);
+  --dh-search-icon: rgba(0, 0, 0, 0.55);
+
+  --dh-page-canvas: #f5f5f5;
+  --dh-text-muted: rgba(0, 0, 0, 0.62);
+  --dh-divider: rgba(0, 0, 0, 0.12);
+
+  /* Pink hint bubbles: always white copy on gradient (beats .body--light h3 { black }) */
+  --dh-hint-fg: #ffffff;
+  --dh-hint-fg-muted: rgba(255, 255, 255, 0.95);
+
+  --dh-help-footer-bg: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
+/* HintBubble on pink gradient — override global .body--light h3/span black text */
+.body--light .dhHintBubble,
+.body--light .dhHintBubble .dhHintBubble-content,
+.body--light .dhHintBubble .dhHintBubble-title,
+.body--light .dhHintBubble .dhHintBubble-text,
+.body--light .dhHintBubble h3,
+.body--light .dhHintBubble p,
+.body--light .dhHintBubble span {
+  color: var(--dh-hint-fg) !important;
+}
+
+.body--light .dhHintBubble .dhHintBubble-text,
+.body--light .dhHintBubble .dhHintBubble-content p {
+  color: var(--dh-hint-fg-muted) !important;
+}
+
+.body--light .dhHintBubble .dhHintBubble-close {
+  color: var(--dh-hint-fg) !important;
+}

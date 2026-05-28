@@ -1,11 +1,12 @@
 <template>
-  <div class="notification-Page q-pa-sm">
+  <div class="notification-Page">
     <PageTitle title="Notifications" />
-    <q-pull-to-refresh @refresh="refresh">
-      <div v-if="isLoading" class="notifications-loading">
-        <q-spinner color="primary" size="2rem" />
-      </div>
-      <div v-else-if="error" class="notifications-error" data-testid="dh-notifications-error">
+    <!-- Iba do konca prvého fetchu; potom PTR (vlastný indikátor pri ťahu). -->
+    <div v-if="!initialFetchDone" class="notifications-loading">
+      <q-spinner color="primary" size="2rem" />
+    </div>
+    <q-pull-to-refresh v-else @refresh="refresh">
+      <div v-if="error" class="notifications-error" data-testid="dh-notifications-error">
         <RetryPanel
           :message="error"
           :on-retry="retry"
@@ -29,7 +30,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useNotificationsStore, type Notification } from "src/stores/notifications";
@@ -40,10 +41,12 @@ import { useI18n } from "vue-i18n";
 
 const router = useRouter();
 const notificationsStore = useNotificationsStore();
-const { items, isLoading, error } = storeToRefs(notificationsStore);
+const { items, error } = storeToRefs(notificationsStore);
 useI18n();
 
 const notifications = computed(() => items.value);
+
+const initialFetchDone = ref(false);
 
 const refresh = async (done: () => void) => {
   await notificationsStore.fetchNotifications(true);
@@ -90,13 +93,17 @@ const handleNotificationClick = async (notification: Notification) => {
 };
 
 onMounted(async () => {
-  // Fetch notifications when page loads
-  await notificationsStore.fetchNotifications(true);
+  try {
+    await notificationsStore.fetchNotifications(true);
+  } finally {
+    initialFetchDone.value = true;
+  }
 });
 </script>
 <style scoped lang="scss">
 .notification-Page {
   background-position: center;
+  padding: 0.05rem 0.2rem 0.75rem;
 
   .notifications-loading,
   .notifications-error,
@@ -117,11 +124,12 @@ onMounted(async () => {
   }
 
   .notifications-list {
-    padding: 0 16px;
+    padding: 0 4px;
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0;
+    margin-top: -10px;
   }
 }
 </style>

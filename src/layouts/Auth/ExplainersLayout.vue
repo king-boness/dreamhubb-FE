@@ -74,11 +74,10 @@ const previousExplainer = () => {
 .q-btn::before {
   box-shadow: none;
 }
+/* Background from global app (iosSafeArea.scss) */
 .LayoutBackground {
-  background-image: url("/images/Auth/bg-explain.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 </style>
 <style scoped lang="scss">

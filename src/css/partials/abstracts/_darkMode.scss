@@ -18,6 +18,10 @@
   h4 {
     color: black !important;
   }
+  /* Donor Filters step 1 — must beat generic .body--light h1 { black !important } (incl. iOS Safari) */
+  .filters-page h1.filters-title.filters-title--swapPosts {
+    color: #2563eb !important;
+  }
   .passwordPage-input,
   .emailPage-input,
   .bioPage-input {
@@ -207,8 +211,6 @@
   .PostDetail-messageButton,
   .postCloserInfo,
   .helpPage-datas,
-  .helpPage-privateButtonDiv,
-  .helpPage-privateQuestionDiv,
   .comment-privateContainer,
   .reviewHeader-button {
     img {
@@ -229,8 +231,6 @@
   .postGoal,
   .topDream-titleContainer,
   .dreamDetail-titleContainer,
-  .postComponent-categoryContainer,
-  .postComponent-valueContainer,
   .donationComponent-valueContainer,
   .donationComponent-donatedPostContainer,
   .donationComponent-donateContent,
@@ -345,6 +345,35 @@
     rgb(220, 220, 220) 100%
   ) !important; 
   }
+
+  /* MyProfile badge picker sheet: svetlý surface + tmavý text (globálne .text-white na q-card rozbíjalo kontrast) */
+  .badgeSwiper .slide-drawer.slide-drawer--bottom {
+    color: #1a1a1a !important;
+    background-color: #f2f2f6 !important;
+    background-image: none !important;
+  }
+
+  .badgeSwiper .slide-drawer.slide-drawer--bottom::before {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .badgeSwiper .badgeSwiper-title {
+    color: #121212 !important;
+  }
+
+  .badgeSwiper .badgeSwiper-description {
+    color: rgba(0, 0, 0, 0.58) !important;
+  }
+
+  .badgeSwiper .slide-drawer__handler--horizontal .cursor-pointer {
+    background-color: rgba(0, 0, 0, 0.22) !important;
+  }
+
+  .badgeSwiper .advance-example .badgeIconTitle {
+    color: #1a1a1a !important;
+  }
+
   .submitPage-description,.submitPage1-title{
     color: #0f0026 !important;
   }
@@ -366,11 +395,1308 @@
     background-color: transparent !important;
     border: 0.1rem solid black;
   }
+  .karmaValue {
+    color: rgba(black, 0.55) !important;
+  }
   .searchIcon {
+    color: rgba(black, 0.78) !important;
     * {
-      stroke: black !important;
+      stroke: currentColor !important;
     }
   }
+  /* Donor feed: integrated chrome + profile bio (scoped utilities stay dark-themed otherwise) */
+  .header.row {
+    border-bottom-color: rgba(black, 0.12) !important;
+    box-shadow: 0 2px 8px rgba(black, 0.06) !important;
+  }
+  .myProfile-bio {
+    color: #1a1a1a !important;
+  }
+  .myProfile-bioSection {
+    border-top-color: rgba(black, 0.12) !important;
+  }
+
+  /* Public / own profile header copy (scoped white beats .body--light span) */
+  .myProfile {
+    .myProfile-info {
+      color: #1a1a1a !important;
+    }
+    .myProfile-username {
+      color: #0a0a0a !important;
+    }
+    .myProfile-location,
+    .myProfile-email {
+      color: rgba(0, 0, 0, 0.58) !important;
+    }
+    .myProfile-tokensLabel,
+    .myProfile-roleLabel {
+      color: rgba(0, 0, 0, 0.55) !important;
+    }
+    .myProfile-tokensValue,
+    .myProfile-roleValue {
+      color: #1a1a1a !important;
+    }
+  }
+
+  /*
+   * Hero (PostHeader + rovnaké triedy v edit placeholder): tmavý fade na fotke,
+   * biela typografia, tmavé sklenené kruhy s bielymi ikonami (donor + donee detail, Help, TopDream).
+   * Explicit h1 + button + category icon: silnejšie ako .body--light h1/span { black }.
+   */
+  .post-header {
+    .post-header-bg {
+      box-shadow: var(--dh-hero-card-shadow) !important;
+    }
+
+    /* Len spodný gradient — bez backdrop blur na celej ploche (nezmäkčuje stred fotky) */
+    .post-header-blurContainer {
+      background: var(--dh-hero-fade) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    h1.post-header-title,
+    .post-header-title {
+      color: var(--dh-hero-text) !important;
+    }
+
+    .post-header-metaRow {
+      color: var(--dh-hero-meta) !important;
+    }
+
+    .post-header-metaRow span {
+      color: var(--dh-hero-meta) !important;
+    }
+
+    .post-header-metaRow .post-header-metaIcon {
+      opacity: 1 !important;
+      filter: brightness(0) invert(1) opacity(0.88) !important;
+    }
+
+    .post-header-categoryPill {
+      background: var(--dh-hero-pill-bg) !important;
+      backdrop-filter: blur(14px) !important;
+      border: 1px solid var(--dh-hero-pill-border) !important;
+      box-shadow: var(--dh-hero-action-shadow) !important;
+    }
+
+    .post-header-categoryText {
+      color: var(--dh-hero-text) !important;
+    }
+
+    .post-header-categoryIcon {
+      filter: none !important;
+    }
+
+    .post-header-iconBtn,
+    .post-header-heartBtn {
+      background: var(--dh-hero-action-bg) !important;
+      border: 1px solid var(--dh-hero-action-border) !important;
+      box-shadow: var(--dh-hero-action-shadow) !important;
+      color: #ffffff !important;
+    }
+
+    .post-header-iconBtn:hover,
+    .post-header-heartBtn:hover {
+      background: var(--dh-hero-action-bg-hover) !important;
+    }
+
+    .post-header-iconBtn:active,
+    .post-header-heartBtn:active {
+      background: var(--dh-hero-action-bg-active) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55) !important;
+    }
+
+    .post-header-iconBtn .q-icon,
+    .post-header-iconBtn .q-btn__content {
+      color: #ffffff !important;
+    }
+
+    .post-header-iconBtn .q-icon {
+      filter: brightness(0) invert(1) !important;
+    }
+
+    .post-header-heartIcon {
+      filter: brightness(0) invert(1) !important;
+    }
+
+    .post-header-heartBtn--liked .post-header-heartIcon {
+      filter: none !important;
+    }
+
+    button.post-header-heartBtn {
+      color: #ffffff !important;
+    }
+  }
+
+  /* Edit My Post — placeholder hero (rovnaké class names ako PostHeader overlay) */
+  .post-edit-hero-placeholder {
+    box-shadow: var(--dh-hero-card-shadow) !important;
+
+    .post-header-categoryPill {
+      background: var(--dh-hero-pill-bg) !important;
+      border: 1px solid var(--dh-hero-pill-border) !important;
+      box-shadow: var(--dh-hero-action-shadow) !important;
+    }
+
+    h1.post-header-title,
+    .post-header-categoryText,
+    .post-header-title {
+      color: var(--dh-hero-text) !important;
+    }
+
+    .post-header-categoryIcon {
+      filter: none !important;
+    }
+
+    .post-header-metaRow {
+      color: var(--dh-hero-meta) !important;
+    }
+
+    .post-header-metaRow span {
+      color: var(--dh-hero-meta) !important;
+    }
+
+    .post-header-metaRow .post-header-metaIcon {
+      filter: brightness(0) invert(1) opacity(0.88) !important;
+    }
+
+    .post-header-iconBtn {
+      background: var(--dh-hero-action-bg) !important;
+      border: 1px solid var(--dh-hero-action-border) !important;
+      box-shadow: var(--dh-hero-action-shadow) !important;
+    }
+
+    .post-header-iconBtn .q-icon {
+      filter: brightness(0) invert(1) !important;
+      color: #fff !important;
+    }
+
+    &::before {
+      background: var(--dh-hero-fade) !important;
+    }
+
+    .post-edit-hero-placeholder-text {
+      color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .post-edit-hero-placeholder-icon {
+      filter: brightness(0) invert(1) opacity(0.85) !important;
+    }
+  }
+
+  .postDetail {
+    .postDetailBg {
+      box-shadow: var(--dh-hero-card-shadow) !important;
+    }
+
+    .postDetail-arrow {
+      background: var(--dh-hero-action-bg) !important;
+      border: 1px solid var(--dh-hero-action-border) !important;
+      color: #ffffff !important;
+      box-shadow: var(--dh-hero-action-shadow) !important;
+    }
+
+    .postDetail-arrow:hover {
+      background: var(--dh-hero-action-bg-hover) !important;
+    }
+
+    .postDetail-arrow:active {
+      background: var(--dh-hero-action-bg-active) !important;
+    }
+
+    .postDetail-commentBtn {
+      background: var(--dh-hero-action-bg) !important;
+      border: 1px solid var(--dh-hero-action-border) !important;
+      box-shadow: var(--dh-hero-action-shadow) !important;
+      color: #ffffff !important;
+    }
+
+    .postDetail-commentBtn:hover {
+      background: var(--dh-hero-action-bg-hover) !important;
+    }
+
+    .postDetail-commentBtn:active {
+      background: var(--dh-hero-action-bg-active) !important;
+    }
+
+    .postDetail-commentBtn.q-btn .q-icon {
+      color: #ffffff !important;
+      filter: brightness(0) invert(1) !important;
+    }
+
+    .postDetail-commentCount {
+      color: #ffffff !important;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.75) !important;
+    }
+
+    .postDetail-dot {
+      background: rgba(255, 255, 255, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.45) !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .postDetail-dot:hover {
+      background: rgba(255, 255, 255, 0.65) !important;
+    }
+
+    .postDetail-dot--active {
+      background: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.85) !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .postDetailAbout-text {
+      color: rgba(0, 0, 0, 0.78) !important;
+    }
+
+    .postDetailAbout-separator {
+      background: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .postDetailDonee-name {
+      color: #0a0a0a !important;
+    }
+
+    .postDetailDonee-location {
+      color: rgba(0, 0, 0, 0.58) !important;
+    }
+
+    .postDetailContent .postDetail-rewardRow .postDetail-rewardLabel {
+      color: rgba(0, 0, 0, 0.82) !important;
+    }
+
+    .postDetail-inner {
+      background: transparent;
+    }
+
+    /*
+     * Post detail light: meta na bielej karte pod hero (namiesto bieleho textu na bielej ploche).
+     * Riadok v hero overlay skryť, aby nebol duplicitný.
+     */
+    .post-header .post-header-metaRow {
+      display: none !important;
+    }
+
+    .postDetail-belowHeroMeta {
+      display: block !important;
+      width: 100%;
+      max-width: 390px;
+      margin: -8px auto 0;
+      padding: 0 16px;
+      position: relative;
+      z-index: 6;
+      box-sizing: border-box;
+    }
+
+    .postDetail-belowHeroMeta-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: #ffffff;
+      border-radius: 18px 18px 0 0;
+      padding: 12px 14px;
+      box-shadow: 0 -6px 26px rgba(0, 0, 0, 0.09);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: none;
+    }
+
+    .postDetail-belowHeroMeta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .postDetail-belowHeroMeta-item span {
+      color: rgba(0, 0, 0, 0.82) !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .postDetail-belowHeroMeta-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      filter: brightness(0) opacity(0.55) !important;
+    }
+
+    .postDetail-belowHeroMeta-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(0, 0, 0, 0.12);
+      flex-shrink: 0;
+    }
+
+    /* Hlavný Contribute / Edit CTA pod hero — gradient tlačidlo, label musí ostať biely */
+    .postCTA .primaryCtaBtn,
+    .postCTA .primaryCtaBtn .primaryCtaMain {
+      color: #ffffff !important;
+    }
+  }
+
+  .postDetail-error,
+  .postDetail-empty {
+    .postDetail-errorContent h2 {
+      color: #0a0a0a !important;
+    }
+    .postDetail-errorContent p {
+      color: rgba(0, 0, 0, 0.62) !important;
+    }
+  }
+
+  .postDetail-errorContent .secondaryBtn {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 0, 0, 0.14) !important;
+    color: #0f0026 !important;
+  }
+
+  /* --- Create / edit post (PostCreationPage): scoped farby boli pre dark mode --- */
+  .postCreation-page {
+    .postCreation-dreamTitle,
+    .postCreation-rewardTitle {
+      color: #0a0a0a !important;
+    }
+
+    .postCreation-tokenBalance {
+      color: rgba(0, 0, 0, 0.62) !important;
+    }
+
+    .postCreation-addInfoButton {
+      color: #0f0026 !important;
+    }
+
+    .postCreation-featuresContainer {
+      border-top-color: rgba(0, 0, 0, 0.1) !important;
+      border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .postCreation-dreamDescription {
+      background-color: #f3f4f6 !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .postCreation-dreamDescription .q-field__native,
+    .postCreation-dreamDescription textarea {
+      color: #0a0a0a !important;
+    }
+
+    .postCreation-dreamDescription .q-field__label {
+      color: rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .postCreation-tokenInput .q-field__control {
+      background: #f3f4f6 !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .postCreation-postTitleInput {
+      background: #f3f4f6 !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .postCreation-postTitleInput .q-field__native,
+    .postCreation-postTitleInput input {
+      color: #0a0a0a !important;
+    }
+
+    .postCreation-postTitleInput .q-field__label {
+      color: rgba(0, 0, 0, 0.45) !important;
+    }
+
+    /* Späť + zatvoriť: rovnaký vizuál ako dream/goal back na pickeroch (biely kruh, jemný tieň). */
+    .postCreation-stepBackBtn,
+    .close-overlay-button .close-overlay-button__btn {
+      border: 2px solid rgba(0, 0, 0, 0.22) !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .postCreation-stepBackBtn .postCreation-stepBackIcon {
+      color: #0a0a0a !important;
+    }
+
+    /* icon-close.svg má biele čiary — na svetlom tle treba tmavú siluetu */
+    .close-overlay-button .close-overlay-button__btn img {
+      filter: brightness(0) saturate(100%);
+      opacity: 0.88;
+    }
+
+    .close-overlay-button .close-overlay-button__btn .q-icon {
+      color: #0a0a0a !important;
+    }
+
+    .postCreation-stepBackBtn:hover,
+    .postCreation-stepBackBtn:active,
+    .close-overlay-button .close-overlay-button__btn:hover,
+    .close-overlay-button .close-overlay-button__btn:active {
+      background: rgba(255, 255, 255, 1) !important;
+      border-color: rgba(0, 0, 0, 0.28) !important;
+    }
+  }
+
+  /* --- Onboarding vertical pickers (dream / goal / side) + submit layout footer --- */
+  .dream-title,
+  .goal-title,
+  .pick-title {
+    color: #0a0a0a !important;
+  }
+
+  .dream-instruction,
+  .goal-instruction,
+  .pick-instruction {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .dream-backBtn,
+  .goal-backBtn {
+    border-color: rgba(0, 0, 0, 0.22) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .pick-header .pick-backBtn {
+    border-color: rgba(0, 0, 0, 0.22) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .dream-helpBtn,
+  .goal-helpBtn,
+  .pick-helpBtn {
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .dream-progress,
+  .goal-progress,
+  .pick-progress {
+    background-color: rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .dream-option:not(.is-active) .dream-icon,
+  .goal-option:not(.is-active) .goal-icon,
+  .pick-option:not(.is-active) .pick-icon {
+    opacity: 0.42 !important;
+  }
+
+  /*
+   * Post-creation / onboarding vertical pickers (WhatIsYourGoal, WhatKindOfDream):
+   * light mode — jemný stredový akcent (biely disk + úzky magenta lem), bez agresívneho haló.
+   */
+  .whatIsYourGoal .swiper-slide-active .goal-content-wrapper::before,
+  .whatKindOfDream .swiper-slide-active .dream-content-wrapper::before {
+    width: 124px !important;
+    height: 124px !important;
+    background:
+      radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 255, 255, 0.94) 0%,
+        rgba(255, 255, 255, 0.72) 40%,
+        rgba(255, 255, 255, 0.22) 58%,
+        transparent 72%
+      ),
+      radial-gradient(
+        circle at 50% 50%,
+        rgba(189, 0, 67, 0.2) 0%,
+        rgba(189, 0, 67, 0.09) 45%,
+        rgba(189, 0, 67, 0.03) 62%,
+        transparent 76%
+      ) !important;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.98),
+      0 0 18px 6px rgba(189, 0, 67, 0.11),
+      0 0 32px 12px rgba(189, 0, 67, 0.05) !important;
+  }
+
+  .whatIsYourGoal .swiper-slide-active .goal-icon-img,
+  .whatKindOfDream .swiper-slide-active .dream-icon-img {
+    filter: brightness(1.04) saturate(1.1) contrast(1.04)
+      drop-shadow(0 0 8px rgba(189, 0, 67, 0.32))
+      drop-shadow(0 0 18px rgba(189, 0, 67, 0.14)) !important;
+  }
+
+  .whatIsYourGoal .swiper-slide-active .goal-icon,
+  .whatKindOfDream .swiper-slide-active .dream-icon {
+    opacity: 1 !important;
+  }
+
+  .submit-layout .submit-footer .submit-description {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .submit-layout .submit-header .submit-buttonPrevious {
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /*
+   * Light mode sheets/dialogs: bright surface + dark text for contrast.
+   */
+  .profileActionsSheet-backdrop,
+  .shareProfileSheet-backdrop,
+  .storePurchaseSheet-backdrop,
+  .paymentSheet-backdrop {
+    background: var(--dh-modal-backdrop) !important;
+  }
+
+  .profileActionsSheet-title,
+  .shareProfileSheet-title,
+  .paymentSheet-title {
+    color: #141414 !important;
+  }
+
+  .storePurchaseSheet-packageName,
+  .paymentSheet-packageName {
+    color: #141414 !important;
+  }
+
+  .storePurchaseSheet-packagePrice,
+  .paymentSheet-packagePrice {
+    color: #ff2c8b !important;
+  }
+
+  .storePurchaseSheet-description {
+    color: rgba(0, 0, 0, 0.68) !important;
+  }
+
+  .paymentSheet-methodBtn {
+    color: #141414 !important;
+    background: #eef0f3 !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .paymentSheet-methodLabel {
+    color: #141414 !important;
+  }
+
+  .paymentSheet-methodSoon {
+    color: rgba(0, 0, 0, 0.48) !important;
+  }
+
+  .paymentSheet-methodBtn--selected {
+    background: rgba(189, 0, 67, 0.14) !important;
+    border-color: #bd0043 !important;
+    color: #3a0a1f !important;
+  }
+
+  .paymentSheet-methodBtn--selected .paymentSheet-methodLabel {
+    color: #3a0a1f !important;
+  }
+
+  .profileActionsSheet,
+  .shareProfileSheet {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.16) !important;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .profileActionsSheet-handle,
+  .shareProfileSheet-handle,
+  .storePurchaseSheet-handle,
+  .paymentSheet-handle {
+    background: rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .storePurchaseSheet,
+  .paymentSheet {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.16) !important;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .storePurchaseSheet-package,
+  .paymentSheet-package {
+    background: #eef0f3 !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .storePurchaseSheet-close,
+  .paymentSheet-close {
+    background: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .storePurchaseSheet-close:hover,
+  .paymentSheet-close:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .storePurchaseSheet-closeIcon,
+  .paymentSheet-closeIcon {
+    filter: brightness(0) opacity(0.55) !important;
+  }
+
+  .shareProfileSheet-platformBtn {
+    background: #eef0f3 !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07) !important;
+  }
+
+  .shareProfileSheet-platformName {
+    color: rgba(0, 0, 0, 0.82) !important;
+  }
+
+  .profileActionsSheet-btn.primary,
+  .profileActionsSheet-btn.tertiary,
+  .profileActionsSheet-btn.secondary,
+  .profileActionsSheet-btn.quaternary,
+  .profileActionsSheet-btn span {
+    color: #141414 !important;
+  }
+
+  .profileActionsSheet-btn.primary {
+    color: #ffffff !important;
+  }
+
+  .profileActionsSheet-btn.tertiary {
+    background: #f4f4f5 !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    color: #1a1a1a !important;
+  }
+
+  .profileActionsSheet-btn,
+  .shareProfileSheet-btn {
+    border-radius: 14px !important;
+  }
+
+  .storePurchaseSheet-cta span,
+  .paymentSheet-cta span {
+    color: #ffffff !important;
+  }
+
+  .shareProfileSheet-btn,
+  .shareProfileSheet-btn span {
+    color: #13376f !important;
+    background: rgba(28, 76, 155, 0.12) !important;
+    border-color: rgba(28, 76, 155, 0.28) !important;
+  }
+
+  .badgeSelector-overlay {
+    background: rgba(0, 0, 0, 0.45) !important;
+  }
+
+  .badgeSelector-drawer {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.16) !important;
+  }
+
+  .badgeSelector-handle {
+    background: rgba(0, 0, 0, 0.24) !important;
+  }
+
+  .badgeSelector-pullHint,
+  .badgeSelector-description {
+    color: rgba(0, 0, 0, 0.72) !important;
+  }
+
+  .badgeSelector-title {
+    color: #141414 !important;
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .badgeSelector-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .badgeSelector-footer {
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Názvy odznakov: farba v BadgeSwiperComponent.vue (unscoped .body--light .badgeSelector-drawer .badgeIconTitle) */
+
+  /* Svetlá mriežka: bledé diamanty (mint / fialová) na bielej ploche — jemná doska + silnejší tieň */
+  .badgeSelector-drawer .badgeIconDiv {
+    padding: 0.45rem 0.35rem 0.25rem !important;
+    border-radius: 0.9rem !important;
+    background: rgba(0, 0, 0, 0.045) !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 2px 10px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .badgeSelector-drawer .badgeIconImg {
+    filter:
+      drop-shadow(0 0 1px rgba(0, 0, 0, 0.32))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.16)) !important;
+  }
+
+  /*
+   * Save badge: .body--light span { color: black } pretláča label v q-btn — vynútiť bielu.
+   */
+  .badgeSelector-saveBtn,
+  .badgeSelector-saveBtn .q-btn__content,
+  .badgeSelector-saveBtn .q-btn__content span,
+  .badgeSelector-saveBtn .block {
+    color: #ffffff !important;
+  }
+
+  /*
+   * Contribute + top-up: svetlý panel v light mode (čitateľný titulok a terciárna akcia).
+   */
+  .contributeSheet-backdrop,
+  .contributeSheet-portal.contributeSheet-backdrop {
+    background: var(--dh-modal-backdrop) !important;
+  }
+
+  .contributeSheet-portal .contributeSheet-inner {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.14) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .contributeSheet-portal .contributeSheet-inner .contributeSheet-handle {
+    background: rgba(0, 0, 0, 0.22) !important;
+  }
+
+  .contributeSheet-portal .contributeSheet-inner .contributeSheet-title {
+    color: #141414 !important;
+  }
+
+  .contributeSheet-portal .contributeSheet-inner .contributeSheet-btn.primary {
+    color: #ffffff !important;
+  }
+
+  .contributeSheet-portal .contributeSheet-inner .contributeSheet-btn.secondary {
+    background: #1a1430 !important;
+    color: #ffffff !important;
+  }
+
+  .contributeSheet-portal .contributeSheet-inner .contributeSheet-btn.tertiary {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #1a1a1a !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .contributeSheet.topUpModal {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.14) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .contributeSheet.topUpModal .contributeSheet-handle {
+    background: rgba(0, 0, 0, 0.22) !important;
+  }
+
+  .contributeSheet.topUpModal .contributeSheet-title {
+    color: #141414 !important;
+  }
+
+  .topUpModal-label {
+    color: rgba(0, 0, 0, 0.72) !important;
+  }
+
+  .topUpModal-balance {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .topUpModal-input .q-field__control {
+    background: #f3f4f6 !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 0.625rem !important;
+  }
+
+  .topUpModal-input .q-field__native {
+    color: #0a0a0a !important;
+  }
+
+  .topUpModal-slider .q-slider__track {
+    background: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .topUpModal-slider .q-slider__track-fill {
+    background: linear-gradient(95deg, #ff007a, #ff8a00) !important;
+  }
+
+  /* Edit My Post — svetlý scroll pod hero; karty a polia ako zvyšok light UI */
+  .postEditPage {
+    .edit-rollup_card {
+      background: #ffffff !important;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      color: #0a0a0a !important;
+    }
+
+    .edit-rollup_header-eyebrow,
+    .edit-rollup_eyebrow {
+      color: rgba(0, 0, 0, 0.52) !important;
+      opacity: 1 !important;
+    }
+
+    .edit-rollup_title {
+      color: #0a0a0a !important;
+    }
+
+    .edit-rollup_text {
+      color: rgba(0, 0, 0, 0.72) !important;
+      opacity: 1 !important;
+    }
+
+    .edit-rollup_list {
+      border-top-color: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .edit-rollup_list-item {
+      color: #0a0a0a !important;
+
+      & + & {
+        border-top-color: rgba(0, 0, 0, 0.08) !important;
+      }
+
+      .q-icon {
+        color: rgba(0, 0, 0, 0.45) !important;
+      }
+    }
+
+    .edit-rollup_header-chevron {
+      color: rgba(0, 0, 0, 0.5) !important;
+      opacity: 1 !important;
+    }
+
+    .section-label,
+    .section-label-sm {
+      color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .eyebrow-label,
+    .tokens-header,
+    .tokens-label,
+    .tokens-funds,
+    .topup-row-overline {
+      color: rgba(0, 0, 0, 0.52) !important;
+      opacity: 1 !important;
+    }
+
+    .post-edit-textarea .q-field__control {
+      background: #f3f4f6 !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .post-edit-textarea .q-field__native,
+    .post-edit-textarea textarea {
+      color: #0a0a0a !important;
+    }
+
+    .about-input .q-field__control {
+      background: #f3f4f6 !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .about-input .q-field__native,
+    .about-input textarea {
+      color: #0a0a0a !important;
+    }
+
+    .topup-card {
+      background: #ffffff !important;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08) !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .topup-row-title,
+    .topup-row-value {
+      color: #1a1a1a !important;
+    }
+
+    .tokens-input .q-field__control {
+      background: rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .tokens-input .q-field__native {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .dhBottomCta-bar {
+    background: linear-gradient(
+      to top,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(248, 248, 250, 1) 55%,
+      rgba(255, 255, 255, 1) 100%
+    ) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .dhBottomCta-btn span {
+    color: #ffffff !important;
+  }
+
+  /* Donor Inspirations — nadpisy a empty copy (scoped white na svetlom pozadí) */
+  .inspiration-page {
+    .inspiration-heading {
+      color: #0a0a0a !important;
+    }
+    .inspiration-empty-title {
+      color: rgba(0, 0, 0, 0.88) !important;
+    }
+    .inspiration-empty-text {
+      color: rgba(0, 0, 0, 0.58) !important;
+    }
+  }
+
+  .storiesComponent {
+    border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* My profile donor tabs — svg a label mimo forced white */
+  .filterTabs {
+    .q-tab:not(.q-tab--active) .q-tab__label {
+      color: rgba(0, 0, 0, 0.58) !important;
+    }
+    .q-tab--active .q-tab__label {
+      color: $primary !important;
+    }
+  }
+
+  .statsTab svg {
+    fill: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .activeStatsTab.statsTab svg {
+    fill: $primary !important;
+  }
+
+  .myProfilePage-error {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    color: #1a1a1a !important;
+  }
+
+  .myProfilePage-errorText {
+    color: rgba(0, 0, 0, 0.62) !important;
+  }
+
+  /* Donor + Donee Search — canvas, pole, výsledky (scoped .search-page ostáva; globál prepíše kontrast) */
+  .search-page {
+    background: var(--dh-page-canvas) !important;
+
+    .search-barDiv .inputSearch {
+      background: var(--dh-search-field-bg) !important;
+      border: 1px solid var(--dh-search-border) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    .search-barDiv .searchbar-Btn {
+      background: var(--dh-float-surface) !important;
+      border: 1px solid var(--dh-float-border) !important;
+      box-shadow: var(--dh-float-shadow) !important;
+    }
+
+    .search-barDiv .searchbar-Btn img {
+      filter: var(--dh-float-icon-filter) !important;
+    }
+
+    .searchIcon {
+      color: var(--dh-search-icon) !important;
+    }
+
+    .searchPage-empty {
+      color: var(--dh-text-muted) !important;
+    }
+
+    .searchPage-resultTitle {
+      color: var(--dh-search-text) !important;
+    }
+
+    .searchPage-resultSnippet {
+      color: var(--dh-text-muted) !important;
+    }
+
+    .searchPage-resultItem {
+      border-bottom-color: var(--dh-divider) !important;
+    }
+
+    .searchPage-sortingContainer {
+      color: var(--dh-search-text) !important;
+    }
+
+    .searchPage-sortingTitle {
+      color: var(--dh-search-text) !important;
+    }
+
+    /* q-input dark + borderless: donútiť svetlé pole a čitateľný text */
+    .inputSearch.q-field--dark .q-field__control:before,
+    .inputSearch.q-field--dark .q-field__control:after {
+      border: none !important;
+    }
+
+    .inputSearch .q-field__native,
+    .inputSearch .q-field__input {
+      color: var(--dh-search-text) !important;
+    }
+
+    .inputSearch .q-field__native::placeholder,
+    .inputSearch input::placeholder {
+      color: var(--dh-search-placeholder) !important;
+      opacity: 1 !important;
+    }
+
+    .inputSearch.q-field--dark .q-field__marginal,
+    .inputSearch .q-field__prepend {
+      color: var(--dh-search-icon) !important;
+    }
+  }
+
+  /* Help (contribute) — texty, ?, spodný bar, toggle okolia */
+  .help-page {
+    .helpPage-privateButtonDiv {
+      color: #1a1a1a !important;
+
+      img {
+        filter: none !important;
+      }
+
+      span {
+        color: #1a1a1a !important;
+      }
+    }
+
+    .helpPage-privateQuestionDiv .questionButton {
+      background: var(--dh-form-aux-btn-bg) !important;
+      border: 1px solid var(--dh-form-aux-btn-border) !important;
+      box-shadow: var(--dh-form-aux-btn-shadow) !important;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      border-radius: 50%;
+    }
+
+    .helpPage-privateQuestionDiv .questionButton img {
+      filter: brightness(0) invert(1) !important;
+    }
+
+    .helpPage-bottomCtaBar {
+      background: var(--dh-help-footer-bg) !important;
+    }
+
+    .helpPage-helpHeading h2 {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .help-page-errorContent {
+    color: #1a1a1a !important;
+
+    h2 {
+      color: #0a0a0a !important;
+    }
+
+    p {
+      color: var(--dh-text-muted) !important;
+      opacity: 1 !important;
+    }
+  }
+
+  /* Segmented toggle — obe polovice čitateľné na svetlom pozadí */
+  .segmented-toggle-btn:not(.active) .segmented-toggle-option-left {
+    color: #ffffff !important;
+  }
+
+  .segmented-toggle-btn:not(.active) .segmented-toggle-option-right {
+    color: rgba(0, 0, 0, 0.82) !important;
+  }
+
+  .segmented-toggle-btn.active .segmented-toggle-option-left {
+    color: rgba(0, 0, 0, 0.82) !important;
+  }
+
+  .segmented-toggle-btn.active .segmented-toggle-option-right {
+    color: #ffffff !important;
+  }
+
+  .donorPosts-integratedChrome.roleChrome-topStack {
+    border-bottom: 1px solid rgba(black, 0.08) !important;
+    box-shadow: 0 1px 0 rgba(black, 0.04) !important;
+  }
+
+  .donorFeed-topControls {
+    border-bottom-color: rgba(black, 0.1) !important;
+  }
+  .donor-tabs {
+    border-bottom-color: rgba(black, 0.1) !important;
+  }
+  .donor-tabs_button:not(.donor-tabs_button--active) {
+    color: rgba(black, 0.52) !important;
+    &:hover {
+      color: rgba(black, 0.78) !important;
+    }
+  }
+  .donor-tabs_button:not(.donor-tabs_button--active) .donor-tabs_icon {
+    filter: brightness(0) opacity(0.5);
+  }
+  .donor-filters_button {
+    color: rgba(black, 0.82) !important;
+    background: rgba(black, 0.06) !important;
+    &:hover {
+      background: rgba(black, 0.1) !important;
+    }
+  }
+  .donor-filters_icon {
+    filter: brightness(0) opacity(0.65) !important;
+    opacity: 1 !important;
+  }
+  .donorPosts-state {
+    color: #555555 !important;
+  }
+  .donorPosts-resetFiltersBtn {
+    background: rgba(black, 0.06) !important;
+    color: rgba(black, 0.88) !important;
+    border-color: rgba(black, 0.14) !important;
+  }
+
+  /* Donor feed post cards — light surface + readable body copy */
+  .postCard {
+    --pc-surface: #ffffff;
+    --pc-border: 1px solid #ececec;
+    --pc-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --pc-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+    --pc-body-title: #1d1d1d;
+    --pc-body-meta: rgba(29, 29, 29, 0.62);
+    --pc-body-preview: rgba(29, 29, 29, 0.72);
+
+    /* Stronger than .body--light h3/span so tokens match design (#1d1d1d / muted meta) */
+    .postCard-title {
+      color: #1d1d1d !important;
+    }
+
+    .postCard-meta span {
+      color: rgba(29, 29, 29, 0.62) !important;
+    }
+
+    .postCard-authorBadge {
+      background: rgba(255, 255, 255, 0.94) !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      backdrop-filter: blur(10px) !important;
+    }
+
+    .postCard-authorName {
+      color: #1d1d1d !important;
+    }
+
+    .postCard-authorBadgeLabel {
+      color: rgba(29, 29, 29, 0.55) !important;
+    }
+
+    .postCard-avatarInitials {
+      color: #1d1d1d !important;
+    }
+
+    .postCard-categoryPill {
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: #1d1d1d !important;
+      border: 1px solid rgba(0, 0, 0, 0.07) !important;
+    }
+
+    /* Soft light fade over image into card (layout unchanged) */
+    .postCard-imageWrapper {
+      position: relative;
+    }
+
+    .postCard-imageWrapper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        to top,
+        rgba(255, 255, 255, 0.38) 0%,
+        rgba(255, 255, 255, 0.12) 28%,
+        rgba(255, 255, 255, 0.04) 48%,
+        rgba(255, 255, 255, 0.01) 62%,
+        transparent 82%
+      );
+    }
+  }
+
+  /* Donee home — section titles + list states */
+  .post-page {
+    .postPage-title {
+      color: #0a0a0a !important;
+    }
+
+    .postPage-header {
+      color: rgba(0, 0, 0, 0.88) !important;
+    }
+
+    .postPage-loading {
+      color: rgba(0, 0, 0, 0.62) !important;
+    }
+
+    .postPage-empty {
+      color: #555555 !important;
+    }
+
+    .postPage-error {
+      color: rgba(180, 40, 40, 0.95) !important;
+    }
+  }
+
+  /* Donee horizontal feed cards — white surface, dark labels, framed image stack */
+  .post-component {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    border: 1px solid #ececec;
+    box-sizing: border-box;
+    background: #f7f7f8;
+  }
+
+  .post-component .postComponent-valueContainer,
+  .post-component .postComponent-categoryContainer {
+    background: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #eeeeee !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .post-component .postComponent-categoryTitle {
+    color: #1d1d1d !important;
+  }
+
+  .post-component .post-component-imageWrapper {
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+
   .badgeGuard,
   .arrowButtonBack {
     filter: invert(100%) !important;
@@ -386,6 +1712,10 @@
     * {
       color: black !important;
     }
+  }
+
+  .dhPageTitle-heading {
+    color: #0a0a0a !important;
   }
 
   // Login Register Layout
@@ -457,9 +1787,22 @@
   .explainText {
     color: #0f0026a0 !important;
   }
-  .swipingIcon,
+  .swipingIcon {
+    filter: brightness(0) opacity(0.55) !important;
+  }
+
   .register-questionButton {
-    filter: invert(100) !important;
+    filter: none !important;
+    background: var(--dh-form-aux-btn-bg) !important;
+    border: 1px solid var(--dh-form-aux-btn-border) !important;
+    box-shadow: var(--dh-form-aux-btn-shadow) !important;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border-radius: 50%;
+
+    img {
+      filter: brightness(0) invert(1) !important;
+    }
   }
 
   // Donee Layout
@@ -469,7 +1812,7 @@
   .submit-buttonPrevious {
     border: 0.15rem solid #0f0026 !important;
     img {
-      filter: invert(100%);
+      filter: brightness(0) opacity(0.65) !important;
     }
   }
   .postCreation-btn {
@@ -497,7 +1840,7 @@
       text-decoration: underline #0f0026 !important;
     }
     img {
-      filter: invert(100%);
+      filter: brightness(0) opacity(0.65) !important;
     }
   }
   .postCreation-addFeatureButton {
@@ -522,7 +1865,7 @@
     background-image: url("/images/Auth/body-light.png") !important;
   }
   .topDream-questionImg {
-    filter: invert(100%);
+    filter: brightness(0) invert(1) !important;
   }
   .userProfile-progressValue {
     color: $primary !important;
@@ -537,7 +1880,7 @@
   }
   .comment-accomplishedButton {
     img {
-      filter: invert(100%);
+      filter: brightness(0) opacity(0.65) !important;
     }
     background: rgba(15, 0, 38, 0.1) !important;
   }
@@ -585,9 +1928,53 @@
   }
 }
 
+/* Donor Filters step 1 — dark theme: blue “swap posts” (no .body--light) */
+body:not(.body--light) .filters-page h1.filters-title.filters-title--swapPosts {
+  color: #6bb3ff !important;
+}
+
+/* Donor feed post cards — dark theme tokens (overridden in .body--light above) */
+.postCard {
+  --pc-surface: linear-gradient(180deg, #17151f 0%, #0d0b13 100%);
+  --pc-border: none;
+  --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --pc-body-title: #ffffff;
+  --pc-body-meta: rgba(255, 255, 255, 0.55);
+  --pc-body-preview: #bbbbbb;
+}
 
 .arrowBtn {
   * {
     width: 1.3rem;
   }
+}
+
+/*
+ * HintBubble (pink gradient) — MUST be last in this file.
+ * Beats nested .body--light { h3, span { color: black !important } } above.
+ * Title is a div.dhHintBubble-title (not h3) so global h3 rule cannot apply.
+ */
+body.body--light .dhHintBubble,
+body.body--light .dhHintBubble .dhHintBubble-content,
+body.body--light .dhHintBubble .dhHintBubble-title,
+body.body--light .dhHintBubble .dhHintBubble-text,
+body.body--light .dhHintBubble p,
+body.body--light .dhHintBubble span,
+body.body--light .post-page .dhHintBubble .dhHintBubble-title,
+body.body--light .post-page .dhHintBubble .dhHintBubble-text,
+body.body--light .donorPosts-emptyHint .dhHintBubble .dhHintBubble-title,
+body.body--light .donorPosts-emptyHint .dhHintBubble .dhHintBubble-text,
+body.body--light .donorPosts-emptyHintBubble .dhHintBubble-title,
+body.body--light .donorPosts-emptyHintBubble .dhHintBubble-text {
+  color: #ffffff !important;
+}
+
+body.body--light .dhHintBubble .dhHintBubble-text,
+body.body--light .dhHintBubble .dhHintBubble-content p {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.body--light .dhHintBubble .dhHintBubble-close {
+  color: #ffffff !important;
 }

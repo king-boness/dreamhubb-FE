@@ -7,7 +7,14 @@
     :class="!(story as any).slides.length ? '' : 'noStoryProfile'"
   >
     <div :class="!(story as any).seen ? 'profile' : 'profile visited'">
-      <img :src="(story as any).userProfileImage" alt="" />
+      <img
+        :src="(story as any).userProfileImage"
+        alt=""
+        width="62"
+        height="62"
+        loading="lazy"
+        decoding="async"
+      />
     </div>
     <div class="title">{{ (story as any).label }}</div>
   </a>
@@ -59,6 +66,7 @@ const setSeen = (index: number) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-shrink: 0;
 }
 .story .profile {
   background: $primary;
@@ -76,11 +84,16 @@ const setSeen = (index: number) => {
 .story .profile img {
   width: 62px;
   height: 62px;
+  min-width: 62px;
+  min-height: 62px;
   border-radius: 50%;
   padding: 0;
   margin: 0;
   border: 2px solid #000;
   box-sizing: content-box;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
 }
 
 .story .title {

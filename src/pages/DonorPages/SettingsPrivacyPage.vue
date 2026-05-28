@@ -83,16 +83,75 @@
         </div>
       </div>
       <div class="pageFooter-div">
-        <q-btn class="cancelButton" @click="$router.go(-1)"> Cancel </q-btn>
+        <q-btn class="cancelButton" :loading="saving" :disable="!hasChanges || saving" @click="handleSave">
+          Save
+        </q-btn>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useAuthStore } from "src/stores/auth";
+import { notifySuccess } from "src/utils/notify";
+
+const PRIVACY_STORAGE_KEY = "dh_privacy_settings";
+
+const authStore = useAuthStore();
 
 const value = ref(false);
 const value2 = ref(false);
+const initialValue = ref(false);
+const initialValue2 = ref(false);
+const saving = ref(false);
+
+const hasChanges = computed(() => value.value !== initialValue.value || value2.value !== initialValue2.value);
+
+onMounted(() => {
+  // Prefer explicit local preference if previously saved on device.
+  const raw = localStorage.getItem(PRIVACY_STORAGE_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as Partial<{ receiveEmailMarketing: boolean; receiveEmailMarketingSecondary: boolean }>;
+      value.value = !!parsed.receiveEmailMarketing;
+      value2.value = !!parsed.receiveEmailMarketingSecondary;
+    } catch {
+      // ignore invalid local data
+    }
+  } else {
+    // Fallback to user payload if backend already exposes these flags.
+    const user = authStore.user as (typeof authStore.user & {
+      receive_email_marketing?: boolean;
+      receive_email_marketing_secondary?: boolean;
+    }) | null;
+    value.value = !!user?.receive_email_marketing;
+    value2.value = !!user?.receive_email_marketing_secondary;
+  }
+
+  initialValue.value = value.value;
+  initialValue2.value = value2.value;
+});
+
+const handleSave = async () => {
+  if (saving.value || !hasChanges.value) return;
+  saving.value = true;
+
+  try {
+    localStorage.setItem(
+      PRIVACY_STORAGE_KEY,
+      JSON.stringify({
+        receiveEmailMarketing: value.value,
+        receiveEmailMarketingSecondary: value2.value
+      })
+    );
+
+    initialValue.value = value.value;
+    initialValue2.value = value2.value;
+    notifySuccess("common.success.saved", "Privacy settings saved", { position: "top" });
+  } finally {
+    saving.value = false;
+  }
+};
 </script>
 <style scoped lang="scss">
 .settingsPrivacy-page {

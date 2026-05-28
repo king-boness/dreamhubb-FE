@@ -17,11 +17,21 @@
         !postDetail &&
         !(route.meta?.hideMainHeader === true)
       "
-      :class="{ 'navbar--hidden': !showNavbar }"
+      :class="{
+        'navbar--hidden': !showNavbar,
+        'dh-use-transform-chrome-hide': isDoneeSettingsTreeRoute
+      }"
       class="navbar"
     />
-    <q-page-container>
-      <RouterView />
+    <q-page-container
+      :class="{
+        'post-creation-flow': isPostCreationFlow,
+        'post-creation-picker': isPostCreationPicker,
+        'role-has-custom-header': isHeaderVisible,
+        'dh-settings-scroll-root': isDoneeSettingsTreeRoute
+      }"
+    >
+      <router-view :key="route.name?.toString() ?? route.fullPath" />
     </q-page-container>
     <FooterDoneeComponent
       v-if="
@@ -48,8 +58,9 @@ import HeaderComponent from "src/components/doneeComponents/HeaderDoneeComponent
 import FooterDoneeComponent from "src/components/doneeComponents/FooterDoneeComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
 import { useRoute } from "vue-router";
-import { watch, ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { watch, ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useAuthStore } from "src/stores/auth";
+import { useRouteSettlingBodyClass } from "src/composables/useRouteSettling";
 
 // Use MutationObserver to watch for body class changes
 let observer: MutationObserver | null = null;
@@ -90,6 +101,8 @@ watch(route, () => {
 
 const authStore = useAuthStore();
 
+useRouteSettlingBodyClass();
+
 // Token balance - must match DonorMainLayout (fallback to 50 after migration)
 const tokenBalance = computed(() => authStore.user?.tokens ?? 50);
 
@@ -105,6 +118,35 @@ const isDonorRoute = computed(() => {
   return routeName.startsWith("donor-");
 });
 
+// Post-creation flow: goal picker, category picker, post creation page – single class for layout fixes
+const isPostCreationFlow = computed(() => {
+  const name = route.name?.toString() || "";
+  return (
+    name === "submit-postCreation" ||
+    name === "donee-postCreation-goal" ||
+    name === "donee-postCreation-category"
+  );
+});
+
+// Picker-only screens (goal/category): fix viewport height + no page scroll / rubber-band; form page (submit-postCreation) keeps scroll
+const isPostCreationPicker = computed(() => {
+  const name = route.name?.toString() || "";
+  return name === "donee-postCreation-goal" || name === "donee-postCreation-category";
+});
+
+// Header visible = same condition as HeaderComponent v-if; used to avoid duplicate safe-area on q-page-container (header already has iphoneDevice padding)
+const isHeaderVisible = computed(() => {
+  const name = route.name?.toString() || "";
+  return (
+    route.name !== "donee-post-detail" &&
+    route.name !== "donee-search" &&
+    route.name !== "donee-help" &&
+    !name.startsWith("donee-onBoarding") &&
+    !name.startsWith("submit") &&
+    route.meta?.hideMainHeader !== true
+  );
+});
+
 // Check badge drawer state
 const checkBadgeDrawerState = () => {
   isBadgeDrawerOpen.value = document.body.classList.contains("badge-drawer-open");
@@ -118,6 +160,11 @@ const checkBadgeDrawerState = () => {
   }
   // Footer is hidden via CSS class when badge-drawer-open is present
 };
+
+const isDoneeSettingsTreeRoute = computed(() => {
+  const n = route.name?.toString() || "";
+  return n === "donee-settings" || n.startsWith("donee-settings-");
+});
 
 onMounted(() => {
   window.addEventListener("scroll", onScroll);
@@ -175,6 +222,20 @@ const checkBodyClass = () => {
   isBodyLight.value = document.body.classList.contains("body--light");
 };
 
+const DONEE_MAIN_TAB_ROUTES = new Set(["donee-posts", "donee-inspirations", "donee-myprofile"]);
+watch(
+  () => route.name,
+  (name) => {
+    const n = name?.toString() || "";
+    if (!DONEE_MAIN_TAB_ROUTES.has(n)) return;
+    showNavbar.value = true;
+    nextTick(() => {
+      lastScrollPosition.value =
+        window.scrollY || document.documentElement.scrollTop || 0;
+    });
+  }
+);
+
 onMounted(async () => {
   // Fetch user data to ensure tokens are loaded
   if (authStore.isAuthenticated && !authStore.user) {
@@ -196,11 +257,21 @@ onMounted(async () => {
   // Watch for class changes on body element
   observer = new MutationObserver(() => {
     checkBadgeDrawerState();
+    checkBodyClass();
   });
   observer.observe(document.body, {
     attributes: true,
     attributeFilter: ["class"]
   });
+
+  watch(isSwitchingRole, (active) => {
+    if (active) {
+      document.body.classList.add("dh-role-switching");
+    } else {
+      document.body.classList.remove("dh-role-switching");
+    }
+  });
+
   // Watch for route changes to detect role switching
   watch(route, (newRoute, oldRoute) => {
     const newRouteName = newRoute.name?.toString() || "";
@@ -216,169 +287,12 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onScroll);
   if (isMobileDevice) {
     window.removeEventListener("resize", handleResize);
   }
-  checkBodyClass();
   if (observer) {
     observer.disconnect();
   }
 });
 </script>
-
-<style lang="scss">
-.navbar--hidden {
-  box-shadow: none;
-  transform: translate3d(0, -100%, 0);
-}
-.footer--hidden {
-  box-shadow: none;
-  // Move the entire footer (including FAB) fully outside the viewport when hidden
-  transform: translate3d(0, 160%, 0);
-}
-
-// Hide footer when splash screen is active
-body.splash-active .footer {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-.splash-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important; max-width: 100%;
-  height: 100vh !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  z-index: 99999 !important;
-  overflow: hidden !important;
-}
-
-// Remove padding from q-layout when splash is active
-body:has(.splash-overlay) .q-layout {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-// Ensure body and html have no padding/margin when splash is active
-body:has(.splash-overlay),
-html:has(.splash-overlay) {
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  width: 100% !important; max-width: 100%;
-  height: 100vh !important;
-}
-
-// Ensure splash overlay covers entire viewport
-body:has(.splash-overlay) {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-}
-.navbar {
-  transition: transform 0.25s ease;
-}
-
-.footer.navbar {
-  transition: transform 0.25s ease;
-}
-
-// Quasar overrides
-.q-header {
-  transition: transform 0.3s ease;
-}
-
-:deep(.q-page-container) {
-  padding-bottom: 0 !important;
-}
-
-.LayoutBackground {
-  background-image: url("/images/Auth/bg-explain.png") !important;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
-}
-
-// Aggressive footer button styling to remove white squares
-.footer {
-  position: fixed !important;
-  bottom: -4px !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 2000 !important; // Higher z-index to ensure footer is above content
-
-  :deep(.button-footer) {
-    background: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    border-width: 0 !important;
-    outline: none !important;
-
-    &::before,
-    &::after {
-      display: none !important;
-      content: none !important;
-      box-shadow: none !important;
-      border: none !important;
-      border-width: 0 !important;
-      background: none !important;
-      background-color: transparent !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-
-    :deep(.q-btn__wrapper) {
-      background: transparent !important;
-      background-color: transparent !important;
-      box-shadow: none !important;
-      border: none !important;
-      border-width: 0 !important;
-      outline: none !important;
-
-      &::before,
-      &::after {
-        display: none !important;
-        content: none !important;
-        box-shadow: none !important;
-        border: none !important;
-        border-width: 0 !important;
-        background: none !important;
-        background-color: transparent !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-      }
-    }
-
-    :deep(.q-btn__content) {
-      background: transparent !important;
-      background-color: transparent !important;
-      box-shadow: none !important;
-      border: none !important;
-      border-width: 0 !important;
-      outline: none !important;
-
-      &::before,
-      &::after {
-        display: none !important;
-        content: none !important;
-        box-shadow: none !important;
-        border: none !important;
-        border-width: 0 !important;
-        background: none !important;
-        background-color: transparent !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-      }
-    }
-  }
-}
-</style>

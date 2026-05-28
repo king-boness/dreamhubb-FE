@@ -1,0 +1,33 @@
+/**
+ * Shared vertical layout for post-creation roller pickers
+ * (WhatIsYourGoal + WhatKindOfDream, non–filter-mode only).
+ * Reference: "the post will be about" (PostGoalPickerPage offsets).
+ */
+
+$post-creation-picker-center-offset-y: -17px;
+$post-creation-picker-axis-offset-y: -19px;
+
+.whatIsYourGoal:not(.whatIsYourGoal--filter-mode),
+.whatKindOfDream:not(.whatKindOfDream--filter-mode) {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.whatIsYourGoal:not(.whatIsYourGoal--filter-mode) .goal-helpBtn,
+.whatKindOfDream:not(.whatKindOfDream--filter-mode) .dream-helpBtn {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.whatIsYourGoal:not(.whatIsYourGoal--filter-mode) .goal-bottom,
+.whatKindOfDream:not(.whatKindOfDream--filter-mode) .dream-bottom {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.whatIsYourGoal:not(.whatIsYourGoal--filter-mode) .goal-instruction,
+.whatKindOfDream:not(.whatKindOfDream--filter-mode) .dream-instruction {
+  margin-bottom: 14px;
+}

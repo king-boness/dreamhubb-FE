@@ -71,17 +71,23 @@ export interface Notification{
   goalName:string
   type:string
 }
-export interface Inspiration{
-  user:{
-    userName:string,
-    userPicture:string,
-  }
-  description:string
-  inspirationInfo:{
-    dateCreated:string
-    likes:number
-    inspirationImage: string,
-  }
+export interface Inspiration {
+  /** Stable id for list keys & local persistence */
+  id: string;
+  user: {
+    userName: string;
+    userPicture: string;
+    /** When set, profile chip opens public donor profile */
+    userId?: number;
+  };
+  description: string;
+  inspirationInfo: {
+    dateCreated: string;
+    likes: number;
+    inspirationImage: string;
+  };
+  /** Donor: opens post detail when set. Omit / null = launch-safe “no linked post”. */
+  linkedPostId?: number | null;
 }
 
 export interface PriceCards{

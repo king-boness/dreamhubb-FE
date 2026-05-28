@@ -157,23 +157,44 @@ watch(isOpen, (open) => {
 .image-preview-card {
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   flex-direction: column;
   position: relative;
+  animation: imagePreviewFadeIn 0.22s ease-out;
+}
+
+@keyframes imagePreviewFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .image-preview-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  right: calc(env(safe-area-inset-right, 0px) + 1rem);
   z-index: 10;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  backdrop-filter: blur(8px);
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  background: rgba(0, 0, 0, 0.55) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+
+  :deep(.q-icon) {
+    color: #ffffff !important;
+    font-size: 1.35rem;
+  }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.72) !important;
   }
 }
 
@@ -223,7 +244,12 @@ watch(isOpen, (open) => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 2rem;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 4.5rem)
+    calc(env(safe-area-inset-right, 0px) + 1.25rem)
+    calc(env(safe-area-inset-bottom, 0px) + 1.25rem)
+    calc(env(safe-area-inset-left, 0px) + 1.25rem);
+  box-sizing: border-box;
 }
 
 .image-preview-carousel {
@@ -247,6 +273,16 @@ watch(isOpen, (open) => {
   object-fit: contain;
   user-select: none;
   -webkit-user-select: none;
-  border-radius: 8px; // Match profile photo lightbox border-radius
+  border-radius: 0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+</style>
+
+<style lang="scss">
+/* Light app global h3/span rules must not wash out viewer chrome */
+.body--light .image-preview-close,
+.body--light .image-preview-close .q-icon,
+.body--light .image-preview-close .q-btn__content {
+  color: #ffffff !important;
 }
 </style>

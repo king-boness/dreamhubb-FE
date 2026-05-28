@@ -457,6 +457,33 @@ const routeCheck = (name: string) => {
   .appSettings-content {
     border-bottom: 0.1rem solid rgba(0, 0, 0, 0.348) !important;
   }
+
+  .appSettings .appSettings-comingSoon {
+    color: rgba(0, 0, 0, 0.58) !important;
+  }
+
+  .appSettings .acccoutSettings-div .appSettings-title {
+    color: #1a1a1a !important;
+  }
+
+  .appSettings .appSettings-content--disabled .appSettings-name {
+    color: rgba(0, 0, 0, 0.52) !important;
+  }
+
+  /* Menu row labels beat `.appSettings .appSettings-name { color: white }` specificity */
+  .appSettings .appSettings-content .appSettings-name,
+  .appSettings .screenMode-container > .appSettings-name {
+    color: #1a1a1a !important;
+  }
+
+  .appSettings .name-toggle-container :deep(.q-btn:not(.q-btn--active)) {
+    color: rgba(0, 0, 0, 0.62) !important;
+  }
+
+  .appSettings .name-toggle-container :deep(.q-btn.q-btn--active) {
+    color: #ffffff !important;
+  }
+
   .btn-container {
     border: 0.1rem solid rgba(119, 0, 0, 0.412);
     background: linear-gradient(

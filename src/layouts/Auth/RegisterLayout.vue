@@ -66,20 +66,20 @@
   </q-layout>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import RegistrationPage1 from "src/pages/Auth/Registration/RegistrationPage1.vue";
 import RegistrationPage4 from "src/pages/Auth/Registration/RegistrationPage4.vue";
 import RegistrationPage5 from "src/pages/Auth/Registration/RegistrationPage5.vue";
-import { useApiCallStore } from "src/stores/api-calls-store";
+import { api } from "boot/axios";
 import { notifyError } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { API_BASE_SOURCE, API_BASE_URL } from "src/config/apiBase";
 
 const horiz = ref(false);
 const { t } = useI18n();
-const apiCalls = useApiCallStore();
 const router = useRouter();
 const registrationIndex = ref(1);
 
@@ -138,44 +138,92 @@ const changeDetails: (
   registrationInfo.image = image;
 };
 
+const summarizeBodyPreview = (value: unknown) => {
+  if (!value || typeof value !== "object") return value;
+  const rec = value as Record<string, unknown>;
+  return {
+    status: rec.status,
+    message: rec.message,
+    errorKeys: rec.errors && typeof rec.errors === "object" ? Object.keys(rec.errors as Record<string, unknown>) : undefined
+  };
+};
+
+onMounted(() => {
+  console.info("[DH-REGISTER-DIAG]", "mount", {
+    resolvedApiBase: API_BASE_URL || "(empty)",
+    resolvedApiBaseSource: API_BASE_SOURCE,
+    axiosDefaultBaseURL: api.defaults.baseURL ?? "(empty)",
+    mode: import.meta.env.MODE,
+    href: typeof window !== "undefined" ? window.location.href : "",
+    navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null
+  });
+});
+
 const register = async () => {
-  const form = new FormData();
-  form.append("userFirstName", "jozko");
-  form.append("userLastName", "ferko");
-  form.append("userName", registrationInfo.username);
-  form.append("userEmail", registrationInfo.email);
-  form.append("userGender", registrationInfo.gender);
-  form.append("userBirthDate", registrationInfo.birthDate);
-  form.append("userPassword", registrationInfo.password);
-  form.append("userSide", registrationInfo.side);
-  form.append("userGoal", "goal");
-  form.append("userDream", "dream");
-  form.append("userCountry", registrationInfo.country);
-  form.append("userState", registrationInfo.state);
-  form.append("userCity", registrationInfo.city);
-  form.append("file", registrationInfo.image);
-  await apiCalls
-    .register(form)
-    .then(() => {
-      // Success handled by redirect, no toast needed
-      return router.push({ name: "login" });
-    })
-    .catch((err) => {
-      const status: number | undefined = err?.response?.status;
-      if (status === 406) {
-        // Username already exists (safe, localized)
-        notifyError({
-          kind: "validation",
-          status,
-          messageKey: "registrationUsernameExists",
-          fallbackMessage: t("registrationUsernameExists"),
-          retryable: false
-        });
-        return;
-      }
-      // Fallback: map common network/offline/timeout/5xx to safe texts
-      notifyError(mapAxiosErrorToDhError(err));
+  const payload = {
+    username: registrationInfo.username,
+    email: registrationInfo.email,
+    password: registrationInfo.password,
+    // BE currently validates only password, but this keeps parity with modern FE flows.
+    password_confirmation: registrationInfo.passwordConfirm,
+    date_birth: registrationInfo.birthDate,
+    gender: registrationInfo.gender,
+    // Legacy register layout captures only city/state/country names; IDs are required by BE.
+    // Send parsed numeric values if present, otherwise null (BE returns validation errors).
+    location_country_id: Number(registrationInfo.country) || null,
+    location_continent_id: Number(registrationInfo.state) || null,
+    location_city_id: Number(registrationInfo.city) || null
+  };
+
+  const resolvedBase = String(api.defaults.baseURL || "").replace(/\/$/, "");
+  const requestUrl = `${resolvedBase}/register`;
+  console.info("[DH-REGISTER-DIAG]", "submit.start", {
+    requestUrl,
+    method: "post",
+    payloadKeys: Object.keys(payload),
+    payloadLocationPreview: {
+      location_country_id: payload.location_country_id,
+      location_continent_id: payload.location_continent_id,
+      location_city_id: payload.location_city_id
+    },
+    navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null
+  });
+
+  try {
+    const response = await api.post("/register", payload);
+    console.info("[DH-REGISTER-DIAG]", "submit.success", {
+      status: response.status,
+      bodyPreview: summarizeBodyPreview(response.data)
     });
+    // Success handled by redirect, no toast needed
+    await router.push({ name: "login" });
+  } catch (err: unknown) {
+    const status: number | undefined = (err as { response?: { status?: number } })?.response?.status;
+    const mapped = mapAxiosErrorToDhError(err);
+    console.info("[DH-REGISTER-DIAG]", "submit.error", {
+      status,
+      code: (err as { code?: string })?.code,
+      message: (err as { message?: string })?.message,
+      mappedKind: mapped.kind,
+      mappedAsOffline: mapped.kind === "offline",
+      navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+      bodyPreview: summarizeBodyPreview((err as { response?: { data?: unknown } })?.response?.data)
+    });
+
+    if (status === 406) {
+      notifyError({
+        kind: "validation",
+        status,
+        messageKey: "registrationUsernameExists",
+        fallbackMessage: t("registrationUsernameExists"),
+        retryable: false
+      });
+      return;
+    }
+
+    // Fallback: map common network/offline/timeout/5xx to safe texts
+    notifyError(mapped);
+  }
 };
 
 const comps = [
@@ -275,11 +323,10 @@ const previousRegister = () => {
 .q-btn::before {
   box-shadow: none;
 }
+/* Background from global app (iosSafeArea.scss) */
 .LayoutBackground {
-  background-image: url("/images/Auth/bg-explain.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 </style>
 <style scoped>

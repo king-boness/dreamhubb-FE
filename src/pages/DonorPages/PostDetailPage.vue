@@ -92,6 +92,39 @@
         </div>
       </div>
 
+    <!-- Light mode: meta na svetlej karte pod hero (dark text); v dark mode skryté cez CSS -->
+    <div
+      v-if="post"
+      class="postDetail-belowHeroMeta"
+      aria-label="Post metadata"
+    >
+      <div class="postDetail-belowHeroMeta-inner">
+        <div class="postDetail-belowHeroMeta-item">
+          <q-icon
+            class="postDetail-belowHeroMeta-icon"
+            :name="'img:/assets/icons/ui/icon-date.svg'"
+          />
+          <span>{{ displayDate }}</span>
+        </div>
+        <div class="postDetail-belowHeroMeta-sep" aria-hidden="true" />
+        <div class="postDetail-belowHeroMeta-item">
+          <q-icon
+            class="postDetail-belowHeroMeta-icon"
+            :name="'img:/assets/icons/ui/icon-location.svg'"
+          />
+          <span>{{ displayLocation }}</span>
+        </div>
+        <div class="postDetail-belowHeroMeta-sep" aria-hidden="true" />
+        <div class="postDetail-belowHeroMeta-item">
+          <q-icon
+            class="postDetail-belowHeroMeta-icon"
+            :name="'img:/assets/icons/post/icon-comment.svg'"
+          />
+          <span>{{ commentsCount ?? 0 }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Rest of content inside postDetail-inner -->
     <div class="postDetail-inner">
 
@@ -214,40 +247,45 @@
 
       </div>
     </div>
-    <transition name="sheet-fade">
-      <div
-        v-if="isContributeSheetOpen"
-        class="contributeSheet-backdrop"
-        @click.self="closeContributeSheet"
-      >
+    <!-- Teleport to body so position:fixed is relative to viewport (layout/transform ancestors would break it on iOS) -->
+    <Teleport to="body">
+      <transition name="sheet-fade">
         <div
-          class="contributeSheet"
-          :class="{ dragging: contributeIsDragging }"
-          :style="{ transform: `translateY(${contributeDragOffset}px)` }"
-          @touchstart.passive="onContributeTouchStart"
-          @touchmove.passive="onContributeTouchMove"
-          @touchend.passive="onContributeTouchEnd"
-          @mousedown="onContributeMouseDown"
+          v-if="isContributeSheetOpen"
+          class="contributeSheet-backdrop contributeSheet-portal"
+          @click.self="closeContributeSheet"
         >
-          <div class="contributeSheet-handle"></div>
-          <h2 class="contributeSheet-title">How do you want to contribute?</h2>
+          <div class="contributeSheet">
+            <div
+              class="contributeSheet-inner"
+              :class="{ dragging: contributeIsDragging }"
+              :style="{ transform: `translateY(${contributeDragOffset}px)` }"
+              @touchstart.passive="onContributeTouchStart"
+              @touchmove.passive="onContributeTouchMove"
+              @touchend.passive="onContributeTouchEnd"
+              @mousedown="onContributeMouseDown"
+            >
+              <div class="contributeSheet-handle"></div>
+              <h2 class="contributeSheet-title">How do you want to contribute?</h2>
 
-          <button class="contributeSheet-btn primary" @click="onContributeOption('accomplish')">
-            ACCOMPLISH DREAM
-          </button>
-          <button class="contributeSheet-btn secondary" @click="onContributeOption('help')">
-            HELP TO FULFILL
-          </button>
-          <button
-            class="contributeSheet-btn tertiary"
-            :disabled="postsStore.donateLoading"
-            @click="openTopUpModal"
-          >
-            {{ postsStore.donateLoading ? t("processing") : t("topUpThePost") }}
-          </button>
+              <button class="contributeSheet-btn primary" @click="onContributeOption('accomplish')">
+                ACCOMPLISH DREAM
+              </button>
+              <button class="contributeSheet-btn secondary" @click="onContributeOption('help')">
+                HELP TO FULFILL
+              </button>
+              <button
+                class="contributeSheet-btn tertiary"
+                :disabled="postsStore.donateLoading"
+                @click="openTopUpModal"
+              >
+                {{ postsStore.donateLoading ? t("processing") : t("topUpThePost") }}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
 
     <!-- Image Preview Modal -->
     <ImagePreviewModal
@@ -428,15 +466,10 @@ const emit = defineEmits<{
   (e: "open-comments-thread", payload: { postId: number | string }): void;
 }>();
 
-type ScrollEventTarget = Window | HTMLElement;
-
 const isLiked = ref(false);
 const likesCount = ref<number | null>(null);
 const isSaved = ref(false);
 const commentsCount = ref<number | null>(null);
-const scrollY = ref(0);
-const scrollTarget = ref<ScrollEventTarget | null>(null);
-const cleanupFns: Array<() => void> = [];
 const isContributeSheetOpen = ref(false);
 const isLightboxOpen = ref(false);
 const lightboxInitialIndex = ref(0);
@@ -457,49 +490,16 @@ const topUpTouchStartY = ref<number | null>(null);
 const topUpDragOffset = ref(0);
 const topUpIsDragging = ref(false);
 
-const readScrollPosition = () => {
-  // Always use window.scrollY for consistency with Quasar QLayout
-  return window.scrollY || document.documentElement?.scrollTop || document.body?.scrollTop || 0;
-};
-
-const handleScroll = () => {
-  const newScrollY = readScrollPosition();
-  scrollY.value = newScrollY;
-  // Debug: log scroll position to verify it's working
-  if (newScrollY > 0 && newScrollY % 50 === 0) {
-    // Scroll position tracking (debug only in development)
-    if (import.meta.env.DEV) {
-      console.debug("[PostDetail] Scroll position:", newScrollY);
-    }
+/** Po návrate z feedu môže byť window scroll > 0; pred prvým vykreslením hero zarovnať hore. */
+const resetHeroScrollState = () => {
+  try {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  } catch {
+    window.scrollTo(0, 0);
   }
 };
 
-const attachScrollListener = (target: ScrollEventTarget) => {
-  target.addEventListener("scroll", handleScroll, { passive: true });
-  cleanupFns.push(() => target.removeEventListener("scroll", handleScroll));
-};
-
-const heroStyle = computed(() => {
-  const maxBlur = 14;
-  const maxTranslate = 40;
-  const maxScroll = 400; // Increased for smoother, more gradual blur
-  const progress = Math.min(scrollY.value / maxScroll, 1);
-
-  const styles = {
-    filter: `blur(${progress * maxBlur}px)`,
-    transform: `translateY(${-progress * maxTranslate}px)`
-  };
-
-  // Debug: log computed style when scroll changes significantly
-  if (progress > 0 && scrollY.value % 100 === 0) {
-    // Hero style computed (debug only in development)
-    if (import.meta.env.DEV) {
-      console.debug("[PostDetail] heroStyle progress:", progress.toFixed(2));
-    }
-  }
-
-  return styles;
-});
+const heroStyle = computed(() => ({}));
 
 // Computed properties from store
 const post = computed(() => postsStore.currentPost);
@@ -726,10 +726,28 @@ watch(
   }
 );
 
+watch(
+  () => route.params.id,
+  () => {
+    resetHeroScrollState();
+  }
+);
+
+// Sync body class so DonorMainLayout can hide footer when contribute/top-up sheet is open
+watch(
+  [isContributeSheetOpen, isTopUpModalOpen],
+  ([contribute, topUp]) => {
+    if (contribute || topUp) {
+      document.body.classList.add("bottom-sheet-open");
+    } else {
+      document.body.classList.remove("bottom-sheet-open");
+    }
+  },
+  { immediate: true }
+);
+
 // Lifecycle hooks
 onMounted(async () => {
-  // keep production console clean
-
   // Clear any existing error when mounting
   clearDonateError();
 
@@ -755,30 +773,14 @@ onMounted(async () => {
     }
   }
 
-  // Always use window as scroll target for Quasar QLayout compatibility
-  scrollTarget.value = window;
-  // no logs
-
-  attachScrollListener(window);
-  handleScroll();
+  resetHeroScrollState();
 });
 
 onBeforeUnmount(() => {
-  // no logs
+  document.body.classList.remove("bottom-sheet-open");
 
   // Clear error message and timeout
   clearDonateError();
-
-  // Run cleanup functions
-  cleanupFns.forEach((fn) => {
-    try {
-      fn();
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.debug("[PostDetail] Error in cleanup function:", error);
-      }
-    }
-  });
 });
 
 const openLightbox = (imageIndex?: number) => {
@@ -1002,11 +1004,13 @@ const closeContributeSheet = () => {
 
 // Top Up Modal functions
 const openTopUpModal = () => {
-  // Get user's token balance
-  const userTokens = authStore.user?.tokens ?? 0;
-  // Set default value: min(10, maxTokens)
-  selectedTokens.value = Math.min(10, Math.max(1, userTokens));
-  isTopUpModalOpen.value = true;
+  // BUG 3: close contribute sheet first so top-up modal is on top and visible
+  closeContributeSheet();
+  nextTick().then(() => {
+    const userTokens = authStore.user?.tokens ?? 0;
+    selectedTokens.value = Math.min(10, Math.max(1, userTokens));
+    isTopUpModalOpen.value = true;
+  });
 };
 
 const closeTopUpModal = () => {

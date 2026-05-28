@@ -1,7 +1,10 @@
 <template>
   <div class="post-page">
     <!-- First Post Hint Bubble -->
-    <div v-if="showFirstPostHint && !isFirstPostHintTemporarilyHidden" class="postPage-firstPostHint">
+    <div
+      v-if="route.name === 'donee-posts' && firstPostHintVisible && !isFirstPostHintTemporarilyHidden"
+      class="postPage-firstPostHint"
+    >
       <HintBubble
         title="Start your journey!"
         text="Create your first dream, problem or idea and share it with the world."
@@ -148,6 +151,8 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onActivated, watch, onBeforeUnmount } from "vue";
+import { useRoute } from "vue-router";
+import { useDeferredOverlay } from "src/composables/useDeferredOverlay";
 import { useI18n } from "vue-i18n";
 import { CarouselPost, Post } from "src/components/models";
 import PostComponent from "src/components/doneeComponents/PostComponent.vue";
@@ -158,6 +163,7 @@ import SegmentedToggle from "src/components/common/SegmentedToggle.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 
 const { t, locale } = useI18n();
+const route = useRoute();
 
 // Reactive state for dismissed hint
 const hintDismissed = ref(false);
@@ -334,6 +340,10 @@ const hasAnyPosts = computed(() => {
 
 // Check if first post hint should be shown
 const showFirstPostHint = computed(() => {
+  if (route.name !== "donee-posts") {
+    return false;
+  }
+
   // Check if hint was dismissed (reactive state or localStorage)
   if (hintDismissed.value) {
     return false;
@@ -360,6 +370,12 @@ const showFirstPostHint = computed(() => {
   }
 
   return true;
+});
+
+const { visible: firstPostHintVisible } = useDeferredOverlay(showFirstPostHint, {
+  routeName: "donee-posts",
+  requiredSide: "donee",
+  minDelayMs: 380
 });
 
 // Dismiss first post hint
@@ -447,7 +463,7 @@ onActivated(async () => {
 <style scoped lang="scss">
 .post-page {
   .postPage-carouselContainer {
-    margin: 1.3rem 0;
+    margin: 0 0 0.7rem;
     image-rendering: auto;
     .postPage-carousel {
       background-color: rgba(34, 0, 113, 0.174);
@@ -485,7 +501,7 @@ onActivated(async () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 18px;
+    margin-top: 2px;
     margin-bottom: 22px;
     padding: 0 1.2rem;
     width: 100%;

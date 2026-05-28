@@ -3,6 +3,8 @@
     :model-value="selectedGoal"
     @update:model-value="selectedGoal = $event"
     :progress="30"
+    :center-offset-y="-17"
+    :roller-axis-offset-y="-19"
     title="the post will be about"
     next-button-label="NEXT STEP"
     @next="handleNext"
@@ -138,7 +140,3 @@ const handleBack = () => {
   router.push({ name: "donee-posts" });
 };
 </script>
-
-<style lang="scss" scoped>
-// Styles are handled by WhatIsYourGoal component
-</style>

@@ -1,16 +1,22 @@
+/* Unified app background (iosSafeArea.scss) */
 .postDetail {
   min-height: 100vh;
   display: flex;
   flex-direction: column; // Stack hero and content vertically
   justify-content: flex-start;
   padding: 0 0 4rem;
-  background: radial-gradient(ellipse at top, #12192f 0, #050710 60%, #020307 100%);
+  background: transparent;
 
   .postDetail-inner {
     width: 100%;
     max-width: 390px;
     margin: 0 auto;
     padding: 0 16px;
+  }
+
+  /* Meta karta pod hero: default skrytá, v light mode zapína sa v _darkMode.scss */
+  .postDetail-belowHeroMeta {
+    display: none;
   }
 
   /* HEADER IMAGE / SLIDER - Hero Card (Full-bleed) */
@@ -26,7 +32,8 @@
     border-radius: 0 0 24px 24px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
     margin-bottom: 0;
-    margin-top: 0; // Ensure no top margin
+    margin-top: 0;
+    height: 360px;
 
     // Ensure PostHeader component fits within postDetailBg
     :deep(.post-header) {
@@ -37,6 +44,11 @@
         width: 100%;
         height: 100%;
         margin-bottom: 0;
+      }
+
+      .post-header-imageWrapper {
+        top: 0;
+        height: 100%;
       }
     }
 
@@ -237,16 +249,16 @@
 
     .postDetail-blurContainer {
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 175px;
+      inset: 0;
+      height: auto;
       border-radius: 0 0 24px 24px;
       background: linear-gradient(
-        to bottom,
-        rgba(1, 3, 16, 0) 0%,
-        rgba(1, 3, 16, 0.9) 60%,
-        rgba(1, 3, 16, 1) 100%
+        to top,
+        rgba(1, 3, 16, 0.88) 0%,
+        rgba(1, 3, 16, 0.5) 22%,
+        rgba(1, 3, 16, 0.18) 42%,
+        rgba(1, 3, 16, 0.06) 58%,
+        rgba(1, 3, 16, 0) 78%
       );
       pointer-events: none;
       z-index: 1;
@@ -598,6 +610,7 @@
     padding: 0;
     margin-top: 24px;
 
+    /* Contribute button: in normal flow (not fixed). Fixed bottom is only the contribute sheet (.contributeSheet) with HELP TO FULFILL. */
     .postCTA {
       margin-top: 1.25rem;
       margin-bottom: 0.5rem;
@@ -831,12 +844,20 @@
     z-index: 40;
   }
 
+  /* Bottom CTA bar for contribute flow (HELP TO FULFILL, ACCOMPLISH DREAM, etc.) – fixed to viewport bottom */
   .contributeSheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 41;
     width: 100%;
     max-width: 420px;
+    margin: 0 auto;
     background: rgba(5, 3, 11, 0.96);
     border-radius: 28px 28px 0 0;
     padding: 1.3rem 1.5rem 2rem;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(14px);
     transition: transform 0.2s ease-out;
@@ -1108,7 +1129,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: radial-gradient(ellipse at top, #12192f 0, #050710 60%, #020307 100%);
+  background: transparent;
 }
 
 .postDetail-errorContent {
@@ -1193,4 +1214,105 @@
       background: rgba(255, 255, 255, 0.1);
     }
   }
+}
+
+/* Contribute sheet when teleported to body – same styles so position:fixed is relative to viewport (avoids layout/transform breaking it on iOS) */
+.contributeSheet-portal.contributeSheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1rem;
+  z-index: 40;
+}
+
+/* Fixed shell only – no transform here so iOS Safari keeps fixed to viewport */
+.contributeSheet-portal .contributeSheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* Inner holds transform (drag) and visual panel – safe area in padding-bottom */
+.contributeSheet-portal .contributeSheet-inner {
+  background: rgba(5, 3, 11, 0.96);
+  border-radius: 28px 28px 0 0;
+  padding: 1.3rem 1.5rem 2rem;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+  transition: transform 0.2s ease-out;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.contributeSheet-portal .contributeSheet-inner.dragging {
+  transition: none;
+}
+
+.contributeSheet-portal .contributeSheet-inner .contributeSheet-handle {
+  width: 48px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.25);
+  margin: 0 auto 1rem;
+}
+
+.contributeSheet-portal .contributeSheet-inner .contributeSheet-title {
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.contributeSheet-portal .contributeSheet-inner .contributeSheet-btn {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 0.95rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+
+.contributeSheet-portal .contributeSheet-inner .contributeSheet-btn.primary {
+  background: linear-gradient(95deg, #ff007a, #ff8a00);
+  color: #fff;
+}
+
+.contributeSheet-portal .contributeSheet-inner .contributeSheet-btn.secondary {
+  background: #181227;
+  color: #fff;
+}
+
+.contributeSheet-portal .contributeSheet-inner .contributeSheet-btn.tertiary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f4f6;
+}
+
+/* Transition when sheet is teleported – animate inner, not fixed shell */
+.contributeSheet-portal.sheet-fade-enter-active,
+.contributeSheet-portal.sheet-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.contributeSheet-portal.sheet-fade-enter-from,
+.contributeSheet-portal.sheet-fade-leave-to {
+  opacity: 0;
+}
+
+.contributeSheet-portal.sheet-fade-enter-from .contributeSheet-inner,
+.contributeSheet-portal.sheet-fade-leave-to .contributeSheet-inner {
+  transform: translateY(24px);
 }

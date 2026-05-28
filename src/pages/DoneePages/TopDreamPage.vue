@@ -1,5 +1,5 @@
 <template>
-  <q-page class="postDetail post-edit-page">
+  <q-page class="postEditPage" :class="{ 'post-edit-page--editMode': isEditMode }">
     <!-- Loading state -->
     <div v-if="loading" class="postDetail-loading">
       <AppSplash />
@@ -57,8 +57,12 @@
       </div>
         <!-- Subtle "Add image" CTA in center (non-intrusive) -->
     <div
+          ref="heroAddImageAnchorRef"
           class="post-edit-hero-placeholder-content"
-          @click="openPhotosEditor"
+          role="button"
+          tabindex="0"
+          @click="onHeroAddImageActivate"
+          @keydown.enter.space.prevent="onHeroAddImageActivate"
     >
       <img
             src="/icons/addImg-icon.svg"
@@ -109,8 +113,8 @@
         </div>
       </div>
 
-      <!-- ABOUT YOUR PROBLEM ROLL-UP SECTION -->
-      <section class="edit-rollup q-mt-md">
+      <!-- ABOUT YOUR PROBLEM ROLL-UP SECTION — medzera pod hero ako .postDetailContent (24px / q-mt-lg) -->
+      <section class="edit-rollup q-mt-lg">
         <div class="edit-rollup_card" :class="{ 'edit-rollup_card--open': isEditRollupOpen }">
           <!-- HLAVIČKA / NEODKLIKNUTÝ STAV -->
           <button type="button" class="edit-rollup_header" @click="isEditRollupOpen = !isEditRollupOpen">
@@ -511,22 +515,26 @@
   </q-page>
 </template>
 <style scoped lang="scss">
-.post-edit-page {
+/* Unified app background (iosSafeArea.scss) */
+.postEditPage {
   min-height: 100vh;
-  padding-bottom: 140px; // Priestor pre sticky tlačidlo "SAVE CHANGES"
-  // Použije sa pozadie z .postDetail classy (rovnaké ako detail stránka)
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0 0 4rem; // priestor pre SAVE CHANGES CTA
+  background: transparent;
 }
 
-/* Hero placeholder for empty images */
+/* Hero placeholder – unified app bg shows; subtle overlay for contrast */
 .post-edit-hero-placeholder {
   width: 100%;
   min-height: 360px; // Match PostHeader min-height
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(22, 22, 22, 0.9) 0%, rgba(40, 40, 40, 0.8) 100%);
+  background: rgba(0, 0, 0, 0.25);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: background 0.3s ease;
   border-radius: 0 0 24px 24px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
@@ -606,32 +614,40 @@
     gap: 0.35rem; // Match PostHeader gap
     box-sizing: border-box;
     align-items: flex-start; // Match PostHeader alignment
+    overflow: visible;
 
     // Category chip row (badge) - EXACT same as PostHeader
     .post-header-chipRow {
       position: relative;
       margin-bottom: 0.75rem; // Spacing above title (same as PostHeader)
-      padding: 0;
+      padding: 2px 0 0;
       z-index: 12;
       pointer-events: none;
       width: 100%;
+      overflow: visible;
     }
 
     .post-header-categoryPill {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.4rem 0.75rem;
+      min-height: 30px;
+      box-sizing: border-box;
+      line-height: 1.25;
+      padding: 0.45rem 0.8rem;
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(14px);
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       pointer-events: auto;
+      overflow: visible;
+      flex-wrap: nowrap;
     }
 
     .post-header-categoryIcon {
       width: 16px;
       height: 16px;
+      flex-shrink: 0;
       object-fit: contain;
     }
 
@@ -960,8 +976,9 @@
   // Rovnaký font-size a letter-spacing ako TOP UP THE DREAM v dizajne
 }
 
+/* Card uses global app background; subtle overlay for contrast */
 .topup-card {
-  background: #05000f;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 20px;
   padding: 0;
   margin-bottom: 18px;
@@ -1526,12 +1543,11 @@
       }
     }
   }
+  /* Unified app background – no local bg image */
   .topDream-descriptionContainer {
     position: relative;
-    background-image: url("/icons/topUpDream-gradientBg.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+    background-image: none;
+    background-color: transparent;
     height: 15rem;
     display: flex;
     flex-direction: column;
@@ -1745,6 +1761,7 @@ import { api } from "boot/axios";
 import type { PostDetail } from "src/stores/posts";
 import { Capacitor } from "@capacitor/core";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { useImagePickMenu } from "src/composables/useImagePickMenu";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifyNegative, notifySuccess } from "src/utils/notify";
@@ -1756,6 +1773,7 @@ const authStore = useAuthStore();
 const { t, locale } = useI18n();
 const useNativePhotoPicker = Capacitor?.isNativePlatform?.() === true;
 const DEBUG_PHOTO_PICKER = import.meta.env.DEV;
+const { openImagePickMenu } = useImagePickMenu();
 
 type CameraPhotoResult = {
   webPath?: string;
@@ -2014,6 +2032,7 @@ const editForm = reactive({
 
 // File input ref for photos
 const fileInput = ref<HTMLInputElement | null>(null);
+const heroAddImageAnchorRef = ref<HTMLElement | null>(null);
 
 // Watch editForm.photos for debugging (DEV only)
 if (import.meta.env.DEV) {
@@ -2056,63 +2075,7 @@ const tempPhotos = ref<
 const photosSaved = ref(false);
 const headlineInputRef = ref<{ focus:() => void; $el?: { querySelector: (selector: string) => HTMLInputElement | null } } | null>(null);
 
-// Scroll tracking for blur effect (same as PostDetailPage)
-type ScrollEventTarget = Window | HTMLElement;
-const scrollY = ref(0);
-const lastKnownScrollY = ref(0); // Last known scroll position (updated only when dialogs are closed)
-const frozenScrollY = ref(0); // Frozen scroll position when dialog is open
-const cleanupFns: Array<() => void> = [];
-
-// Check if any edit dialog is open
-const isEditDialogOpen = computed(() => {
-  return dialogs.photos || dialogs.category || dialogs.subcategory || dialogs.headline || dialogs.deadline;
-});
-
-const readScrollPosition = () => {
-  // Always use window.scrollY for consistency with Quasar QLayout
-  return window.scrollY || document.documentElement?.scrollTop || document.body?.scrollTop || 0;
-};
-
-const handleScroll = () => {
-  // Don't update lastKnownScrollY if a dialog is open (to prevent reset to 0)
-  if (isEditDialogOpen.value) {
-    return;
-  }
-  const newScrollY = readScrollPosition();
-  scrollY.value = newScrollY;
-  lastKnownScrollY.value = newScrollY;
-};
-
-const attachScrollListener = (target: ScrollEventTarget) => {
-  target.addEventListener("scroll", handleScroll, { passive: true });
-  cleanupFns.push(() => target.removeEventListener("scroll", handleScroll));
-};
-
-// Effective scroll Y: use frozen value when dialog is open, otherwise use lastKnownScrollY
-const effectiveScrollY = computed(() => {
-  if (isEditDialogOpen.value) {
-    return frozenScrollY.value;
-  }
-  return lastKnownScrollY.value;
-});
-
-const heroStyle = computed(() => {
-  const maxBlur = 14;
-  const maxTranslate = 40;
-  const maxScroll = 400; // Increased for smoother, more gradual blur
-
-  // Use effectiveScrollY instead of scrollY.value to preserve blur when dialogs open
-  // This ensures blur stays frozen at the current value when a dialog is open
-  const progress = Math.min(effectiveScrollY.value / maxScroll, 1);
-  const clampedProgress = Math.max(0, Math.min(1, progress)); // Clamp between 0 and 1
-
-  const styles = {
-    filter: `blur(${clampedProgress * maxBlur}px)`,
-    transform: `translateY(${-clampedProgress * maxTranslate}px)`
-  };
-
-  return styles;
-});
+const heroStyle = computed(() => ({}));
 
 // Form state
 const form = reactive({
@@ -2164,13 +2127,6 @@ onMounted(async () => {
       editedPost.value = JSON.parse(JSON.stringify(postsStore.currentPost));
     }
   }
-
-  // Attach scroll listener for blur effect (same as PostDetailPage)
-  attachScrollListener(window);
-  handleScroll();
-
-  // Initialize lastKnownScrollY with current scroll position
-  lastKnownScrollY.value = readScrollPosition();
 });
 
 const handleRetryLoadPost = async () => {
@@ -2183,36 +2139,10 @@ const handleRetryLoadPost = async () => {
   loading.value = false;
 };
 
-// Watch for dialog open/close to freeze/unfreeze blur
-watch(isEditDialogOpen, (isOpen) => {
-  if (isOpen) {
-    // Freeze blur: save current scroll position
-    frozenScrollY.value = lastKnownScrollY.value;
-    if (import.meta.env.DEV) {
-      console.debug("[Blur] Dialog opened, freezing blur at scrollY:", frozenScrollY.value);
-    }
-  } else {
-    // Unfreeze blur: update lastKnownScrollY with current position
-    const currentScrollY = readScrollPosition();
-    lastKnownScrollY.value = currentScrollY;
-    if (import.meta.env.DEV) {
-      console.debug("[Blur] Dialog closed, updating lastKnownScrollY to:", currentScrollY);
-    }
-  }
-});
-
 onBeforeUnmount(() => {
-  // Run cleanup functions
-  cleanupFns.forEach((fn) => {
-    try {
-      fn();
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.debug("[TopDreamPage] Error in cleanup function:", error);
-      }
-    }
-  });
-  cleanupFns.length = 0;
+  // Cleanup picker scroll listeners (in case user navigates away with picker open)
+  cleanupCategoryPickerScroll();
+  cleanupSubcategoryPickerScroll();
 });
 
 // Post type label for display
@@ -2320,6 +2250,15 @@ const mapFeCategoryToSubcategoryId = (feCategory: string | null): number | null 
 };
 
 // Handler funkcie pre edit akcie
+/** Empty hero: open picker immediately (iOS gesture-safe). With photos: open editor sheet. */
+const onHeroAddImageActivate = () => {
+  if (editForm.photos.length === 0) {
+    void pickImage();
+    return;
+  }
+  openPhotosEditor();
+};
+
 const openPhotosEditor = () => {
   if (import.meta.env.DEV) {
     console.debug("[openPhotosEditor] Opening photos dialog");
@@ -3132,108 +3071,33 @@ const removePhoto = (index: number) => {
   markDirty();
 };
 
-/** Jednotná funkcia pre výber fotky – iOS: Uri (prefer file paths for better q-img rendering), web: input[type=file] */
+async function appendPickedFile(file: File): Promise<void> {
+  const displaySrc = URL.createObjectURL(file);
+  const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  editForm.photos = [
+    ...editForm.photos,
+    { file, previewUrl: displaySrc, localId }
+  ];
+  markDirty();
+}
+
+/** iOS: bottom sheet (pod CTA); web: file input. Gallery editor keeps existing Camera paths. */
 async function pickImage(): Promise<void> {
   if (editForm.photos.length >= MAX_PHOTOS) {
     notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
     return;
   }
-  if (useNativePhotoPicker) {
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        source: CameraSource.Photos,
-        resultType: CameraResultType.Base64
-      });
-      const displaySrc = toDisplaySrcFromPhoto(photo);
-      const file = await cameraResultToFile(photo);
-      if (DEBUG_PHOTO_PICKER && import.meta.env.DEV) {
-        console.debug("[EditAddPhoto]", {
-          picked: {
-            dataUrl: photo.dataUrl ? "present" : undefined,
-            base64StringLen: photo.base64String ? photo.base64String.length : 0,
-            format: photo.format,
-            webPath: photo.webPath,
-            path: photo.path
-          },
-          displaySrcPreview: displaySrc ? displaySrc.slice(0, 80) + "..." : "",
-          hasFile: !!file
-        });
+
+  openImagePickMenu({
+    getFileInput: () => fileInput.value,
+    getAnchorEl: () => heroAddImageAnchorRef.value,
+    onCameraFiles: async (files) => {
+      const remaining = MAX_PHOTOS - editForm.photos.length;
+      for (const file of files.slice(0, remaining)) {
+        await appendPickedFile(file);
       }
-      if (file && displaySrc) {
-        const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        const newItem = {
-          file,
-          previewUrl: displaySrc,
-          localId,
-          dataUrl: photo.dataUrl,
-          base64String: photo.base64String,
-          format: photo.format,
-          webPath: photo.webPath,
-          path: photo.path
-        };
-
-        // DEBUG: Log newItem details after creation
-        if (import.meta.env.DEV) {
-          console.debug("[pickImage] newItem created:", {
-            previewUrl: newItem.previewUrl,
-            previewUrlStartsWith: {
-              blob: newItem.previewUrl.startsWith("blob:"),
-              file: newItem.previewUrl.startsWith("file:"),
-              capacitor: newItem.previewUrl.startsWith("capacitor:")
-            },
-            file: {
-              exists: !!newItem.file,
-              type: newItem.file?.type,
-              size: newItem.file?.size
-            },
-            flags: {
-              hasWebPath: !!newItem.webPath,
-              hasPath: !!newItem.path,
-              hasBase64String: !!newItem.base64String,
-              hasDataUrl: !!newItem.dataUrl
-            }
-          });
-        }
-
-        editForm.photos = [...editForm.photos, newItem];
-        markDirty();
-
-        // DEBUG: Log after adding to editForm.photos
-        if (import.meta.env.DEV) {
-          const lastItem = editForm.photos[editForm.photos.length - 1];
-          const displaySrc = getPhotoDisplaySrc(lastItem);
-          console.debug("[pickImage] After adding to editForm.photos:", {
-            length: editForm.photos.length,
-            lastItem: typeof lastItem === "object" && lastItem !== null ? {
-              previewUrl: "previewUrl" in lastItem ? lastItem.previewUrl : undefined,
-              hasFile: "file" in lastItem ? !!lastItem.file : false,
-              webPath: "webPath" in lastItem ? lastItem.webPath : undefined,
-              path: "path" in lastItem ? lastItem.path : undefined
-            } : null
-          });
-          if (!displaySrc || displaySrc === "") {
-            console.debug("[pickImage] getPhotoDisplaySrc returned empty", {
-              objectKeys: typeof lastItem === "object" && lastItem !== null ? Object.keys(lastItem) : []
-            });
-          }
-        }
-        if (DEBUG_PHOTO_PICKER) {
-          console.debug("[TopDreamPage] pickImage added to gallery:", {
-            localId,
-            displaySrc: displaySrc.slice(0, 50) + "...",
-            totalPhotos: editForm.photos.length
-          });
-        }
-      } else if (DEBUG_PHOTO_PICKER && import.meta.env.DEV) {
-        console.debug("[TopDreamPage] pickImage: failed to add photo", { hasFile: !!file, hasDisplaySrc: !!displaySrc });
-      }
-    } catch (e) {
-      if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] pickImage (Camera.getPhoto) cancelled or failed:", e);
     }
-  } else {
-    fileInput.value?.click();
-  }
+  });
 }
 
 const onAddPhotoClick = () => {

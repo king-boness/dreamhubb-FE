@@ -7,7 +7,7 @@
       :slides-per-view="1"
       :slides-per-group="1"
       :space-between="14"
-      :pagination="{ clickable: true }"
+      :pagination="false"
       :watch-slides-progress="true"
       :prevent-clicks="false"
       :prevent-clicks-propagation="false"
@@ -176,6 +176,12 @@ const modules = [Grid, Pagination, Navigation, Mousewheel, FreeMode];
   --swiper-pagination-bullet-inactive-color: rgba(255, 255, 255, 0.741);
   z-index: 111 !important;
 }
+
+/* Label pod ikonou: dark drawer = svetlý text; light drawer prepíše --dh-badge-grid-label (druhý style blok). */
+.advance-example {
+  --dh-badge-grid-label: rgba(255, 255, 255, 0.92);
+}
+
 .badgeDiv {
   margin-bottom: 1.5rem !important;
 }
@@ -210,7 +216,7 @@ const modules = [Grid, Pagination, Navigation, Mousewheel, FreeMode];
     }
     .badgeIconTitle {
       font-size: 0.8rem;
-      color: white;
+      color: var(--dh-badge-grid-label);
     }
   }
 }
@@ -236,5 +242,16 @@ const modules = [Grid, Pagination, Navigation, Mousewheel, FreeMode];
     width: 30%;
     box-sizing: border-box;
   }
+}
+</style>
+
+<style lang="scss">
+/* Vyššia špecificita ako scoped .badgeIconDiv reťazec + konzistentné s .body--light badge sheet */
+.body--light .badgeSelector-drawer {
+  --dh-badge-grid-label: rgba(0, 0, 0, 0.88);
+}
+
+.body--light .badgeSelector-drawer .badgeIconTitle {
+  color: rgba(0, 0, 0, 0.88) !important;
 }
 </style>

@@ -49,28 +49,13 @@
             borderless
             dark
             v-model="data.birthDate"
+            type="date"
             :rules="[
               () => validateDate(data.birthDate) || 'Must be a valid date.'
             ]"
             class="registerDatas"
             label="Date of birth"
-          >
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-date v-model="data.birthDate" mask="YYYY-MM-DD">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
+          />
           <q-select
             borderless
             dark
@@ -146,7 +131,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineProps, PropType, reactive, watch, ref } from "vue";
+import { defineProps, PropType, reactive, watch, ref, onBeforeUnmount } from "vue";
 
 interface Props {
   changeDetails: (
@@ -223,12 +208,19 @@ const onFileChange = (event: Event) => {
   if (!input.files?.length) {
     return;
   }
+  if (data.imageSrc && data.imageSrc.startsWith("blob:")) {
+    URL.revokeObjectURL(data.imageSrc);
+  }
   const file = input.files[0];
   const src = URL.createObjectURL(file);
   data.imageSrc = src;
   data.image = file as File;
-  // Never log local object URLs (can be sensitive / noisy)
 };
+onBeforeUnmount(() => {
+  if (data.imageSrc && data.imageSrc.startsWith("blob:")) {
+    URL.revokeObjectURL(data.imageSrc);
+  }
+});
 fetch("/images/Auth/default-avatar-male.jpg").then((response) =>
   response.blob().then((blob) => {
     data.image = blob;

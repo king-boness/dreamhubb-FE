@@ -3,6 +3,8 @@
     :model-value="selectedSubcategory || null"
     @update:model-value="selectedSubcategory = $event || ''"
     :progress="70"
+    :center-offset-y="-17"
+    :roller-axis-offset-y="-19"
     title="from category"
     next-button-label="NEXT STEP"
     @next="handleNext"

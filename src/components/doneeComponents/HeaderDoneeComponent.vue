@@ -9,11 +9,7 @@
           class="iconContainer"
           @click="handleLogoClick"
         >
-          <img
-            :src="logoImage"
-            alt=""
-            class="logoIcon"
-          />
+          <DreamhubbHeaderMark :is-body-light="props.isBodyLight" class="logoIcon" />
           <img src="/header_icons/donee.svg" alt="" class="header-roleIcon" />
           <img src="/header_icons/swap.svg" alt="" class="navbarIcon" />
         </div>
@@ -38,7 +34,7 @@
           <g opacity="0.8">
             <path
               d="M31 31L26.65 26.65M29 21C29 25.4183 25.4183 29 21 29C16.5817 29 13 25.4183 13 21C13 16.5817 16.5817 13 21 13C25.4183 13 29 16.5817 29 21Z"
-              stroke="#FAFAFA"
+              stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -75,11 +71,10 @@
   </div>
 </template>
 <style scoped lang="scss">
+/* Background from global app (iosSafeArea.scss) */
 .header {
-  background-image: none;
-  background-image: url("/images/Auth/bg-explain.png") !important;
-  background-repeat: no-repeat;
-  background-size: auto;
+  background-image: none !important;
+  background-color: transparent !important;
   position: sticky;
   top: 0;
   left: 0;
@@ -87,7 +82,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.3rem 1rem 1rem 1rem;
+  padding: 1.3rem var(--dh-header-pad-x, 1rem) 1rem;
   border-bottom: 0.05rem solid rgba(255, 255, 255, 0.202);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.1);
   z-index: 2000; // Higher z-index to ensure header is above content
@@ -143,6 +138,12 @@
   width: auto;
   object-fit: contain;
 }
+
+.searchIcon {
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+}
+
 .buttonIcon {
   width: 1rem;
   height: 1rem;
@@ -166,7 +167,7 @@
       height: 1.3rem;
     }
     .karmaValue {
-      color: #f3f3f3a2;
+      color: rgba(255, 255, 255, 0.64);
       font-size: 1.2rem;
       font-family: poppinsBold;
       margin-right: 0.5rem;
@@ -190,13 +191,15 @@ import { usePreferencesStore } from "src/stores/preferences";
 import { usePostsStore } from "src/stores/posts";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import AppSplash from "src/components/common/AppSplash.vue";
+import DreamhubbHeaderMark from "src/components/common/DreamhubbHeaderMark.vue";
 import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
 import { refreshTokenIfNeeded } from "boot/axios";
 
 interface Props {
   karma: number;
   showBack: boolean;
-  isBodyLight: boolean;
+  /** Optional: logo reads theme from DOM; kept for API compatibility. */
+  isBodyLight?: boolean;
 }
 
 const props: Props = defineProps({
@@ -210,7 +213,8 @@ const props: Props = defineProps({
   },
   isBodyLight: {
     type: Boolean,
-    required: true
+    required: false,
+    default: false
   }
 });
 
@@ -230,29 +234,18 @@ const handleHeaderBack = () => {
   goBackOrFallback(router, fallback);
 };
 
-// Logo imports
-const logoImageLight = new URL("../../assets/logos/dreamhubb_logo_l.svg", import.meta.url).href;
-const logoImageDark = new URL("../../assets/logos/dreamhubb_logo_d.svg", import.meta.url).href;
-
-// Computed logo based on light/dark mode
-const logoImage = computed(() => {
-  // Light mode: use dark logo (dreamhubb_logo_d.svg)
-  // Dark mode: use light logo (dreamhubb_logo_l.svg)
-  return props.isBodyLight ? logoImageDark : logoImageLight;
-});
-
 const handleLogoClick = async () => {
   // Refresh token before switch so donor fetches use new token (jwt-auth invalidates old on refresh)
   await refreshTokenIfNeeded();
   preferencesStore.setCurrentSide("donor");
   applyFiltersFromPreferences();
-  document.body.classList.add("splash-active");
+  document.body.classList.add("splash-active", "dh-role-switching");
   isSwitchingRole.value = true;
   await new Promise(resolve => setTimeout(resolve, 500));
   await router.push({ name: "donor-posts" });
   setTimeout(() => {
     isSwitchingRole.value = false;
-    document.body.classList.remove("splash-active");
+    document.body.classList.remove("splash-active", "dh-role-switching");
   }, 300);
 };
 

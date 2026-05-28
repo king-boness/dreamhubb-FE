@@ -1,5 +1,5 @@
-<svg width="136" height="105" viewBox="0 0 136 105" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_d_3015_1665)">
+<svg width="64" height="64" viewBox="36 33 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g>
 <circle cx="68" cy="65" r="28" fill="#BD0043"/>
 </g>
 <g clip-path="url(#clip0_3015_1665)">
@@ -9,15 +9,6 @@
 </g>
 </g>
 <defs>
-<filter id="filter0_d_3015_1665" x="0" y="0" width="136" height="136" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="3"/>
-<feGaussianBlur stdDeviation="20"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3015_1665"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3015_1665" result="shape"/>
-</filter>
 <clipPath id="clip0_3015_1665">
 <rect width="24.2162" height="24.2162" fill="white" transform="translate(55.8921 52.8918)"/>
 </clipPath>

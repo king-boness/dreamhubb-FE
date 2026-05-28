@@ -331,10 +331,9 @@
   padding: 1.5rem 0;
   left: 0;
   height: 8.6rem;
-  background-image: url("/images/Auth/bg-explain.png") !important;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  /* Background from global app (iosSafeArea.scss) */
+  background-image: none !important;
+  background-color: transparent !important;
   .postReward {
     margin-top: 0.4rem;
     display: flex;
@@ -404,81 +403,142 @@
   background-color: transparent !important;
 }
 
-/* Position adjustments for footer icons on donor side */
-/* Home icon: 5px down, 1px right */
-.footer > .button-footer:first-child,
-.footer > .q-btn:first-child,
-.footer .button-footer:first-of-type {
-  transform: translateX(1px) translateY(5px) !important;
-  
-  &:hover {
-    transform: translateX(1px) translateY(3px) scale(1.05) !important;
+/*
+ * Jemné posuny ikon — len footre bez vlastnej donor mriežky.
+ * .footer--donor4 / .footer--doneeNav majú vlastné flex rozloženie v komponentoch.
+ */
+.footer:not(.footer--donor4):not(.footer--doneeNav) {
+  /* Home icon: 5px down, 1px right */
+  > .button-footer:first-child,
+  > .q-btn:first-child,
+  .button-footer:first-of-type {
+    transform: translateX(1px) translateY(5px) !important;
+
+    &:hover {
+      transform: translateX(1px) translateY(3px) scale(1.05) !important;
+    }
+
+    &:active {
+      transform: translateX(1px) translateY(5px) scale(0.95) !important;
+    }
+
+    &.active {
+      transform: translateX(1px) translateY(4px) scale(1.02) !important;
+    }
   }
-  
-  &:active {
-    transform: translateX(1px) translateY(5px) scale(0.95) !important;
+
+  /* Inspirations icon: 4px down */
+  > .button-footer:nth-child(2),
+  > .q-btn:nth-child(2),
+  .button-footer:nth-of-type(2) {
+    transform: translateX(0px) translateY(4px) !important;
+
+    &:hover {
+      transform: translateX(0px) translateY(2px) scale(1.05) !important;
+    }
+
+    &:active {
+      transform: translateX(0px) translateY(4px) scale(0.95) !important;
+    }
+
+    &.active {
+      transform: translateX(0px) translateY(3px) scale(1.02) !important;
+    }
   }
-  
-  &.active {
-    transform: translateX(1px) translateY(4px) scale(1.02) !important;
+
+  /* Notifications icon: 4px down, 3px left (2px more left from -1px) */
+  > .button-footer.red,
+  > .q-btn.red,
+  .button-footer.red,
+  .q-btn.button-footer.red {
+    transform: translateX(-3px) translateY(4px) !important;
+
+    &:hover {
+      transform: translateX(-3px) translateY(2px) scale(1.05) !important;
+    }
+
+    &:active {
+      transform: translateX(-3px) translateY(4px) scale(0.95) !important;
+    }
+
+    &.active {
+      transform: translateX(-3px) translateY(3px) scale(1.02) !important;
+    }
+  }
+
+  /* Profile icon: 9px down, 2px left (1px more left from -1px) */
+  > .button-footer.profileIcon,
+  > .q-btn.profileIcon,
+  .button-footer.profileIcon,
+  .q-btn.button-footer.profileIcon {
+    transform: translateX(-2px) translateY(9px) !important;
+
+    &:hover {
+      transform: translateX(-2px) translateY(7px) scale(1.05) !important;
+    }
+
+    &:active {
+      transform: translateX(-2px) translateY(9px) scale(0.95) !important;
+    }
+
+    &.activeProfile {
+      transform: translateX(-2px) translateY(8px) scale(1.02) !important;
+    }
   }
 }
 
-/* Inspirations icon: 4px down */
-.footer > .button-footer:nth-child(2),
-.footer > .q-btn:nth-child(2),
-.footer .button-footer:nth-of-type(2) {
-  transform: translateX(0px) translateY(4px) !important;
-  
-  &:hover {
-    transform: translateX(0px) translateY(2px) scale(1.05) !important;
-  }
-  
-  &:active {
-    transform: translateX(0px) translateY(4px) scale(0.95) !important;
-  }
-  
-  &.active {
-    transform: translateX(0px) translateY(3px) scale(1.02) !important;
-  }
+/* Donor / Donee footers: drop global profile nudge for vertical centering */
+.footer.footer--donor4 .profileIcon,
+.footer.footer--doneeNav .profileIcon {
+  margin-top: 0 !important;
 }
 
-/* Notifications icon: 4px down, 3px left (2px more left from -1px) */
-.footer > .button-footer.red,
-.footer > .q-btn.red,
-.footer .button-footer.red,
-.footer .q-btn.button-footer.red {
-  transform: translateX(-3px) translateY(4px) !important;
-  
-  &:hover {
-    transform: translateX(-3px) translateY(2px) scale(1.05) !important;
-  }
-  
-  &:active {
-    transform: translateX(-3px) translateY(4px) scale(0.95) !important;
-  }
-  
-  &.active {
-    transform: translateX(-3px) translateY(3px) scale(1.02) !important;
-  }
+/*
+ * Tab bar: even horizontal distribution (replaces space-between / space-evenly + per-icon nudges).
+ */
+.footer.footer--donor4 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  align-items: center;
+  column-gap: 0.35rem;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(1rem, env(safe-area-inset-right, 0px)) !important;
 }
 
-/* Profile icon: 9px down, 2px left (1px more left from -1px) */
-.footer > .button-footer.profileIcon,
-.footer > .q-btn.profileIcon,
-.footer .button-footer.profileIcon,
-.footer .q-btn.button-footer.profileIcon {
-  transform: translateX(-2px) translateY(9px) !important;
-  
-  &:hover {
-    transform: translateX(-2px) translateY(7px) scale(1.05) !important;
-  }
-  
-  &:active {
-    transform: translateX(-2px) translateY(9px) scale(0.95) !important;
-  }
-  
-  &.activeProfile {
-    transform: translateX(-2px) translateY(8px) scale(1.02) !important;
-  }
+.footer.footer--donor4 > .button-footer {
+  width: 100%;
+  max-width: 5.25rem;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  transform: translateY(4px) !important;
+}
+
+.footer.footer--doneeNav {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto minmax(0, 1fr) minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  column-gap: 0.25rem;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(1rem, env(safe-area-inset-right, 0px)) !important;
+}
+
+.footer.footer--doneeNav .footer-left,
+.footer.footer--doneeNav .footer-right {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.footer.footer--doneeNav > .button-footer.footer-left,
+.footer.footer--doneeNav > .button-footer.footer-right,
+.footer.footer--doneeNav > .button-footer.red,
+.footer.footer--doneeNav > .button-footer.profileIcon {
+  width: 100%;
+  max-width: 5.25rem;
+  transform: translateY(4px) !important;
+}
+
+.footer.footer--doneeNav .circle-wrap {
+  justify-self: center;
 }

@@ -171,13 +171,16 @@ const finishedTasks = ref([
       rgba(37, 37, 37, 0.525) 0%,
       rgba(23, 23, 23, 0.33) 100%
     );
-    height: 3.6rem;
+    min-height: 3.6rem;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    padding: 0 0.3rem;
+    padding: 0.35rem 0.5rem;
     margin-bottom: 0.8rem;
     border-radius: 0.8rem;
+    gap: 0.35rem;
 
     .taskImgDiv {
       background: linear-gradient(
@@ -193,6 +196,7 @@ const finishedTasks = ref([
       border-radius: 0.6rem;
       height: 2.5rem;
       width: 2.5rem;
+      flex-shrink: 0;
       .taskTrophyImg {
         height: 1.2rem;
       }
@@ -202,8 +206,12 @@ const finishedTasks = ref([
       color: white;
       font-family: poppins;
       font-size: 0.8rem;
+      flex: 1 1 auto;
+      min-width: 0;
+      margin-left: 0.25rem;
       white-space: nowrap;
-      margin-left: 0.4rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .task {
       border-left: 0.07rem solid #fcfcfc1c;
@@ -233,8 +241,10 @@ const finishedTasks = ref([
 }
 .taskReward {
   @extend .task;
-  padding-left: 0.8rem;
-  margin-left: 0.8rem;
+  flex: 0 0 auto;
+  padding-left: 0.5rem;
+  margin-left: auto;
+  max-width: 42%;
 }
 .FinishedtaskImgDiv {
   display: flex;
@@ -242,11 +252,14 @@ const finishedTasks = ref([
   justify-content: center;
   padding: 0.5rem;
   border-radius: 0.6rem;
+  flex-shrink: 0;
 }
 
 .FinishedtaskReward {
-  padding-left: 1.7rem;
-  margin-left: 1rem;
+  flex: 0 0 auto;
+  padding-left: 0.5rem;
+  margin-left: auto;
+  max-width: 42%;
   @extend .task;
 }
 </style>

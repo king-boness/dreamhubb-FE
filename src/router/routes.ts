@@ -8,6 +8,20 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }
   },
   {
+    path: "/privacy",
+    alias: ["/privacy-policy"],
+    component: () => import("src/pages/Public/PrivacyPolicyPage.vue"),
+    name: "privacy-policy",
+    meta: { requiresAuth: false }
+  },
+  {
+    path: "/terms",
+    alias: ["/terms-of-use"],
+    component: () => import("src/pages/Public/TermsOfUsePage.vue"),
+    name: "terms-of-use",
+    meta: { requiresAuth: false }
+  },
+  {
     path: "/auth",
     component: () => import("src/layouts/Auth/AuthWelcomeLayout.vue"),
     name: "auth-welcome",
@@ -114,6 +128,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import("src/layouts/Auth/RegisterLayout.vue"),
     name: "registration"
   },
+  // Web token shop – Stripe return target
+  {
+    path: "/token-shop",
+    meta: { requiresAuth: true },
+    component: () => import("src/pages/DonorPages/TokenShopPage.vue"),
+    name: "token-shop"
+  },
 
   {
     path: "/donor",
@@ -129,7 +150,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "post-detail/:id",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, hideFooter: true, hideMainHeader: true },
         component: () => import("src/pages/DonorPages/PostDetailPage.vue"),
         name: "donor-post-detail"
       },
@@ -174,7 +195,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "filters",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, hideFooter: true, hideMainHeader: true },
         component: () => import("src/pages/DonorPages/FiltersPage.vue"),
         name: "donor-filters"
       },
@@ -305,7 +326,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "help",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, hideFooter: true, hideMainHeader: true },
         component: () => import("src/pages/DonorPages/HelpPage.vue"),
         name: "donor-help"
       },
@@ -377,7 +398,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "search",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, hideFooter: true, hideMainHeader: true },
         component: () => import("src/pages/DonorPages/SearchPage.vue"),
         name: "donor-search"
       },

@@ -180,12 +180,10 @@ const props: Props = defineProps({
     fill: black;
   }
 }
+/* Background from global app (iosSafeArea.scss) */
 .footer {
-  background-image: none;
-  background-image: url("/images/Auth/bg-explain.png") !important;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 .notificationIcon {
   height: 1.7rem !important;

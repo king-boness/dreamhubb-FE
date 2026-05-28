@@ -13,87 +13,111 @@
       <div class="goal-content">
         <h1 class="goal-title">{{ title }}</h1>
 
-        <!-- Flicking carousel -->
-        <div class="goal-carousel-wrapper">
-          <Flicking
-            ref="flickingInstance"
-            :options="flickingOptions"
-            :plugins="flickingPlugins"
-            @changed="handleFlickingChanged"
-            @ready="handleFlickingReady"
-            class="goal-flicking"
-          >
-            <div
-              v-for="option in options"
-              :key="option.id"
-              class="goal-option"
-              :class="{ 'is-active': localValue === option.value }"
-            >
-              <div class="goal-content-wrapper">
-                <div class="goal-icon" :class="`goal-icon--${option.value}`">
-                  <img
-                    :src="`/icons/CategoryIcons/${option.value}.svg`"
-                    :alt="option.value"
-                    class="goal-icon-img"
-                  />
-                </div>
-              </div>
+        <!-- Vertical wheel; help anchored to full-width wrapper (right inset); shell mask = soft horizon -->
+        <div class="goal-carousel-wrapper" :style="goalCarouselWrapperStyle">
+          <div class="goal-carousel-stage" :style="goalCarouselStageStyle">
+            <div class="goal-swiper-shell">
+              <Swiper
+                class="goal-swiper"
+                direction="vertical"
+                :loop="false"
+                :rewind="true"
+                :watch-overflow="true"
+                :centered-slides="true"
+                slides-per-view="auto"
+                :space-between="0"
+                :speed="320"
+                :threshold="5"
+                :free-mode="false"
+                :mousewheel="{ forceToAxis: true, releaseOnEdges: false, sensitivity: 0.85 }"
+                :modules="swiperModules"
+                @swiper="onSwiperReady"
+                @slideChange="handleSwiperChanged"
+              >
+                <SwiperSlide
+                  v-for="option in options"
+                  :key="option.id"
+                  class="goal-option"
+                >
+                  <div class="goal-content-wrapper">
+                    <div class="goal-icon" :class="`goal-icon--${option.value}`">
+                      <img
+                        :src="`/icons/CategoryIcons/${option.value}.svg`"
+                        :alt="option.value"
+                        class="goal-icon-img"
+                      />
+                    </div>
+                  </div>
+                </SwiperSlide>
+              </Swiper>
             </div>
-          </Flicking>
-
-          <button class="goal-helpBtn" @click="handleInfoClick">
+          </div>
+          <button type="button" class="goal-helpBtn" @click="handleInfoClick">
             <q-icon name="help_outline" />
           </button>
         </div>
 
-        <p class="goal-instruction">choose by swiping up or down</p>
+        <p v-if="hideFooter" class="goal-instruction goal-instruction--inline">
+          choose by swiping up or down
+        </p>
       </div>
     </template>
     <template v-else>
       <div class="goal-content">
-        <!-- Flicking carousel -->
-      <div class="goal-carousel-wrapper">
-        <Flicking
-          ref="flickingInstance"
-          :options="flickingOptions"
-          :plugins="flickingPlugins"
-          @changed="handleFlickingChanged"
-          @ready="handleFlickingReady"
-          class="goal-flicking"
-        >
-            <div
-              v-for="option in options"
-              :key="option.id"
-              class="goal-option"
-              :class="{ 'is-active': localValue === option.value }"
-            >
-              <div class="goal-content-wrapper">
-                <div class="goal-icon" :class="`goal-icon--${option.value}`">
-                  <img
-                    :src="`/icons/CategoryIcons/${option.value}.svg`"
-                    :alt="option.value"
-                    class="goal-icon-img"
-                  />
-                </div>
-              </div>
+        <div class="goal-carousel-wrapper" :style="goalCarouselWrapperStyle">
+          <div class="goal-carousel-stage" :style="goalCarouselStageStyle">
+            <div class="goal-swiper-shell">
+              <Swiper
+                class="goal-swiper"
+                direction="vertical"
+                :loop="false"
+                :rewind="true"
+                :watch-overflow="true"
+                :centered-slides="true"
+                slides-per-view="auto"
+                :space-between="0"
+                :speed="320"
+                :threshold="5"
+                :free-mode="false"
+                :mousewheel="{ forceToAxis: true, releaseOnEdges: false, sensitivity: 0.85 }"
+                :modules="swiperModules"
+                @swiper="onSwiperReady"
+                @slideChange="handleSwiperChanged"
+              >
+                <SwiperSlide
+                  v-for="option in options"
+                  :key="option.id"
+                  class="goal-option"
+                >
+                  <div class="goal-content-wrapper">
+                    <div class="goal-icon" :class="`goal-icon--${option.value}`">
+                      <img
+                        :src="`/icons/CategoryIcons/${option.value}.svg`"
+                        :alt="option.value"
+                        class="goal-icon-img"
+                      />
+                    </div>
+                  </div>
+                </SwiperSlide>
+              </Swiper>
             </div>
-          </Flicking>
-
-          <button class="goal-helpBtn" @click="handleInfoClick">
+          </div>
+          <button type="button" class="goal-helpBtn" @click="handleInfoClick">
             <q-icon name="help_outline" />
           </button>
         </div>
       </div>
     </template>
 
-    <!-- Action buttons (hidden if hideFooter is true) -->
-    <template v-if="!hideFooter">
+    <!-- Instruction + CTA: margin-top auto on .goal-bottom pins this above safe-area -->
+    <div v-if="!hideFooter" class="goal-bottom">
+      <p class="goal-instruction">choose by swiping up or down</p>
       <div class="goal-actions" v-if="showSearchButton">
         <button class="goal-searchBtn" @click="handleSearch">SEARCH</button>
         <button class="goal-nextBtn" @click="handleNext">{{ nextButtonLabel }}</button>
       </div>
       <button v-else class="goal-nextBtn goal-nextBtn-single" @click="handleNext">{{ nextButtonLabel }}</button>
-    </template>
+    </div>
 
     <!-- Info Modal -->
     <InfoModal
@@ -109,9 +133,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted } from "vue";
-import { Fade, Perspective } from "@egjs/flicking-plugins";
-import Flicking from "@egjs/vue3-flicking";
+import { ref, computed, watch, nextTick } from "vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Mousewheel } from "swiper/modules";
+import type { Swiper as SwiperClass } from "swiper";
+import "swiper/css";
 import InfoModal from "./InfoModal.vue";
 import { goalInfo } from "src/config/onboardingInfo";
 
@@ -123,7 +149,12 @@ const props = defineProps<{
   showSearchButton?: boolean; // Show search button, defaults to false
   hideHeader?: boolean; // Hide header (back button + title), defaults to false
   hideFooter?: boolean; // Hide footer (CTA buttons), defaults to false
+  centerOffsetY?: number; // Vertical shift of the whole roller block (px)
+  rollerAxisOffsetY?: number; // Vertical shift of wheel axis only (px), keeps ? fixed
 }>();
+
+const POST_CREATION_CENTER_OFFSET_Y = -17;
+const POST_CREATION_ROLLER_AXIS_OFFSET_Y = -19;
 
 const emit = defineEmits<{
   "update:modelValue": [value: "problem" | "dream" | "idea"];
@@ -135,87 +166,8 @@ const emit = defineEmits<{
 // Initialize with "dream" as default (index 1 in options array)
 const localValue = ref<"problem" | "dream" | "idea">(props.modelValue || "dream");
 const showInfoModal = ref(false);
-const flickingInstance = ref<InstanceType<typeof Flicking> | null>(null);
-const isFlickingReady = ref(false);
-
-// Watch for flickingInstance changes and synchronize when it becomes available
-watch(() => flickingInstance.value, async (newInstance) => {
-  if (newInstance && !isFlickingReady.value) {
-    // Check if it's a Vue component wrapper
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const instance = (newInstance as any)?.flicking || newInstance;
-    if (instance && typeof instance.moveTo === "function") {
-      isFlickingReady.value = true;
-      await nextTick();
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await syncFlickingToValue();
-      // no verbose logs
-    }
-  }
-}, { immediate: true });
-
-// Synchronize Flicking position with selected value
-const syncFlickingToValue = async () => {
-  if (!flickingInstance.value) {
-    return;
-  }
-
-  const targetIndex = options.findIndex(opt => opt.value === localValue.value);
-  if (targetIndex < 0) {
-    return;
-  }
-
-  try {
-    // Get the actual Flicking instance (might be wrapped in Vue component)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const flicking = (flickingInstance.value as any)?.flicking || flickingInstance.value;
-
-    // Check if moveTo method exists
-    if (typeof flicking?.moveTo !== "function") {
-      return;
-    }
-
-    // Use moveTo to synchronize position without animation (duration: 0)
-    // Use requestAnimationFrame to ensure DOM is ready
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    flicking.moveTo(targetIndex, 0);
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.debug("[WhatIsYourGoal] Error synchronizing Flicking:", error);
-    }
-  }
-};
-
-// Watch for changes to modelValue prop and update localValue immediately (but only if different)
-// IMPORTANT: We don't sync Flicking here on initial mount if value is already correct
-// This prevents animation when returning to the page
-watch(() => props.modelValue, async (newVal, oldVal) => {
-  // Skip if this is the initial watch call (oldVal is undefined) and value matches
-  if (oldVal === undefined && newVal === localValue.value) {
-    return;
-  }
-
-  if (newVal !== null && newVal !== undefined && newVal !== localValue.value) {
-    localValue.value = newVal;
-    // Only sync Flicking if it's ready (not on initial mount if value is correct)
-    if (isFlickingReady.value) {
-      await nextTick();
-      await new Promise(resolve => setTimeout(resolve, 50));
-      await syncFlickingToValue();
-    }
-  } else if (newVal === null || newVal === undefined) {
-    // If modelValue is null/undefined, default to "dream"
-    if (localValue.value !== "dream") {
-      localValue.value = "dream";
-      // Only sync Flicking if it's ready
-      if (isFlickingReady.value) {
-        await nextTick();
-        await new Promise(resolve => setTimeout(resolve, 50));
-        await syncFlickingToValue();
-      }
-    }
-  }
-}, { immediate: true });
+const swiperRef = ref<SwiperClass | null>(null);
+const swiperModules = [Mousewheel];
 
 const progressWidth = computed(() => {
   return `${props.progress ?? 40}%`;
@@ -223,101 +175,52 @@ const progressWidth = computed(() => {
 
 const title = computed(() => props.title ?? "the post will be about");
 const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
+const goalCarouselWrapperStyle = computed(() => ({
+  transform: `translateY(${props.centerOffsetY ?? POST_CREATION_CENTER_OFFSET_Y}px)`
+}));
+const goalCarouselStageStyle = computed(() => ({
+  transform: `translateY(${props.rollerAxisOffsetY ?? POST_CREATION_ROLLER_AXIS_OFFSET_Y}px)`
+}));
 
 const handleSearch = () => {
   emit("search");
 };
 
-// Flicking options - problem first (top), dream second (middle), idea third (bottom)
 const options = [
   { id: 1, title: "Problem", value: "problem" as const },
   { id: 2, title: "Dream", value: "dream" as const },
   { id: 3, title: "Idea", value: "idea" as const }
 ];
 
-const flickingOptions = computed(() => {
-  // Default to dream (index 1) if no value set or if value is null/undefined
-  let defaultIdx = 1; // dream is default (index 1)
-  if (localValue.value === "problem") {
-    defaultIdx = 0;
-  } else if (localValue.value === "dream") {
-    defaultIdx = 1;
-  } else if (localValue.value === "idea") {
-    defaultIdx = 2;
-  }
-  // If localValue is null/undefined, defaultIdx stays 1 (dream)
-
-  return {
-    horizontal: false, // Vertical scrolling
-    inputType: ["mouse", "touch", "pointer"],
-    defaultIndex: defaultIdx,
-    align: "center",
-    circular: true,
-    duration: 300, // Faster transition
-    easing: (x: number) => 1 - Math.pow(1 - x, 3), // Ease-out cubic
-    deceleration: 0.0075, // Smoother deceleration
-    threshold: 40, // Lower threshold for easier swiping
-    interruptable: true, // Allow interrupting animations
-    bounce: 0 // No bounce for smoother feel
-  };
-});
-
-const flickingPlugins = [
-  new Fade("", 0.3), // Very tight fade range - only active item visible
-  new Perspective({ rotate: 0.2, scale: 1.3 }) // Minimal perspective effect
-];
-
-const handleFlickingChanged = (e: { index: number }) => {
-  const selectedOption = options[e.index];
+const handleSwiperChanged = (swiper: SwiperClass) => {
+  const selectedOption = options[swiper.activeIndex] ?? options[1];
   localValue.value = selectedOption.value;
   emit("update:modelValue", localValue.value);
 };
 
-// Handle Flicking ready event - synchronize position when component is ready
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handleFlickingReady = async (e: any) => {
-  // The @ready event passes the Flicking instance directly
-  // Store it for later use
-  if (e) {
-    // Check if it's the Flicking instance or a wrapper
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const instance = (e as any).flicking || e;
-    if (instance && typeof instance.moveTo === "function") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      flickingInstance.value = instance as any;
-      isFlickingReady.value = true;
-
-      // Wait for next tick and a small delay to ensure Flicking is fully initialized
-      await nextTick();
-      await new Promise(resolve => setTimeout(resolve, 150));
-
-      // Synchronize position with current value
-      await syncFlickingToValue();
-      // no logs
-    }
-  }
+const onSwiperReady = async (swiper: SwiperClass) => {
+  swiperRef.value = swiper;
+  await nextTick();
+  const idx = options.findIndex(opt => opt.value === localValue.value);
+  swiper.slideTo(idx >= 0 ? idx : 1, 0, false);
 };
 
-// Also synchronize on mount (in case @ready event doesn't fire or component is re-mounted)
-onMounted(async () => {
-  // Wait for Flicking to initialize - use multiple delays to ensure it's ready
-  await nextTick();
-  await new Promise(resolve => setTimeout(resolve, 100));
-  await nextTick();
-  await new Promise(resolve => setTimeout(resolve, 100));
-
-  // Try to get Flicking instance from ref
-  if (flickingInstance.value) {
-    // Check if it's a Vue component wrapper
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const instance = (flickingInstance.value as any)?.flicking || flickingInstance.value;
-    if (instance && typeof instance.moveTo === "function") {
-      isFlickingReady.value = true;
-      await syncFlickingToValue();
-      // no logs
+watch(
+  () => props.modelValue,
+  async (newVal) => {
+    const normalized = (newVal ?? "dream") as "problem" | "dream" | "idea";
+    if (normalized !== localValue.value) {
+      localValue.value = normalized;
     }
-  }
-});
+    if (!swiperRef.value) return;
+    await nextTick();
+    const idx = options.findIndex(o => o.value === normalized);
+    if (idx >= 0 && swiperRef.value.activeIndex !== idx) {
+      swiperRef.value.slideTo(idx, 0, false);
+    }
+  },
+  { immediate: true }
+);
 
 const currentInfo = computed(() => {
   return goalInfo[localValue.value] || goalInfo.dream;
@@ -349,24 +252,42 @@ const handleNext = () => {
 
 <style lang="scss" scoped>
 .whatIsYourGoal {
+  --goal-wheel-shell-height: 400px;
+  --goal-wheel-shell-min-height: 320px;
+  --goal-wheel-shell-max-height: 48vh;
+  --goal-wheel-slide-size: 152px;
+  --goal-wheel-wrapper-pad-y: 0.5rem;
+  --goal-wheel-track-pad-y: 20px;
+  --goal-inline-instruction-gap: 0.9rem;
+  --goal-bottom-top-gap: 10px;
+  --goal-instruction-bottom-gap: 14px;
+
   width: 100%;
   max-width: 390px;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 24px 20px 40px;
+  padding-bottom: max(33px, env(safe-area-inset-bottom, 0px));
   margin: 0 auto;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
-  overflow: hidden;
+  background: transparent;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
+  box-sizing: border-box;
 
   // When used in filters (hide-header and hide-footer), remove padding and background
   &.whatIsYourGoal--filter-mode {
     padding: 0;
     margin: 0;
     background: transparent;
-    height: 100%;
     max-width: 100%;
+    width: 100%;
+    /* Shrink-wrap so FiltersPage can vertically center roller + ? as one block */
+    flex: 0 1 auto;
+    min-height: 0;
   }
 }
 
@@ -377,6 +298,7 @@ const handleNext = () => {
   margin-bottom: 20px;
   flex-shrink: 0;
   position: relative;
+  padding-top: 41px;
 }
 
 .goal-backBtn {
@@ -430,13 +352,13 @@ const handleNext = () => {
   justify-content: center;
   padding: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible !important;
   position: relative;
 
-  // In filter mode, content should fill available space
   .whatIsYourGoal--filter-mode & {
-    flex: 1;
+    flex: 1 1 auto;
     width: 100%;
+    justify-content: center;
   }
 }
 
@@ -444,7 +366,7 @@ const handleNext = () => {
   font-size: 1.5rem;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 20px 0;
+  margin: 0 0 8px 0;
   text-align: center;
   flex-shrink: 0;
   line-height: 1.2;
@@ -453,43 +375,103 @@ const handleNext = () => {
 .goal-carousel-wrapper {
   position: relative;
   width: 100%;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 0;
+  align-items: center;
   margin: 0;
+  transform: translateY(var(--goal-center-offset-y, 0px));
+  /* Room for ? button from screen right (button uses right: 1.25rem on this box) */
+  padding: var(--goal-wheel-wrapper-pad-y) 0;
+  box-sizing: border-box;
+  overflow: visible !important;
+
+  .whatIsYourGoal--filter-mode & {
+    flex: 1 1 auto;
+    align-items: center;
+    min-height: 0;
+    margin: 0;
+    padding: var(--goal-wheel-wrapper-pad-y) 0;
+  }
 }
 
-.goal-flicking {
+.goal-carousel-stage {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  height: 100%;
-  max-height: 450px;
+  max-width: 280px;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: visible !important;
 }
 
-:deep(.flicking-viewport) {
+/* Soft vertical fade so icons ease out at top/bottom “horizon” (works on any background) */
+.goal-swiper-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 280px;
+  margin: 0 auto;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.goal-swiper {
+  width: 100%;
+  max-width: 280px;
+  /* Compact wheel; row height still from slidesPerView auto + .swiper-slide */
+  height: var(--goal-wheel-shell-height);
+  min-height: var(--goal-wheel-shell-min-height);
+  max-height: var(--goal-wheel-shell-max-height);
+  overflow: visible !important;
+  flex-shrink: 0;
+}
+
+:deep(.swiper.swiper-vertical) {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: visible !important;
   pointer-events: auto;
+  z-index: 1;
 }
 
-:deep(.flicking-camera) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 80px; // Reduced gap to make transitions smoother
+/* CRITICAL: vertical Swiper requires column direction; bare `display:flex` defaults to row and breaks the wheel */
+:deep(.swiper-wrapper) {
+  flex-direction: column !important;
+  box-sizing: border-box;
+  padding-top: var(--goal-wheel-track-pad-y);
+  padding-bottom: var(--goal-wheel-track-pad-y);
+  overflow: visible !important;
 }
 
-:deep(.flicking-panel) {
+/* Opacity only on inner icon — SwiperSlide may not keep custom class on the same node as swiper-slide-* */
+/* slidesPerView: auto — Swiper reads this height; numeric slidesPerView would set inline height = full viewport */
+:deep(.swiper-slide) {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  height: var(--goal-wheel-slide-size) !important;
+  min-height: var(--goal-wheel-slide-size);
+  max-height: var(--goal-wheel-slide-size);
+  box-sizing: border-box;
+  transition: transform 0.25s ease;
+  overflow: visible !important;
 }
 
 .goal-option {
@@ -499,25 +481,51 @@ const handleNext = () => {
   justify-content: center;
   gap: 0;
   width: 100%;
-  min-height: 200px;
-  opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  min-height: var(--goal-wheel-slide-size);
+  height: auto;
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
-  will-change: opacity, transform;
+  pointer-events: auto;
+  overflow: visible !important;
+}
+
+:deep(.swiper-slide-active) {
+  z-index: 2;
+}
+
+/* Soft pink halo behind active icon only (brand #BD0043) */
+:deep(.swiper-slide-active .goal-content-wrapper::before) {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 124px;
+  height: 124px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 0;
   pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(189, 0, 67, 0.35) 0%,
+    rgba(189, 0, 67, 0.12) 45%,
+    transparent 72%
+  );
+  box-shadow:
+    0 0 22px 10px rgba(189, 0, 67, 0.28),
+    0 0 42px 18px rgba(189, 0, 67, 0.12);
+}
 
-  &.is-active {
-    opacity: 1;
-    transform: scale(1.2);
-    pointer-events: auto;
-  }
+:deep(.swiper-slide:not(.swiper-slide-active) .goal-icon) {
+  opacity: 0.42;
+  transform: scale(0.94);
+}
 
-  // Show icon even when not active, but very faint
-  &:not(.is-active) .goal-icon {
-    opacity: 0.1;
-  }
+:deep(.swiper-slide-prev .goal-icon),
+:deep(.swiper-slide-next .goal-icon) {
+  opacity: 0.58;
+  transform: scale(0.98);
 }
 
 .goal-content-wrapper {
@@ -529,49 +537,64 @@ const handleNext = () => {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: visible !important;
 }
 
 .goal-icon {
-  width: 160px;
-  height: 160px;
+  width: 108px;
+  height: 108px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
-  opacity: 0.3;
+  opacity: 1;
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
-  margin-top: 0;
+}
 
-  .goal-option.is-active & {
-    opacity: 1;
-    transform: scale(1.1);
-  }
+:deep(.swiper-slide-active .goal-icon) {
+  opacity: 1;
+  transform: scale(1.12);
+  z-index: 1;
+  filter: brightness(1.08);
 }
 
 .goal-icon-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(189, 0, 67, 0.5));
+  filter: drop-shadow(0 0 16px rgba(189, 0, 67, 0.45));
+}
+
+:deep(.swiper-slide-active .goal-icon-img) {
+  filter: brightness(1.1) drop-shadow(0 0 18px rgba(189, 0, 67, 0.65))
+    drop-shadow(0 0 34px rgba(189, 0, 67, 0.35));
 }
 
 .goal-helpBtn {
   position: absolute;
-  right: 20px;
-  top: calc(50% - 40px);
+  right: 1.25rem;
+  /* Keep help button locked to selected item axis (center of roller viewport). */
+  top: 50%;
+  transform: translateY(-50%);
+
+  .whatIsYourGoal--filter-mode & {
+    top: 50%;
+    transform: translateY(-50%);
+  }
   width: 40px;
   height: 40px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
+  background: rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 50;
   pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
     border-color: rgba(255, 255, 255, 0.6);
@@ -585,12 +608,29 @@ const handleNext = () => {
   }
 }
 
+.goal-bottom {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--goal-bottom-top-gap);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  z-index: 20;
+}
+
 .goal-instruction {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 20px 0;
+  margin: 0 0 var(--goal-instruction-bottom-gap) 0;
   text-align: center;
   flex-shrink: 0;
+}
+
+.goal-instruction--inline {
+  margin-top: var(--goal-inline-instruction-gap);
+  margin-bottom: 0;
 }
 
 .goal-actions {

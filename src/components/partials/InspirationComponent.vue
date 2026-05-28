@@ -1,18 +1,44 @@
 <template>
   <div class="inspiration-Component">
     <div
-      class="inspiration-Bg"
-      :style="{
-        backgroundImage:
-          'url(' + props.inspiration.inspirationInfo.inspirationImage + ')'
-      }"
-      @click="routeCheck('post-detail')"
+      class="inspiration-media"
+      role="button"
+      tabindex="0"
+      @click="openLinkedPostOrNotice"
+      @keyup.enter.space.prevent="openLinkedPostOrNotice"
     >
-      <div class="profileSection" @click.stop="routeCheck('userProfile')">
-        <img class="userPicture" :src="props.inspiration.user.userPicture" />
-        <span class="userName">{{ props.inspiration.user.userName }}</span>
-      </div>
-      <div class="inspiration-icons">
+      <q-img
+        :src="coverImageSrc"
+        :ratio="4 / 5"
+        fit="cover"
+        no-spinner
+        loading="lazy"
+        img-class="inspiration-imgEl"
+        class="inspiration-qimg"
+        :class="{ 'inspiration-qimg--ready': mainImageReady }"
+        @load="onCoverLoad"
+        @error="onCoverLoad"
+      >
+        <template #loading>
+          <div class="inspiration-imgPlaceholder">
+            <q-skeleton type="rect" square class="inspiration-imgSkeleton" />
+          </div>
+        </template>
+      </q-img>
+      <div class="inspiration-mediaChrome">
+        <div class="profileSection" @click.stop="openAuthorProfile">
+          <img
+            class="userPicture"
+            :src="props.inspiration.user.userPicture"
+            alt=""
+            width="35"
+            height="35"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="userName">{{ props.inspiration.user.userName }}</span>
+        </div>
+        <div class="inspiration-icons" @click.stop>
         <q-btn class="PostDetail-btn"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
@@ -46,6 +72,7 @@
             />
           </svg>
         </q-btn>
+        </div>
       </div>
     </div>
     <div class="inspiration-info">
@@ -76,11 +103,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, PropType, ref } from "vue";
+import { defineProps, PropType, ref, computed, watch } from "vue";
 import { Inspiration } from "src/components/models";
 import { useRouter, useRoute } from "vue-router";
+import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
 
 const isLiked = ref(false);
+const mainImageReady = ref(false);
 
 interface Props {
   inspiration: Inspiration;
@@ -93,14 +123,62 @@ const props: Props = defineProps({
   }
 });
 
+const coverImageSrc = computed(
+  () => props.inspiration.inspirationInfo.inspirationImage
+);
+
+watch(
+  coverImageSrc,
+  () => {
+    mainImageReady.value = false;
+  },
+  { immediate: true }
+);
+
+const onCoverLoad = () => {
+  mainImageReady.value = true;
+};
+
 const router = useRouter();
 const route = useRoute();
-const routesName = route.name?.toString() || "";
+const $q = useQuasar();
+const { t } = useI18n();
 
-const routeCheck = (name: string) => {
-  routesName.startsWith("donee")
-    ? router.push({ name: `donee-${name}` })
-    : router.push({ name: `donor-${name}` });
+const routesName = route.name?.toString() || "";
+const isDonor = () => routesName.startsWith("donor");
+
+const openLinkedPostOrNotice = () => {
+  const id = props.inspiration.linkedPostId;
+  if (isDonor() && id != null && id > 0) {
+    void router.push({ name: "donor-post-detail", params: { id: String(id) } });
+    return;
+  }
+  $q.notify({
+    type: "info",
+    message: t("inspirationNoLinkedPost"),
+    timeout: 2800
+  });
+};
+
+const openAuthorProfile = () => {
+  const uid = props.inspiration.user.userId;
+  if (uid != null && uid > 0) {
+    if (isDonor()) {
+      void router.push({ name: "donor-user-profile", params: { userId: String(uid) } });
+    } else {
+      void router.push({ name: "donee-user-profile", params: { userId: String(uid) } });
+    }
+    return;
+  }
+  if (isDonor()) {
+    void router.push({ name: "donor-userProfile" });
+    return;
+  }
+  $q.notify({
+    type: "info",
+    message: t("inspirationProfileUnavailable"),
+    timeout: 2800
+  });
 };
 </script>
 <style scoped lang="scss">
@@ -149,22 +227,61 @@ $text-max-length: 10000; // set the maximum length of the text
   backdrop-filter: blur(1rem);
 }
 .inspiration-Component {
-  height: 32rem;
-  .inspiration-Bg {
+  width: 100%;
+
+  /* q-img + ratio="4/5" rezervuje výšku ešte pred načítaním siete */
+  .inspiration-media {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .inspiration-qimg {
+    width: 100%;
+    display: block;
+  }
+
+  .inspiration-qimg :deep(.inspiration-imgEl) {
+    opacity: 0;
+    transition: opacity 0.42s ease;
+  }
+
+  .inspiration-qimg--ready :deep(.inspiration-imgEl) {
+    opacity: 1;
+  }
+
+  .inspiration-imgPlaceholder {
+    position: absolute;
+    inset: 0;
+  }
+
+  .inspiration-imgSkeleton {
+    width: 100%;
+    height: 100%;
+    min-height: 12rem;
+  }
+
+  .inspiration-mediaChrome {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 22rem;
     padding: 0.7rem;
-    background-size: cover;
-    background-repeat: round;
-    image-rendering: smooth;
-    z-index: -1;
+    pointer-events: none;
+    z-index: 1;
+
+    .profileSection,
+    .inspiration-icons {
+      pointer-events: auto;
+    }
+
     .inspiration-icons {
       display: flex;
       width: 100%;
-      justify-content: end;
+      justify-content: flex-end;
     }
+
     .profileSection {
       background: linear-gradient(
         108.46deg,
@@ -174,31 +291,40 @@ $text-max-length: 10000; // set the maximum length of the text
       border-radius: 1.3rem;
       width: 9.3rem;
       height: 3rem;
+      min-height: 3rem;
       padding: 0.4rem;
       display: flex;
       align-items: center;
       color: white;
+      flex-shrink: 0;
+
       .userPicture {
         height: 2.2rem;
         width: 2.2rem;
+        min-width: 2.2rem;
+        min-height: 2.2rem;
         border-radius: 1.5rem;
         margin-left: 0.3rem;
         margin-right: 0.5rem;
+        object-fit: cover;
+        flex-shrink: 0;
       }
+
       .userName {
         margin-right: 0.7rem;
         color: white;
         font-weight: bold;
         font-size: 0.9rem;
-        white-space: nowrap; // prevent line breaks
-        overflow: hidden; // hide the text that exceeds the maximum length
-        text-overflow: ellipsis; // add an ellipsis to indicate truncated text
-        max-width: #{$text-max-length}ch; // set the maximum width based on the maximum length
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: #{$text-max-length}ch;
       }
     }
   }
+
   .inspiration-info {
-    height: 10rem;
+    min-height: 10rem;
     background-color: rgba(2, 2, 2, 0.354);
     backdrop-filter: blur(10px);
     color: white;

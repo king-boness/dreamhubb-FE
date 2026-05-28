@@ -1,6 +1,6 @@
 <template>
   <div
-    class="footer row col-12"
+    class="footer footer--doneeNav"
     :class="{ 'iphoneDevice-footer': $q.platform.is.ios }"
   >
     <q-btn
@@ -29,9 +29,11 @@
       />
       <span class="footer-pageName">{{ t("inspirations") }}</span>
     </q-btn>
-    <q-btn class="circle" @click="handlePostCreationClick">
-      <img src="/footer_icons/post.svg" :alt="t('addPost')" />
-    </q-btn>
+    <div class="circle-wrap">
+      <q-btn class="circle" @click="handlePostCreationClick">
+        <img src="/footer_icons/post.svg" :alt="t('addPost')" />
+      </q-btn>
+    </div>
     <q-btn
       :ripple="false"
       @click="$router.push({ name: 'donee-notifications' })"
@@ -282,16 +284,24 @@ const handlePostCreationClick = () => {
   background-position: center;
   background-size: cover;
   overflow: visible;
+  position: relative;
   display: flex;
-  justify-content: space-around;
-  align-items: center;
+  flex-direction: row;
   flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-top: 0.4rem;
+  padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
   height: auto;
   min-height: auto;
-  position: relative; // For absolute positioning of .circle button
 
   // Ensure all q-btn elements in footer have transparent background
-  :deep(.q-btn) {
+  :deep(.q-btn:not(.circle)) {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
@@ -300,10 +310,7 @@ const handlePostCreationClick = () => {
     outline: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-width: auto !important;
-    min-height: auto !important;
-    width: auto !important;
-    height: auto !important;
+    // Dimensions are reset for standard footer buttons; .circle uses its own explicit sizing
 
     &::before,
     &::after {
@@ -343,6 +350,11 @@ const handlePostCreationClick = () => {
     }
 
     .q-btn__content {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 0.12rem !important;
       background: transparent !important;
       background-color: transparent !important;
       box-shadow: none !important;
@@ -379,6 +391,14 @@ const handlePostCreationClick = () => {
       opacity: 0 !important;
       visibility: hidden !important;
     }
+  }
+
+  // Reset dimensions only for non-circle footer buttons
+  :deep(.q-btn):not(.circle) {
+    min-width: auto !important;
+    min-height: auto !important;
+    width: auto !important;
+    height: auto !important;
   }
 }
 
@@ -455,6 +475,11 @@ const handlePostCreationClick = () => {
   }
 
   :deep(.q-btn__content) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.12rem !important;
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
@@ -799,12 +824,11 @@ const handlePostCreationClick = () => {
   }
 }
 
-.footer-right {
-  margin-right: -1.5rem !important;
+.footer--doneeNav .footer-right {
+  margin-right: 0 !important;
   pointer-events: auto;
   position: relative;
   z-index: 1;
-  // Transform is now defined per icon below
 }
 
 /* Notifications icon specific positioning - 1px more right (from 1px to 2px) and 4px down */
@@ -869,35 +893,36 @@ const handlePostCreationClick = () => {
   transform: translateX(4px) translateY(3px) scale(1.02) !important;
 }
 
-.circle {
-  // FAB overlap - 1/3 above footer, 2/3 in footer
-  // Border line should align with top edge of footer
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  background-color: transparent;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  min-width: auto !important;
-  min-height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
-  position: absolute;
-  left: 50%;
-  bottom: 100%;
-  overflow: visible;
-  flex: 0 0 auto;
+.footer--doneeNav .circle-wrap {
+  width: 2.8rem;
+  height: 2.8rem;
   flex-shrink: 0;
-  flex-grow: 0;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin-bottom: 0;
   pointer-events: auto;
-  z-index: 1000;
-  // Position: 1/3 above footer (translate up by 33.33% of button height)
-  // Button height is 6rem, so 1/3 = 2rem = 33.33%
-  // Additional 6px down (10px + 4px - 3px - 2px - 2px - 1px adjustment)
-  transform: translateX(-50%) translateY(calc(-33.33% + 6px));
+  z-index: 20;
+}
+
+.circle {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  overflow: visible;
 
   &::before,
   &::after {
@@ -911,25 +936,20 @@ const handlePostCreationClick = () => {
   }
 
   :deep(.q-btn__wrapper) {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0 !important;
-    min-height: 6rem !important;
-    min-width: 6rem !important;
-    width: 6rem !important;
-    height: 6rem !important;
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
     border: none !important;
-    border-width: 0 !important;
-    outline: none !important;
-    overflow: visible;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
-    cursor: pointer;
-    z-index: 1000;
 
     &::before,
     &::after {
@@ -978,16 +998,12 @@ const handlePostCreationClick = () => {
   }
 
   img {
-    height: 1.6rem;
-    width: 1.6rem;
-    object-fit: contain;
-    transition: none !important;
-    transform: scale(6);
-    transform-origin: center;
+    width: 2.8rem;
+    height: 2.8rem;
     display: block;
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
+    object-fit: contain;
+    transform: none !important;
+    filter: none !important;
   }
 }
 </style>

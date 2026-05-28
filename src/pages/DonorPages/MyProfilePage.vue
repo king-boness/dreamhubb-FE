@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <q-page class="donorMyProfileUnified donorPostsPage donorPostsPage--unifiedScroll" :padding="false">
     <div v-if="loadError" class="myProfilePage-error">
       <div class="myProfilePage-errorText">{{ loadError }}</div>
       <q-btn
@@ -14,7 +14,7 @@
       </q-btn>
     </div>
     <MyProfileFilterComponent :post="post"></MyProfileFilterComponent>
-  </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
@@ -27,6 +27,7 @@ import { tGlobal } from "src/utils/i18nGlobal";
 
 const authStore = useAuthStore();
 const { t } = useI18n();
+
 const loadError = ref<string | null>(null);
 const retryLabel = computed(() => {
   const label = t("common.actions.retry");
@@ -77,6 +78,11 @@ const handleRetry = async () => {
 };
 </script>
 <style scoped lang="scss">
+.donorMyProfileUnified {
+  /* Match donee profile baseline: no extra bottom reserve */
+  padding-bottom: 0 !important;
+}
+
 .myProfilePage-error {
   width: calc(100% - 2rem);
   margin: 1rem auto 0.75rem;

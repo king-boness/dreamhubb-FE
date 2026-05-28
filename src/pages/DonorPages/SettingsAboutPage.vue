@@ -19,6 +19,7 @@ const { t } = useI18n();
   .settingsAbout-header {
     display: flex;
     width: 24rem;
+    max-width: 100%;
     justify-content: start;
     align-items: start;
     margin: 1.5rem 0;
@@ -41,5 +42,15 @@ const { t } = useI18n();
       font-size: 0.95rem;
     }
   }
+}
+</style>
+<style lang="scss">
+/* `p.aboutAppText` is not covered by global `.body--light span, h1, …` */
+.body--light .settingsAbout-page .settingsAbout-heading {
+  color: #1a1a1a !important;
+}
+
+.body--light .settingsAbout-page .aboutAppText {
+  color: rgba(0, 0, 0, 0.78) !important;
 }
 </style>

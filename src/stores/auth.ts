@@ -1,6 +1,7 @@
 // src/stores/auth.ts
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { resolveProfileImageSrc } from "src/utils/avatar";
 
 const TOKEN_KEY = "token";
 
@@ -34,7 +35,7 @@ export const useAuthStore = defineStore("auth", {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
-    avatarUrl: (state) => state.user?.profile_picture || null,
+    avatarUrl: (state) => resolveProfileImageSrc(state.user?.profile_picture ?? null),
     name: (state) => state.user?.username || ""
   },
 

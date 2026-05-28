@@ -17,10 +17,7 @@ $breakpoint-samsung: 375px;
   .verifyContent-button{
     font-size: 0.7rem !important;
   }
-  .tokenShop-card{
-    width: 10.5rem !important;
-    height: 10.5rem !important;
-  }
+  /* Token grid uses `width: 100%` per cell — fixed rem width breaks 2-column layout */
  .tutorial-btn {
   margin-bottom: 2rem !important;
  }

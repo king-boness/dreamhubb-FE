@@ -1,56 +1,54 @@
 <template>
-  <transition name="sheet-fade">
+  <div
+    v-if="modelValue"
+    class="shareProfileSheet-backdrop"
+    @click.self="closeSheet"
+  >
     <div
-      v-if="modelValue"
-      class="shareProfileSheet-backdrop"
-      @click.self="closeSheet"
+      class="shareProfileSheet"
+      :class="{ dragging: isDragging }"
+      :style="{
+        height: `${sheetHeight}px`
+      }"
+      @touchstart="onSheetTouchStart"
+      @touchmove="onSheetTouchMove"
+      @touchend="onSheetTouchEnd"
+      @mousedown="onSheetMouseDown"
     >
       <div
-        class="shareProfileSheet"
-        :class="{ dragging: isDragging }"
-        :style="{
-          height: `${sheetHeight}px`
-        }"
-        @touchstart="onSheetTouchStart"
-        @touchmove="onSheetTouchMove"
-        @touchend="onSheetTouchEnd"
-        @mousedown="onSheetMouseDown"
-      >
-        <div
-          class="shareProfileSheet-handle"
-          @touchstart.stop="onHandleTouchStart"
-          @touchmove.stop="onHandleTouchMove"
-          @touchend.stop="onHandleTouchEnd"
-          @mousedown.stop="onHandleMouseDown"
-        ></div>
-        <h2 class="shareProfileSheet-title">{{ shareTitle }}</h2>
+        class="shareProfileSheet-handle"
+        @touchstart.stop="onHandleTouchStart"
+        @touchmove.stop="onHandleTouchMove"
+        @touchend.stop="onHandleTouchEnd"
+        @mousedown.stop="onHandleMouseDown"
+      ></div>
+      <h2 class="shareProfileSheet-title">{{ shareTitle }}</h2>
 
-        <div class="shareProfileSheet-platforms">
-          <button
-            v-for="platform in platforms"
-            :key="platform.name"
-            class="shareProfileSheet-platformBtn"
-            @click="shareOnPlatform(platform)"
-          >
-            <img
-              :src="platform.icon"
-              :alt="platform.name"
-              class="shareProfileSheet-platformIcon"
-            />
-            <span class="shareProfileSheet-platformName">{{ platform.name }}</span>
-          </button>
-        </div>
-
+      <div class="shareProfileSheet-platforms">
         <button
-          v-if="hasNativeShare"
-          class="shareProfileSheet-btn shareProfileSheet-btn--native"
-          @click="shareNative"
+          v-for="platform in platforms"
+          :key="platform.name"
+          class="shareProfileSheet-platformBtn"
+          @click="shareOnPlatform(platform)"
         >
-          Share via Device
+          <img
+            :src="platform.icon"
+            :alt="platform.name"
+            class="shareProfileSheet-platformIcon"
+          />
+          <span class="shareProfileSheet-platformName">{{ platform.name }}</span>
         </button>
       </div>
+
+      <button
+        v-if="hasNativeShare"
+        class="shareProfileSheet-btn shareProfileSheet-btn--native"
+        @click="shareNative"
+      >
+        Share via Device
+      </button>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -84,13 +82,15 @@ const isDragging = ref(false);
 const sheetHeight = ref(0);
 const dragStartY = ref(0);
 const hasMoved = ref(false);
-const MIN_HEIGHT = 280; // Minimum height in pixels
-const INITIAL_HEIGHT = 600; // Initial height when opening (higher than min)
+const MIN_HEIGHT = 260; // Minimum height in pixels
+/** Same peek height as badge selector drawer (ProfileContent) — pull up to expand */
+const INITIAL_HEIGHT = 300;
 const MAX_HEIGHT_PERCENT = 90; // 90% of viewport height
 const DRAG_START_THRESHOLD = 5; // Minimum movement to start dragging (prevents scroll interference)
 
-// Calculate max height based on viewport
+// Calculate max height based on viewport (90vh — ako rozšírený badge drawer)
 const maxHeight = computed(() => {
+  if (typeof window === "undefined") return 640;
   return (window.innerHeight * MAX_HEIGHT_PERCENT) / 100;
 });
 
@@ -105,8 +105,8 @@ watch(
   (isOpen) => {
     if (isOpen) {
       document.body.classList.add("bottom-sheet-open");
-      // Set to initial height when opening (higher than min)
-      sheetHeight.value = INITIAL_HEIGHT;
+      /* Badge selector pri otvorení nastaví plnú výšku (~90vh), nie malý peek — rovnaký dojem pri slide-up */
+      sheetHeight.value = maxHeight.value;
     } else {
       document.body.classList.remove("bottom-sheet-open");
       sheetHeight.value = MIN_HEIGHT;
@@ -135,11 +135,9 @@ const closeSheet = () => {
   emit("update:modelValue", false);
 };
 
-// Calculate snap point based on current height
-// Two snap points: INITIAL_HEIGHT (600px), MAX_HEIGHT (90vh)
-// MIN_HEIGHT is only used as a clamp limit, not as a snap point
+// Calculate snap point based on current height (peek vs plná výška)
 const calculateSnapPoint = (currentHeight: number) => {
-  // Only two snap points: INITIAL_HEIGHT and MAX_HEIGHT
+  // Dva snap body: kompaktný peek a max výška
   const snapPoints = [INITIAL_HEIGHT, maxHeight.value];
   let nearest = snapPoints[0];
   let minDistance = Math.abs(currentHeight - snapPoints[0]);
@@ -524,6 +522,7 @@ const platforms = [
   justify-content: center;
   padding: 0 1rem;
   z-index: 10001; // Above ProfileActionsSheet and footer
+  animation: shareProfileBackdropFadeIn 0.3s ease;
 }
 
 .shareProfileSheet {
@@ -532,9 +531,10 @@ const platforms = [
   padding: 1.5rem 1.5rem 2rem;
   width: 100%;
   max-width: 600px;
+  max-height: 92vh;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease-out;
-  min-height: 280px;
+  animation: shareProfileSheetSlideUp 0.3s ease-out;
+  min-height: 260px;
   height: 280px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -657,24 +657,22 @@ const platforms = [
   }
 }
 
-@keyframes slideUp {
+@keyframes shareProfileBackdropFadeIn {
   from {
-    transform: translateY(100%);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
     opacity: 1;
   }
 }
 
-.sheet-fade-enter-active,
-.sheet-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.sheet-fade-enter-from,
-.sheet-fade-leave-to {
-  opacity: 0;
+/* Match badge drawer: panel slides from bottom; backdrop fades separately (no whole-sheet opacity fade). */
+@keyframes shareProfileSheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 </style>

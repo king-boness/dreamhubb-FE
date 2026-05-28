@@ -5,21 +5,29 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onBeforeUnmount, ref } from "vue";
 import lottie from "lottie-web";
 import animationData from "src/assets/Auth/splash-dark.json";
 
 const animationContainer = ref<HTMLElement | null>(null);
+let lottieInstance: ReturnType<typeof lottie.loadAnimation> | null = null;
 
 onMounted(() => {
   if (animationContainer.value) {
-    lottie.loadAnimation({
+    lottieInstance = lottie.loadAnimation({
       container: animationContainer.value,
       renderer: "canvas",
-      loop: true, // Loop for loading state
+      loop: true,
       autoplay: true,
       animationData
     });
+  }
+});
+
+onBeforeUnmount(() => {
+  if (lottieInstance) {
+    lottieInstance.destroy();
+    lottieInstance = null;
   }
 });
 </script>

@@ -103,6 +103,20 @@ export default {
   // Navigation
   home: "Home",
   inspirations: "Inspirations",
+  inspirationsForYou: "Inspirations for you",
+  inspirationsYourStory: "Your Story",
+  inspirationsEmptyTitle: "No inspirations yet",
+  inspirationsEmptyHint:
+    "When you add a post, it appears here on this device. Pull down to refresh.",
+  addInspirationPost: "Add an inspiration post",
+  inspirationAddImage: "Add image",
+  inspirationPostPlaceholder: "Write about your inspiration post…",
+  postInspiration: "Post inspiration",
+  inspirationNeedTextOrImage: "Add a short message or at least one image.",
+  inspirationPosted: "Your inspiration was added.",
+  inspirationNoLinkedPost:
+    "This inspiration is not linked to a dream post yet. Browse the home feed to open posts.",
+  inspirationProfileUnavailable: "Profile is not available for this inspiration.",
   notificationsLabel: "Notifications",
   profile: "profile",
   settings: "Settings",

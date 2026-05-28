@@ -4,7 +4,7 @@ import { getLastRequest, pushRequest } from "src/utils/diagnostics-buffer";
 const dev = !!import.meta.env.DEV;
 const forced =
   (typeof window !== "undefined" &&
-    (window as any).__diagnosticsForce === true) ||
+    (window as { __diagnosticsForce?: unknown }).__diagnosticsForce === true) ||
   (typeof localStorage !== "undefined" &&
     localStorage.getItem("__diagnostics") === "1");
 // Opt-in: dev mode or explicit flag (no auto-enable on iOS)
@@ -123,8 +123,16 @@ export default boot(() => {
 
   // ---- Fetch wrapper (DEV) ----
   const origFetch = window.fetch;
-  window.fetch = async (input: any, init?: any): Promise<Response> => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  window.fetch = async (
+    input: string | URL | Request,
+    init?: globalThis.RequestInit
+  ): Promise<Response> => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
     const method = init?.method ?? "GET";
     const start = Date.now();
     let status: number | undefined;

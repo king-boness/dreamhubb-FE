@@ -43,13 +43,14 @@ const openNetworkSettings = () => {
 </script>
 
 <style scoped lang="scss">
+/* Unified app background shows through */
 .no-connection {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top, #0b001c 0%, #05000e 40%, #010006 100%);
+  background: transparent;
   z-index: 9999;
 }
 

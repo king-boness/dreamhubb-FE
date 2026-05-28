@@ -12,6 +12,8 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (5.0.6):
     - Capacitor
+  - CapgoNativePurchases (0.0.72):
+    - Capacitor
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -21,6 +23,7 @@ DEPENDENCIES:
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - "CapgoNativePurchases (from `../../node_modules/@capgo/native-purchases`)"
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -37,6 +40,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/keyboard"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
+  CapgoNativePurchases:
+    :path: "../../node_modules/@capgo/native-purchases"
 
 SPEC CHECKSUMS:
   Capacitor: 747aadb4fa786f460d8cd9d0557cb81440a13747
@@ -46,7 +51,8 @@ SPEC CHECKSUMS:
   CapacitorHaptics: 1fffc1217c7e64a472d7845be50fb0c2f7d4204c
   CapacitorKeyboard: b978154b024a5f65e044908e37d15b7de58b9d12
   CapacitorStatusBar: 565c0a1ebd79bb40d797606a8992b4a105885309
+  CapgoNativePurchases: e93db2aa7d22721a46bb73ebeb76019d0696ba2c
 
-PODFILE CHECKSUM: 3d364089fbea25a4a6298746022e532616ef4206
+PODFILE CHECKSUM: 31e0a3be181bf566ed0536cb0437addf39d40bd1
 
 COCOAPODS: 1.16.2

@@ -7,7 +7,7 @@
       <template v-for="(lang, i) in languages" :key="i">
         <q-separator
           v-if="lang.isDivider"
-          dark
+          :dark="!isBodyLight"
           class="lang-divider"
         />
         <div
@@ -440,7 +440,8 @@ watch(
 
     .lang-divider {
       margin: 0.5rem 0;
-      background-color: rgba(255, 255, 255, 0.2);
+      opacity: 1 !important;
+      background-color: rgba(255, 255, 255, 0.2) !important;
     }
 
     .langCategory {
@@ -514,5 +515,12 @@ watch(
     border-radius: 0.5rem;
     width: 100%;
   }
+}
+</style>
+
+<style lang="scss">
+.body--light .settingsLang-page .lang-divider {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  opacity: 1 !important;
 }
 </style>
