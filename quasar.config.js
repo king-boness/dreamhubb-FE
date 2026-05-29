@@ -18,10 +18,11 @@ module.exports = configure(function (/* ctx */) {
       errors: true
     },
 
-    // Boot files
+    // Boot files (dev-only diagnostics must not run in App Store Release builds)
     boot: [
-      "diagnostics",
-      "capacitor-debug",
+      ...(process.env.NODE_ENV === "development"
+        ? ["diagnostics", "capacitor-debug"]
+        : ["launch-safe"]),
       "i18n",
       "axios",
       "auth",

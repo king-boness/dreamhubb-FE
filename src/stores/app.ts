@@ -8,6 +8,10 @@ export const useAppStore = defineStore("app", {
     // Global app init state – used for initial splash/loading
     isInitializingApp: true as boolean
   }),
+  getters: {
+    /** Alias used by App.vue */
+    isInitializing: (state) => state.isInitializingApp
+  },
   actions: {
     async initializeApp() {
       if (import.meta.env.DEV) {
@@ -18,21 +22,31 @@ export const useAppStore = defineStore("app", {
       const preferencesStore = usePreferencesStore();
 
       try {
-        // Hydrate preferences from localStorage (safe to call multiple times)
-        preferencesStore.hydrateFromStorage();
+        try {
+          preferencesStore.hydrateFromStorage();
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.debug("[AppStore] hydrateFromStorage failed:", error);
+          }
+        }
 
-        // If we already have a token, make sure user data is loaded
         if (authStore.token) {
           try {
             await authStore.fetchUser();
-          } catch (error) {
-            // Requirement (auth UX): never spam console with token verification failures.
-            // If /user fails during init (401/403 OR network/CORS/timeout), silently clear session and stay in guest flow.
+          } catch {
             if (import.meta.env.DEV) {
               console.debug("[AppStore] fetchUser failed during init; clearing session silently.");
             }
-            await authStore.logout({ remote: false, silent: true });
+            try {
+              await authStore.logout({ remote: false, silent: true });
+            } catch {
+              // ignore — guest flow must still render
+            }
           }
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.debug("[AppStore] initializeApp unexpected error:", error);
         }
       } finally {
         this.isInitializingApp = false;

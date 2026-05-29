@@ -37,24 +37,30 @@ const handleOffline = () => {
   networkStore.setOnline(false);
 };
 
-// Inicializácia appky a auth stavu pri štarte
-onMounted(async () => {
+onMounted(() => {
   window.addEventListener("online", handleOnline);
   window.addEventListener("offline", handleOffline);
 
-  // Initialize global app state (auth + preferences, etc.)
-  await appStore.initializeApp();
+  void (async () => {
+    try {
+      await appStore.initializeApp();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.debug("[App] initializeApp failed:", error);
+      }
+      appStore.setInitializingApp(false);
+    }
 
-  // Ensure axios has the latest token after reload
-  const token = authStore.token;
-  if (token) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    import("src/boot/axios").then((mod) => {
-      const { api } = mod;
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-    });
-  }
+    const token = authStore.token;
+    if (token) {
+      try {
+        const mod = await import("src/boot/axios");
+        mod.api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      } catch {
+        // ignore
+      }
+    }
+  })();
 });
 
 onBeforeUnmount(() => {
