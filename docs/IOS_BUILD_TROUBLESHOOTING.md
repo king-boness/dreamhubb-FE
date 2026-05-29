@@ -36,4 +36,4 @@ pod install
 grep PRODUCT_BUNDLE_IDENTIFIER ios/App/App.xcodeproj/project.pbxproj
 ```
 
-Mal by byť zjednotený na `com.dreamhubb.app` (žiadne duplicity).
+Mal by byť zjednotený na `com.dreamhubb.ap` (žiadne duplicity).
