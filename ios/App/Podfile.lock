@@ -44,14 +44,14 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capgo/native-purchases"
 
 SPEC CHECKSUMS:
-  Capacitor: 747aadb4fa786f460d8cd9d0557cb81440a13747
-  CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
-  CapacitorCamera: d333715364b5d85422c627aae6db87ef6161352c
+  Capacitor: 9686e5711b48a1aa84671ede795d0175848abcba
+  CapacitorApp: 3bef09d0bbb9698fd1766398499f306647156bbf
+  CapacitorCamera: 916a67c6726fabcc623df79d3f934828f2520103
   CapacitorCordova: 31ab98dca2ddcee051027a1afe7e8c85c82f7297
-  CapacitorHaptics: 1fffc1217c7e64a472d7845be50fb0c2f7d4204c
-  CapacitorKeyboard: b978154b024a5f65e044908e37d15b7de58b9d12
-  CapacitorStatusBar: 565c0a1ebd79bb40d797606a8992b4a105885309
-  CapgoNativePurchases: e93db2aa7d22721a46bb73ebeb76019d0696ba2c
+  CapacitorHaptics: c56885bd07919be808b38db507507919ce4d1b09
+  CapacitorKeyboard: 673a4a303383a61f4d360c871f121f8bbaa745b6
+  CapacitorStatusBar: f7e05ad7e5fb1a1cdacd2f0b55d488550ca07c41
+  CapgoNativePurchases: 28cafc43d5f888f0240a395e711272ab2ec315c3
 
 PODFILE CHECKSUM: 31e0a3be181bf566ed0536cb0437addf39d40bd1
 
