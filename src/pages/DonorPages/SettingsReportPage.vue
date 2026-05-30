@@ -2,8 +2,8 @@
   <div class="report-page">
     <div class="report-header">
       <span class="report-title">Report a post</span>
-      <span class="report-description"
-        >Adipiscing viverra netus ultricies lacus consectetur.
+      <span class="report-description">
+        Help us keep dreamhubb safe. Select a reason and describe the issue. Our team will review your report.
       </span>
     </div>
 
@@ -15,11 +15,8 @@
         dark
         size="lg"
         color="primary"
-        @click="
-          category = false;
-          subCategory = false;
-        "
         class="radioButton-report"
+        @click="category = false; subCategory = false"
       />
       <span class="reportName">Inappropriate Content</span>
     </div>
@@ -31,11 +28,8 @@
         dark
         size="lg"
         color="primary"
-        @click="
-          category = false;
-          subCategory = false;
-        "
         class="radioButton-report"
+        @click="category = false; subCategory = false"
       />
       <span class="reportName">Hate speech or Racism</span>
     </div>
@@ -47,11 +41,8 @@
         dark
         size="lg"
         color="primary"
-        @click="
-          category = true;
-          subCategory = false;
-        "
         class="radioButton-report"
+        @click="category = true; subCategory = false"
       />
       <span class="reportName">Wrong Category</span>
     </div>
@@ -63,11 +54,8 @@
         dark
         size="lg"
         color="primary"
-        @click="
-          category = false;
-          subCategory = true;
-        "
         class="radioButton-report"
+        @click="category = false; subCategory = true"
       />
       <span class="reportName">Wrong Subcategory</span>
     </div>
@@ -81,8 +69,7 @@
         label="Tell us more about the problem..."
         class="registerDatas registerSecrete reportInput"
         type="textarea"
-      >
-      </q-input>
+      />
     </div>
     <div v-if="category">
       <q-select
@@ -109,7 +96,8 @@
     <div class="reportPage-buttonContainer">
       <q-btn
         class="report-button"
-        :disabled="!canSendReport"
+        :disabled="!canSendReport || submitting"
+        :loading="submitting"
         @click="handleSendReport"
       >
         <span>Send Report</span>
@@ -121,7 +109,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { notifySuccess } from "src/utils/notify";
+import { api } from "boot/axios";
+import { notifySuccess, notifyError } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { goBackOrFallback } from "src/utils/navigation";
 
 const route = useRoute();
@@ -133,8 +123,8 @@ const subCategorySelect = ref("");
 const CategorySelect = ref("");
 const category = ref(false);
 const subCategory = ref(false);
+const submitting = ref(false);
 
-// All available subcategories
 const subCategoryOptions = [
   "Traveling",
   "Health",
@@ -146,7 +136,6 @@ const subCategoryOptions = [
   "Other"
 ];
 
-// Handle click on report container (text or radio button)
 const handleRadioClick = (value: string) => {
   shape.value = value;
   if (value === "wrongCategory") {
@@ -162,7 +151,9 @@ const handleRadioClick = (value: string) => {
 };
 
 const postId = computed(() => {
-  return route.params.id ? String(route.params.id) : null;
+  const fromParams = route.params.id ? String(route.params.id) : null;
+  const fromQuery = route.query.postId ? String(route.query.postId) : null;
+  return fromParams || fromQuery;
 });
 
 const canSendReport = computed(() => {
@@ -170,15 +161,44 @@ const canSendReport = computed(() => {
 });
 
 const handleSendReport = async () => {
-  // TODO: Implement actual API call to report post
-  // For now, just show success and redirect back
-  notifySuccess("common.success.reportSubmitted", "Report submitted successfully", { position: "top", timeout: 3000 });
+  if (!postId.value) {
+    notifyError(
+      {
+        kind: "validation",
+        messageKey: "common.errors.validation",
+        fallbackMessage: "Post ID is missing. Open report from a post detail screen.",
+        retryable: false
+      },
+      { position: "top" }
+    );
+    return;
+  }
 
-  // Redirect back to post detail or previous page
-  const fallback = postId.value ? { name: "donor-post-detail", params: { id: postId.value } } : { name: "donor-posts" };
-  goBackOrFallback(router, fallback);
+  submitting.value = true;
+  try {
+    // TODO(backend): confirm route + payload with Laravel (expected: POST /api/posts/:id/report).
+    await api.post(`/posts/${postId.value}/report`, {
+      reason: shape.value || "other",
+      message: helpMessage.value.trim(),
+      suggested_category: CategorySelect.value || null,
+      suggested_subcategory: subCategorySelect.value || null
+    });
+
+    notifySuccess("common.success.reportSubmitted", "Report submitted successfully", {
+      position: "top",
+      timeout: 3000
+    });
+
+    const fallback = { name: "donor-post-detail", params: { id: postId.value } };
+    goBackOrFallback(router, fallback);
+  } catch (error) {
+    notifyError(mapAxiosErrorToDhError(error), { position: "top" });
+  } finally {
+    submitting.value = false;
+  }
 };
 </script>
+
 <style scoped lang="scss">
 .report-page {
   padding: 0 1.2rem;
@@ -200,6 +220,7 @@ const handleSendReport = async () => {
     .report-description {
       color: rgba(255, 255, 255, 0.534);
       font-size: 1rem;
+      line-height: 1.45;
     }
   }
   .report-container {
@@ -242,7 +263,7 @@ const handleSendReport = async () => {
       border-radius: 0.5rem !important;
       align-items: center;
       margin-top: 1rem;
-      margin-bottom: 8rem;
+      margin-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
     }
   }
 }

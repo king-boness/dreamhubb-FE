@@ -44,9 +44,15 @@
           ></q-btn>
         </div>
         <div class="settingsPrivacy-bottom">
-          <div class="settingsPrivacy-tracking settingsPrivacy">
+          <div
+            class="settingsPrivacy-tracking settingsPrivacy settingsPrivacy-linkRow"
+            role="button"
+            tabindex="0"
+            @click="openTerms"
+            @keyup.enter="openTerms"
+          >
             <span class="trackingTitle Title">Terms and Conditions</span>
-            <q-btn class="arrowBtn"
+            <q-btn class="arrowBtn" flat tabindex="-1"
               ><svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -62,9 +68,15 @@
                 </g></svg
             ></q-btn>
           </div>
-          <div class="settingsPrivacy-tracking settingsPrivacy">
+          <div
+            class="settingsPrivacy-tracking settingsPrivacy settingsPrivacy-linkRow"
+            role="button"
+            tabindex="0"
+            @click="openPrivacyPolicy"
+            @keyup.enter="openPrivacyPolicy"
+          >
             <span class="trackingTitle Title">Privacy Policy</span>
-            <q-btn class="arrowBtn"
+            <q-btn class="arrowBtn" flat tabindex="-1"
               ><svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -92,8 +104,11 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { notifySuccess } from "src/utils/notify";
+
+const router = useRouter();
 
 const PRIVACY_STORAGE_KEY = "dh_privacy_settings";
 
@@ -106,6 +121,14 @@ const initialValue2 = ref(false);
 const saving = ref(false);
 
 const hasChanges = computed(() => value.value !== initialValue.value || value2.value !== initialValue2.value);
+
+const openTerms = () => {
+  void router.push({ name: "terms-of-use" });
+};
+
+const openPrivacyPolicy = () => {
+  void router.push({ name: "privacy-policy" });
+};
 
 onMounted(() => {
   // Prefer explicit local preference if previously saved on device.
@@ -207,6 +230,10 @@ const handleSave = async () => {
 
         .settingsPrivacy {
           margin: 0.3rem 0;
+        }
+
+        .settingsPrivacy-linkRow {
+          cursor: pointer;
         }
       }
     }

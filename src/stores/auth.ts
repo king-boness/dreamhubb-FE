@@ -236,6 +236,23 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    /** Permanently delete the authenticated account (requires backend DELETE /user). */
+    async deleteAccount(): Promise<void> {
+      if (!this.token) {
+        throw new Error("Not authenticated");
+      }
+
+      // TODO(backend): confirm Laravel exposes DELETE /api/user (or POST /api/user/delete).
+      const { data } = await api.delete("/user");
+
+      if (data?.status === "success") {
+        await this.logout({ remote: false, silent: true });
+        return;
+      }
+
+      throw new Error(data?.message || "Account deletion failed");
+    },
+
     /** Set token (used after refresh to keep store in sync with localStorage) */
     setToken(token: string | null) {
       this.token = token;

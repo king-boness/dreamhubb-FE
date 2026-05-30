@@ -4,7 +4,12 @@ import { mapAxiosErrorToDhError, isNetworkError, isTimeoutError } from "src/util
 import { notifyError } from "src/utils/notify";
 import { tGlobal } from "src/utils/i18nGlobal";
 import { pushRequest } from "src/utils/diagnostics-buffer";
-import { API_BASE_SOURCE, API_BASE_URL, IS_NATIVE_RUNTIME } from "src/config/apiBase";
+import {
+  API_BASE_SOURCE,
+  API_BASE_URL,
+  IS_NATIVE_RUNTIME,
+  isLocalhostUrl
+} from "src/config/apiBase";
 
 declare module "axios" {
   interface InternalAxiosRequestConfig {
@@ -30,12 +35,21 @@ declare module "@vue/runtime-core" {
 // - Native live-reload dev (Capacitor on device): VITE_API_BASE_NATIVE_DEV (if set)
 const BASE = API_BASE_URL;
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV || IS_NATIVE_RUNTIME) {
   console.info("[DH-API-BASE]", {
     selectedBase: BASE || "(empty)",
     source: API_BASE_SOURCE,
-    nativeRuntime: IS_NATIVE_RUNTIME
+    nativeRuntime: IS_NATIVE_RUNTIME,
+    viteApiBase: import.meta.env.VITE_API_BASE || "(empty)",
+    viteApiBaseNativeDev: import.meta.env.VITE_API_BASE_NATIVE_DEV || "(empty)",
+    localhostOnDevice: IS_NATIVE_RUNTIME && isLocalhostUrl(BASE)
   });
+  if (IS_NATIVE_RUNTIME && isLocalhostUrl(BASE)) {
+    console.error(
+      "[DH-API-BASE-WARN] API base is localhost on a native device — requests will fail with ERR_NETWORK. " +
+        "Set VITE_API_BASE_NATIVE_DEV to your Mac LAN URL in .env and restart quasar dev."
+    );
+  }
 }
 
 // ------------------------------------
@@ -355,15 +369,25 @@ const attachInterceptor = (instance: AxiosInstance) => {
       if (isTimeoutError(error) || isNetworkError(error)) {
         const authUrl = isAuthEndpointUrl(url);
         if (authUrl) {
-          console.info("[DH-LOGIN-DIAG]", "axios.response.authTransportFailure", {
+          const localhostMisconfig = IS_NATIVE_RUNTIME && isLocalhostUrl(API_BASE_URL);
+          console.error("[DH-LOGIN-DIAG]", "axios.response.authTransportFailure", {
             url,
             method: originalRequest?.method,
             baseURL: originalRequest?.baseURL ?? "(empty)",
+            resolvedApiBase: API_BASE_URL || "(empty)",
+            resolvedApiSource: API_BASE_SOURCE,
             code: (error as { code?: string }).code,
             message: (error as { message?: string }).message,
             isTimeout: isTimeoutError(error),
             isNetwork: isNetworkError(error),
-            navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null
+            navigatorOnLine: typeof navigator !== "undefined" ? navigator.onLine : null,
+            ...(localhostMisconfig
+              ? {
+                  hint:
+                    "ERR_NETWORK likely because API base is localhost on iPhone. " +
+                    "Use VITE_API_BASE_NATIVE_DEV=http://<MAC_LAN_IP>:8000/api in .env"
+                }
+              : {})
           });
         } else if (isNetworkError(error)) {
           // Requirement: show offline banner also on ERR_NETWORK (even if navigator.onLine is true).

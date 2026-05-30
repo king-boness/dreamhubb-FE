@@ -191,11 +191,16 @@
         ></q-btn>
       </div>
     </div>
-    <!-- <q-btn class="appSettings-deleteButton text-capitalize"
-      ><span class="">Delete account</span></q-btn
-      > -->
   </div>
   <div class="appSettings-buttonsContainer">
+    <q-btn
+      class="appSettings-deleteButton text-capitalize"
+      flat
+      no-caps
+      @click="confirmDeleteAccount"
+    >
+      <span>Delete account</span>
+    </q-btn>
     <q-btn
       class="appSettings-deleteButton appSettings-logOutButton text-capitalize"
       @click="logout"
@@ -211,6 +216,8 @@ import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import { useI18n } from "vue-i18n";
 import messages from "src/i18n";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { notifyError, notifySuccess } from "src/utils/notify";
 
 const $q = useQuasar();
 const router = useRouter();
@@ -383,6 +390,26 @@ const logout = async () => {
   await auth.logout();
   router.push({ name: "login" });
 };
+
+const confirmDeleteAccount = () => {
+  $q.dialog({
+    title: "Delete account",
+    message:
+      "This permanently deletes your dreamhubb account and associated data (posts, profile). This action cannot be undone.",
+    cancel: { label: "Cancel", flat: true, color: "grey" },
+    ok: { label: "Delete account", color: "negative", flat: true },
+    persistent: true
+  }).onOk(async () => {
+    try {
+      await auth.deleteAccount();
+      notifySuccess("common.success.saved", "Your account has been deleted.", { position: "top" });
+      router.push({ name: "auth-welcome-page" });
+    } catch (error) {
+      notifyError(mapAxiosErrorToDhError(error), { position: "top" });
+    }
+  });
+};
+
 function changeTheme() {
   $q.dark.toggle();
   lightMode.value = !lightMode.value;

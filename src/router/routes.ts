@@ -675,7 +675,7 @@ const routes: RouteRecordRaw[] = [
         name: "donee-settings-privacy"
       },
       {
-        path: "post-detail/report",
+        path: "post-detail/:id/report",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/SettingsReportPage.vue"),
         name: "settings-report"

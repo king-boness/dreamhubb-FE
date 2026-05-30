@@ -9,6 +9,12 @@ import type { AppleIapPurchaseResult, AppleIapPurchaseStatus, AppleIapBackendPay
 import { buildPurchasePayload } from "src/types/purchase";
 import { appleIapAdapter } from "src/services/appleIapAdapter";
 
+/**
+ * Flip to true after Laravel validates Apple receipts (POST /api/purchases/validate-apple).
+ * While false, iOS token purchases show as unavailable — avoids fake success during App Review.
+ */
+export const APPLE_IAP_BACKEND_ENABLED = false;
+
 function isIos(): boolean {
   if (typeof window === "undefined") return false;
   const cap = Capacitor as unknown as { getPlatform?: () => string; isNativePlatform?: () => boolean };
@@ -65,6 +71,13 @@ export async function purchaseApplePackage(pkg: TokenPackage): Promise<AppleIapP
       const backendPayload = buildAppleIapBackendPayload(pkg, result.transactionId, payload);
       if (import.meta.env.DEV) {
         console.debug("[AppleIap] Purchase success – backend payload for Laravel:", backendPayload);
+      }
+      if (!APPLE_IAP_BACKEND_ENABLED) {
+        return {
+          status: "unavailable",
+          errorMessage:
+            "Token purchases are temporarily unavailable. Apple payment was received but server validation is not enabled yet."
+        };
       }
       // TODO: POST backendPayload to Laravel (e.g. POST /api/purchases/validate-apple) and refresh user tokens
     }

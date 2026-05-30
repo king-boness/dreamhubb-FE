@@ -83,7 +83,7 @@ import { usePurchasePlatform } from "src/composables/usePurchasePlatform";
 import type { TokenPackage, WebPaymentMethodId } from "src/types/purchase";
 import { TOKEN_PACKAGES, formatTokenAmount } from "src/config/tokenPackages";
 import { notifySuccess, notifyNegative, notifyInfo } from "src/utils/notify";
-import { isAppleIapReady } from "src/services/appleIapService";
+import { isAppleIapReady, APPLE_IAP_BACKEND_ENABLED } from "src/services/appleIapService";
 import PaymentMethodSheet from "src/components/purchase/PaymentMethodSheet.vue";
 import StorePurchaseSheet from "src/components/purchase/StorePurchaseSheet.vue";
 
@@ -119,6 +119,20 @@ watch(showPurchaseSheet, (open) => {
 });
 
 function openPurchaseSheet(pkg: TokenPackage) {
+  if (purchaseProvider.value === "apple_iap" && !APPLE_IAP_BACKEND_ENABLED) {
+    notifyNegative(
+      "Token purchases are temporarily unavailable on iOS. You can still earn tokens in the app.",
+      { timeout: 5000 }
+    );
+    return;
+  }
+  if (applePluginUnavailable.value) {
+    notifyNegative(
+      "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
+      { timeout: 5000 }
+    );
+    return;
+  }
   selectedPackage.value = pkg;
   showPurchaseSheet.value = true;
 }
@@ -244,7 +258,10 @@ onMounted(async () => {
   handleStripeReturn();
   if (purchaseProvider.value === "apple_iap") {
     applePluginUnavailable.value = !(await isAppleIapReady());
-    if (applePluginUnavailable.value) {
+    if (!APPLE_IAP_BACKEND_ENABLED) {
+      loadError.value =
+        "Token purchases on iOS are temporarily unavailable. Apple IAP server validation is being finalized.";
+    } else if (applePluginUnavailable.value) {
       loadError.value = "iOS purchases are unavailable in this build (NativePurchases plugin not linked).";
     }
   }

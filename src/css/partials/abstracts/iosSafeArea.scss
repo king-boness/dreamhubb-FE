@@ -140,3 +140,24 @@ html, body, #q-app, .q-layout, .q-page-container {
 .platform-ios .q-bottom-sheet__content {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* iPad / large phones: keep primary content readable, avoid edge-to-edge stretch */
+@media (min-width: 768px) {
+  .platform-ios .q-page {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
+  .platform-ios .appSettings,
+  .platform-ios .report-page,
+  .platform-ios .settingsPrivacy-page,
+  .platform-ios .settingsSupport-page,
+  .platform-ios .settingsBan-page,
+  .platform-ios .stats-Page {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
