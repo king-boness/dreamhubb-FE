@@ -95,7 +95,7 @@ module.exports = configure(function (/* ctx */) {
     // Quasar framework config
     framework: {
       config: {},
-      plugins: ["Notify", "BottomSheet"]
+      plugins: ["Notify", "BottomSheet", "Dialog"]
     },
 
     animations: ['fadeIn', 'fadeOut', 'backInRight', 'backInLeft', 'flipInY'],

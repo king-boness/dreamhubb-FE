@@ -3,7 +3,7 @@
     <div class="settingsFaq-header">
       <span class="settingsFaq-title">FAQ</span>
       <span class="settingsFaq-description">
-        Adipiscing viverra netus ultricies lacus consectetur.
+        Common questions about dreamhubb, Tokens, and your account.
       </span>
     </div>
     <div class="settingsFaq-accordion">
@@ -31,11 +31,33 @@
 <script setup lang="ts">
 const cardList = [
   {
-    title: "Question #1",
-    text: "Eros aliquam. Posuere purus pellentesque ipsum imperdiet ut sociis eget egestas pharetra. At nisl nisl lectus enim egestas diam elementum euismod dui. Cursus quis et proin quis ut a sit. Nisi massa aenean."
+    title: "What is dreamhubb?",
+    text: "dreamhubb is a social help platform where people can share dreams, problems, and ideas, and receive support from others."
   },
-  { title: "Question #2", text: "Card 2 Text" },
-  { title: "Question #3", text: "Card 3 Text" }
+  {
+    title: "What are Tokens?",
+    text: "Tokens are an in-app virtual currency used to support posts inside dreamhubb. Tokens are not cash and cannot be withdrawn."
+  },
+  {
+    title: "Can I withdraw Tokens?",
+    text: "No. Tokens are only used inside dreamhubb and cannot be exchanged for money."
+  },
+  {
+    title: "How can I report content?",
+    text: 'Open a post detail and tap "Report a post". You can also contact support from Settings.'
+  },
+  {
+    title: "How can I delete my account?",
+    text: 'Go to Settings and tap "Delete account". You will be asked to confirm before deletion.'
+  },
+  {
+    title: "How can I contact support?",
+    text: "Go to Settings → Help & Support or email matej.kostun@gmail.com."
+  },
+  {
+    title: "Are token purchases available on iOS?",
+    text: "Token purchases on iOS are temporarily unavailable while Apple In-App Purchase validation is finalized."
+  }
 ];
 </script>
 
@@ -45,6 +67,7 @@ const cardList = [
   justify-content: center;
   flex-direction: column;
   padding: 0 1.2rem;
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
   .settingsFaq-header {
     display: flex;
     flex-direction: column;

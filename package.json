@@ -13,6 +13,8 @@
     "test:watch": "echo \"⚠️  Tests disabled for release (vitest temporarily removed)\" && exit 0",
     "test:ui": "echo \"⚠️  Tests disabled for release (vitest temporarily removed)\" && exit 0",
     "dev": "quasar dev",
+    "dev:ios": "quasar dev -m capacitor -T ios",
+    "dev:ios:render": "VITE_API_BASE_NATIVE_DEV=https://dreamhubb-be-php.onrender.com/api quasar dev -m capacitor -T ios",
     "build": "quasar build",
     "ios": "ionic cap run ios -l --external",
     "build:pwa": "quasar build -m pwa",
