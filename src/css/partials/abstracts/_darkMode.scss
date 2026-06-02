@@ -1548,6 +1548,21 @@
     .postCard-meta span {
       color: rgba(255, 255, 255, 0.55) !important;
     }
+
+    .postCard-authorName,
+    .postCard-authorBadgeLabel,
+    .postCard-categoryPill,
+    .postCard-categoryPill span {
+      color: #ffffff !important;
+    }
+
+    .postCard-rewardPill > span {
+      color: #ffffff !important;
+    }
+
+    .postCard-body {
+      background: transparent !important;
+    }
   }
 
   /* Donee home — section titles + list states */
@@ -1862,6 +1877,29 @@ body.body--light .donorPostsPage .postCard .postCard-title {
 
 body.body--light .donorPostsPage .postCard .postCard-meta span {
   color: rgba(255, 255, 255, 0.55) !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-authorName,
+body.body--light .donorPostsPage .postCard .postCard-authorBadgeLabel {
+  color: #ffffff !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-categoryPill,
+body.body--light .donorPostsPage .postCard .postCard-categoryPill span {
+  color: #ffffff !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-rewardPill > span {
+  color: #ffffff !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-body {
+  background: transparent !important;
+  border-top: none !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-imageWrapper {
+  margin-bottom: 0;
 }
 
 /* Donor feed post cards — dark theme tokens (overridden in .body--light above) */

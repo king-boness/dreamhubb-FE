@@ -147,21 +147,42 @@ watch(isOpen, (open) => {
 
 <style lang="scss" scoped>
 .image-preview-dialog {
-  z-index: 10000 !important; // Ensure lightbox is above other dialogs
+  z-index: 10000 !important;
+
+  :deep(.q-dialog__backdrop) {
+    background: rgba(0, 0, 0, 0.96) !important;
+    backdrop-filter: none !important;
+  }
 
   :deep(.q-dialog__inner) {
-    padding: 0;
+    padding: 0 !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+
+  :deep(.q-dialog__inner > div) {
+    max-width: 100% !important;
+    max-height: 100% !important;
   }
 }
 
 .image-preview-card {
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.92);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
+  background: #000000;
   display: flex;
   flex-direction: column;
   position: relative;
   animation: imagePreviewFadeIn 0.22s ease-out;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 @keyframes imagePreviewFadeIn {
@@ -238,43 +259,63 @@ watch(isOpen, (open) => {
 }
 
 .image-preview-content {
+  flex: 1 1 auto;
   width: 100%;
-  height: 100%;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 4.5rem)
-    calc(env(safe-area-inset-right, 0px) + 1.25rem)
-    calc(env(safe-area-inset-bottom, 0px) + 1.25rem)
-    calc(env(safe-area-inset-left, 0px) + 1.25rem);
+    calc(env(safe-area-inset-top, 0px) + 3.5rem)
+    calc(env(safe-area-inset-right, 0px) + 0.75rem)
+    calc(env(safe-area-inset-bottom, 0px) + 2.5rem)
+    calc(env(safe-area-inset-left, 0px) + 0.75rem);
   box-sizing: border-box;
 }
 
 .image-preview-carousel {
   width: 100%;
   height: 100%;
+  min-height: 0;
   background: transparent;
+
+  :deep(.q-carousel__viewport),
+  :deep(.q-carousel__slides-container),
+  :deep(.q-panel) {
+    height: 100% !important;
+  }
+
+  :deep(.q-carousel__slide) {
+    height: 100% !important;
+  }
 }
 
 .image-preview-slide {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   padding: 0;
 }
 
 .image-preview-image {
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  max-width: min(100%, 100vw);
+  max-height: min(
+    100%,
+    calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 6rem)
+  );
   width: auto;
   height: auto;
   object-fit: contain;
+  object-position: center;
   user-select: none;
   -webkit-user-select: none;
   border-radius: 0;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: none;
 }
 </style>
 

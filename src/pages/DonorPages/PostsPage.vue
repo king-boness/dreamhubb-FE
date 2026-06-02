@@ -638,10 +638,12 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 .postCard-body {
   padding: 16px;
-  padding-bottom: 18px; // Bottom padding 16-20px
+  padding-bottom: 18px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  background: transparent;
+  box-sizing: border-box;
 }
 
 .postCard-title {

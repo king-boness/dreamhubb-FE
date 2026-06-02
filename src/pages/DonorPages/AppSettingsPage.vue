@@ -191,17 +191,33 @@
             </g></svg
         ></q-btn>
       </div>
+      <div
+        class="appSettings-content appSettings-content--destructive"
+        @click="confirmDeleteAccount"
+      >
+        <div class="appSetting-description">
+          <img src="/icons/deleteImg-icon.svg" alt="" class="appSettings-img" />
+          <span class="appSettings-name">Delete Account</span>
+        </div>
+        <q-btn class="arrowBtn"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
+            <g opacity="0.6">
+              <path
+                d="M8.47503 15.8332C8.59952 15.8337 8.72253 15.8062 8.83501 15.7528C8.9475 15.6995 9.04659 15.6216 9.12503 15.5249L13.15 10.5249C13.2726 10.3758 13.3396 10.1888 13.3396 9.99574C13.3396 9.80272 13.2726 9.61568 13.15 9.46657L8.98336 4.46657C8.84191 4.29639 8.63865 4.18937 8.4183 4.16905C8.19794 4.14874 7.97854 4.21679 7.80836 4.35824C7.63818 4.49969 7.53116 4.70295 7.51084 4.9233C7.49053 5.14366 7.55858 5.36306 7.70003 5.53324L11.425 9.9999L7.82503 14.4666C7.72312 14.5889 7.65839 14.7378 7.63849 14.8958C7.61859 15.0538 7.64436 15.2141 7.71274 15.3579C7.78112 15.5017 7.88925 15.6228 8.02434 15.7071C8.15944 15.7913 8.31583 15.8351 8.47503 15.8332Z"
+                fill="#D0DCD8"
+              />
+            </g></svg
+        ></q-btn>
+      </div>
     </div>
   </div>
   <div class="appSettings-actions">
-    <q-btn
-      class="appSettings-deleteButton text-capitalize"
-      flat
-      no-caps
-      @click="confirmDeleteAccount"
-    >
-      <span>Delete account</span>
-    </q-btn>
     <q-btn
       class="appSettings-logOutButton text-capitalize"
       flat
@@ -397,11 +413,11 @@ const logout = async () => {
 
 const confirmDeleteAccount = () => {
   $q.dialog({
-    title: "Delete account",
+    title: "Delete Account",
     message:
       "This permanently deletes your dreamhubb account and associated data (posts, profile). This action cannot be undone.",
     cancel: { label: "Cancel", flat: true, color: "grey" },
-    ok: { label: "Delete account", color: "negative", flat: true },
+    ok: { label: "Delete Account", color: "negative", flat: true },
     persistent: true
   }).onOk(async () => {
     try {
@@ -505,6 +521,10 @@ const routeCheck = (name: string) => {
   .appSettings .appSettings-content .appSettings-name,
   .appSettings .screenMode-container > .appSettings-name {
     color: #1a1a1a !important;
+  }
+
+  .appSettings .appSettings-content--destructive .appSettings-name {
+    color: rgba(189, 0, 67, 0.92) !important;
   }
 
   .appSettings .name-toggle-container :deep(.q-btn:not(.q-btn--active)) {
@@ -656,18 +676,23 @@ const routeCheck = (name: string) => {
   width: 100%;
 }
 
+.appSettings-content--destructive {
+  cursor: pointer;
+
+  .appSettings-name {
+    color: rgba(189, 0, 67, 0.92) !important;
+  }
+}
+
 .appSettings-actions {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  padding: 1.5rem 0.8rem 0;
-  padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom, 0px) + 4.5rem));
+  padding: 1rem 0.8rem 0;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
 
-  .appSettings-deleteButton,
   .appSettings-logOutButton {
     width: 100%;
     flex: 0 0 auto;
