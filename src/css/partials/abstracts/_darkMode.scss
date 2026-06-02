@@ -1531,22 +1531,26 @@
     border-color: rgba(black, 0.14) !important;
   }
 
-  /* Donor feed post cards — light mode: rovnaký layout/overlay ako dark (tmavá karta na svetlom pozadí) */
+  /* Donor feed — light: hero overlay pills tmavé, textový blok svetlý */
   .postCard {
-    --pc-surface: linear-gradient(180deg, #17151f 0%, #0d0b13 100%);
-    --pc-border: none;
-    --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
-    --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.2);
-    --pc-body-title: #ffffff;
-    --pc-body-meta: rgba(255, 255, 255, 0.55);
-    --pc-body-preview: #bbbbbb;
+    --pc-surface: #ffffff;
+    --pc-border: 1px solid rgba(0, 0, 0, 0.06);
+    --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.14);
+    --pc-body-title: #1a1a1a;
+    --pc-body-meta: rgba(0, 0, 0, 0.58);
+    --pc-body-preview: rgba(0, 0, 0, 0.68);
 
     .postCard-title {
-      color: #ffffff !important;
+      color: #1a1a1a !important;
     }
 
     .postCard-meta span {
-      color: rgba(255, 255, 255, 0.55) !important;
+      color: rgba(0, 0, 0, 0.58) !important;
+    }
+
+    .postCard-preview {
+      color: rgba(0, 0, 0, 0.68) !important;
     }
 
     .postCard-authorName,
@@ -1556,12 +1560,9 @@
       color: #ffffff !important;
     }
 
-    .postCard-rewardPill > span {
-      color: #ffffff !important;
-    }
-
     .postCard-body {
-      background: transparent !important;
+      background: #fbfbfb !important;
+      border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
     }
   }
 
@@ -1857,26 +1858,35 @@ body.body--light .postDetail .post-header .post-header-metaRow {
   display: flex !important;
 }
 
-/* Donor feed — light karty: rovnaký tmavý model ako dark (vyššia špecifita než scoped) */
+/* Donor feed — light: karta svetlá, textový blok čitateľný (vyššia špecifita než scoped) */
 body.body--light .donorPostsPage .postCard {
-  --pc-surface: linear-gradient(180deg, #17151f 0%, #0d0b13 100%);
-  --pc-border: none;
-  --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
-  --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.2);
-  --pc-body-title: #ffffff;
-  --pc-body-meta: rgba(255, 255, 255, 0.55);
-  --pc-body-preview: #bbbbbb;
-  background: var(--pc-surface) !important;
-  border: var(--pc-border) !important;
-  box-shadow: var(--pc-shadow) !important;
+  --pc-surface: #ffffff;
+  --pc-border: 1px solid rgba(0, 0, 0, 0.06);
+  --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.14);
+  --pc-body-title: #1a1a1a;
+  --pc-body-meta: rgba(0, 0, 0, 0.58);
+  --pc-body-preview: rgba(0, 0, 0, 0.68);
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-body {
+  background: #fbfbfb !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 body.body--light .donorPostsPage .postCard .postCard-title {
-  color: #ffffff !important;
+  color: #1a1a1a !important;
 }
 
 body.body--light .donorPostsPage .postCard .postCard-meta span {
-  color: rgba(255, 255, 255, 0.55) !important;
+  color: rgba(0, 0, 0, 0.58) !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-preview {
+  color: rgba(0, 0, 0, 0.68) !important;
 }
 
 body.body--light .donorPostsPage .postCard .postCard-authorName,
@@ -1889,13 +1899,9 @@ body.body--light .donorPostsPage .postCard .postCard-categoryPill span {
   color: #ffffff !important;
 }
 
+body.body--light .donorPostsPage .postCard .postCard-rewardPill,
 body.body--light .donorPostsPage .postCard .postCard-rewardPill > span {
-  color: #ffffff !important;
-}
-
-body.body--light .donorPostsPage .postCard .postCard-body {
-  background: transparent !important;
-  border-top: none !important;
+  color: #ff2c8b !important;
 }
 
 body.body--light .donorPostsPage .postCard .postCard-imageWrapper {

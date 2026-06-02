@@ -1,0 +1,37 @@
+/*
+ * Settings informational subpages — light mode readable typography.
+ * Scoped page styles default to white / #d0dcd8 for dark app chrome.
+ */
+body.body--light {
+  .settingsSupport-page .settingsSupport-heading,
+  .settingsBan-page .settingsBan-heading,
+  .settingsAbout-page .settingsAbout-heading,
+  .settingsFaq-page .settingsFaq-title,
+  .settingsPrivacy-page .settingsPrivacy-title,
+  .settingsPrivacy-page .settingsPrivacy .Title {
+    color: #1a1a1a !important;
+  }
+
+  .settingsSupport-page .questionsText,
+  .settingsBan-page .rulesText,
+  .settingsAbout-page .aboutAppText,
+  .settingsFaq-page .settingsFaq-description,
+  .settingsFaq-page .settingsFaq-cardText {
+    color: rgba(0, 0, 0, 0.68) !important;
+  }
+
+  .settingsSupport-page .questionsText strong,
+  .settingsBan-page .rulesText strong {
+    color: rgba(0, 0, 0, 0.78) !important;
+  }
+
+  .settingsBan-page .rulesText--muted {
+    color: rgba(0, 0, 0, 0.55) !important;
+    opacity: 1 !important;
+  }
+
+  .settingsSupport-page .settingsSupport-link,
+  .settingsBan-page .settingsBan-link {
+    color: #bd0043 !important;
+  }
+}
