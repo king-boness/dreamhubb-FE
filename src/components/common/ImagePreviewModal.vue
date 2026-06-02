@@ -176,10 +176,11 @@ watch(isOpen, (open) => {
   max-width: 100vw;
   max-height: 100vh;
   max-height: 100dvh;
-  background: #000000;
+  background: #000;
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
   animation: imagePreviewFadeIn 0.22s ease-out;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -198,7 +199,7 @@ watch(isOpen, (open) => {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 1rem);
   right: calc(env(safe-area-inset-right, 0px) + 1rem);
-  z-index: 10;
+  z-index: 5;
   width: 48px;
   height: 48px;
   min-width: 48px;
@@ -245,10 +246,11 @@ watch(isOpen, (open) => {
 
 .image-preview-counter {
   position: absolute;
-  bottom: 2rem;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: 3;
+  pointer-events: none;
   background: rgba(0, 0, 0, 0.5);
   color: white;
   padding: 0.5rem 1rem;
@@ -259,58 +261,50 @@ watch(isOpen, (open) => {
 }
 
 .image-preview-content {
-  flex: 1 1 auto;
+  padding: 0 !important;
   width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  position: relative;
   min-height: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
-  padding:
-    calc(env(safe-area-inset-top, 0px) + 3.5rem)
-    calc(env(safe-area-inset-right, 0px) + 0.75rem)
-    calc(env(safe-area-inset-bottom, 0px) + 2.5rem)
-    calc(env(safe-area-inset-left, 0px) + 0.75rem);
   box-sizing: border-box;
 }
 
 .image-preview-carousel {
   width: 100%;
   height: 100%;
-  min-height: 0;
-  background: transparent;
+  min-height: 100%;
+  background: #000;
 
   :deep(.q-carousel__viewport),
   :deep(.q-carousel__slides-container),
-  :deep(.q-panel) {
-    height: 100% !important;
-  }
-
+  :deep(.q-panel),
   :deep(.q-carousel__slide) {
+    width: 100% !important;
     height: 100% !important;
+    min-height: 100% !important;
   }
 }
 
 .image-preview-slide {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  padding: 0;
+  padding: 0 !important;
 }
 
 .image-preview-image {
   display: block;
-  max-width: min(100%, 100vw);
-  max-height: min(
-    100%,
-    calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 6rem)
-  );
-  width: auto;
-  height: auto;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
   object-position: center;
   user-select: none;
   -webkit-user-select: none;

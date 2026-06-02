@@ -753,7 +753,11 @@ const routeCheck = (name: string) => {
   flex: 0 0 auto;
   min-height: 0;
   width: 100%;
-  padding-bottom: calc(4.5rem + 0.35rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Footer clearance only — beats .dh-settings-scroll-root default (4.75rem) */
+.dh-settings-scroll-root .appSettings-page {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .appSettings-content--destructive {
