@@ -1560,6 +1560,11 @@
       color: #ffffff !important;
     }
 
+    .postCard-rewardPill,
+    .postCard-rewardPill span {
+      color: #ff2c8b !important;
+    }
+
     .postCard-body {
       background: #fbfbfb !important;
       border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -1900,7 +1905,7 @@ body.body--light .donorPostsPage .postCard .postCard-categoryPill span {
 }
 
 body.body--light .donorPostsPage .postCard .postCard-rewardPill,
-body.body--light .donorPostsPage .postCard .postCard-rewardPill > span {
+body.body--light .donorPostsPage .postCard .postCard-rewardPill span {
   color: #ff2c8b !important;
 }
 
@@ -1952,4 +1957,12 @@ body.body--light .dhHintBubble .dhHintBubble-content p {
 
 body.body--light .dhHintBubble .dhHintBubble-close {
   color: #ffffff !important;
+}
+
+/*
+ * Donor feed reward pill — MUST be last (beats .body--light span { black !important }).
+ */
+body.body--light .donorPostsPage .postCard .postCard-rewardPill,
+body.body--light .donorPostsPage .postCard .postCard-rewardPill span {
+  color: #ff2c8b !important;
 }

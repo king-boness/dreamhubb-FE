@@ -634,6 +634,10 @@ const emitOpenAuthor = (post: DonorPost) => {
   font-weight: 700;
   line-height: 1.2;
   border: 1px solid rgba(255, 44, 139, 0.4); // Stronger border
+
+  span {
+    color: inherit;
+  }
 }
 
 .postCard-body {

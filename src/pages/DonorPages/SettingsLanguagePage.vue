@@ -441,7 +441,6 @@ watch(
     .lang-divider {
       margin: 0.5rem 0;
       opacity: 1 !important;
-      background-color: rgba(255, 255, 255, 0.2) !important;
     }
 
     .langCategory {
@@ -519,8 +518,19 @@ watch(
 </style>
 
 <style lang="scss">
-.body--light .settingsLang-page .lang-divider {
-  background-color: rgba(0, 0, 0, 0.12) !important;
+/* Dark divider (scoped attr beats generic .body--light rules) */
+body:not(.body--light) .settingsLang-page .settingsLang-selection .lang-divider {
+  background: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Light divider — higher specificity than scoped white rule */
+body.body--light .settingsLang-page .settingsLang-selection .lang-divider,
+body.body--light .settingsLang-page .settingsLang-selection .lang-divider.q-separator {
+  background: rgba(0, 0, 0, 0.1) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
   opacity: 1 !important;
+  height: 1px !important;
+  min-height: 1px !important;
 }
 </style>
