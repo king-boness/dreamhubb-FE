@@ -199,7 +199,7 @@ watch(isOpen, (open) => {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 1rem);
   right: calc(env(safe-area-inset-right, 0px) + 1rem);
-  z-index: 5;
+  z-index: 20;
   width: 48px;
   height: 48px;
   min-width: 48px;
@@ -224,7 +224,7 @@ watch(isOpen, (open) => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 15;
   background: rgba(0, 0, 0, 0.5);
   color: white;
   backdrop-filter: blur(8px);
@@ -249,7 +249,7 @@ watch(isOpen, (open) => {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 3;
+  z-index: 20;
   pointer-events: none;
   background: rgba(0, 0, 0, 0.5);
   color: white;
@@ -261,22 +261,27 @@ watch(isOpen, (open) => {
 }
 
 .image-preview-content {
-  padding: 0 !important;
+  position: relative;
   width: 100%;
   height: 100%;
   flex: 1 1 auto;
-  position: relative;
   min-height: 0;
-  display: flex;
-  overflow: hidden;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 4.25rem)
+    0
+    calc(env(safe-area-inset-bottom, 0px) + 4.25rem)
+    0;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .image-preview-carousel {
   width: 100%;
   height: 100%;
-  min-height: 100%;
-  background: #000;
+  background: transparent;
 
   :deep(.q-carousel__viewport),
   :deep(.q-carousel__slides-container),
@@ -284,32 +289,32 @@ watch(isOpen, (open) => {
   :deep(.q-carousel__slide) {
     width: 100% !important;
     height: 100% !important;
-    min-height: 100% !important;
   }
 }
 
 .image-preview-slide {
   width: 100%;
   height: 100%;
-  min-height: 100%;
+  padding: 0 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 !important;
+  box-sizing: border-box;
 }
 
 .image-preview-image {
   display: block;
   width: 100%;
   height: 100%;
-  max-width: none;
-  max-height: none;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   object-position: center;
   user-select: none;
   -webkit-user-select: none;
   border-radius: 0;
   box-shadow: none;
+  background: transparent;
 }
 </style>
 

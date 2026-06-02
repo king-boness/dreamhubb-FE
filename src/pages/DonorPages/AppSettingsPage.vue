@@ -755,9 +755,19 @@ const routeCheck = (name: string) => {
   width: 100%;
 }
 
-/* Footer clearance only — beats .dh-settings-scroll-root default (4.75rem) */
+/*
+ * Bottom inset like profile/detail CTAs (Report / Settings) — not footer tab height.
+ * Beats .dh-settings-scroll-root default (4.75rem) from _roleMainChrome.scss.
+ */
+.dh-settings-scroll-root:has(.appSettings-page) {
+  min-height: auto !important;
+  height: auto !important;
+}
+
 .dh-settings-scroll-root .appSettings-page {
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px)) !important;
+  min-height: auto !important;
+  height: auto !important;
 }
 
 .appSettings-content--destructive {
@@ -773,7 +783,10 @@ const routeCheck = (name: string) => {
   display: flex;
   flex-direction: column;
   padding: 0 0.8rem;
-  margin: 1.75rem 0 0;
+  margin-top: 1.75rem;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
   width: 100%;
   box-sizing: border-box;
 
