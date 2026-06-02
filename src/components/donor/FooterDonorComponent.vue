@@ -1,7 +1,10 @@
 <template>
   <div
     class="footer footer--donor4"
-    :class="{ 'iphoneDevice-footer': $q.platform.is.ios }"
+    :class="{
+      'iphoneDevice-footer': $q.platform.is.ios,
+      'footer--light': isBodyLight
+    }"
   >
     <q-btn
       :ripple="false"
@@ -256,11 +259,18 @@ const bellIcon = computed(() => {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  background-image: none;
-  background-image: url("/icons/rectangle.svg") !important;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: none !important;
+  background-color: rgba(10, 10, 16, 0.78) !important;
+  backdrop-filter: blur(20px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45) !important;
+
+  &.footer--light {
+    background-color: rgba(255, 255, 255, 0.62) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08) !important;
+  }
   overflow: visible;
   display: flex;
   flex-direction: row;

@@ -1,4 +1,5 @@
 <template>
+  <div class="appSettings-page">
   <div class="appSettings">
     <div class="acccoutSettings-div accontSettings-container">
       <span class="appSettings-title">{{ t("accountSettings") }}</span>
@@ -192,7 +193,7 @@
       </div>
     </div>
   </div>
-  <div class="appSettings-buttonsContainer">
+  <div class="appSettings-actions">
     <q-btn
       class="appSettings-deleteButton text-capitalize"
       flat
@@ -202,11 +203,14 @@
       <span>Delete account</span>
     </q-btn>
     <q-btn
-      class="appSettings-deleteButton appSettings-logOutButton text-capitalize"
+      class="appSettings-logOutButton text-capitalize"
+      flat
+      no-caps
       @click="logout"
     >
-      <span class="">{{ t("logOut") }}</span>
+      <span>{{ t("logOut") }}</span>
     </q-btn>
+  </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -552,8 +556,8 @@ const routeCheck = (name: string) => {
   box-shadow: none;
 }
 .appSettings {
+  flex: 0 1 auto;
   padding: 0 1rem;
-
   padding-top: 1.2rem;
   .q-btn-item {
     border-radius: 0.3rem;
@@ -643,23 +647,38 @@ const routeCheck = (name: string) => {
     font-family: poppins;
     font-size: 1rem;
   }
-  .appSettings-logOutButton {
-    margin-top: 1rem;
-    margin-bottom: 7rem;
-  }
 }
-.appSettings-buttonsContainer {
-  padding: 0 0.8rem;
-  .appSettings-deleteButton {
+.appSettings-page {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.appSettings-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.5rem 0.8rem 0;
+  padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom, 0px) + 4.5rem));
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+
+  .appSettings-deleteButton,
+  .appSettings-logOutButton {
     width: 100%;
+    flex: 0 0 auto;
+    margin: 0;
+    min-height: 48px;
     background-color: rgba(141, 31, 70, 0.088);
     color: rgba(163, 2, 61, 0.673);
     font-family: montseraatSemiBold;
     font-size: 1.2rem !important;
     border-radius: 0.5rem !important;
-    align-items: start;
-    margin-top: 1.5rem;
-    margin-bottom: 3rem;
+    align-items: center;
   }
 }
 .screenMode-container {

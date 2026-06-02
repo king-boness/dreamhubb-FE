@@ -90,7 +90,8 @@ body.dh-role-switching .donorPosts-emptyHint {
 }
 
 /* Settings: fixná rezerva pre footer — skrytie futra len transformom, bez zmeny padding-bottom (žiadny skok scrollu). */
-.dh-settings-scroll-root .q-page {
+.dh-settings-scroll-root .q-page,
+.dh-settings-scroll-root .appSettings-page {
   padding-bottom: calc(5.7rem + env(safe-area-inset-bottom, 0px)) !important;
   box-sizing: border-box;
 }

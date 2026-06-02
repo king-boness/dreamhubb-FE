@@ -58,9 +58,9 @@ html, body, #q-app, .q-layout, .q-page-container {
   overflow-anchor: none;
 }
 
-/* Donor post detail: spolu s donor-no-header — výnimka s !important, aby horný inset platil nad „padding-top: 0“ */
+/* Donor post detail: hero/ikonky riešia safe-area v PostHeader (.post-header-topIcons) — bez dvojitého top insetu */
 .platform-ios .q-page-container.donor-no-header.dh-donor-post-detail {
-  padding-top: env(safe-area-inset-top, 0px) !important;
+  padding-top: 0 !important;
 }
 
 .platform-ios .q-page.donorPostsPage--unifiedScroll {

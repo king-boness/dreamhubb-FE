@@ -229,13 +229,13 @@ const headerImages = computed(() => {
 
     .post-header-topIcons {
       position: absolute;
-      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      top: calc(env(safe-area-inset-top, 0px) + 14px);
       left: 0;
       right: 0;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 0 1rem;
+      padding: 0 16px;
       z-index: 15;
       pointer-events: none;
 

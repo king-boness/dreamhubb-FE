@@ -670,68 +670,13 @@
       background: transparent;
     }
 
-    /*
-     * Post detail light: meta na bielej karte pod hero (namiesto bieleho textu na bielej ploche).
-     * Riadok v hero overlay skryť, aby nebol duplicitný.
-     */
-    .post-header .post-header-metaRow {
+    /* Meta v hero overlay (rovnako ako dark) — žiadna samostatná karta pod hero */
+    .postDetail-belowHeroMeta {
       display: none !important;
     }
 
-    .postDetail-belowHeroMeta {
-      display: block !important;
-      width: 100%;
-      max-width: 390px;
-      margin: -8px auto 0;
-      padding: 0 16px;
-      position: relative;
-      z-index: 6;
-      box-sizing: border-box;
-    }
-
-    .postDetail-belowHeroMeta-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      background: #ffffff;
-      border-radius: 18px 18px 0 0;
-      padding: 12px 14px;
-      box-shadow: 0 -6px 26px rgba(0, 0, 0, 0.09);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-bottom: none;
-    }
-
-    .postDetail-belowHeroMeta-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 1;
-      min-width: 0;
-      justify-content: center;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-
-    .postDetail-belowHeroMeta-item span {
-      color: rgba(0, 0, 0, 0.82) !important;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .postDetail-belowHeroMeta-icon {
-      width: 14px;
-      height: 14px;
-      flex-shrink: 0;
-      filter: brightness(0) opacity(0.55) !important;
-    }
-
-    .postDetail-belowHeroMeta-sep {
-      width: 1px;
-      height: 18px;
-      background: rgba(0, 0, 0, 0.12);
-      flex-shrink: 0;
+    .post-header .post-header-metaRow {
+      display: flex !important;
     }
 
     /* Hlavný Contribute / Edit CTA pod hero — gradient tlačidlo, label musí ostať biely */
@@ -1586,67 +1531,22 @@
     border-color: rgba(black, 0.14) !important;
   }
 
-  /* Donor feed post cards — light surface + readable body copy */
+  /* Donor feed post cards — light mode: rovnaký layout/overlay ako dark (tmavá karta na svetlom pozadí) */
   .postCard {
-    --pc-surface: #ffffff;
-    --pc-border: 1px solid #ececec;
-    --pc-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --pc-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
-    --pc-body-title: #1d1d1d;
-    --pc-body-meta: rgba(29, 29, 29, 0.62);
-    --pc-body-preview: rgba(29, 29, 29, 0.72);
+    --pc-surface: linear-gradient(180deg, #17151f 0%, #0d0b13 100%);
+    --pc-border: none;
+    --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+    --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.2);
+    --pc-body-title: #ffffff;
+    --pc-body-meta: rgba(255, 255, 255, 0.55);
+    --pc-body-preview: #bbbbbb;
 
-    /* Stronger than .body--light h3/span so tokens match design (#1d1d1d / muted meta) */
     .postCard-title {
-      color: #1d1d1d !important;
+      color: #ffffff !important;
     }
 
     .postCard-meta span {
-      color: rgba(29, 29, 29, 0.62) !important;
-    }
-
-    .postCard-authorBadge {
-      background: rgba(255, 255, 255, 0.94) !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
-      backdrop-filter: blur(10px) !important;
-    }
-
-    .postCard-authorName {
-      color: #1d1d1d !important;
-    }
-
-    .postCard-authorBadgeLabel {
-      color: rgba(29, 29, 29, 0.55) !important;
-    }
-
-    .postCard-avatarInitials {
-      color: #1d1d1d !important;
-    }
-
-    .postCard-categoryPill {
-      background: rgba(255, 255, 255, 0.92) !important;
-      color: #1d1d1d !important;
-      border: 1px solid rgba(0, 0, 0, 0.07) !important;
-    }
-
-    /* Soft light fade over image into card (layout unchanged) */
-    .postCard-imageWrapper {
-      position: relative;
-    }
-
-    .postCard-imageWrapper::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        to top,
-        rgba(255, 255, 255, 0.38) 0%,
-        rgba(255, 255, 255, 0.12) 28%,
-        rgba(255, 255, 255, 0.04) 48%,
-        rgba(255, 255, 255, 0.01) 62%,
-        transparent 82%
-      );
+      color: rgba(255, 255, 255, 0.55) !important;
     }
   }
 
@@ -1931,6 +1831,37 @@
 /* Donor Filters step 1 — dark theme: blue “swap posts” (no .body--light) */
 body:not(.body--light) .filters-page h1.filters-title.filters-title--swapPosts {
   color: #6bb3ff !important;
+}
+
+/* Post detail light — meta len v hero overlay (bez karty pod fotkou) */
+body.body--light .postDetail .postDetail-belowHeroMeta {
+  display: none !important;
+}
+
+body.body--light .postDetail .post-header .post-header-metaRow {
+  display: flex !important;
+}
+
+/* Donor feed — light karty: rovnaký tmavý model ako dark (vyššia špecifita než scoped) */
+body.body--light .donorPostsPage .postCard {
+  --pc-surface: linear-gradient(180deg, #17151f 0%, #0d0b13 100%);
+  --pc-border: none;
+  --pc-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+  --pc-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.2);
+  --pc-body-title: #ffffff;
+  --pc-body-meta: rgba(255, 255, 255, 0.55);
+  --pc-body-preview: #bbbbbb;
+  background: var(--pc-surface) !important;
+  border: var(--pc-border) !important;
+  box-shadow: var(--pc-shadow) !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-title {
+  color: #ffffff !important;
+}
+
+body.body--light .donorPostsPage .postCard .postCard-meta span {
+  color: rgba(255, 255, 255, 0.55) !important;
 }
 
 /* Donor feed post cards — dark theme tokens (overridden in .body--light above) */

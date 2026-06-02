@@ -92,39 +92,6 @@
         </div>
       </div>
 
-    <!-- Light mode: meta na svetlej karte pod hero (dark text); v dark mode skryté cez CSS -->
-    <div
-      v-if="post"
-      class="postDetail-belowHeroMeta"
-      aria-label="Post metadata"
-    >
-      <div class="postDetail-belowHeroMeta-inner">
-        <div class="postDetail-belowHeroMeta-item">
-          <q-icon
-            class="postDetail-belowHeroMeta-icon"
-            :name="'img:/assets/icons/ui/icon-date.svg'"
-          />
-          <span>{{ displayDate }}</span>
-        </div>
-        <div class="postDetail-belowHeroMeta-sep" aria-hidden="true" />
-        <div class="postDetail-belowHeroMeta-item">
-          <q-icon
-            class="postDetail-belowHeroMeta-icon"
-            :name="'img:/assets/icons/ui/icon-location.svg'"
-          />
-          <span>{{ displayLocation }}</span>
-        </div>
-        <div class="postDetail-belowHeroMeta-sep" aria-hidden="true" />
-        <div class="postDetail-belowHeroMeta-item">
-          <q-icon
-            class="postDetail-belowHeroMeta-icon"
-            :name="'img:/assets/icons/post/icon-comment.svg'"
-          />
-          <span>{{ commentsCount ?? 0 }}</span>
-        </div>
-      </div>
-    </div>
-
     <!-- Rest of content inside postDetail-inner -->
     <div class="postDetail-inner">
 

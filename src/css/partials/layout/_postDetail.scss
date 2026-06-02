@@ -19,7 +19,7 @@
     display: none;
   }
 
-  /* HEADER IMAGE / SLIDER - Hero Card (Full-bleed) */
+  /* HEADER IMAGE / SLIDER - Hero Card (Full-bleed, pod status bar / Dynamic Island) */
   .postDetailBg {
     position: relative;
     width: 100%; max-width: 100%; // iOS: 100vw spôsoboval horizontálny overflow (ružový roh)
@@ -27,13 +27,14 @@
     right: 50%;
     margin-left: -50vw;
     margin-right: -50vw;
-    height: 360px;
+    margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(360px + env(safe-area-inset-top, 0px));
     overflow: hidden;
     border-radius: 0 0 24px 24px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
     margin-bottom: 0;
-    margin-top: 0;
-    height: 360px;
+    box-sizing: border-box;
 
     // Ensure PostHeader component fits within postDetailBg
     :deep(.post-header) {
@@ -1106,7 +1107,7 @@
     }
 
     .postDetailBg {
-      height: 420px;
+      height: calc(420px + env(safe-area-inset-top, 0px));
     }
   }
 }

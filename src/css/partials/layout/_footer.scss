@@ -542,3 +542,26 @@
 .footer.footer--doneeNav .circle-wrap {
   justify-self: center;
 }
+
+/*
+ * Donor / Donee tab bar — konzistentný blur podklad (dark + light), namiesto SVG rectangle.
+ * Scoped štýly v Footer* komponentoch prepisujeme !important; safe-area zostáva v komponentoch.
+ */
+.footer.footer--donor4,
+.footer.footer--doneeNav {
+  background-image: none !important;
+  background-color: rgba(10, 10, 16, 0.78) !important;
+  backdrop-filter: blur(20px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.body--light .footer.footer--donor4,
+body.body--light .footer.footer--doneeNav,
+.footer.footer--donor4.footer--light,
+.footer.footer--doneeNav.footer--light {
+  background-color: rgba(255, 255, 255, 0.62) !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08) !important;
+}
