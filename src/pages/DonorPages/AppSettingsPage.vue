@@ -228,6 +228,56 @@
     </q-btn>
   </div>
   </div>
+
+  <q-dialog
+    v-model="deleteAccountDialogOpen"
+    persistent
+    @hide="resetDeleteAccountDialog"
+  >
+    <q-card class="appSettings-deleteDialog">
+      <q-card-section>
+        <div class="appSettings-deleteDialog-title">Delete Account</div>
+      </q-card-section>
+      <q-card-section class="q-pt-none">
+        <p class="appSettings-deleteDialog-body">
+          This action permanently deletes your account and hides your posts. To
+          continue, type:
+        </p>
+        <p class="appSettings-deleteDialog-phrase">
+          &quot;{{ requiredDeletePhrase }}&quot;
+        </p>
+        <q-input
+          v-model="deleteConfirmText"
+          class="appSettings-deleteDialog-input"
+          type="textarea"
+          autogrow
+          outlined
+          dense
+          :dark="!lightMode"
+          aria-label="Confirm account deletion"
+        />
+      </q-card-section>
+      <q-card-actions align="right" class="appSettings-deleteDialog-actions">
+        <q-btn
+          flat
+          no-caps
+          label="Cancel"
+          class="appSettings-deleteDialog-cancel"
+          @click="closeDeleteAccountDialog"
+        />
+        <q-btn
+          flat
+          no-caps
+          label="Delete Account"
+          color="negative"
+          class="appSettings-deleteDialog-confirm"
+          :disable="!isDeleteConfirmValid"
+          :loading="deleteAccountLoading"
+          @click="submitDeleteAccount"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
@@ -411,23 +461,53 @@ const logout = async () => {
   router.push({ name: "login" });
 };
 
+const deleteAccountDialogOpen = ref(false);
+const deleteConfirmText = ref("");
+const deleteAccountLoading = ref(false);
+
+const deleteAccountUsername = computed(
+  () => auth.user?.username?.trim() || auth.name?.trim() || ""
+);
+
+const requiredDeletePhrase = computed(
+  () => `I want to delete my account: ${deleteAccountUsername.value}`
+);
+
+const isDeleteConfirmValid = computed(
+  () => deleteConfirmText.value.trim() === requiredDeletePhrase.value
+);
+
+const resetDeleteAccountDialog = () => {
+  deleteConfirmText.value = "";
+  deleteAccountLoading.value = false;
+};
+
+const closeDeleteAccountDialog = () => {
+  deleteAccountDialogOpen.value = false;
+  resetDeleteAccountDialog();
+};
+
 const confirmDeleteAccount = () => {
-  $q.dialog({
-    title: "Delete Account",
-    message:
-      "This permanently deletes your dreamhubb account and associated data (posts, profile). This action cannot be undone.",
-    cancel: { label: "Cancel", flat: true, color: "grey" },
-    ok: { label: "Delete Account", color: "negative", flat: true },
-    persistent: true
-  }).onOk(async () => {
-    try {
-      await auth.deleteAccount();
-      notifySuccess("common.success.saved", "Your account has been deleted.", { position: "top" });
-      router.push({ name: "auth-welcome-page" });
-    } catch (error) {
-      notifyError(mapAxiosErrorToDhError(error), { position: "top" });
-    }
-  });
+  deleteConfirmText.value = "";
+  deleteAccountDialogOpen.value = true;
+};
+
+const submitDeleteAccount = async () => {
+  if (!isDeleteConfirmValid.value) return;
+
+  deleteAccountLoading.value = true;
+  try {
+    await auth.deleteAccount();
+    closeDeleteAccountDialog();
+    notifySuccess("common.success.saved", "Your account has been deleted.", {
+      position: "top"
+    });
+    router.push({ name: "auth-welcome-page" });
+  } catch (error) {
+    notifyError(mapAxiosErrorToDhError(error), { position: "top" });
+  } finally {
+    deleteAccountLoading.value = false;
+  }
 };
 
 function changeTheme() {
@@ -674,6 +754,7 @@ const routeCheck = (name: string) => {
   flex: 0 0 auto;
   min-height: 0;
   width: 100%;
+  padding-bottom: calc(4.5rem + 1rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .appSettings-content--destructive {
@@ -688,8 +769,8 @@ const routeCheck = (name: string) => {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  padding: 1rem 0.8rem 0;
-  margin: 0;
+  padding: 0 0.8rem;
+  margin: 1.75rem 0 0;
   width: 100%;
   box-sizing: border-box;
 
@@ -843,5 +924,52 @@ const routeCheck = (name: string) => {
   top: 27%;
   left: 63%;
   height: 1.2rem;
+}
+
+.appSettings-deleteDialog {
+  width: min(100%, 22rem);
+  max-width: 92vw;
+  background: #1c1a24;
+  color: #f5f5f5;
+}
+
+.appSettings-deleteDialog-title {
+  font-family: poppinsSemiBold;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.appSettings-deleteDialog-body,
+.appSettings-deleteDialog-phrase {
+  margin: 0 0 0.75rem;
+  font-family: poppins;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.appSettings-deleteDialog-phrase {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  word-break: break-word;
+}
+
+.appSettings-deleteDialog-actions {
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.body--light {
+  .appSettings-deleteDialog {
+    background: #ffffff;
+    color: #1a1a1a;
+  }
+
+  .appSettings-deleteDialog-body {
+    color: rgba(0, 0, 0, 0.68);
+  }
+
+  .appSettings-deleteDialog-phrase {
+    color: #1a1a1a;
+  }
 }
 </style>
