@@ -269,7 +269,6 @@
           flat
           no-caps
           label="Delete Account"
-          color="negative"
           class="appSettings-deleteDialog-confirm"
           :disable="!isDeleteConfirmValid"
           :loading="deleteAccountLoading"
@@ -754,7 +753,7 @@ const routeCheck = (name: string) => {
   flex: 0 0 auto;
   min-height: 0;
   width: 100%;
-  padding-bottom: calc(4.5rem + 1rem + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: calc(4.5rem + 0.35rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .appSettings-content--destructive {
@@ -927,40 +926,148 @@ const routeCheck = (name: string) => {
 }
 
 .appSettings-deleteDialog {
-  width: min(100%, 22rem);
+  width: min(100%, 22.5rem);
   max-width: 92vw;
-  background: #1c1a24;
-  color: #f5f5f5;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    rgba(28, 24, 36, 0.98) 0%,
+    rgba(14, 10, 18, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 44, 139, 0.22);
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.55),
+    0 0 38px rgba(255, 44, 139, 0.08);
+  color: #ffffff;
+
+  .q-card__section:first-child {
+    padding-bottom: 0.35rem;
+  }
 }
 
 .appSettings-deleteDialog-title {
-  font-family: poppinsSemiBold;
-  font-size: 1.15rem;
-  line-height: 1.35;
-}
-
-.appSettings-deleteDialog-body,
-.appSettings-deleteDialog-phrase {
-  margin: 0 0 0.75rem;
-  font-family: poppins;
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.appSettings-deleteDialog-phrase {
+  font-family: poppinsSemiBold, poppins, sans-serif;
+  font-size: 1.28rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.3;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.appSettings-deleteDialog-body {
+  margin: 0 0 0.85rem;
+  font-family: poppins, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.appSettings-deleteDialog-phrase {
+  margin: 0 0 1rem;
+  padding: 0.8rem 0.9rem;
+  font-family: poppins, sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.45;
   word-break: break-word;
+  color: #ffffff;
+  background: rgba(255, 44, 139, 0.09);
+  border: 1px solid rgba(255, 44, 139, 0.24);
+  border-radius: 14px;
+}
+
+.appSettings-deleteDialog-input {
+  :deep(.q-field__control) {
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+
+    &::before {
+      border: 1px solid rgba(255, 44, 139, 0.28);
+    }
+  }
+
+  :deep(.q-field__control:hover::before) {
+    border-color: rgba(255, 44, 139, 0.42);
+  }
+
+  :deep(.q-field--focused .q-field__control::before) {
+    border-color: rgba(255, 44, 139, 0.65);
+    box-shadow: 0 0 0 1px rgba(255, 44, 139, 0.2);
+  }
+
+  :deep(.q-field__native),
+  :deep(textarea) {
+    color: rgba(255, 255, 255, 0.92);
+    font-family: poppins, sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  :deep(.q-field__label) {
+    color: rgba(255, 255, 255, 0.55);
+  }
 }
 
 .appSettings-deleteDialog-actions {
-  padding: 0.5rem 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0.25rem 1rem 1.1rem;
+}
+
+.appSettings-deleteDialog-cancel {
+  min-height: 42px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  font-family: montseraatSemiBold, poppinsSemiBold, sans-serif;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.82) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  &::before {
+    box-shadow: none !important;
+  }
+}
+
+.appSettings-deleteDialog-confirm {
+  min-height: 42px;
+  padding: 0 1.15rem;
+  border-radius: 999px;
+  font-family: montseraatSemiBold, poppinsSemiBold, sans-serif;
+  font-size: 0.92rem;
+  color: #ffffff !important;
+  background: linear-gradient(90deg, #bd0043 0%, #ff2c8b 100%) !important;
+  border: none;
+
+  &::before {
+    box-shadow: none !important;
+  }
+
+  &.disabled,
+  &[disabled] {
+    opacity: 0.45 !important;
+    color: #ffffff !important;
+    background: linear-gradient(90deg, #bd0043 0%, #ff2c8b 100%) !important;
+  }
 }
 
 .body--light {
   .appSettings-deleteDialog {
     background: #ffffff;
+    border: 1px solid rgba(189, 0, 67, 0.18);
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.12),
+      0 0 32px rgba(255, 44, 139, 0.1);
+    color: #1a1a1a;
+  }
+
+  .appSettings-deleteDialog-title {
     color: #1a1a1a;
   }
 
@@ -970,6 +1077,52 @@ const routeCheck = (name: string) => {
 
   .appSettings-deleteDialog-phrase {
     color: #1a1a1a;
+    background: rgba(189, 0, 67, 0.06);
+    border-color: rgba(189, 0, 67, 0.18);
+  }
+
+  .appSettings-deleteDialog-input {
+    :deep(.q-field__control) {
+      background: rgba(0, 0, 0, 0.02);
+      color: #1a1a1a;
+
+      &::before {
+        border-color: rgba(189, 0, 67, 0.22);
+      }
+    }
+
+    :deep(.q-field__control:hover::before) {
+      border-color: rgba(189, 0, 67, 0.35);
+    }
+
+    :deep(.q-field--focused .q-field__control::before) {
+      border-color: rgba(255, 44, 139, 0.55);
+      box-shadow: 0 0 0 1px rgba(255, 44, 139, 0.12);
+    }
+
+    :deep(.q-field__native),
+    :deep(textarea) {
+      color: #1a1a1a;
+    }
+
+    :deep(.q-field__label) {
+      color: rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  .appSettings-deleteDialog-cancel {
+    color: rgba(0, 0, 0, 0.72) !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .appSettings-deleteDialog-confirm {
+    color: #ffffff !important;
+
+    &.disabled,
+    &[disabled] {
+      color: #ffffff !important;
+    }
   }
 }
 </style>
