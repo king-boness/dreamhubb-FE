@@ -156,11 +156,11 @@ watch(isOpen, (open) => {
 
   :deep(.q-dialog__inner) {
     padding: 0 !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
     width: 100vw !important;
     height: 100vh !important;
     height: 100dvh !important;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
   }
 
   :deep(.q-dialog__inner > div) {
@@ -199,7 +199,7 @@ watch(isOpen, (open) => {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 1rem);
   right: calc(env(safe-area-inset-right, 0px) + 1rem);
-  z-index: 20;
+  z-index: 30;
   width: 48px;
   height: 48px;
   min-width: 48px;
@@ -224,7 +224,7 @@ watch(isOpen, (open) => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 15;
+  z-index: 25;
   background: rgba(0, 0, 0, 0.5);
   color: white;
   backdrop-filter: blur(8px);
@@ -249,7 +249,7 @@ watch(isOpen, (open) => {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 20;
+  z-index: 30;
   pointer-events: none;
   background: rgba(0, 0, 0, 0.5);
   color: white;
@@ -267,9 +267,9 @@ watch(isOpen, (open) => {
   flex: 1 1 auto;
   min-height: 0;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 4.25rem)
+    calc(env(safe-area-inset-top, 0px) + 3.25rem)
     0
-    calc(env(safe-area-inset-bottom, 0px) + 4.25rem)
+    calc(env(safe-area-inset-bottom, 0px) + 3.25rem)
     0;
   box-sizing: border-box;
   display: flex;
@@ -278,9 +278,13 @@ watch(isOpen, (open) => {
   overflow: hidden;
 }
 
-.image-preview-carousel {
+.image-preview-carousel,
+.image-preview-slide {
   width: 100%;
   height: 100%;
+}
+
+.image-preview-carousel {
   background: transparent;
 
   :deep(.q-carousel__viewport),
@@ -290,26 +294,39 @@ watch(isOpen, (open) => {
     width: 100% !important;
     height: 100% !important;
   }
+
+  :deep(.q-img),
+  :deep(.q-img__container),
+  :deep(.q-img__image),
+  :deep(img) {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
 }
 
 .image-preview-slide {
-  width: 100%;
-  height: 100%;
-  padding: 0 0.75rem;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .image-preview-image {
   display: block;
   width: 100%;
-  height: 100%;
-  max-width: 100%;
+  max-width: 100vw;
+  height: auto;
   max-height: 100%;
   object-fit: contain;
   object-position: center;
+  flex: 0 1 auto;
+  align-self: center;
   user-select: none;
   -webkit-user-select: none;
   border-radius: 0;
