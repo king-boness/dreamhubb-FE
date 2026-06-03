@@ -1,5 +1,5 @@
 <template>
-  <div class="stats-filter">
+  <div class="stats-filter stats-filter--tokens">
     <q-tabs
       class="text-white statsFilter"
       active-color="primary"

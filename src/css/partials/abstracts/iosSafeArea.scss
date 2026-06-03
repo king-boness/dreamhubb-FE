@@ -77,6 +77,14 @@ html, body, #q-app, .q-layout, .q-page-container {
   ~ .q-page-container.role-has-custom-header {
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* donor-myprofile unified scroll: keď sa integrovaný header skryje, doplň top inset (inak tab row ide pod notch) */
+.platform-ios
+  .LayoutBackground.q-layout
+  > .roleChrome-topStack.donorPosts-integratedChrome.navbar--hidden:not(.dh-use-transform-chrome-hide)
+  ~ .q-page-container.donor-feed-unified-scroll {
+  padding-top: env(safe-area-inset-top, 0px);
+}
 /* Edit post: žiadny header, hero má ísť hore; platí len keď je v kontajneri .postEditPage, po návrate sa neaplikuje */
 .platform-ios .q-page-container:has(.postEditPage) {
   padding-top: 0;
