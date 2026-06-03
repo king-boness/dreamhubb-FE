@@ -187,13 +187,17 @@ defineProps({
   min-height: auto;
   height: auto;
   overflow: visible;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  overscroll-behavior: contain;
+  scroll-snap-type: none !important;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
 
 .stats-filter--profile .tabPanel--profileStats .statsPage {
   min-height: auto;
   height: auto;
-  padding-bottom: max(4.75rem, calc(4.5rem + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: 0;
+  overscroll-behavior: contain;
+  scroll-snap-type: none !important;
 }
 
 .stats-filter--profile .tabPanel--profileStats .statsPage-loading {
@@ -205,7 +209,8 @@ defineProps({
 }
 
 .stats-filter--profile .tabPanel--profileStats .detailed-stats {
-  padding-bottom: 0.25rem;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .profileTab {
