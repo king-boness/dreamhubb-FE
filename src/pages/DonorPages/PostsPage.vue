@@ -533,11 +533,23 @@ const emitOpenAuthor = (post: DonorPost) => {
   overflow: hidden;
   /* Clip to card top corners only via parent .postCard overflow + radius (no inner radius mismatch / black seam) */
   border-radius: 0;
+
+  /* Carousel vrstva nad author badge; progress bez safe-area insetu */
+  :deep(.dhPostCover) {
+    z-index: 2;
+  }
+
+  :deep(.postCarousel-progress) {
+    top: 14px;
+    left: 24px;
+    right: 24px;
+    z-index: 8;
+  }
 }
 
 .postCard-authorBadge {
   position: absolute;
-  top: 27px; /* Posun nadol o ďalších 7px (z 20px na 27px) */
+  top: 36px; /* pod progress barom (progress ~14px + 3px výška) */
   left: 12px;
   display: flex;
   align-items: center;
@@ -548,7 +560,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   backdrop-filter: blur(8px);
   cursor: pointer;
   transition: background 0.2s ease;
-  z-index: 2;
+  z-index: 1;
 
   &:hover {
     background: rgba(0, 0, 0, 0.75);

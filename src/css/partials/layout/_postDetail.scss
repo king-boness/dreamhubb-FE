@@ -55,11 +55,11 @@
       }
     }
 
-    /* Hero album: progress pod Dynamic Island, mimo X/share/heart */
+    /* Hero album: pod Dynamic Island, nad X/share/heart (tlačidlá: safe-area + 14px) */
     :deep(.postCarousel-progress) {
-      top: calc(env(safe-area-inset-top, 0px) + 18px);
-      left: calc(16px + 48px + 10px);
-      right: calc(16px + 48px + 10px + 48px + 8px);
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      left: 24px;
+      right: 24px;
       z-index: 16;
     }
 
@@ -100,9 +100,9 @@
     // Progress bar (legacy; aktívny carousel používa .postCarousel-progress)
     .postDetail-progress {
       position: absolute;
-      top: calc(env(safe-area-inset-top, 0px) + 18px);
-      left: calc(16px + 48px + 10px);
-      right: calc(16px + 48px + 10px + 48px + 8px);
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      left: 24px;
+      right: 24px;
       display: flex;
       gap: 0.25rem;
       z-index: 16;
@@ -467,9 +467,9 @@
 
     .postDetail-progressBar {
       position: absolute;
-      top: calc(env(safe-area-inset-top, 0px) + 18px);
-      left: calc(12px + 48px + 10px);
-      right: calc(12px + 48px + 10px + 48px + 8px);
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      left: 24px;
+      right: 24px;
       display: flex !important;
       gap: 6px;
       z-index: 20;

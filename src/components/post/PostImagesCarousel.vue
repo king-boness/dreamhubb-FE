@@ -262,15 +262,15 @@ onBeforeUnmount(() => {
   }
 }
 
-// Progress bar
+// Progress bar — default: feed / karty (bez safe-area; detail override v _postDetail.scss)
 .postCarousel-progress {
   position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
-  left: 0.75rem;
-  right: 0.75rem;
+  top: 14px;
+  left: 24px;
+  right: 24px;
   display: flex;
   gap: 0.25rem;
-  z-index: 15;
+  z-index: 8;
   pointer-events: none;
 }
 
