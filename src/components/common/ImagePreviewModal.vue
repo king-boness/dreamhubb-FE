@@ -59,12 +59,14 @@
               draggable="false"
             />
             <div class="image-preview-backdropOverlay" aria-hidden="true" />
-            <img
-              :src="url"
-              :alt="`Image ${idx + 1}`"
-              class="image-preview-image"
-              draggable="false"
-            />
+            <div class="image-preview-foreground">
+              <img
+                :src="url"
+                :alt="`Image ${idx + 1}`"
+                class="image-preview-image"
+                draggable="false"
+              />
+            </div>
           </q-carousel-slide>
         </q-carousel>
       </div>
@@ -164,6 +166,9 @@ watch(isOpen, (open) => {
 
   :deep(.q-dialog__inner) {
     padding: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
     width: 100vw !important;
     height: 100vh !important;
     height: 100dvh !important;
@@ -172,21 +177,24 @@ watch(isOpen, (open) => {
   }
 
   :deep(.q-dialog__inner > div) {
-    max-width: 100% !important;
-    max-height: 100% !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
   }
 }
 
 .image-preview-card {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  max-width: 100vw;
-  max-height: 100dvh;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: none;
+  max-height: none;
   background: #000;
-  display: flex;
-  flex-direction: column;
-  position: relative;
   overflow: hidden;
   animation: imagePreviewFadeIn 0.22s ease-out;
   border-radius: 0 !important;
@@ -268,21 +276,35 @@ watch(isOpen, (open) => {
 }
 
 .image-preview-content {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
-  padding:
-    calc(env(safe-area-inset-top, 0px) + 1.75rem)
-    0
-    calc(env(safe-area-inset-bottom, 0px) + 2.75rem)
-    0;
+  padding: 0;
+  margin: 0;
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+}
+
+.image-preview-carousel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+
+  :deep(.q-carousel),
+  :deep(.q-carousel__viewport),
+  :deep(.q-carousel__slides-container),
+  :deep(.q-panel),
+  :deep(.q-carousel__slide),
+  :deep(.q-panel-parent) {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    padding: 0 !important;
+  }
 }
 
 .image-preview-carousel,
@@ -291,38 +313,27 @@ watch(isOpen, (open) => {
   height: 100%;
 }
 
-.image-preview-carousel {
-  background: transparent;
-
-  :deep(.q-carousel__viewport),
-  :deep(.q-carousel__slides-container),
-  :deep(.q-panel),
-  :deep(.q-carousel__slide) {
-    width: 100% !important;
-    height: 100% !important;
-  }
-}
-
 .image-preview-slide {
   position: relative;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 !important;
+  display: block;
   overflow: hidden;
-  background: #000;
+  background: transparent;
   box-sizing: border-box;
 }
 
 .image-preview-backdropImage {
   position: absolute;
-  inset: -24px;
-  width: calc(100% + 48px);
-  height: calc(100% + 48px);
+  top: 50%;
+  left: 50%;
+  width: 100vmax;
+  height: 100vmax;
+  min-width: 100%;
+  min-height: 100%;
   object-fit: cover;
   object-position: center;
   filter: blur(22px);
-  transform: scale(1.06);
+  transform: translate(-50%, -50%) scale(1.08);
   opacity: 0.55;
   pointer-events: none;
   user-select: none;
@@ -339,13 +350,27 @@ watch(isOpen, (open) => {
   z-index: 1;
 }
 
-.image-preview-image {
-  position: relative;
+.image-preview-foreground {
+  position: absolute;
+  inset: 0;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 3.25rem)
+    0
+    calc(env(safe-area-inset-bottom, 0px) + 2.5rem)
+    0;
+  pointer-events: none;
+}
+
+.image-preview-image {
   display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 100vw;
+  width: auto;
+  height: auto;
+  max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   object-position: center;
