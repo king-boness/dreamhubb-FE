@@ -1,272 +1,412 @@
 <template>
   <div class="statsPage">
-    <div class="overwiev-stats">
-      <div class="overwievTitleDiv">
-        <span class="overwievTitle">Overview</span>
-      </div>
-      <div class="karmaUsed"></div>
-      <div v-for="(card, i) in cards" :key="i" class="cardContainer">
-        <div class="karmaGainedCard">
-          <div class="karmaGainedTitleDiv">
-            <span class="karmaGainedTitle">{{ card.overview.title }}</span>
-          </div>
-          <div class="overwievDonationsDiv">
-            <img
-              :src="card.overview.comesFromImg"
-              alt=""
-              class="karmaGainedImgGift"
-            />
-            <span class="karmaGainedDescription">{{
-              card.overview.comesFrom
-            }}</span>
-          </div>
-          <div class="karmaValue">
-            <img
-              src="/icons/KarmaIcon.png"
-              alt=""
-              class="karmaGainedImgKarma"
-            />
-            <span class="karmaGainedKarmaValue">{{
-              formatNumber(card.overview.comesFromValue)
-            }}</span>
-          </div>
-        </div>
-      </div>
+    <div v-if="loading && !tokenStats" class="statsPage-loading">
+      <q-spinner color="primary" size="2rem" />
     </div>
-    <div class="detailed-stats">
-      <div class="DetailedStats-div">
-        <span class="DetailedStats-Title">Detailed Stats</span>
-      </div>
-      <div class="usedOnStats">
-        <div class="usedOnStats-title"><span>used on</span></div>
-        <div class="usedOnStats-categories">
-          <div class="usedOn-buttonsDiv">
-            <q-btn
-              :class="{ 'usedOn-button': true, active: model === 'onDream' }"
-              @click="model = 'onDream'"
-            >
-              <img src="/post_icons/dream_mini.svg" alt="dream" class="usedOn-icon" />
-            </q-btn>
-            <q-btn
-              :class="{ 'usedOn-button': true, active: model === 'onProblem' }"
-              @click="model = 'onProblem'"
-            >
-              <img src="/post_icons/problem_mini.svg" alt="problem" class="usedOn-icon" />
-            </q-btn>
-            <q-btn
-              :class="{ 'usedOn-button': true, active: model === 'onIdea' }"
-              @click="model = 'onIdea'"
-            >
-              <img src="/post_icons/idea_mini.svg" alt="idea" class="usedOn-icon" />
-            </q-btn>
-          </div>
-        </div>
-        <div class="usedOnStats-value">
-          <img src="/icons/KarmaIcon.png" alt="" />
-          <span>{{ formatNumber(stats.usedKarma?.[model]) }}</span>
-        </div>
-      </div>
-      <div class="usedOnStats-categoryContainer">
-        <span class="usedOnStats-categoryTitle"
-          >Category specific spending</span
-        >
-        <div class="usedOnStats-spendingContainer">
-          <q-select
-            v-model="selectedCategory"
-            :options="options"
-            behavior="menu"
-            borderless
-            class="registerDatas usedOnStats-spendingSelect"
-          >
-            <template v-slot:selected-item="scope">
-              <q-icon
-                :name="`img:${scope.opt.icon}`"
-                class="usedOnStats-spendingIcon"
-              />
-              <span class="usedOnStats-spendingText"
-                >{{ scope.opt.label }}
-              </span>
-            </template>
 
-            <template v-slot:option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section avatar>
-                  <q-icon
-                    class="usedOnStats-dropdownSpendingIcon"
-                    :name="`img:${scope.opt.icon}`"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label class="usedOnStats-dropdownSpendingText">{{
-                    scope.opt.label
-                  }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <div class="usedOnStats-value usedOnStats-spendingValue">
-            <img src="/icons/KarmaIcon.png" alt="" />
-            <span>{{ formatNumber(selectedCategory.tokens) }}</span>
+    <RetryPanel
+      v-else-if="error"
+      :message="error"
+      :on-retry="loadTokenStats"
+      variant="inline"
+      button-class="statsPage-retryBtn"
+      data-testid="dh-token-stats-retry"
+    />
+
+    <template v-else-if="tokenStats">
+      <p
+        v-if="showHistoricalNote"
+        class="statsPage-historicalNote"
+        data-testid="dh-token-stats-historical-note"
+      >
+        Stats are tracked from the latest update onward. Older token history may not be
+        available.
+      </p>
+
+      <div class="overwiev-stats">
+        <div class="overwievTitleDiv">
+          <span class="overwievTitle">Overview</span>
+        </div>
+        <div class="karmaUsed"></div>
+        <div v-for="(card, i) in cards" :key="i" class="cardContainer">
+          <div class="karmaGainedCard">
+            <div class="karmaGainedTitleDiv">
+              <span class="karmaGainedTitle">{{ card.overview.title }}</span>
+            </div>
+            <div v-if="card.overview.comesFrom" class="overwievDonationsDiv">
+              <img
+                :src="card.overview.comesFromImg"
+                alt=""
+                class="karmaGainedImgGift"
+              />
+              <span class="karmaGainedDescription">{{
+                card.overview.comesFrom
+              }}</span>
+            </div>
+            <div class="karmaValue">
+              <img
+                src="/icons/KarmaIcon.png"
+                alt=""
+                class="karmaGainedImgKarma"
+              />
+              <span class="karmaGainedKarmaValue">{{
+                formatNumber(card.overview.comesFromValue)
+              }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <div class="detailed-stats">
+        <div class="DetailedStats-div">
+          <span class="DetailedStats-Title">Detailed Stats</span>
+        </div>
+        <div class="usedOnStats">
+          <div class="usedOnStats-title"><span>Used Tokens on</span></div>
+          <div class="usedOnStats-categories">
+            <div class="usedOn-buttonsDiv">
+              <q-btn
+                :class="{ 'usedOn-button': true, active: model === 'onDream' }"
+                @click="model = 'onDream'"
+              >
+                <img src="/post_icons/dream_mini.svg" alt="dream" class="usedOn-icon" />
+              </q-btn>
+              <q-btn
+                :class="{ 'usedOn-button': true, active: model === 'onProblem' }"
+                @click="model = 'onProblem'"
+              >
+                <img src="/post_icons/problem_mini.svg" alt="problem" class="usedOn-icon" />
+              </q-btn>
+              <q-btn
+                :class="{ 'usedOn-button': true, active: model === 'onIdea' }"
+                @click="model = 'onIdea'"
+              >
+                <img src="/post_icons/idea_mini.svg" alt="idea" class="usedOn-icon" />
+              </q-btn>
+            </div>
+          </div>
+          <div class="usedOnStats-value">
+            <img src="/icons/KarmaIcon.png" alt="" />
+            <span>{{ formatNumber(stats.usedKarma?.[model]) }}</span>
+          </div>
+        </div>
+        <div class="usedOnStats-categoryContainer">
+          <span class="usedOnStats-categoryTitle"
+            >Category specific spending</span
+          >
+          <p
+            v-if="!hasSubcategorySpending"
+            class="statsPage-emptySubcategory"
+            data-testid="dh-token-stats-subcategory-empty"
+          >
+            No subcategory spending yet.
+          </p>
+          <div v-else class="usedOnStats-spendingContainer">
+            <q-select
+              v-model="selectedCategory"
+              :options="subcategoryOptions"
+              behavior="menu"
+              borderless
+              class="registerDatas usedOnStats-spendingSelect"
+            >
+              <template v-slot:selected-item="scope">
+                <q-icon
+                  :name="`img:${scope.opt.icon}`"
+                  class="usedOnStats-spendingIcon"
+                />
+                <span class="usedOnStats-spendingText"
+                  >{{ scope.opt.label }}
+                </span>
+              </template>
+
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section avatar>
+                    <q-icon
+                      class="usedOnStats-dropdownSpendingIcon"
+                      :name="`img:${scope.opt.icon}`"
+                    />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="usedOnStats-dropdownSpendingText">{{
+                      scope.opt.label
+                    }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+            <div class="usedOnStats-value usedOnStats-spendingValue">
+              <img src="/icons/KarmaIcon.png" alt="" />
+              <span>{{ formatNumber(selectedCategory.tokens) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted, onActivated } from "vue";
 import { Stats, specificSpending } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
+import { fetchTokenStats } from "src/services/tokenStatsService";
+import type {
+  TokenStatsCategorySpend,
+  TokenStatsResponse
+} from "src/types/tokenStats";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import RetryPanel from "src/components/common/RetryPanel.vue";
 
-const model = ref("onDream");
+const DEFAULT_CATEGORY_BUCKETS: TokenStatsCategorySpend[] = [
+  { key: "dreams", label: "Dreams", tokens: 0 },
+  { key: "problems", label: "Problems", tokens: 0 },
+  { key: "ideas", label: "Ideas", tokens: 0 }
+];
 
-// TODO: Replace with API data when BE endpoint is ready
-// Computed properties for stats data
-const remainingKarma = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/remaining-karma')
-  return 0;
-});
+const CATEGORY_KEY_TO_MODEL: Record<string, "onDream" | "onProblem" | "onIdea"> = {
+  dreams: "onDream",
+  problems: "onProblem",
+  ideas: "onIdea"
+};
 
-const tokensUsedOnDreams = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/used-on-dreams')
-  return 0;
-});
+const SUBCATEGORY_SPENDING_ICONS: Record<string, string> = {
+  events: "/icons/events-icon.svg",
+  health: "/icons/health-icon.svg",
+  learning: "/icons/learning-icon.svg",
+  possessions: "/icons/possesion-icon.svg",
+  profession: "/icons/proffesion-icon.svg",
+  relationships: "/icons/relationship-icon.svg",
+  other: "/icons/others-icon.svg",
+  traveling: "/icons/travelling-icon.svg"
+};
 
-const tokensUsedOnProblems = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/used-on-problems')
-  return 0;
-});
+const model = ref<"onDream" | "onProblem" | "onIdea">("onDream");
+const loading = ref(false);
+const error = ref<string | null>(null);
+const tokenStats = ref<TokenStatsResponse | null>(null);
 
-const tokensUsedOnIdeas = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/used-on-ideas')
-  return 0;
-});
+const showHistoricalNote = computed(
+  () => tokenStats.value?.meta?.historical_before_ledger === "unavailable"
+);
 
-const tokensUsedOnDonations = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/used-on-donations')
-  return 0;
-});
-
-const tokensGainedFromDonations = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/gained-from-donations')
-  return 0;
-});
-
-const categorySpecificSpending = computed(() => {
-  // TODO: Replace with API data: await api.get('/user/stats/category-spending')
-  return {
-    Events: 0,
-    Health: 0,
-    Learning: 0,
-    Possesions: 0,
-    Proffesion: 0,
-    Relationships: 0,
-    Other: 0,
-    Travelling: 0
-  };
-});
-
-const stats = computed(() => ({
-  usedKarma: {
-    onDream: tokensUsedOnDreams.value,
-    onProblem: tokensUsedOnProblems.value,
-    onIdea: tokensUsedOnIdeas.value,
-    onDonation: tokensUsedOnDonations.value
+const categoryBuckets = computed(() => {
+  const fromApi = tokenStats.value?.spent?.by_category ?? [];
+  if (fromApi.length === 0) {
+    return DEFAULT_CATEGORY_BUCKETS;
   }
-} as Stats));
-
-const cards = computed(() => [
-  {
-    overview: {
-      title: "Gained From",
-      comesFrom: "Donations",
-      comesFromImg: "/icons/giftIcon-red.svg",
-      comesFromValue: tokensGainedFromDonations.value
-    }
-  },
-  {
-    overview: {
-      title: "Gained From",
-      comesFrom: "Donations",
-      comesFromImg: "/icons/giftIcon-red.svg",
-      comesFromValue: tokensGainedFromDonations.value
-    }
-  },
-  {
-    overview: {
-      title: "karma remaining",
-      comesFromValue: remainingKarma.value
+  const merged = DEFAULT_CATEGORY_BUCKETS.map((bucket) => {
+    const match = fromApi.find((row) => row.key === bucket.key);
+    return match ?? bucket;
+  });
+  for (const row of fromApi) {
+    if (!merged.some((item) => item.key === row.key)) {
+      merged.push(row);
     }
   }
-] as Stats[]);
+  return merged;
+});
 
-const options = computed(() => [
-  {
-    label: "Events",
-    value: "Events",
-    icon: "/icons/events-icon.svg",
-    tokens: categorySpecificSpending.value.Events
-  },
-  {
-    label: "Health",
-    value: "Health",
-    icon: "/icons/health-icon.svg",
-    tokens: categorySpecificSpending.value.Health
-  },
-  {
-    label: "Learning",
-    value: "Learning",
-    icon: "/icons/learning-icon.svg",
-    tokens: categorySpecificSpending.value.Learning
-  },
-  {
-    label: "Possesions",
-    value: "Possesions",
-    icon: "/icons/possesion-icon.svg",
-    tokens: categorySpecificSpending.value.Possesions
-  },
-  {
-    label: "Proffesion",
-    value: "Proffesion",
-    icon: "/icons/proffesion-icon.svg",
-    tokens: categorySpecificSpending.value.Proffesion
-  },
-  {
-    label: "Relationships",
-    value: "Relationships",
-    icon: "/icons/relationship-icon.svg",
-    tokens: categorySpecificSpending.value.Relationships
-  },
-  {
-    label: "The Other",
-    value: "Other",
-    icon: "/icons/others-icon.svg",
-    tokens: categorySpecificSpending.value.Other
-  },
-  {
-    label: "Travelling",
-    value: "Travelling",
-    icon: "/icons/travelling-icon.svg",
-    tokens: categorySpecificSpending.value.Travelling
+const categoryTokensByKey = computed(() => {
+  const map: Record<string, number> = {};
+  for (const row of categoryBuckets.value) {
+    map[row.key] = row.tokens;
   }
-] as specificSpending[]);
+  return map;
+});
 
-const selectedCategory = ref({
+const tokensUsedOnDreams = computed(
+  () => categoryTokensByKey.value.dreams ?? 0
+);
+const tokensUsedOnProblems = computed(
+  () => categoryTokensByKey.value.problems ?? 0
+);
+const tokensUsedOnIdeas = computed(() => categoryTokensByKey.value.ideas ?? 0);
+const tokensUsedOnDonations = computed(
+  () => tokenStats.value?.spent?.on_donations ?? 0
+);
+
+const tokensGainedFromSupport = computed(
+  () => tokenStats.value?.earned?.from_received_contributions ?? 0
+);
+const tokensGainedFromPurchases = computed(
+  () => tokenStats.value?.earned?.from_purchases ?? 0
+);
+const tokensGainedFromHelp = computed(
+  () => tokenStats.value?.earned?.from_help ?? 0
+);
+const remainingTokens = computed(() => tokenStats.value?.balance ?? 0);
+
+const stats = computed(
+  () =>
+    ({
+      usedKarma: {
+        onDream: tokensUsedOnDreams.value,
+        onProblem: tokensUsedOnProblems.value,
+        onIdea: tokensUsedOnIdeas.value,
+        onDonation: tokensUsedOnDonations.value
+      }
+    }) as Stats
+);
+
+const cards = computed(
+  () =>
+    [
+      {
+        overview: {
+          title: "Received",
+          comesFrom: "Support Received",
+          comesFromImg: "/icons/giftIcon-red.svg",
+          comesFromValue: tokensGainedFromSupport.value
+        }
+      },
+      {
+        overview: {
+          title: "Purchased",
+          comesFrom: "Purchased Tokens",
+          comesFromImg: "/icons/giftIcon-red.svg",
+          comesFromValue: tokensGainedFromPurchases.value
+        }
+      },
+      {
+        overview: {
+          title: "Earned",
+          comesFrom: "Help Rewards",
+          comesFromImg: "/icons/giftIcon-red.svg",
+          comesFromValue: tokensGainedFromHelp.value
+        }
+      },
+      {
+        overview: {
+          title: "Remaining Tokens",
+          comesFrom: "",
+          comesFromImg: "",
+          comesFromValue: remainingTokens.value
+        }
+      }
+    ] as Stats[]
+);
+
+function subcategoryIconForSlug(slug: string): string {
+  const normalized = slug.trim().toLowerCase();
+  return SUBCATEGORY_SPENDING_ICONS[normalized] ?? "/icons/others-icon.svg";
+}
+
+const subcategoryOptions = computed(() => {
+  const rows = tokenStats.value?.spent?.by_subcategory ?? [];
+  return rows.map(
+    (row) =>
+      ({
+        label: row.label || row.slug,
+        value: String(row.id || row.slug),
+        icon: subcategoryIconForSlug(row.slug),
+        tokens: row.tokens
+      }) as specificSpending
+  );
+});
+
+const hasSubcategorySpending = computed(() => subcategoryOptions.value.length > 0);
+
+const selectedCategory = ref<specificSpending>({
   label: "Events",
   value: "Events",
   icon: "/icons/events-icon.svg",
   tokens: 0
 });
 
-// Update selectedCategory tokens when category changes
-watch(() => selectedCategory.value.value, (newValue) => {
-  const category = options.value.find(opt => opt.value === newValue);
-  if (category) {
-    selectedCategory.value = { ...category };
+watch(
+  subcategoryOptions,
+  (options) => {
+    if (options.length === 0) {
+      return;
+    }
+    const currentStillValid = options.some(
+      (opt) => opt.value === selectedCategory.value.value
+    );
+    if (!currentStillValid) {
+      selectedCategory.value = { ...options[0] };
+    } else {
+      const match = options.find(
+        (opt) => opt.value === selectedCategory.value.value
+      );
+      if (match) {
+        selectedCategory.value = { ...match };
+      }
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => selectedCategory.value.value,
+  (newValue) => {
+    const category = subcategoryOptions.value.find((opt) => opt.value === newValue);
+    if (category) {
+      selectedCategory.value = { ...category };
+    }
   }
-}, { immediate: true });
+);
+
+watch(categoryBuckets, (buckets) => {
+  const currentKey = Object.entries(CATEGORY_KEY_TO_MODEL).find(
+    ([, modelKey]) => modelKey === model.value
+  )?.[0];
+  if (currentKey && buckets.some((b) => b.key === currentKey)) {
+    return;
+  }
+  const firstWithSpend = buckets.find((b) => b.tokens > 0);
+  const key = firstWithSpend?.key ?? "dreams";
+  model.value = CATEGORY_KEY_TO_MODEL[key] ?? "onDream";
+});
+
+async function loadTokenStats() {
+  loading.value = true;
+  error.value = null;
+  try {
+    tokenStats.value = await fetchTokenStats();
+  } catch (err: unknown) {
+    const mapped = mapAxiosErrorToDhError(err);
+    error.value = mapped.fallbackMessage;
+    tokenStats.value = null;
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  void loadTokenStats();
+});
+
+onActivated(() => {
+  void loadTokenStats();
+});
+
+defineExpose({
+  refresh: loadTokenStats
+});
 </script>
 <style scoped lang="scss">
+.statsPage-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.statsPage-historicalNote {
+  color: rgba(255, 255, 255, 0.65);
+  font-family: poppins;
+  font-size: 0.72rem;
+  line-height: 1.25rem;
+  margin: 0 1rem 0.75rem;
+  text-align: center;
+}
+
+.statsPage-emptySubcategory {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: poppins;
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
 .usedOnStats-spendingContainer {
   display: flex;
   align-items: center;

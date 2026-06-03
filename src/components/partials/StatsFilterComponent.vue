@@ -64,9 +64,9 @@
       <q-tab-panel class="panel" name="funds"
         ><TokenShopPage></TokenShopPage>
       </q-tab-panel>
-      <q-tab-panel class="panel" name="stats"
-        ><StatsPage></StatsPage
-      ></q-tab-panel>
+      <q-tab-panel class="panel" name="stats">
+        <StatsPage ref="statsPageRef" />
+      </q-tab-panel>
       <q-tab-panel class="panel" name="earn"
         ><EarnPage></EarnPage>
       </q-tab-panel>
@@ -74,12 +74,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import StatsPage from "src/pages/DonorPages/StatsPage.vue";
 import EarnPage from "src/pages/DonorPages/EarnPage.vue";
 import TokenShopPage from "src/pages/DonorPages/TokenShopPage.vue";
 
 const tab = ref("funds");
+const statsPageRef = ref<InstanceType<typeof StatsPage> | null>(null);
+
+watch(tab, (value) => {
+  if (value === "stats") {
+    void statsPageRef.value?.refresh?.();
+  }
+});
 </script>
 <style lang="scss">
 .q-tab__content {
