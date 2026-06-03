@@ -55,6 +55,33 @@
       }
     }
 
+    /* Hero album: progress pod Dynamic Island, mimo X/share/heart */
+    :deep(.postCarousel-progress) {
+      top: calc(env(safe-area-inset-top, 0px) + 18px);
+      left: calc(16px + 48px + 10px);
+      right: calc(16px + 48px + 10px + 48px + 8px);
+      z-index: 16;
+    }
+
+    /* Šípky: stred pásma medzi hornými akciami a comment buttonom */
+    :deep(.postCarousel-arrow) {
+      top: calc(
+        (
+          env(safe-area-inset-top, 0px) + 14px + 24px +
+          (100% - 1.5rem - 24px)
+        ) / 2
+      );
+      transform: translateY(-50%);
+
+      &:hover {
+        transform: translateY(calc(-50% - 1px));
+      }
+
+      &:active {
+        transform: translateY(-50%) scale(0.96);
+      }
+    }
+
     .postDetail-imageWrapper {
       position: absolute;
       top: 0;
@@ -70,15 +97,15 @@
         opacity 0.15s ease-out;
     }
 
-    // Progress bar
+    // Progress bar (legacy; aktívny carousel používa .postCarousel-progress)
     .postDetail-progress {
       position: absolute;
-      top: 0.75rem;
-      left: 0.75rem;
-      right: 0.75rem;
+      top: calc(env(safe-area-inset-top, 0px) + 18px);
+      left: calc(16px + 48px + 10px);
+      right: calc(16px + 48px + 10px + 48px + 8px);
       display: flex;
       gap: 0.25rem;
-      z-index: 15;
+      z-index: 16;
     }
 
     .postDetail-progress-segment {
@@ -175,44 +202,34 @@
       opacity: 0;
     }
 
-    // Navigation arrows
+    // Navigation arrows (legacy; aktívny carousel používa .postCarousel-arrow)
     .postDetail-arrow {
+      @include dh-hero-action-btn;
       position: absolute;
-      top: 50%;
+      top: calc(
+        (
+          env(safe-area-inset-top, 0px) + 14px + 24px +
+          (100% - 1.5rem - 24px)
+        ) / 2
+      );
       transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-        border-radius: 50%;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      font-size: 24px;
-      font-weight: 300;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
       z-index: 12;
-      transition: all 0.2s ease;
       user-select: none;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.7);
-        border-color: rgba(255, 255, 255, 0.4);
-        transform: translateY(-50%) scale(1.1);
+        transform: translateY(calc(-50% - 1px));
       }
 
       &:active {
-        transform: translateY(-50%) scale(0.95);
+        transform: translateY(-50%) scale(0.96);
       }
 
       &--left {
-        left: 12px;
+        left: 1rem;
       }
 
       &--right {
-        right: 12px;
+        right: 1rem;
       }
     }
 
@@ -450,9 +467,9 @@
 
     .postDetail-progressBar {
       position: absolute;
-      top: 14px;
-      left: 12px;
-      right: 12px;
+      top: calc(env(safe-area-inset-top, 0px) + 18px);
+      left: calc(12px + 48px + 10px);
+      right: calc(12px + 48px + 10px + 48px + 8px);
       display: flex !important;
       gap: 6px;
       z-index: 20;

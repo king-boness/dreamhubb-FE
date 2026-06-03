@@ -36,16 +36,20 @@
     <!-- Navigation arrows (optional, can be hidden via prop) -->
     <template v-if="hasMultipleImages && showArrows">
       <button
+        type="button"
         class="postCarousel-arrow postCarousel-arrow--left"
+        aria-label="Previous image"
         @click="handleManualPrev"
       >
-        ‹
+        <span class="postCarousel-arrowIcon" aria-hidden="true">‹</span>
       </button>
       <button
+        type="button"
         class="postCarousel-arrow postCarousel-arrow--right"
+        aria-label="Next image"
         @click="handleManualNext"
       >
-        ›
+        <span class="postCarousel-arrowIcon" aria-hidden="true">›</span>
       </button>
     </template>
 
@@ -237,6 +241,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+@import "src/css/partials/abstracts/mixins";
+
 .postImagesCarousel {
   position: relative;
   width: 100%;
@@ -259,12 +265,13 @@ onBeforeUnmount(() => {
 // Progress bar
 .postCarousel-progress {
   position: absolute;
-  top: 0.75rem;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
   left: 0.75rem;
   right: 0.75rem;
   display: flex;
   gap: 0.25rem;
   z-index: 15;
+  pointer-events: none;
 }
 
 .postCarousel-progress-segment {
@@ -299,43 +306,43 @@ onBeforeUnmount(() => {
 
 // Navigation arrows
 .postCarousel-arrow {
+  @include dh-hero-action-btn;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-size: 24px;
-  font-weight: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   z-index: 12;
-  transition: all 0.2s ease;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.7);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-50%) scale(1.1);
+    transform: translateY(calc(-50% - 1px));
   }
 
   &:active {
-    transform: translateY(-50%) scale(0.95);
+    transform: translateY(-50%) scale(0.96);
   }
 
   &--left {
-    left: 12px;
+    left: 1rem;
   }
 
   &--right {
-    right: 12px;
+    right: 1rem;
   }
+}
+
+.postCarousel-arrowIcon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+  flex: 0 0 auto;
+  pointer-events: none;
 }
 
 // Dots indicators

@@ -610,19 +610,26 @@
       box-shadow: var(--dh-hero-card-shadow) !important;
     }
 
-    .postDetail-arrow {
+    .postDetail-arrow,
+    .postCarousel-arrow {
       background: var(--dh-hero-action-bg) !important;
       border: 1px solid var(--dh-hero-action-border) !important;
       color: #ffffff !important;
       box-shadow: var(--dh-hero-action-shadow) !important;
     }
 
-    .postDetail-arrow:hover {
+    .postDetail-arrow:hover,
+    .postCarousel-arrow:hover {
       background: var(--dh-hero-action-bg-hover) !important;
     }
 
-    .postDetail-arrow:active {
+    .postDetail-arrow:active,
+    .postCarousel-arrow:active {
       background: var(--dh-hero-action-bg-active) !important;
+    }
+
+    .postCarousel-arrowIcon {
+      color: #ffffff !important;
     }
 
     .postDetail-commentBtn {
