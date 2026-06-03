@@ -30,10 +30,6 @@
         @click="nextImage"
       />
 
-      <div v-if="images.length > 0" class="image-preview-zoomHint">
-        {{ isZoomed ? "Tap to fit" : "Tap to zoom" }}
-      </div>
-
       <!-- Image counter (only if multiple images) -->
       <div v-if="images.length > 1" class="image-preview-counter">
         {{ currentIndex + 1 }} / {{ images.length }}
@@ -56,12 +52,18 @@
             class="image-preview-slide"
           >
             <img
+              class="image-preview-backdropImage"
+              :src="url"
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+            />
+            <div class="image-preview-backdropOverlay" aria-hidden="true" />
+            <img
               :src="url"
               :alt="`Image ${idx + 1}`"
               class="image-preview-image"
-              :class="{ 'image-preview-image--zoomed': isZoomed }"
               draggable="false"
-              @click.stop="toggleZoom"
             />
           </q-carousel-slide>
         </q-carousel>
@@ -88,7 +90,6 @@ const emit = defineEmits<{
 }>();
 
 const currentIndex = ref(props.initialIndex);
-const isZoomed = ref(false);
 
 const isOpen = computed({
   get: () => props.modelValue,
@@ -125,14 +126,6 @@ const previousImage = () => {
   }
 };
 
-const toggleZoom = () => {
-  isZoomed.value = !isZoomed.value;
-};
-
-watch(currentIndex, () => {
-  isZoomed.value = false;
-});
-
 const close = () => {
   isOpen.value = false;
 };
@@ -156,7 +149,6 @@ watch(isOpen, (open) => {
     window.addEventListener("keydown", handleKeydown);
   } else {
     window.removeEventListener("keydown", handleKeydown);
-    isZoomed.value = false;
   }
 });
 </script>
@@ -190,7 +182,6 @@ watch(isOpen, (open) => {
   height: 100vh;
   height: 100dvh;
   max-width: 100vw;
-  max-height: 100vh;
   max-height: 100dvh;
   background: #000;
   display: flex;
@@ -260,22 +251,9 @@ watch(isOpen, (open) => {
   right: 1rem;
 }
 
-.image-preview-zoomHint {
-  position: absolute;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 3.25rem);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 30;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.62);
-  pointer-events: none;
-  font-family: poppins, sans-serif;
-  white-space: nowrap;
-}
-
 .image-preview-counter {
   position: absolute;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
   left: 50%;
   transform: translateX(-50%);
   z-index: 30;
@@ -296,7 +274,7 @@ watch(isOpen, (open) => {
   flex: 1 1 auto;
   min-height: 0;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 2.75rem)
+    calc(env(safe-area-inset-top, 0px) + 1.75rem)
     0
     calc(env(safe-area-inset-bottom, 0px) + 2.75rem)
     0;
@@ -323,47 +301,60 @@ watch(isOpen, (open) => {
     width: 100% !important;
     height: 100% !important;
   }
-
 }
 
 .image-preview-slide {
+  position: relative;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
   overflow: hidden;
+  background: #000;
+  box-sizing: border-box;
+}
+
+.image-preview-backdropImage {
+  position: absolute;
+  inset: -24px;
+  width: calc(100% + 48px);
+  height: calc(100% + 48px);
+  object-fit: cover;
+  object-position: center;
+  filter: blur(22px);
+  transform: scale(1.06);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.image-preview-backdropOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.58)),
+    rgba(0, 0, 0, 0.32);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .image-preview-image {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 100%;
   height: 100%;
-  max-width: 100%;
+  max-width: 100vw;
   max-height: 100%;
   object-fit: contain;
   object-position: center;
-  flex: 0 1 auto;
-  align-self: center;
-  user-select: none;
-  -webkit-user-select: none;
+  background: transparent;
   border-radius: 0;
   box-shadow: none;
-  background: transparent;
-  cursor: zoom-in;
-  transition: transform 0.18s ease, object-fit 0.18s ease;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
-}
-
-.image-preview-image--zoomed {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
-  flex: 1 1 auto;
-  align-self: stretch;
-  object-fit: cover;
-  cursor: zoom-out;
 }
 </style>
 
