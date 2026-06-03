@@ -534,22 +534,18 @@ const emitOpenAuthor = (post: DonorPost) => {
   /* Clip to card top corners only via parent .postCard overflow + radius (no inner radius mismatch / black seam) */
   border-radius: 0;
 
-  /* Carousel vrstva nad author badge; progress bez safe-area insetu */
-  :deep(.dhPostCover) {
-    z-index: 2;
-  }
-
+  /* Progress nad author badge; cover bez z-index (inak zakryje celý badge) */
   :deep(.postCarousel-progress) {
-    top: 14px;
+    top: 15px;
     left: 24px;
     right: 24px;
-    z-index: 8;
+    z-index: 4;
   }
 }
 
 .postCard-authorBadge {
   position: absolute;
-  top: 36px; /* pod progress barom (progress ~14px + 3px výška) */
+  top: 32px; /* pod progress barom */
   left: 12px;
   display: flex;
   align-items: center;
@@ -560,7 +556,7 @@ const emitOpenAuthor = (post: DonorPost) => {
   backdrop-filter: blur(8px);
   cursor: pointer;
   transition: background 0.2s ease;
-  z-index: 1;
+  z-index: 3;
 
   &:hover {
     background: rgba(0, 0, 0, 0.75);

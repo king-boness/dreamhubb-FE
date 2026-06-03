@@ -9,6 +9,7 @@
       :show-arrows="showArrows"
       :show-dots="showDots"
       :alt="alt"
+      :progress-context="progressContext"
       :image-style="imageStyle"
       @image-click="$emit('image-click', $event)"
     />
@@ -41,6 +42,7 @@ interface Props {
   showArrows?: boolean;
   showDots?: boolean;
   imageStyle?: Record<string, string>;
+  progressContext?: "feed" | "detail";
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -54,7 +56,8 @@ const props = withDefaults(defineProps<Props>(), {
   showProgress: true,
   showArrows: true,
   showDots: true,
-  imageStyle: () => ({})
+  imageStyle: () => ({}),
+  progressContext: "feed"
 });
 
 defineEmits<{

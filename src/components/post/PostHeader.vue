@@ -11,6 +11,7 @@
           :show-progress="showProgress"
           :show-arrows="showArrows"
           :show-dots="showDots"
+          :progress-context="progressContext"
           alt="Post image"
           :image-style="imageStyle"
           @image-click="$emit('image-click', $event)"
@@ -133,6 +134,7 @@ interface Props {
   isLiked?: boolean;
   // Show/hide share and like buttons
   showShareAndLike?: boolean;
+  progressContext?: "feed" | "detail";
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -151,7 +153,8 @@ const props = withDefaults(defineProps<Props>(), {
   closeIcon: "img:/assets/icons/post/icon-close.svg",
   shareIcon: "img:/assets/icons/post/icon-share.svg",
   isLiked: false,
-  showShareAndLike: true
+  showShareAndLike: true,
+  progressContext: "feed"
 });
 
 defineEmits<{

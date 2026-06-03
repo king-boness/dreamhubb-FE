@@ -1,5 +1,8 @@
 <template>
-  <div class="postImagesCarousel">
+  <div
+    class="postImagesCarousel"
+    :class="{ 'postImagesCarousel--detail': progressContext === 'detail' }"
+  >
     <!-- Progress bar -->
     <div v-if="hasMultipleImages && showProgress" class="postCarousel-progress">
       <div
@@ -78,6 +81,8 @@ interface Props {
   showDots?: boolean;
   alt?: string;
   imageStyle?: Record<string, string>;
+  /** feed = karty na nástenke; detail = hero na post detaile (iná pozícia progressu) */
+  progressContext?: "feed" | "detail";
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -87,7 +92,8 @@ const props = withDefaults(defineProps<Props>(), {
   showArrows: true,
   showDots: true,
   alt: "Post image",
-  imageStyle: () => ({})
+  imageStyle: () => ({}),
+  progressContext: "feed"
 });
 
 // eslint-disable-next-line func-call-spacing
@@ -262,16 +268,22 @@ onBeforeUnmount(() => {
   }
 }
 
-// Progress bar — default: feed / karty (bez safe-area; detail override v _postDetail.scss)
+// Progress bar — feed (nástenka); detail má vlastný modifier nižšie
 .postCarousel-progress {
   position: absolute;
-  top: 14px;
+  top: 15px;
   left: 24px;
   right: 24px;
   display: flex;
   gap: 0.25rem;
-  z-index: 8;
+  z-index: 4;
   pointer-events: none;
+}
+
+.postImagesCarousel--detail .postCarousel-progress {
+  /* +8px baseline + 40px nadol (opačne oproti predchádzajúcemu posunu) */
+  top: 60px;
+  z-index: 16;
 }
 
 .postCarousel-progress-segment {

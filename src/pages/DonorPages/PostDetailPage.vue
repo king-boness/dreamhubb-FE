@@ -45,6 +45,7 @@
           :show-progress="true"
           :show-arrows="true"
           :show-dots="true"
+          progress-context="detail"
           :image-wrapper-style="heroStyle"
           :image-style="{ cursor: 'pointer' }"
           :title="displayTitle"
