@@ -72,24 +72,24 @@
       </q-tab>
     </q-tabs>
 
-    <q-tab-panels v-model="tab" animated class="panel" swipeable>
-      <q-tab-panel class="tabPanel" name="Profile"
-        ><ProfileContent></ProfileContent
-      ></q-tab-panel>
-      <q-tab-panel class="tabPanel" name="funds"
-        ><TokenShopPage></TokenShopPage>
+    <q-tab-panels v-model="tab" class="panel">
+      <q-tab-panel class="tabPanel" name="Profile">
+        <ProfileContent v-if="tab === 'Profile'" />
       </q-tab-panel>
-      <q-tab-panel class="tabPanel" name="stats"
-        ><StatsPage></StatsPage
-      ></q-tab-panel>
-      <q-tab-panel class="tabPanel" name="earn"
-        ><EarnPage></EarnPage>
+      <q-tab-panel class="tabPanel" name="funds">
+        <TokenShopPage v-if="tab === 'funds'" />
+      </q-tab-panel>
+      <q-tab-panel class="tabPanel tabPanel--profileStats" name="stats">
+        <StatsPage v-if="tab === 'stats'" ref="statsPageRef" />
+      </q-tab-panel>
+      <q-tab-panel class="tabPanel" name="earn">
+        <EarnPage v-if="tab === 'earn'" />
       </q-tab-panel>
     </q-tab-panels>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, defineProps, PropType } from "vue";
+import { ref, watch, nextTick, defineProps, PropType } from "vue";
 import { useI18n } from "vue-i18n";
 import { Post } from "src/components/models";
 
@@ -103,6 +103,23 @@ import UserAvatar from "src/components/common/UserAvatar.vue";
 const { t } = useI18n();
 const authStore = useAuthStore();
 const tab = ref("Profile");
+const statsPageRef = ref<InstanceType<typeof StatsPage> | null>(null);
+
+watch(tab, (value) => {
+  void nextTick(() => {
+    const scrollRoot = document.querySelector(
+      ".q-page-container.donor-feed-unified-scroll"
+    ) as HTMLElement | null;
+    if (scrollRoot) {
+      scrollRoot.scrollTop = 0;
+    }
+  });
+
+  if (value === "stats") {
+    void statsPageRef.value?.refresh?.();
+  }
+});
+
 defineProps({
   post: {
     type: Object as PropType<Post>,
@@ -157,6 +174,38 @@ defineProps({
 .stats-filter .tabPanel {
   overflow-anchor: none !important;
   scroll-snap-type: none !important;
+}
+
+/* Profile variant: panel height follows active tab only (no ProfileContent ghost height) */
+.stats-filter--profile .panel,
+.stats-filter--profile .q-tab-panels {
+  min-height: 0;
+  height: auto;
+}
+
+.stats-filter--profile .tabPanel--profileStats {
+  min-height: auto;
+  height: auto;
+  overflow: visible;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.stats-filter--profile .tabPanel--profileStats .statsPage {
+  min-height: auto;
+  height: auto;
+  padding-bottom: max(4.75rem, calc(4.5rem + env(safe-area-inset-bottom, 0px)));
+}
+
+.stats-filter--profile .tabPanel--profileStats .statsPage-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 2rem 0;
+}
+
+.stats-filter--profile .tabPanel--profileStats .detailed-stats {
+  padding-bottom: 0.25rem;
 }
 
 .profileTab {

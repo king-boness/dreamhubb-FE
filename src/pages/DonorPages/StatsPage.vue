@@ -387,8 +387,10 @@ defineExpose({
 <style scoped lang="scss">
 .statsPage-loading {
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 2rem 0;
+  min-height: 12rem;
 }
 
 .statsPage-historicalNote {
