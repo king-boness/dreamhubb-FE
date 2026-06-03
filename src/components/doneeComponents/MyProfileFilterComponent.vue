@@ -1,5 +1,8 @@
 <template>
-  <div class="stats-filter stats-filter--profile">
+  <div
+    class="stats-filter stats-filter--profile"
+    :class="{ 'stats-filter--profileStatsActive': tab === 'stats' }"
+  >
     <q-tabs
       class="text-white filterTabs"
       active-color="primary"
@@ -89,7 +92,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, nextTick, defineProps, PropType } from "vue";
+import {
+  ref,
+  watch,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  defineProps,
+  PropType
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { Post } from "src/components/models";
 
@@ -105,19 +116,63 @@ const authStore = useAuthStore();
 const tab = ref("Profile");
 const statsPageRef = ref<InstanceType<typeof StatsPage> | null>(null);
 
-watch(tab, (value) => {
-  void nextTick(() => {
-    const scrollRoot = document.querySelector(
-      ".q-page-container.donor-feed-unified-scroll"
-    ) as HTMLElement | null;
-    if (scrollRoot) {
-      scrollRoot.scrollTop = 0;
-    }
+const PROFILE_STATS_BODY_CLASS = "dh-profile-stats-active";
+const MY_PROFILE_TABS_BODY_CLASS = "dh-myprofile-tabs";
+
+const setProfileStatsScrollMode = (active: boolean) => {
+  if (active) {
+    document.body.classList.add(PROFILE_STATS_BODY_CLASS);
+  } else {
+    document.body.classList.remove(PROFILE_STATS_BODY_CLASS);
+  }
+};
+
+const waitFrame = () =>
+  new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
   });
 
-  if (value === "stats") {
-    void statsPageRef.value?.refresh?.();
+const resetUnifiedScrollTop = async () => {
+  await nextTick();
+  await waitFrame();
+  await waitFrame();
+
+  const scrollRoot = document.querySelector(
+    ".q-page-container.donor-feed-unified-scroll"
+  ) as HTMLElement | null;
+
+  if (scrollRoot) {
+    scrollRoot.scrollTop = 0;
+    void scrollRoot.offsetHeight;
+    scrollRoot.scrollTop = 0;
   }
+};
+
+watch(tab, async (value, oldValue) => {
+  const isStats = value === "stats";
+
+  setProfileStatsScrollMode(isStats);
+
+  if (isStats) {
+    await resetUnifiedScrollTop();
+    await nextTick();
+    void statsPageRef.value?.refresh?.();
+    return;
+  }
+
+  if (oldValue === "stats") {
+    await nextTick();
+    await waitFrame();
+  }
+});
+
+onMounted(() => {
+  document.body.classList.add(MY_PROFILE_TABS_BODY_CLASS);
+});
+
+onBeforeUnmount(() => {
+  document.body.classList.remove(PROFILE_STATS_BODY_CLASS);
+  document.body.classList.remove(MY_PROFILE_TABS_BODY_CLASS);
 });
 
 defineProps({
@@ -127,58 +182,95 @@ defineProps({
   }
 });
 </script>
-<style scoped lang="scss"></style>
-<style lang="scss">
+<style scoped lang="scss">
 .statsTab {
   svg {
     fill: white;
   }
 }
-.stats-filter {
+.stats-filter--profile.stats-filter--profileStatsActive {
   overflow-anchor: none !important;
   scroll-snap-type: none !important;
-
-  .scroll {
-    -webkit-overflow-scrolling: auto !important;
-    will-change: auto;
-  }
 }
 
-.q-tab__content {
+.stats-filter--profile .filterTabs {
+  width: 100%;
+  max-width: 100%;
+  margin: 0.1rem auto 0;
+  padding: 0 0.85rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.stats-filter--profile :deep(.q-tabs) {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden !important;
+}
+
+.stats-filter--profile :deep(.q-tabs__content),
+.stats-filter--profile :deep(.q-tabs__content--align-center),
+.stats-filter--profile :deep(.q-tabs__content--align-justify) {
+  display: flex !important;
+  justify-content: space-evenly !important;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  gap: 0;
+  transform: none !important;
+  overflow-x: hidden !important;
+}
+
+.stats-filter--profile :deep(.q-tab) {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0 !important;
+  max-width: none;
+  padding: 0.65rem 0.75rem !important;
+  justify-content: center;
+}
+
+.stats-filter--profile :deep(.q-tab__content) {
   display: flex;
-  flex-direction: row-reverse !important; /* Reverses the order of label and icon */
-  align-items: center; /* Vertically aligns label and icon */
+  flex-direction: row-reverse !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+
   svg {
-    margin-right: 0.5rem;
+    margin-right: 0.4rem;
+    flex-shrink: 0;
   }
 }
-.filterTabs {
-  margin: 0 auto;
-  margin-top: 0.1rem;
-  padding: 0 0.6rem;
-  .q-tab__label {
-    font-size: 0.8rem;
-    text-transform: lowercase !important;
-    font-family: poppinsMedium;
-  }
-  .q-tab {
-    padding: 0.5rem 0.7rem !important;
-  }
+
+.stats-filter--profile :deep(.q-tab__label) {
+  font-size: 0.75rem;
+  text-transform: lowercase !important;
+  font-family: poppinsMedium;
+  white-space: nowrap;
 }
-.q-tab-panel {
+
+.stats-filter--profile :deep(.q-tabs__arrow),
+.stats-filter--profile :deep(.q-tabs__arrow--left),
+.stats-filter--profile :deep(.q-tabs__arrow--right) {
+  display: none !important;
+}
+
+:global(.q-tab-panel) {
   padding: 0 !important;
   overflow-anchor: none !important;
 }
 
-.stats-filter .panel,
-.stats-filter .tabPanel {
+.stats-filter--profile.stats-filter--profileStatsActive :deep(.panel),
+.stats-filter--profile.stats-filter--profileStatsActive :deep(.tabPanel),
+.stats-filter--profile.stats-filter--profileStatsActive .tabPanel--profileStats {
   overflow-anchor: none !important;
   scroll-snap-type: none !important;
 }
 
 /* Profile variant: panel height follows active tab only (no ProfileContent ghost height) */
-.stats-filter--profile .panel,
-.stats-filter--profile .q-tab-panels {
+.stats-filter--profile :deep(.panel),
+.stats-filter--profile :deep(.q-tab-panels) {
   min-height: 0;
   height: auto;
 }
@@ -213,9 +305,57 @@ defineProps({
   margin-bottom: 0;
 }
 
+/*
+ * My Profile tabs: pri hide-on-scroll headera nesmie q-page-container dostať padding-top
+ * (iosSafeArea rule), inak skáče obsah pri scrollovaní Profile tabu.
+ */
+:global(body.dh-myprofile-tabs
+    .LayoutBackground.q-layout
+    > .roleChrome-topStack.donorPosts-integratedChrome.navbar--hidden:not(.dh-use-transform-chrome-hide)
+    ~ .q-page-container.donor-feed-unified-scroll) {
+  padding-top: 0 !important;
+}
+
+/*
+ * Profile → stats: scroll root is .q-page-container.donor-feed-unified-scroll (donor-myprofile).
+ * :global() required — body / page-container live outside this SFC scoped tree.
+ */
+:global(body.dh-profile-stats-active .q-page-container.donor-feed-unified-scroll) {
+  overflow-y: auto !important;
+  overscroll-behavior-y: none !important;
+  min-height: auto !important;
+  max-height: 100dvh;
+}
+
+:global(body.dh-profile-stats-active .q-page-container.donor-feed-unified-scroll .q-page) {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive),
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .panel),
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .q-tab-panels),
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .q-panel),
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .q-tab-panel),
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .q-tab-panels__content) {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .tabPanel--profileStats) {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+:global(body.dh-profile-stats-active .stats-filter--profileStatsActive .statsPage) {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 .profileTab {
   .profileTab-avatarWrapper {
     margin-right: 0.5rem !important;
+    flex-shrink: 0;
   }
   .profilePicture {
     border-radius: 50% !important;
@@ -227,7 +367,7 @@ defineProps({
   .profilePicture {
     border: 0.1rem solid $primary;
   }
-  .q-tab__label {
+  :deep(.q-tab__label) {
     color: $primary;
   }
 }
@@ -238,7 +378,7 @@ defineProps({
   * {
     color: $primary !important;
   }
-  .q-ripple {
+  :deep(.q-ripple) {
     display: none;
   }
 }

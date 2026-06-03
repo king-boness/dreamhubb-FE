@@ -1068,6 +1068,9 @@ onBeforeUnmount(() => {
   font-family: poppins;
   white-space: pre-wrap;
   word-wrap: break-word;
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
 }
 
 .myProfile-actions {

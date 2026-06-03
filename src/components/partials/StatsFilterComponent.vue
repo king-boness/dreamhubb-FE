@@ -60,7 +60,7 @@
       ></q-tab>
     </q-tabs>
 
-    <q-tab-panels v-model="tab" animated class="panel">
+    <q-tab-panels v-model="tab" class="panel">
       <q-tab-panel class="panel" name="funds"
         ><TokenShopPage></TokenShopPage>
       </q-tab-panel>
