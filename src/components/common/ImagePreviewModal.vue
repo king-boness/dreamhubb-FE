@@ -30,6 +30,10 @@
         @click="nextImage"
       />
 
+      <div v-if="images.length > 0" class="image-preview-zoomHint">
+        {{ isZoomed ? "Tap to fit" : "Tap to zoom" }}
+      </div>
+
       <!-- Image counter (only if multiple images) -->
       <div v-if="images.length > 1" class="image-preview-counter">
         {{ currentIndex + 1 }} / {{ images.length }}
@@ -55,7 +59,9 @@
               :src="url"
               :alt="`Image ${idx + 1}`"
               class="image-preview-image"
+              :class="{ 'image-preview-image--zoomed': isZoomed }"
               draggable="false"
+              @click.stop="toggleZoom"
             />
           </q-carousel-slide>
         </q-carousel>
@@ -82,6 +88,7 @@ const emit = defineEmits<{
 }>();
 
 const currentIndex = ref(props.initialIndex);
+const isZoomed = ref(false);
 
 const isOpen = computed({
   get: () => props.modelValue,
@@ -118,6 +125,14 @@ const previousImage = () => {
   }
 };
 
+const toggleZoom = () => {
+  isZoomed.value = !isZoomed.value;
+};
+
+watch(currentIndex, () => {
+  isZoomed.value = false;
+});
+
 const close = () => {
   isOpen.value = false;
 };
@@ -141,6 +156,7 @@ watch(isOpen, (open) => {
     window.addEventListener("keydown", handleKeydown);
   } else {
     window.removeEventListener("keydown", handleKeydown);
+    isZoomed.value = false;
   }
 });
 </script>
@@ -244,6 +260,19 @@ watch(isOpen, (open) => {
   right: 1rem;
 }
 
+.image-preview-zoomHint {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 3.25rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.62);
+  pointer-events: none;
+  font-family: poppins, sans-serif;
+  white-space: nowrap;
+}
+
 .image-preview-counter {
   position: absolute;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
@@ -267,9 +296,9 @@ watch(isOpen, (open) => {
   flex: 1 1 auto;
   min-height: 0;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 3.25rem)
+    calc(env(safe-area-inset-top, 0px) + 2.75rem)
     0
-    calc(env(safe-area-inset-bottom, 0px) + 3.25rem)
+    calc(env(safe-area-inset-bottom, 0px) + 2.75rem)
     0;
   box-sizing: border-box;
   display: flex;
@@ -295,17 +324,6 @@ watch(isOpen, (open) => {
     height: 100% !important;
   }
 
-  :deep(.q-img),
-  :deep(.q-img__container),
-  :deep(.q-img__image),
-  :deep(img) {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    max-height: 100% !important;
-    object-fit: contain !important;
-    object-position: center !important;
-  }
 }
 
 .image-preview-slide {
@@ -320,8 +338,8 @@ watch(isOpen, (open) => {
 .image-preview-image {
   display: block;
   width: 100%;
-  max-width: 100vw;
-  height: auto;
+  height: 100%;
+  max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   object-position: center;
@@ -332,6 +350,20 @@ watch(isOpen, (open) => {
   border-radius: 0;
   box-shadow: none;
   background: transparent;
+  cursor: zoom-in;
+  transition: transform 0.18s ease, object-fit 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.image-preview-image--zoomed {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  flex: 1 1 auto;
+  align-self: stretch;
+  object-fit: cover;
+  cursor: zoom-out;
 }
 </style>
 
