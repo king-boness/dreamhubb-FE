@@ -170,6 +170,8 @@ const headerImages = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@import "src/css/partials/abstracts/mixins";
+
 .post-header {
   // Scoped styles to prevent affecting PostDetailPage
   width: 100%;
@@ -250,57 +252,16 @@ const headerImages = computed(() => {
       }
     }
 
-    .post-header-iconBtn {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.45) !important;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(14px);
-      color: #fff;
-      cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
-
-      &:hover {
-        transform: translateY(-1px);
-        background: rgba(0, 0, 0, 0.6) !important;
-      }
-
-      &:active {
-        transform: scale(0.95);
-        background: rgba(0, 0, 0, 0.75) !important;
-      }
-    }
-
+    .post-header-iconBtn,
     .post-header-heartBtn {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.45) !important;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(14px);
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+      @include dh-hero-action-btn;
 
-      &:hover {
-        transform: translateY(-1px);
-        background: rgba(0, 0, 0, 0.6) !important;
+      &.q-btn {
+        min-height: 48px;
+        line-height: 1;
       }
 
-      &:active {
-        transform: scale(0.95);
-        background: rgba(0, 0, 0, 0.75) !important;
-      }
+      @include dh-hero-action-btn-icon;
 
       &--liked {
         .post-header-heartIcon {
@@ -328,8 +289,8 @@ const headerImages = computed(() => {
     }
 
     .post-header-heartIcon {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       object-fit: contain;
     }
 

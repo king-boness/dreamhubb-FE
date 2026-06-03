@@ -1,3 +1,5 @@
+@import "../abstracts/mixins";
+
 /* Unified app background (iosSafeArea.scss) */
 .postDetail {
   min-height: 100vh;
@@ -554,46 +556,18 @@
       gap: 4px;
 
       .postDetail-commentBtn {
-        width: 40px;
-        height: 40px;
-        border-radius: 999px;
-        border: none;
-        background: rgba(0, 0, 0, 0.45) !important;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        cursor: pointer;
-        padding: 0;
-        margin: 0;
-        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
-
-        i {
-          font-size: 20px;
-        }
+        @include dh-hero-action-btn;
 
         &.q-btn {
-          min-height: auto;
-          padding: 0;
-
-          .q-icon {
-            font-size: 20px;
-            color: #fff;
-            filter: brightness(0) invert(1);
-          }
+          min-height: 48px;
+          line-height: 1;
         }
 
-        &:hover {
-          transform: translateY(-1px);
-          background: rgba(0, 0, 0, 0.6) !important;
-        }
+        @include dh-hero-action-btn-icon;
 
-        &:active {
-          transform: scale(0.95);
-          background: rgba(0, 0, 0, 0.75) !important;
+        &.q-btn .q-icon {
+          color: #fff;
+          transform: translateY(0);
         }
       }
 

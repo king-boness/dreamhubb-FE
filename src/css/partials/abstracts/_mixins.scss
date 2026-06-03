@@ -1,3 +1,62 @@
+/* Post / hero overlay: close, share, heart, comment — rovnaké sklenené kruhy */
+@mixin dh-hero-action-btn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: rgba(36, 26, 24, 0.48) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(14px) saturate(1.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+
+  &:hover {
+    background: rgba(36, 26, 24, 0.62) !important;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+@mixin dh-hero-action-btn-icon {
+  .q-btn__content {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .q-icon,
+  svg,
+  img {
+    display: block;
+    width: 22px;
+    height: 22px;
+    line-height: 1;
+    margin: 0;
+    object-fit: contain;
+    flex: 0 0 auto;
+  }
+
+  .q-icon {
+    font-size: 22px;
+  }
+}
 
 @mixin arrowButtton($rotate,$bgcolor,$border) {
     border: .1rem solid $border;
