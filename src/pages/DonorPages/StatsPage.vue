@@ -538,19 +538,21 @@ defineExpose({
       rgba(37, 37, 37, 0.405) 0%,
       rgba(23, 23, 23, 0.33) 100%
     );
-    // background-color: pink;
-    height: 3.6rem;
+    min-height: 3.6rem;
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 1rem;
+    gap: 0.5rem;
+    padding: 0.35rem 1rem;
     margin-bottom: 0.5rem;
     border-radius: 0.8rem;
 
     .karmaGainedTitleDiv {
-      width: 0.8rem;
+      flex: 0 0 4.2rem;
+      width: auto;
+      min-width: 0;
       display: flex;
+      align-items: center;
 
       .karmaGainedTitle {
         color: white;
@@ -562,13 +564,15 @@ defineExpose({
     }
 
     .overwievDonationsDiv {
-      margin-left: 4.5rem;
+      flex: 1 1 auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: fixed;
+      min-width: 0;
+      margin: 0;
 
       .karmaGainedImgGift {
+        flex-shrink: 0;
         height: 1.7rem;
         margin-right: 0.5rem;
         margin-bottom: 0.2rem;
@@ -578,10 +582,16 @@ defineExpose({
         color: white;
         font-family: poppins;
         font-size: 0.9rem;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
 
     .karmaValue {
+      flex: 0 0 auto;
+      margin-left: auto;
       display: flex;
       align-items: center;
       background-color: rgba(189, 0, 67, 0.1);
@@ -618,26 +628,34 @@ defineExpose({
     );
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0rem 1rem;
+    gap: 0.5rem;
+    padding: 0.35rem 1rem;
     margin: 0 auto;
     border-radius: 0.8rem;
     width: 100%;
-    height: 3.8rem;
+    min-height: 3.8rem;
 
     .usedOnStats-title {
+      flex: 0 0 3.5rem;
       color: white;
       font-size: 0.7rem;
       font-family: poppins;
       line-height: 0.9rem;
       text-transform: Uppercase;
-      width: 0.8rem;
+      width: auto;
+      min-width: 0;
     }
     .usedOnStats-categories {
-      position: fixed;
-      margin-left: 2.8rem;
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      margin: 0;
     }
     .usedOnStats-value {
+      flex: 0 0 auto;
+      margin-left: auto;
       display: flex;
       align-items: center;
       background-color: rgba(189, 0, 67, 0.1);

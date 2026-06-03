@@ -1,6 +1,5 @@
 <template>
   <div class="stats-filter stats-filter--profile">
-    <div class="stats-filter__tabsHeader">
     <q-tabs
       class="text-white filterTabs"
       active-color="primary"
@@ -72,7 +71,6 @@
         </svg>
       </q-tab>
     </q-tabs>
-    </div>
 
     <q-tab-panels v-model="tab" animated class="panel" swipeable>
       <q-tab-panel class="tabPanel" name="Profile"
@@ -129,19 +127,6 @@ defineProps({
   }
 }
 
-/* Profile route: tabs stick below notch when unified-scroll chrome hides on scroll */
-.stats-filter--profile .stats-filter__tabsHeader {
-  position: sticky;
-  top: env(safe-area-inset-top, 0px);
-  z-index: 20;
-  background-color: #0a0a0a;
-  padding-bottom: 0.15rem;
-  margin-bottom: 0.1rem;
-}
-
-.body--light .stats-filter--profile .stats-filter__tabsHeader {
-  background-color: #f5f5f5;
-}
 .q-tab__content {
   display: flex;
   flex-direction: row-reverse !important; /* Reverses the order of label and icon */
