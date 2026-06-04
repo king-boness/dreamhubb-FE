@@ -156,6 +156,8 @@
       :profile-title="sharePostTitle"
       :profile-text="sharePostText"
       :post-type="(post?.type as 'dream' | 'problem' | 'idea' | null) || null"
+      shareable-type="post"
+      :shareable-id="postId ?? null"
     />
   </div>
 </template>

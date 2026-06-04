@@ -9,6 +9,7 @@ import {
 
 import routes from "./routes";
 import { useAuthStore } from "src/stores/auth";
+import { captureShareVisitFromRoute } from "src/utils/shareVisitCapture";
 
 export default route(function ({ store }) {
   const createHistory = process.env.SERVER
@@ -60,6 +61,8 @@ export default route(function ({ store }) {
   }
 
   Router.beforeEach((to, from, next) => {
+    captureShareVisitFromRoute(to);
+
     try {
       // Použiť authStore.isAuthenticated
       let isAuthenticated = false;

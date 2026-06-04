@@ -86,6 +86,8 @@
       :profile-url="profileShareUrl"
       :profile-title="shareProfileTitle"
       :profile-text="shareProfileText"
+      shareable-type="profile"
+      :shareable-id="authStore.user?.id ?? null"
     />
 
     <!-- Badge Selector Drawer -->

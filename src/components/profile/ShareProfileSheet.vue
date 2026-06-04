@@ -54,6 +54,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { notifyError } from "src/utils/notify";
+import {
+  createTrackedShare,
+  recordShareEvent
+} from "src/services/shareTrackingService";
+import type { ShareableType, ShareChannel } from "src/types/shareTracking";
 
 interface Props {
   modelValue: boolean;
@@ -61,6 +66,8 @@ interface Props {
   profileTitle?: string;
   profileText?: string;
   postType?: "dream" | "problem" | "idea" | null; // For dynamic title based on post type
+  shareableType?: ShareableType;
+  shareableId?: string | number | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -68,7 +75,9 @@ const props = withDefaults(defineProps<Props>(), {
   profileUrl: "",
   profileTitle: "Check out this profile on dreamhubb",
   profileText: "Check out this profile on dreamhubb",
-  postType: null
+  postType: null,
+  shareableType: undefined,
+  shareableId: null
 });
 
 // eslint-disable-next-line func-call-spacing
@@ -351,9 +360,61 @@ onBeforeUnmount(() => {
   document.body.classList.remove("bottom-sheet-open");
 });
 
-const shareOnPlatform = (platform: { name: string; url: (url: string, title: string, text: string) => string }) => {
+function platformToChannel(platformName: string): ShareChannel | string {
+  const key = platformName.toLowerCase();
+  if (key.includes("facebook")) return "facebook";
+  if (key.includes("whatsapp")) return "whatsapp";
+  if (key.includes("instagram")) return "instagram";
+  if (key.includes("tiktok")) return "tiktok";
+  return "unknown";
+}
+
+function isShareCancelled(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
+  if (
+    error &&
+    typeof error === "object" &&
+    "name" in error &&
+    (error as { name?: string }).name === "AbortError"
+  ) {
+    return true;
+  }
+  return false;
+}
+
+async function resolveTrackedShare(
+  channel: ShareChannel | string
+): Promise<{ url: string; token: string | null }> {
+  if (!props.shareableType) {
+    return { url: props.profileUrl, token: null };
+  }
+
   try {
-    const shareUrl = platform.url(props.profileUrl, props.profileTitle, props.profileText);
+    const response = await createTrackedShare({
+      shareable_type: props.shareableType,
+      shareable_id: props.shareableId ?? null,
+      channel
+    });
+
+    return {
+      url: response.share.share_url,
+      token: response.share.token
+    };
+  } catch {
+    return { url: props.profileUrl, token: null };
+  }
+}
+
+const shareOnPlatform = async (platform: {
+  name: string;
+  url: (url: string, title: string, text: string) => string;
+}) => {
+  try {
+    const channel = platformToChannel(platform.name);
+    const { url: trackedUrl } = await resolveTrackedShare(channel);
+    const shareUrl = platform.url(trackedUrl, props.profileTitle, props.profileText);
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   } catch (error) {
     notifyError({
@@ -362,18 +423,35 @@ const shareOnPlatform = (platform: { name: string; url: (url: string, title: str
       fallbackMessage: "Failed to share. Please try again.",
       retryable: true
     }, { timeout: 3000 });
+    void error;
   }
 };
 
 const shareNative = async () => {
+  const { url, token } = await resolveTrackedShare("native");
+
   try {
     await navigator.share({
       title: props.profileTitle,
       text: props.profileText,
-      url: props.profileUrl
+      url
     });
+
+    if (token) {
+      try {
+        await recordShareEvent({
+          share_token: token,
+          event_type: "completed",
+          channel: "native"
+        });
+      } catch {
+        /* analytics only */
+      }
+    }
   } catch (error) {
-    // User cancelled or error - ignore
+    if (isShareCancelled(error)) {
+      return;
+    }
     void error;
   }
 };

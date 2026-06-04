@@ -269,6 +269,8 @@
       :profile-title="sharePostTitle"
       :profile-text="sharePostText"
       :post-type="(normalizedPost?.category?.slug as 'dream' | 'problem' | 'idea' | null) || null"
+      shareable-type="post"
+      :shareable-id="post?.post_id ?? route.params.id ?? null"
     />
 
     <!-- Top Up Post Modal -->

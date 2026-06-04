@@ -22,6 +22,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }
   },
   {
+    path: "/open",
+    component: () => import("src/pages/Common/OpenSharePage.vue"),
+    name: "open-share",
+    meta: { requiresAuth: false }
+  },
+  {
     path: "/auth",
     component: () => import("src/layouts/Auth/AuthWelcomeLayout.vue"),
     name: "auth-welcome",
