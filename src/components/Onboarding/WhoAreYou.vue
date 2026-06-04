@@ -315,6 +315,8 @@
 
       <p class="who-instruction">Fill up your data</p>
 
+      <AuthLegalNotice class="who-legal" />
+
       <!-- Error message -->
       <div v-if="onboardingStore.error" class="who-error">
         {{ onboardingStore.error }}
@@ -340,6 +342,7 @@ import { notifyError } from "src/utils/notify";
 import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
+import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
 const onboardingStore = useOnboardingStore();
 

@@ -56,11 +56,22 @@
         <q-btn
           v-else-if="registrationIndex !== 1 && !horiz"
           label="JOIN"
-          :disabled="nextDisabled"
+          :disabled="nextDisabled || !acceptedTerms"
           color="primary"
           class="button"
           @click="register"
         />
+        <div v-if="registrationIndex !== 1 && !horiz" class="registerLegal">
+          <q-checkbox v-model="acceptedTerms" dark dense class="registerLegal-checkbox">
+            <span class="registerLegal-label">
+              I agree to the
+              <router-link :to="{ name: 'terms-of-use' }" @click.stop>Terms of Use</router-link>
+              and
+              <router-link :to="{ name: 'privacy-policy' }" @click.stop>Privacy Policy</router-link>.
+            </span>
+          </q-checkbox>
+          <AuthLegalNotice />
+        </div>
       </div>
     </q-page-container>
   </q-layout>
@@ -77,8 +88,10 @@ import { api } from "boot/axios";
 import { notifyError } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { API_BASE_SOURCE, API_BASE_URL } from "src/config/apiBase";
+import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
 const horiz = ref(false);
+const acceptedTerms = ref(false);
 const { t } = useI18n();
 const router = useRouter();
 const registrationIndex = ref(1);
@@ -172,7 +185,8 @@ const register = async () => {
     // Send parsed numeric values if present, otherwise null (BE returns validation errors).
     location_country_id: Number(registrationInfo.country) || null,
     location_continent_id: Number(registrationInfo.state) || null,
-    location_city_id: Number(registrationInfo.city) || null
+    location_city_id: Number(registrationInfo.city) || null,
+    accepted_terms: acceptedTerms.value
   };
 
   const resolvedBase = String(api.defaults.baseURL || "").replace(/\/$/, "");
@@ -359,5 +373,22 @@ const previousRegister = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.registerLegal {
+  width: 22rem;
+  margin: 0.75rem auto 0;
+  text-align: left;
+}
+
+.registerLegal-label {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+
+  a {
+    color: #ff4db8;
+    text-decoration: underline;
+  }
 }
 </style>

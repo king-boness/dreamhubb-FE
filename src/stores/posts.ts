@@ -132,7 +132,22 @@ export const usePostsStore = defineStore("posts", {
         const { data } = await api.get("/posts", { params: queryParams });
 
         // Robustný fallback pre rôzne BE štruktúry
-        this.posts = data.data || data.posts || data || [];
+        let posts = data.data || data.posts || data || [];
+
+        try {
+          const { useBlocksStore } = await import("src/stores/blocks");
+          const blocksStore = useBlocksStore();
+          if (!blocksStore.loaded) {
+            await blocksStore.loadBlockedUsers();
+          }
+          posts = (posts as Record<string, unknown>[]).filter(
+            (post) => !blocksStore.isBlocked((post as { user_id?: number }).user_id)
+          );
+        } catch {
+          // Feed still works if block list cannot be loaded
+        }
+
+        this.posts = posts;
       } catch (error: unknown) {
         const mapped = mapAxiosErrorToDhError(error);
         this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);

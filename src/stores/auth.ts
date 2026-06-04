@@ -89,6 +89,13 @@ export const useAuthStore = defineStore("auth", {
             // ignore
           }
 
+          try {
+            const { useBlocksStore } = await import("src/stores/blocks");
+            await useBlocksStore().loadBlockedUsers(true);
+          } catch {
+            // ignore
+          }
+
           this.loading = false;
           return data;
         } else {

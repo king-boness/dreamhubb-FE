@@ -56,11 +56,14 @@
       v-model:continent="feedContinent"
       v-model:country="feedCountry"
       v-model:city="feedCityId"
+      v-model:accepted-terms="acceptedTerms"
       :emit-city-id="true"
       city-model-mode="object"
       :enable-geolocation="false"
       :progress="80"
       :title="t('postsWillBeFrom')"
+      :require-terms-acceptance="true"
+      next-button-label="CREATE ACCOUNT"
       @next="handleNext"
       @back="handleBack"
     />
@@ -136,6 +139,11 @@ const feedCountry = computed({
 const feedCityId = computed({
   get: () => onboardingStore.feedCityId,
   set: (value) => onboardingStore.setStepData("feedCityId", value)
+});
+
+const acceptedTerms = computed({
+  get: () => onboardingStore.acceptedTerms,
+  set: (value) => onboardingStore.setStepData("acceptedTerms", value)
 });
 
 const username = computed({

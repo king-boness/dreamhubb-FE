@@ -62,7 +62,8 @@ export const useOnboardingStore = defineStore("onboarding", {
     // per-field validation errors from BE
     fieldErrors: {} as Record<string, string> | null,
     profilePictureFile: null as File | null,
-    profilePicturePreview: null as string | null // Base64 preview for avatar
+    profilePicturePreview: null as string | null, // Base64 preview for avatar
+    acceptedTerms: false
   }),
 
   getters: {
@@ -374,7 +375,8 @@ export const useOnboardingStore = defineStore("onboarding", {
           gender: this.gender,
           location_country_id: locationIds.countryId || null,
           location_continent_id: locationIds.continentId || null,
-          location_city_id: locationIds.cityId
+          location_city_id: locationIds.cityId,
+          accepted_terms: this.acceptedTerms
         };
 
         if (import.meta.env.DEV) {

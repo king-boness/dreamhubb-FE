@@ -298,12 +298,24 @@
       </div>
     </template>
 
+    <div v-if="!hideFooter && requireTermsAcceptance" class="location-terms">
+      <q-checkbox v-model="localAcceptedTerms" dark dense class="location-terms-checkbox">
+        <span class="location-terms-label">
+          I agree to the
+          <router-link :to="{ name: 'terms-of-use' }" @click.stop>Terms of Use</router-link>
+          and
+          <router-link :to="{ name: 'privacy-policy' }" @click.stop>Privacy Policy</router-link>.
+        </span>
+      </q-checkbox>
+      <AuthLegalNotice />
+    </div>
+
     <!-- Action button (hidden if hideFooter is true) -->
     <template v-if="!hideFooter">
       <button
         class="location-nextBtn"
         @click="handleNext"
-        :disabled="!localContinent || !localCountry"
+        :disabled="!localContinent || !localCountry || (requireTermsAcceptance && !localAcceptedTerms)"
       >
         {{ nextButtonLabel }}
       </button>
@@ -343,6 +355,7 @@ import { continents, getCountriesByContinent, getAllCountries } from "src/data/c
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
 import { useAuthStore } from "src/stores/auth";
+import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
 const props = withDefaults(defineProps<{
   continent?: string;
@@ -357,22 +370,32 @@ const props = withDefaults(defineProps<{
   emitCityId?: boolean; // If true, emit city ID instead of name, defaults to false
   cityDisplayFallback?: string; // Optional: label to show while city options are still loading
   cityModelMode?: "value" | "object"; // 'object' prevents 1-frame ID flash by not binding raw numeric id to QSelect model
+  requireTermsAcceptance?: boolean;
+  acceptedTerms?: boolean;
 }>(), {
   continent: "",
   country: "",
   city: "",
   emitCityId: false,
   cityDisplayFallback: "",
-  cityModelMode: "value"
+  cityModelMode: "value",
+  requireTermsAcceptance: false,
+  acceptedTerms: false
 });
 
 const emit = defineEmits<{
   "update:continent": [value: string];
   "update:country": [value: string];
   "update:city": [value: string | number];
+  "update:acceptedTerms": [value: boolean];
   next: [];
   back: [];
 }>();
+
+const localAcceptedTerms = computed({
+  get: () => props.acceptedTerms,
+  set: (value: boolean) => emit("update:acceptedTerms", value)
+});
 
 /** Settings / filters: light q-fields on pale card — not full-screen dark onboarding */
 const isEmbedMode = computed(() => props.hideHeader && props.hideFooter);
@@ -1151,6 +1174,22 @@ watch(localCityId, (newVal) => {
   color: rgba(255, 255, 255, 0.6);
   margin: 0;
   text-align: center;
+}
+
+.location-terms {
+  margin: 1rem 0 0.5rem;
+  max-width: 22rem;
+}
+
+.location-terms-label {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+
+  a {
+    color: #ff4db8;
+    text-decoration: underline;
+  }
 }
 
 .location-nextBtn {

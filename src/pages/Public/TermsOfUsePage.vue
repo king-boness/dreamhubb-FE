@@ -13,6 +13,19 @@
       </section>
 
       <section>
+        <h2>User-Generated Content</h2>
+        <p>
+          dreamhubb has <strong>zero tolerance</strong> for objectionable content, harassment, hate speech,
+          sexual content involving minors, threats, spam, or abusive behavior. We may remove content and
+          suspend or terminate accounts that violate these rules.
+        </p>
+        <p>
+          You can report posts in the app and block users who behave abusively. Blocked users are removed
+          from your feed immediately.
+        </p>
+      </section>
+
+      <section>
         <h2>Accounts and Content</h2>
         <p>
           You are responsible for your account and for content you post. You must not post unlawful, abusive,

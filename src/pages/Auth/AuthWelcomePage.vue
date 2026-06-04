@@ -64,12 +64,15 @@
           <span class="authWelcome-help_badge"></span>
         </button>
       </div>
+
+      <AuthLegalNotice class="authWelcome-legal" />
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 import { useRouter } from "vue-router";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { completedDreamsBank, type CompletedDreamCard } from "src/data/completedDreamsBank";

@@ -55,6 +55,8 @@
       {{ t('forgotPassword') }}
     </q-btn>
 
+    <AuthLegalNotice class="LoginPage-legal" />
+
     <div v-if="showForgotHint" class="LoginPage-forgotHint">
       <div class="LoginPage-forgotHintText">{{ forgotHintText }}</div>
       <q-btn class="LoginPage-forgotHintCta" flat @click="handleForgotPassword">
@@ -75,6 +77,7 @@ import { notifyError } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { logLoginDiag, redactEmail, summarizeAxiosError } from "src/utils/loginDiagnostics";
 import { API_BASE_SOURCE, API_BASE_URL } from "src/config/apiBase";
+import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
 const router = useRouter();
 const route = useRoute();

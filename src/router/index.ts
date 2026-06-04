@@ -92,6 +92,11 @@ export default route(function ({ store }) {
         return;
       }
 
+      if (to.name === "support" || to.name === "privacy-policy" || to.name === "terms-of-use") {
+        next();
+        return;
+      }
+
       // 🚪 guestOnly routes - len pre neprihlásených
       if (to.meta.guestOnly && isAuthenticated) {
         next({ name: "donor-posts" });

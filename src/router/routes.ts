@@ -28,6 +28,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }
   },
   {
+    path: "/support",
+    component: () => import("src/pages/Public/SupportPage.vue"),
+    name: "support",
+    meta: { requiresAuth: false }
+  },
+  {
     path: "/auth",
     component: () => import("src/layouts/Auth/AuthWelcomeLayout.vue"),
     name: "auth-welcome",

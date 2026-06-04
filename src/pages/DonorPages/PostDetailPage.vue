@@ -195,7 +195,7 @@
 
             <div v-if="displayAuthorBioText" class="postDetailAbout-separator" />
 
-            <!-- Report a post -->
+            <!-- Report / block -->
             <div class="postDetail-reportSection">
               <button
                 type="button"
@@ -208,6 +208,15 @@
                   class="postDetail-reportIcon"
                 />
                 <span>{{ t("reportPost") }}</span>
+              </button>
+              <button
+                v-if="!isAuthor && authorId"
+                type="button"
+                class="postDetail-reportCta postDetail-reportCta--block"
+                @click="handleBlockAuthor"
+              >
+                <q-icon name="block" size="18px" class="postDetail-reportIcon" />
+                <span>Block user</span>
               </button>
             </div>
           </div>
@@ -384,6 +393,7 @@ import { notifyError, notifySuccess } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { useCommentsStore } from "src/stores/comments";
 import { api } from "boot/axios";
+import { useBlockUser } from "src/composables/useBlockUser";
 
 const { t, locale } = useI18n();
 
@@ -930,6 +940,8 @@ const handleSave = async () => {
   }
 };
 
+const { blockUserById } = useBlockUser();
+
 const handleReportDream = () => {
   const postId = post.value?.post_id;
   if (!postId) return;
@@ -938,6 +950,12 @@ const handleReportDream = () => {
     name: "donor-post-report",
     params: { id: String(postId) }
   });
+};
+
+const handleBlockAuthor = async () => {
+  const id = authorId.value;
+  if (!id) return;
+  await blockUserById(id, { navigateBack: true });
 };
 
 const handleComments = () => {

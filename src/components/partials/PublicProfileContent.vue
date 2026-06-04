@@ -25,6 +25,14 @@
           <PageTitle :title="`About ${displayName}`" />
           <p class="myProfile-bio">{{ displayBio }}</p>
         </div>
+        <button
+          v-if="canBlockUser"
+          type="button"
+          class="publicProfile-blockBtn"
+          @click="handleBlockUser"
+        >
+          Block user
+        </button>
       </div>
     </div>
 
@@ -71,10 +79,14 @@ import { translateCityName, translateCountryName } from "src/utils/cityNames";
 import PageTitle from "src/components/ui/PageTitle.vue";
 import ProfileMenuItem from "src/components/common/ProfileMenuItem.vue";
 import { normalizePost } from "src/utils/normalizePost";
+import { useAuthStore } from "src/stores/auth";
+import { useBlockUser } from "src/composables/useBlockUser";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
+const { blockUserById } = useBlockUser();
 
 interface PublicUser {
   id: number;
@@ -105,6 +117,18 @@ const isDonorSide = computed(() => route.meta?.side === "donor");
 const displayName = computed(() => {
   return props.userData?.name || props.userData?.username || "User";
 });
+
+const canBlockUser = computed(() => {
+  const targetId = props.userData?.id;
+  const selfId = authStore.user?.id;
+  return !!targetId && !!selfId && targetId !== selfId;
+});
+
+const handleBlockUser = async () => {
+  const targetId = props.userData?.id;
+  if (!targetId) return;
+  await blockUserById(targetId, { navigateBack: true });
+};
 
 const displayLocation = computed(() => {
   const u = props.userData;
@@ -343,6 +367,18 @@ const goToPosts = (type: "dream" | "problem" | "idea") => {
   font-family: poppins;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.publicProfile-blockBtn {
+  margin-top: 1rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255, 77, 184, 0.55);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #ff4db8;
+  font-family: poppinsSemiBold;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .publicProfileMenu {
