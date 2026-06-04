@@ -9,6 +9,7 @@
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { recordShareVisit } from "src/services/shareTrackingService";
+import { markShareVisitRecorded } from "src/utils/shareVisitCapture";
 import type { ShareableType } from "src/types/shareTracking";
 
 const route = useRoute();
@@ -42,20 +43,37 @@ function redirectForShare(
   void router.replace({ name: "donor-posts" });
 }
 
+function redirectFallback(): void {
+  void router.replace({ name: "donor-posts" });
+}
+
 onMounted(async () => {
   const raw = route.query.s;
   const token = typeof raw === "string" ? raw.trim() : "";
 
   if (!token) {
-    void router.replace({ name: "donor-posts" });
+    redirectFallback();
     return;
   }
 
   try {
     const response = await recordShareVisit(token);
+    markShareVisitRecorded(token);
+
+    if (import.meta.env?.DEV) {
+      console.debug("[open-share] visit recorded", {
+        deduped: response.deduped,
+        self_visit: response.self_visit ?? false,
+        shareable_type: response.share.shareable_type
+      });
+    }
+
     redirectForShare(response.share.shareable_type, response.share.shareable_id);
-  } catch {
-    void router.replace({ name: "donor-posts" });
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.debug("[open-share] visit failed, fallback redirect", err);
+    }
+    redirectFallback();
   }
 });
 </script>

@@ -86,6 +86,12 @@ export default route(function ({ store }) {
         return;
       }
 
+      // Public share opener – visit + redirect handled in OpenSharePage (not auth-gated)
+      if (to.name === "open-share") {
+        next();
+        return;
+      }
+
       // 🚪 guestOnly routes - len pre neprihlásených
       if (to.meta.guestOnly && isAuthenticated) {
         next({ name: "donor-posts" });
