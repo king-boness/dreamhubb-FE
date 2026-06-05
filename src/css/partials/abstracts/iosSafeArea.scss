@@ -122,9 +122,25 @@ html, body, #q-app, .q-layout, .q-page-container {
 .platform-ios .landingLayout .q-page.login {
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* Znížiť horný priestor nad mapou na logine, aby formulár nebol posunutý príliš dole */
-.platform-ios .landingLayout .landingPage-mapImage {
-  padding-top: 1.5rem;
+/* Login: map area compact so form + legal notice fit above the fold */
+.platform-ios .landingLayout .q-page.login.login--auth-form .landingPage-mapImage {
+  padding-top: 1rem;
+}
+
+.platform-ios .landingLayout .q-page.login.login--auth-form .mapImage {
+  height: 8.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-height: 700px) {
+  .platform-ios .landingLayout .q-page.login.login--auth-form .landingPage-mapImage {
+    padding-top: 0.5rem;
+  }
+
+  .platform-ios .landingLayout .q-page.login.login--auth-form .mapImage {
+    height: 6.75rem;
+    margin-bottom: 0.35rem;
+  }
 }
 
 /* Safe-area na q-header – header sa neprekrýva so status barom */

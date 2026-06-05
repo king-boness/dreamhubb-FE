@@ -3,7 +3,11 @@
     <q-page-container>
       <q-page
         class="justify-center items-center login"
-        :class="{ iphoneDevice: $q.platform.is.ios, 'login--reset': isResetFlow }"
+        :class="{
+          iphoneDevice: $q.platform.is.ios,
+          'login--reset': isResetFlow,
+          'login--auth-form': route.name === 'login'
+        }"
       >
         <div class="row col-12" :class="{ 'landingLayout-topRow--overlay': isResetFlow }">
           <div v-if="route.name == 'login'" class="buttonDiv">
@@ -68,6 +72,73 @@ const handleBack = () => {
   height: 16rem;
   width: 100%;
   margin-bottom: 2rem;
+}
+
+/* Login: tighter vertical stack so legal notice fits without scrolling */
+.login--auth-form {
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+}
+
+.login--auth-form .landingPage-mapImage {
+  padding-top: 2.25rem;
+}
+
+.login--auth-form .mapImage {
+  height: 10.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.login--auth-form .buttonDiv {
+  margin: 0.5rem;
+  margin-bottom: -2rem !important;
+}
+
+.login--auth-form .logo {
+  font-size: 3rem;
+  margin-top: -0.35rem;
+  line-height: 1;
+}
+
+.login--auth-form .landingPage-contentSection {
+  margin-top: -0.25rem;
+}
+
+@media (max-height: 780px) {
+  .login--auth-form .landingPage-mapImage {
+    padding-top: 1.25rem;
+  }
+
+  .login--auth-form .mapImage {
+    height: 8.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .login--auth-form .logo {
+    font-size: 2.6rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .login--auth-form .landingPage-mapImage {
+    padding-top: 0.75rem;
+  }
+
+  .login--auth-form .mapImage {
+    height: 7rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .login--auth-form .logo {
+    font-size: 2.25rem;
+  }
+
+  .login--auth-form .buttonDiv {
+    margin-bottom: -1.5rem !important;
+  }
 }
 /* Background from global app (iosSafeArea.scss) */
 .login {

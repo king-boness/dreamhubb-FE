@@ -299,18 +299,27 @@ const handleForgotPassword = () => {
 
 .loginPage-input {
   font-family: montseraat;
-  margin: 0.5rem 0;
+  margin: 0.3rem 0;
   width: 22rem;
   background-color: rgba(0, 0, 0, 0.324);
 }
+
+.loginPage-input :deep(.q-field__control) {
+  min-height: 3.2rem;
+}
+
+.loginPage-password.loginPage-input {
+  margin-bottom: 0.35rem !important;
+}
+
 .LoginPage-rememberContainer {
   width: 22rem;
   .LoginPage-rememberInput {
     color: white;
     font-family: poppins;
-    font-size: 0.8rem;
-    margin: 0.3rem 0;
-    margin-bottom: 0.6rem;
+    font-size: 0.75rem;
+    margin: 0.1rem 0;
+    margin-bottom: 0.35rem;
   }
 }
 .LoginPage-forgotPswButton {
@@ -318,9 +327,10 @@ const handleForgotPassword = () => {
   background-color: rgba(141, 31, 70, 0.338) !important;
   color: rgba(218, 3, 82, 0.77) !important;
   font-family: montseraatSemiBold;
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   border-radius: 0.5rem !important;
-  margin-bottom: 1rem;
+  margin-bottom: 0.4rem;
+  min-height: 2.6rem;
 }
 
 .LoginPage-forgotHint {
@@ -345,14 +355,53 @@ const handleForgotPassword = () => {
   font-family: montseraatSemiBold;
 }
 .LoginPage-loginButton {
-  margin-top: 1rem;
+  margin-top: 0.45rem;
   background-color: rgba(182, 0, 67, 1);
   color: white;
   border: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   width: 22rem;
   font-family: montseraatSemiBold;
   border-radius: 0.5rem !important;
-  margin-bottom: 0.8rem !important;
+  margin-bottom: 0.45rem !important;
+  min-height: 2.75rem;
+}
+
+.LoginPage-legal :deep(.authLegalNotice) {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+@media (max-height: 780px) {
+  .loginPage-input {
+    margin: 0.2rem 0;
+  }
+
+  .loginPage-input :deep(.q-field__control) {
+    min-height: 3rem;
+  }
+
+  .LoginPage-rememberContainer .LoginPage-rememberInput {
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .LoginPage-loginButton,
+  .LoginPage-forgotPswButton {
+    min-height: 2.5rem;
+    font-size: 0.95rem !important;
+  }
+
+  .LoginPage-legal :deep(.authLegalNotice) {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-height: 700px) {
+  .LoginPage-legal :deep(.authLegalNotice) {
+    font-size: 0.65rem;
+  }
 }
 </style>
