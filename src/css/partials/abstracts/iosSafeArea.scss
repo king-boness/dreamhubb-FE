@@ -54,7 +54,8 @@ html, body, #q-app, .q-layout, .q-page-container {
 
 /* donor-posts / inspirations / myprofile: chrome vnútri q-page — kontajner bez horného insetu (safe-area v HeaderDonor .iphoneDevice-large) */
 .platform-ios .q-page-container.donor-feed-unified-scroll {
-  padding-top: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   overflow-anchor: none;
 }
 
@@ -78,12 +79,12 @@ html, body, #q-app, .q-layout, .q-page-container {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* donor-myprofile unified scroll: keď sa integrovaný header skryje, doplň top inset (inak tab row ide pod notch) */
+/* donor feed tabs: static chrome — nikdy neprepínať padding-top počas scrollu (žiadny layout jump). */
 .platform-ios
   .LayoutBackground.q-layout
   > .roleChrome-topStack.donorPosts-integratedChrome.navbar--hidden:not(.dh-use-transform-chrome-hide)
   ~ .q-page-container.donor-feed-unified-scroll {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: 0 !important;
 }
 /* Edit post: žiadny header, hero má ísť hore; platí len keď je v kontajneri .postEditPage, po návrate sa neaplikuje */
 .platform-ios .q-page-container:has(.postEditPage) {
@@ -122,25 +123,27 @@ html, body, #q-app, .q-layout, .q-page-container {
 .platform-ios .landingLayout .q-page.login {
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* Login: map area compact so form + legal notice fit above the fold */
-.platform-ios .landingLayout .q-page.login.login--auth-form .landingPage-mapImage {
-  padding-top: 1rem;
-}
-
-.platform-ios .landingLayout .q-page.login.login--auth-form .mapImage {
-  height: 8.5rem;
-  margin-bottom: 0.5rem;
+/* Login: iOS tweaks only (welcome untouched) */
+@media (max-height: 780px) {
+  .platform-ios .login.login--auth-form {
+    --login-map-height: 10rem;
+    --login-map-pad-top: 2rem;
+    --login-map-margin-bottom: 1rem;
+  }
 }
 
 @media (max-height: 700px) {
-  .platform-ios .landingLayout .q-page.login.login--auth-form .landingPage-mapImage {
-    padding-top: 0.5rem;
+  .platform-ios .login.login--auth-form {
+    --login-map-pad-top: 1rem;
+    --login-map-height: 7.5rem;
+    --login-map-margin-bottom: 0.5rem;
   }
+}
 
-  .platform-ios .landingLayout .q-page.login.login--auth-form .mapImage {
-    height: 6.75rem;
-    margin-bottom: 0.35rem;
-  }
+/* Onboarding: each step owns safe-area + bottom padding; parent must not clip CTAs */
+.platform-ios .onboardingFlow {
+  padding-top: 0;
+  min-height: 100dvh;
 }
 
 /* Safe-area na q-header – header sa neprekrýva so status barom */

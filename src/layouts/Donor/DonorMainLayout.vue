@@ -4,6 +4,7 @@
   <q-layout
     view="lHh Lpr lFf"
     class="LayoutBackground"
+    :class="{ 'dh-donor-feed-layout': isDonorUnifiedScrollRoute }"
     @touchstart.passive="onTouchStart"
     @touchend.passive="onTouchEnd"
   >
@@ -27,6 +28,7 @@
     <!-- Single header for feed tabs — avoids duplicate mount when router-view swaps pages -->
     <div
       v-if="isDonorUnifiedScrollRoute && isDonorHeaderChromeVisible"
+      ref="donorFeedChromeRef"
       class="roleChrome-topStack navbar donorPosts-integratedChrome"
       :class="{ 'navbar--hidden': !showNavbar }"
     >
@@ -56,7 +58,8 @@
       v-if="shouldShowDonorFooterShell"
       class="navbar"
       :class="{
-        'footer--hidden': !showFooterChrome || isSwitchingRole || isBadgeDrawerOpen
+        'footer--hidden':
+          isDonorFooterHiddenOnScroll || isSwitchingRole || isBadgeDrawerOpen
       }"
     />
   </q-layout>
@@ -97,18 +100,6 @@ const isBadgeDrawerFull = ref(false);
 const isBodyLight = ref(false);
 const checkBodyClass = () => {
   isBodyLight.value = document.body.classList.contains("body--light");
-};
-
-const checkBadgeDrawerState = () => {
-  isBadgeDrawerOpen.value = document.body.classList.contains("badge-drawer-open");
-  isBadgeDrawerFull.value = document.body.classList.contains("badge-drawer-full");
-  if (isBadgeDrawerFull.value) {
-    showNavbar.value = false;
-    showFooterChrome.value = false;
-  } else if (isBadgeDrawerOpen.value && !isBadgeDrawerFull.value) {
-    showNavbar.value = true;
-    showFooterChrome.value = true;
-  }
 };
 
 const isSettingsSubPage = computed(() => {
@@ -178,10 +169,70 @@ const shouldShowDonorFooterShell = computed(() => {
 const SCROLL_THRESHOLD = 65;
 let scrollRafId: number | null = null;
 let pageContainerScrollEl: HTMLElement | null = null;
+const donorFeedChromeRef = ref<HTMLElement | null>(null);
+let lastFeedChromeInset = 0;
+let chromeResizeObserver: ResizeObserver | null = null;
+/** Header always visible; footer may hide on scroll (token shop, settings tree). */
 const STABLE_CHROME_ROUTES = new Set(["donor-tokenshop"]);
+const DONOR_MAIN_TAB_ROUTES = new Set(["donor-posts", "donor-inspirations", "donor-myprofile"]);
+/** Unified-scroll routes with header only (no donor feed tabs / filters in chrome). */
+const DONOR_HEADER_ONLY_CHROME_ROUTES = new Set(["donor-inspirations", "donor-myprofile"]);
+
+/** Donee model on feed tabs: one flag drives header stack + footer hide/show. */
+const isDonorFooterHiddenOnScroll = computed(() => {
+  const n = route.name?.toString() || "";
+  if (n === "donor-tokenshop") return !showFooterChrome.value;
+  if (DONOR_MAIN_TAB_ROUTES.has(n)) return !showNavbar.value;
+  return !showFooterChrome.value;
+});
 
 const pickPageContainer = (): HTMLElement | null => {
   return document.querySelector(".LayoutBackground.q-layout > .q-page-container") as HTMLElement | null;
+};
+
+const syncFeedChromeInset = () => {
+  const el = donorFeedChromeRef.value;
+  if (!el) return;
+  const h = el.offsetHeight;
+  if (h > 0) lastFeedChromeInset = h;
+  document.body.style.setProperty("--dh-donor-feed-chrome-inset", `${lastFeedChromeInset}px`);
+};
+
+const isDonorSettingsRouteName = (routeName: string) =>
+  routeName === "donor-settings" || routeName.startsWith("donor-settings-");
+
+const setDonorFeedChromeVisible = (visible: boolean) => {
+  const routeName = route.name?.toString() || "";
+  if (isDonorSettingsRouteName(routeName)) {
+    showNavbar.value = true;
+    showFooterChrome.value = visible;
+    return;
+  }
+  if (!DONOR_MAIN_TAB_ROUTES.has(routeName)) {
+    showNavbar.value = visible;
+    showFooterChrome.value = visible;
+    return;
+  }
+
+  if (showNavbar.value === visible) return;
+
+  showNavbar.value = visible;
+  showFooterChrome.value = visible;
+
+  // Anchor scroll direction after chrome toggle — no scrollTop compensation (that caused up/down flicker).
+  nextTick(() => {
+    lastScrollPosition.value = getScrollPosition();
+  });
+};
+
+const checkBadgeDrawerState = () => {
+  isBadgeDrawerOpen.value = document.body.classList.contains("badge-drawer-open");
+  isBadgeDrawerFull.value = document.body.classList.contains("badge-drawer-full");
+  if (isBadgeDrawerFull.value) {
+    setDonorFeedChromeVisible(false);
+  } else if (isBadgeDrawerOpen.value && !isBadgeDrawerFull.value) {
+    setDonorFeedChromeVisible(true);
+  }
 };
 
 /**
@@ -234,13 +285,11 @@ const onScroll = () => {
     const routeName = route.name?.toString() || "";
 
     if (isBadgeDrawerFull.value) {
-      showNavbar.value = false;
-      showFooterChrome.value = false;
+      setDonorFeedChromeVisible(false);
       return;
     }
     if (isBadgeDrawerOpen.value && !isBadgeDrawerFull.value) {
-      showNavbar.value = true;
-      showFooterChrome.value = true;
+      setDonorFeedChromeVisible(true);
       return;
     }
 
@@ -251,15 +300,15 @@ const onScroll = () => {
     const scrollingUp = currentScrollPosition < lastScrollPosition.value;
     lastScrollPosition.value = currentScrollPosition;
 
-    // Token shop: keep top chrome from collapsing (layout height jump), but footer still follows scroll.
-    if (STABLE_CHROME_ROUTES.has(routeName)) {
+    // Token shop / settings: header fixed, footer follows scroll.
+    if (STABLE_CHROME_ROUTES.has(routeName) || isDonorSettingsTreeRoute.value) {
       showNavbar.value = true;
       showFooterChrome.value = scrollingUp;
       return;
     }
 
-    showNavbar.value = scrollingUp;
-    showFooterChrome.value = scrollingUp;
+    // Feed tabs: header + filter bar + footer hide together (same as DoneeMainLayout showNavbar).
+    setDonorFeedChromeVisible(scrollingUp);
   });
 };
 
@@ -325,19 +374,40 @@ watch(
   }
 );
 
-/** Fast nav can leave `showNavbar` false from scroll-hide on a previous screen; main tabs must always show chrome. */
-const DONOR_MAIN_TAB_ROUTES = new Set(["donor-posts", "donor-inspirations", "donor-myprofile"]);
+/** Fast nav can leave `showNavbar` false from scroll-hide on a previous screen. */
 watch(
   () => route.name,
   (name) => {
     const n = name?.toString() || "";
-    if (!DONOR_MAIN_TAB_ROUTES.has(n)) return;
-    showNavbar.value = true;
-    showFooterChrome.value = true;
+    const onFeed = DONOR_MAIN_TAB_ROUTES.has(n);
+    const onSettings = isDonorSettingsRouteName(n);
+    document.body.classList.toggle("dh-donor-feed-active", onFeed);
+    document.body.classList.toggle(
+      "dh-donor-chrome-header-only",
+      DONOR_HEADER_ONLY_CHROME_ROUTES.has(n)
+    );
+
+    if (onFeed || onSettings) {
+      showNavbar.value = true;
+      showFooterChrome.value = true;
+    }
+
+    if (onSettings) {
+      nextTick(() => {
+        const pc = pickPageContainer();
+        if (pc) pc.scrollTop = 0;
+        lastScrollPosition.value = 0;
+      });
+      return;
+    }
+
+    if (!onFeed) return;
     nextTick(() => {
+      syncFeedChromeInset();
       lastScrollPosition.value = getScrollPosition();
     });
-  }
+  },
+  { immediate: true }
 );
 
 watch(isSwitchingRole, (active) => {
@@ -370,6 +440,22 @@ onMounted(async () => {
 
   await nextTick();
   attachScrollListeners();
+  syncFeedChromeInset();
+
+  chromeResizeObserver = new ResizeObserver(() => {
+    syncFeedChromeInset();
+  });
+  if (donorFeedChromeRef.value) {
+    chromeResizeObserver.observe(donorFeedChromeRef.value);
+  }
+
+  watch(donorFeedChromeRef, (el, prev) => {
+    if (prev && chromeResizeObserver) chromeResizeObserver.unobserve(prev);
+    if (el && chromeResizeObserver) {
+      chromeResizeObserver.observe(el);
+      syncFeedChromeInset();
+    }
+  });
 
   if (isMobileDevice) {
     window.addEventListener("resize", handleResize);
@@ -401,6 +487,11 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  document.body.classList.remove("dh-donor-feed-active");
+  document.body.classList.remove("dh-donor-chrome-header-only");
+  document.body.style.removeProperty("--dh-donor-feed-chrome-inset");
+  chromeResizeObserver?.disconnect();
+  chromeResizeObserver = null;
   detachScrollListeners();
   if (isMobileDevice) {
     window.removeEventListener("resize", handleResize);

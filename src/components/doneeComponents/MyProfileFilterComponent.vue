@@ -323,8 +323,10 @@ defineProps({
 :global(body.dh-profile-stats-active .q-page-container.donor-feed-unified-scroll) {
   overflow-y: auto !important;
   overscroll-behavior-y: none !important;
-  min-height: auto !important;
-  max-height: 100dvh;
+  min-height: 0 !important;
+  height: 0 !important;
+  flex: 1 1 auto !important;
+  max-height: none !important;
 }
 
 :global(body.dh-profile-stats-active .q-page-container.donor-feed-unified-scroll .q-page) {

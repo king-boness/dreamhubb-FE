@@ -1,6 +1,9 @@
 <template>
   <div class="settingsBan-page">
     <div class="settingsBan-header">
+      <button type="button" class="settingsBan-backBtn" aria-label="Back" @click="handleBack">
+        <q-icon name="chevron_left" />
+      </button>
       <span class="settingsBan-heading">Blocked users</span>
     </div>
     <div class="settingsBan-rules">
@@ -42,12 +45,21 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useBlocksStore } from "src/stores/blocks";
+import { goBackOrFallback } from "src/utils/navigation";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
+const route = useRoute();
+const router = useRouter();
 const blocksStore = useBlocksStore();
 const loading = ref(true);
+
+function handleBack() {
+  const isDonee = String(route.name || "").startsWith("donee-");
+  goBackOrFallback(router, { name: isDonee ? "donee-settings" : "donor-settings" });
+}
 const unblockingId = ref<number | null>(null);
 const blockedUsers = ref(blocksStore.blockedUsers);
 
@@ -86,15 +98,34 @@ async function handleUnblock(userId: number) {
     display: flex;
     width: 100%;
     max-width: 36rem;
-    justify-content: start;
-    align-items: start;
+    align-items: center;
+    gap: 0.75rem;
     margin: 1.5rem 0;
-    flex-direction: column;
 
     .settingsBan-heading {
       font-size: 1.4rem;
       font-family: poppinsSemiBold;
       color: white;
+      flex: 1;
+    }
+  }
+
+  .settingsBan-backBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+
+    .q-icon {
+      font-size: 24px;
+      color: #ffffff;
     }
   }
 

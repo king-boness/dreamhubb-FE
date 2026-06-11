@@ -7,8 +7,8 @@
         <span class="onBoarding-description">
           We connect dreamers with those who are willing to support their goals,
           creating a community of support and motivation. Start fulfilling your
-          own dreams or help someone else fulfill theirs today with Karma
-          tokens.</span
+          own dreams or help someone else fulfill theirs today with
+          Tokens.</span
         >
       </div>
     </div>

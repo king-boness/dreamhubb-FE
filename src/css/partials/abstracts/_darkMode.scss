@@ -882,7 +882,7 @@
   .dream-progress,
   .goal-progress,
   .pick-progress {
-    background-color: rgba(0, 0, 0, 0.12) !important;
+    background-color: rgba(0, 0, 0, 0.18) !important;
   }
 
   .dream-option:not(.is-active) .dream-icon,
@@ -896,7 +896,8 @@
    * light mode — jemný stredový akcent (biely disk + úzky magenta lem), bez agresívneho haló.
    */
   .whatIsYourGoal .swiper-slide-active .goal-content-wrapper::before,
-  .whatKindOfDream .swiper-slide-active .dream-content-wrapper::before {
+  .whatKindOfDream .swiper-slide-active .dream-content-wrapper::before,
+  .pickYourSide .swiper-slide-active .pick-content-wrapper::before {
     width: 124px !important;
     height: 124px !important;
     background:
@@ -921,14 +922,16 @@
   }
 
   .whatIsYourGoal .swiper-slide-active .goal-icon-img,
-  .whatKindOfDream .swiper-slide-active .dream-icon-img {
+  .whatKindOfDream .swiper-slide-active .dream-icon-img,
+  .pickYourSide .swiper-slide-active .pick-icon-img {
     filter: brightness(1.04) saturate(1.1) contrast(1.04)
       drop-shadow(0 0 8px rgba(189, 0, 67, 0.32))
       drop-shadow(0 0 18px rgba(189, 0, 67, 0.14)) !important;
   }
 
   .whatIsYourGoal .swiper-slide-active .goal-icon,
-  .whatKindOfDream .swiper-slide-active .dream-icon {
+  .whatKindOfDream .swiper-slide-active .dream-icon,
+  .pickYourSide .swiper-slide-active .pick-icon {
     opacity: 1 !important;
   }
 
@@ -1534,6 +1537,10 @@
 
   .segmented-toggle-btn.active .segmented-toggle-option-right {
     color: #ffffff !important;
+  }
+
+  .LayoutBackground.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome.roleChrome-topStack {
+    background-color: rgb(238, 238, 238) !important;
   }
 
   .donorPosts-integratedChrome.roleChrome-topStack {

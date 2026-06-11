@@ -76,7 +76,20 @@
       <template v-if="currentStep === 1 || currentStep === 2">
         <p class="filters-footerHint">choose by swiping up or down</p>
         <button class="filters-searchBtn" @click="handleSearch">SEARCH</button>
-        <button class="filters-nextBtn" @click="handleNext">{{ currentNextLabel }}</button>
+        <div
+          v-if="currentStep === 1"
+          ref="swapCategoryTooSlotRef"
+          class="filters-nextBtn-slot"
+          aria-hidden="true"
+        />
+        <button
+          v-if="currentStep === 2"
+          class="filters-nextBtn"
+          type="button"
+          @click="handleNext"
+        >
+          {{ currentNextLabel }}
+        </button>
       </template>
 
       <!-- STEP 3: Search button only -->
@@ -91,6 +104,18 @@
       </template>
 
     </footer>
+
+    <!-- Step 1 only: fixed bottom anchor (iOS-safe bottom px, like PickYourSide NEXT STEP) -->
+    <div
+      v-if="currentStep === 1"
+      ref="swapCategoryTooAnchorRef"
+      class="filters-swapCategoryToo-anchor"
+      :style="swapCategoryTooAnchorStyle"
+    >
+      <button class="filters-nextBtn" type="button" @click="handleNext">
+        {{ currentNextLabel }}
+      </button>
+    </div>
   </q-page>
 </template>
 
@@ -160,6 +185,34 @@ const currentNextLabel = computed(() => {
   if (currentStep.value === 3) return "search";
   return "";
 });
+
+/** Step 1 “swap category too”: + = down from footer slot (px-only, iOS-safe). */
+const SWAP_CATEGORY_TOO_NUDGE_DOWN_PX = 3;
+
+const swapCategoryTooSlotRef = ref<HTMLElement | null>(null);
+const swapCategoryTooAnchorRef = ref<HTMLElement | null>(null);
+const swapCategoryTooAnchorStyle = ref<Record<string, string>>({});
+
+let swapCategoryTooLayoutObserver: ResizeObserver | null = null;
+
+const syncSwapCategoryTooPosition = () => {
+  const slot = swapCategoryTooSlotRef.value;
+  const anchor = swapCategoryTooAnchorRef.value;
+  if (!slot || !anchor || currentStep.value !== 1) return;
+
+  const topPx = slot.getBoundingClientRect().top + SWAP_CATEGORY_TOO_NUDGE_DOWN_PX;
+  const topValue = `${topPx}px`;
+
+  anchor.style.top = topValue;
+  anchor.style.bottom = "auto";
+  swapCategoryTooAnchorStyle.value = { top: topValue, bottom: "auto" };
+};
+
+const scheduleSwapCategoryTooSync = () => {
+  nextTick(() => {
+    requestAnimationFrame(syncSwapCategoryTooPosition);
+  });
+};
 
 const progressWidth = computed(() => {
   if (currentStep.value <= 1) return "33%";
@@ -354,14 +407,28 @@ onMounted(() => {
   filterSubcategory.value = postsStore.filters.subcategorySlug;
   currentStep.value = 1;
   setWheelScrollLock(currentStep.value === 1 || currentStep.value === 2);
+
+  scheduleSwapCategoryTooSync();
+  window.setTimeout(scheduleSwapCategoryTooSync, 100);
+  window.addEventListener("resize", scheduleSwapCategoryTooSync);
+
+  const footer = document.querySelector(".filters-footer");
+  if (footer) {
+    swapCategoryTooLayoutObserver = new ResizeObserver(scheduleSwapCategoryTooSync);
+    swapCategoryTooLayoutObserver.observe(footer);
+  }
 });
 
 watch(currentStep, (step) => {
   setWheelScrollLock(step === 1 || step === 2);
+  scheduleSwapCategoryTooSync();
 });
 
 onBeforeUnmount(() => {
   setWheelScrollLock(false);
+  window.removeEventListener("resize", scheduleSwapCategoryTooSync);
+  swapCategoryTooLayoutObserver?.disconnect();
+  swapCategoryTooLayoutObserver = null;
   if (wheelTouchLockAttached) {
     document.removeEventListener("touchmove", wheelTouchMoveLockHandler);
     wheelTouchLockAttached = false;
@@ -413,7 +480,7 @@ watch(filterCategory, (newVal) => {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  padding: 0 1.5rem 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 1.5rem 0;
   margin-top: 0;
   margin-bottom: 20px;
   flex-shrink: 0;
@@ -732,6 +799,33 @@ body:not(.body--light) .filters-footer {
   &:hover {
     transform: translateY(-2px);
     background: rgba(189, 0, 67, 0.1);
+  }
+}
+
+.filters-nextBtn-slot {
+  height: 48px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Step 1 “swap category too”: top in px via syncSwapCategoryTooPosition (iOS-safe). */
+.filters-swapCategoryToo-anchor {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 390px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  z-index: 201;
+  bottom: auto;
+  transform: none;
+  pointer-events: none;
+
+  .filters-nextBtn {
+    pointer-events: auto;
   }
 }
 

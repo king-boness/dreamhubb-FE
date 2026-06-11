@@ -29,21 +29,26 @@
         </div>
         <div class="karmaUsed"></div>
         <div v-for="(card, i) in cards" :key="i" class="cardContainer">
-          <div class="karmaGainedCard">
-            <div class="karmaGainedTitleDiv">
-              <span class="karmaGainedTitle">{{ card.overview.title }}</span>
-            </div>
-            <div v-if="card.overview.comesFrom" class="overwievDonationsDiv">
-              <img
-                :src="card.overview.comesFromImg"
-                alt=""
-                class="karmaGainedImgGift"
-              />
-              <span class="karmaGainedDescription">{{
+          <div
+            class="statsOverviewRow karmaGainedCard"
+            :class="{ 'statsOverviewRow--summary': !card.overview.comesFrom }"
+          >
+            <span class="statsOverviewRow-label karmaGainedTitle">{{
+              card.overview.title
+            }}</span>
+            <template v-if="card.overview.comesFrom">
+              <span class="statsOverviewRow-iconCell">
+                <img
+                  :src="card.overview.comesFromImg"
+                  alt=""
+                  class="statsOverviewRow-icon karmaGainedImgGift"
+                />
+              </span>
+              <span class="statsOverviewRow-name karmaGainedDescription">{{
                 card.overview.comesFrom
               }}</span>
-            </div>
-            <div class="karmaValue">
+            </template>
+            <div class="statsOverviewRow-badge karmaValue">
               <img
                 src="/icons/KarmaIcon.png"
                 alt=""
@@ -534,7 +539,7 @@ defineExpose({
     }
   }
 
-  .karmaGainedCard {
+  .statsOverviewRow.karmaGainedCard {
     background: linear-gradient(
       108.46deg,
       rgba(37, 37, 37, 0.405) 0%,
@@ -542,58 +547,78 @@ defineExpose({
     );
     min-height: 3.6rem;
     width: 100%;
-    display: flex;
+    display: grid !important;
+    grid-template-columns: 4.25rem 1.75rem minmax(0, 1fr) auto;
+    grid-template-rows: 1fr;
     align-items: center;
-    gap: 0.5rem;
+    column-gap: 0.5rem;
     padding: 0.35rem 1rem;
     margin-bottom: 0.5rem;
     border-radius: 0.8rem;
+    box-sizing: border-box;
 
-    .karmaGainedTitleDiv {
-      flex: 0 0 4.2rem;
-      width: auto;
-      min-width: 0;
-      display: flex;
-      align-items: center;
-
-      .karmaGainedTitle {
-        color: white;
-        font-size: 0.7rem;
-        font-family: poppins;
-        line-height: 0.9rem;
-        text-transform: Uppercase;
-      }
+    &.statsOverviewRow--summary {
+      grid-template-columns: minmax(0, 1fr) auto;
     }
 
-    .overwievDonationsDiv {
-      flex: 1 1 auto;
+    .statsOverviewRow-label {
+      grid-column: 1;
+      grid-row: 1;
+      min-width: 0;
+      color: white;
+      font-size: 0.7rem;
+      font-family: poppins;
+      line-height: 0.9rem;
+      text-transform: uppercase;
+      align-self: center;
+    }
+
+    &.statsOverviewRow--summary .statsOverviewRow-label {
+      grid-column: 1;
+    }
+
+    .statsOverviewRow-iconCell {
+      grid-column: 2;
+      grid-row: 1;
+      width: 1.75rem;
+      height: 1.75rem;
+      min-width: 1.75rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      min-width: 0;
+      justify-content: flex-start;
+      align-self: center;
       margin: 0;
-
-      .karmaGainedImgGift {
-        flex-shrink: 0;
-        height: 1.7rem;
-        margin-right: 0.5rem;
-        margin-bottom: 0.2rem;
-      }
-
-      .karmaGainedDescription {
-        color: white;
-        font-family: poppins;
-        font-size: 0.9rem;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
+      padding: 0;
     }
 
-    .karmaValue {
-      flex: 0 0 auto;
-      margin-left: auto;
+    .statsOverviewRow-icon {
+      width: 1.7rem;
+      height: 1.7rem;
+      min-width: 1.7rem;
+      margin: 0;
+      padding: 0;
+      object-fit: contain;
+      display: block;
+    }
+
+    .statsOverviewRow-name {
+      grid-column: 3;
+      grid-row: 1;
+      color: white;
+      font-family: poppins;
+      font-size: 0.9rem;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    .statsOverviewRow-badge.karmaValue {
+      grid-column: 4;
+      grid-row: 1;
+      justify-self: end;
+      margin-left: 0;
       display: flex;
       align-items: center;
       background-color: rgba(189, 0, 67, 0.1);
@@ -612,6 +637,10 @@ defineExpose({
         margin-left: 0.1rem;
         font-size: 1rem;
       }
+    }
+
+    &.statsOverviewRow--summary .statsOverviewRow-badge.karmaValue {
+      grid-column: 2;
     }
   }
 }
