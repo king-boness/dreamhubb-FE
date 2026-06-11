@@ -1,0 +1,112 @@
+/**
+ * Login layout follows AuthWelcomePage reference (welcome styles stay in component).
+ */
+.login.login--auth-form {
+  --login-form-width: min(22rem, calc(100% - 2rem));
+  /* AuthWelcomePage reference tokens */
+  --login-map-height: 16rem;
+  --login-map-pad-top: 5rem;
+  --login-map-margin-bottom: 2rem;
+  --login-logo-max-width: 220px;
+  --login-content-max: 390px;
+  --login-legal-font-size: 0.72rem;
+
+  position: relative;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 6px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+}
+
+.login.login--auth-form .landingPage-contentSection {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.login.login--auth-form .buttonDiv {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
+  left: 20px;
+  margin: 0 !important;
+  z-index: 20;
+}
+
+.login.login--auth-form .login-welcome-map {
+  padding-top: var(--login-map-pad-top);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--login-content-max);
+  pointer-events: none;
+}
+
+.login.login--auth-form .login-welcome-map__img {
+  height: var(--login-map-height);
+  width: 100%;
+  max-width: var(--login-content-max);
+  margin-bottom: var(--login-map-margin-bottom);
+  object-fit: contain;
+  opacity: 0.65;
+}
+
+.login.login--auth-form .login-welcome-brand {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.login.login--auth-form .login-welcome-logo {
+  max-width: var(--login-logo-max-width);
+  width: 100%;
+  height: auto;
+  margin: 0 auto 12px;
+  display: block;
+}
+
+.login.login--auth-form .login-welcome-stack {
+  width: 100%;
+  max-width: var(--login-content-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.login.login--auth-form .login-welcome-legal :deep(.authLegalNotice) {
+  font-size: var(--login-legal-font-size);
+  line-height: 1.35;
+  margin: 0.25rem 0 0;
+  max-width: var(--login-form-width);
+}
+
+/* Compact login only — welcome reference unchanged */
+@media (max-height: 780px) {
+  .login.login--auth-form {
+    --login-map-height: 11rem;
+    --login-map-pad-top: 2.5rem;
+    --login-map-margin-bottom: 1.25rem;
+    --login-logo-max-width: 200px;
+    --login-legal-font-size: 0.68rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .login.login--auth-form {
+    --login-map-height: 8.5rem;
+    --login-map-pad-top: 1.5rem;
+    --login-map-margin-bottom: 0.65rem;
+    --login-logo-max-width: 180px;
+    --login-legal-font-size: 0.65rem;
+    justify-content: flex-start;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4px);
+  }
+}

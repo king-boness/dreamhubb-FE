@@ -16,7 +16,7 @@ export default {
   explainerText1: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle2: "Msaidie wengine, wacha wengine wakusaidie",
   explainerText2: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
-  explainerTitle3: "Pata Karma kwa kusaidia",
+  explainerTitle3: "Pata Tokens kwa kusaidia",
   explainerText3: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle4: "Hata msaada wa sehemu unaweza kumsukuma mtu kuelekea ndoto yake",
   explainerText4: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. ",

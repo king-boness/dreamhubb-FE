@@ -1,9 +1,8 @@
 <template>
   <div class="legal-page">
     <div class="legal-page__inner">
-      <button class="legal-page__back" type="button" @click="goBack">
-        <span class="legal-page__backIcon" aria-hidden="true">←</span>
-        <span>Back</span>
+      <button class="legal-page__back" type="button" aria-label="Back" @click="goBack">
+        <q-icon name="chevron_left" />
       </button>
       <main class="legal-page__card">
         <slot />
@@ -23,7 +22,7 @@ const { goBack } = useLegalPageBack();
   min-height: 100dvh;
   background: #0b0b10;
   color: #f2f2f5;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 24px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
   padding-right: 16px;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
   padding-left: 16px;
@@ -37,22 +36,27 @@ const { goBack } = useLegalPageBack();
 }
 
 .legal-page__back {
+  width: 40px;
+  height: 40px;
+  margin: 0 0 10px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  margin: 0 0 14px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #ff4db8;
-  font-family: poppinsSemiBold, sans-serif;
-  font-size: 0.95rem;
+  justify-content: center;
   cursor: pointer;
-}
+  transition: border-color 0.2s ease;
 
-.legal-page__backIcon {
-  font-size: 1.1rem;
-  line-height: 1;
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .q-icon {
+    font-size: 24px;
+    color: #ffffff;
+  }
 }
 
 .legal-page__card {
@@ -88,6 +92,10 @@ const { goBack } = useLegalPageBack();
   color: #ff1f74;
 }
 
+.legal-page__card :deep(section[id]) {
+  scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 72px);
+}
+
 .legal-page__card :deep(.legal-page__updated) {
   margin-top: -4px;
   color: rgba(255, 255, 255, 0.65);
@@ -99,7 +107,11 @@ const { goBack } = useLegalPageBack();
 }
 
 .body--light .legal-page__back {
-  color: #bd0043;
+  border-color: rgba(0, 0, 0, 0.2);
+
+  .q-icon {
+    color: #111218;
+  }
 }
 
 .body--light .legal-page__card {

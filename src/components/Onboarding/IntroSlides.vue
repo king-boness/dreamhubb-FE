@@ -63,7 +63,7 @@ const slides: Slide[] = [
     image: "/images/onboarding/slide-2.png"
   },
   {
-    title: "Earn Karma by helping",
+    title: "Earn Tokens by helping",
     subtitle: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
     image: "/images/onboarding/slide-3.png"
   },

@@ -11,7 +11,7 @@
         <div class="onBoarding-textContainer">
           <span class="text">
             Start fulfilling your own dreams or help someone else fulfill theirs
-            today with Karma tokens.
+            today with Tokens.
           </span>
         </div>
       </div>

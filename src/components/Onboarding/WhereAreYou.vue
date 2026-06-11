@@ -27,6 +27,7 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :popup-content-class="onboardingSelectMenuClass"
             fit
             @update:model-value="handleContinentChange"
           />
@@ -38,6 +39,7 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :popup-content-class="onboardingSelectMenuClass"
             :disable="!localContinent"
             use-input
             input-debounce="0"
@@ -63,6 +65,7 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :popup-content-class="onboardingSelectMenuClass"
             :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
             :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
             use-input
@@ -115,6 +118,7 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :popup-content-class="onboardingSelectMenuClass"
             :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
             use-input
             input-debounce="300"
@@ -170,6 +174,7 @@
           :dark="!isEmbedMode"
           outlined
           class="location-select"
+          :popup-content-class="onboardingSelectMenuClass"
           fit
           @update:model-value="handleContinentChange"
         />
@@ -181,6 +186,7 @@
           :dark="!isEmbedMode"
           outlined
           class="location-select"
+          :popup-content-class="onboardingSelectMenuClass"
           :disable="!localContinent"
           use-input
           input-debounce="0"
@@ -206,6 +212,7 @@
           :dark="!isEmbedMode"
           outlined
           class="location-select"
+          :popup-content-class="onboardingSelectMenuClass"
           :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
           :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
           use-input
@@ -258,6 +265,7 @@
           :dark="!isEmbedMode"
           outlined
           class="location-select"
+          :popup-content-class="onboardingSelectMenuClass"
           :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
           use-input
           input-debounce="300"
@@ -299,15 +307,18 @@
     </template>
 
     <div v-if="!hideFooter && requireTermsAcceptance" class="location-terms">
-      <q-checkbox v-model="localAcceptedTerms" dark dense class="location-terms-checkbox">
+      <div class="location-terms-row">
+        <q-checkbox v-model="localAcceptedTerms" dark dense class="location-terms-checkbox" />
         <span class="location-terms-label">
           I agree to the
           <router-link :to="{ name: 'terms-of-use' }" @click.stop>Terms of Use</router-link>
           and
           <router-link :to="{ name: 'privacy-policy' }" @click.stop>Privacy Policy</router-link>.
         </span>
-      </q-checkbox>
-      <AuthLegalNotice />
+      </div>
+      <p class="location-zeroTolerance">
+        dreamhubb has <strong>zero tolerance</strong> for objectionable content and abusive users.
+      </p>
     </div>
 
     <!-- Action button (hidden if hideFooter is true) -->
@@ -355,7 +366,6 @@ import { continents, getCountriesByContinent, getAllCountries } from "src/data/c
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
 import { useAuthStore } from "src/stores/auth";
-import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
 const props = withDefaults(defineProps<{
   continent?: string;
@@ -399,6 +409,7 @@ const localAcceptedTerms = computed({
 
 /** Settings / filters: light q-fields on pale card — not full-screen dark onboarding */
 const isEmbedMode = computed(() => props.hideHeader && props.hideFooter);
+const onboardingSelectMenuClass = "onboarding-select-menu";
 
 const authStore = useAuthStore();
 
@@ -910,24 +921,31 @@ watch(localCityId, (newVal) => {
 .whereAreYou {
   width: 100%;
   max-width: 390px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 20px 40px;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: block;
+  padding: 24px 20px 0;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+  padding-bottom: max(32px, calc(env(safe-area-inset-bottom, 0px) + 28px));
   margin: 0 auto;
   background: transparent;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
+  box-sizing: border-box;
 
   // When used in filters (hide-header and hide-footer), remove padding and background
   &.whereAreYou--filter-mode {
     padding: 0;
     margin: 0;
     background: transparent;
-    /* Avoid stretching inside q-card: flex:1 + form auto-margins created a large empty “pit”. */
     height: auto;
     min-height: 0;
+    max-height: none;
     max-width: 100%;
+    overflow: visible;
   }
 }
 
@@ -939,6 +957,7 @@ watch(localCityId, (newVal) => {
   margin-bottom: 20px;
   flex-shrink: 0;
   position: relative;
+  padding-top: 0;
 }
 
 .location-backBtn {
@@ -985,25 +1004,19 @@ watch(localCityId, (newVal) => {
 }
 
 .location-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 0;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
+  width: 100%;
   gap: 0;
   padding-top: 0;
 
-  // In filter mode, use flex-start for step 3 layout
   .whereAreYou--filter-mode & {
     justify-content: flex-start;
     padding-top: 0;
     gap: 0;
-    flex: 0 1 auto;
-    min-height: 0;
   }
 }
 
@@ -1040,8 +1053,6 @@ watch(localCityId, (newVal) => {
   flex-direction: column;
   gap: 1.25rem;
   margin: 0;
-  margin-top: auto;
-  margin-bottom: auto;
   flex-shrink: 0;
 }
 
@@ -1120,55 +1131,6 @@ watch(localCityId, (newVal) => {
   }
 }
 
-/* Embedded (settings): light q-fields only in light mode */
-:global(.body--light) .location-form--embed .location-select {
-  :deep(.q-field__control) {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #1a1a1a;
-  }
-
-  :deep(.q-field__label) {
-    color: rgba(0, 0, 0, 0.55);
-  }
-
-  :deep(.q-field__native) {
-    color: #1a1a1a;
-  }
-
-  :deep(.q-field--disabled .q-field__native),
-  :deep(.q-field--disabled .q-field__input) {
-    color: #111111 !important;
-    -webkit-text-fill-color: #111111 !important;
-    opacity: 1 !important;
-  }
-
-  :deep(.q-field--disabled .q-field__native *),
-  :deep(.q-field--disabled .q-field__input *),
-  :deep(.q-field--disabled .q-placeholder) {
-    color: #111111 !important;
-    -webkit-text-fill-color: #111111 !important;
-    opacity: 1 !important;
-  }
-
-  :deep(.q-field--disabled),
-  :deep(.q-field--disabled .q-field__control),
-  :deep(.q-field--disabled .q-field__inner) {
-    opacity: 1 !important;
-  }
-
-  :deep(.q-field--disabled .q-field__label) {
-    color: rgba(0, 0, 0, 0.5) !important;
-  }
-
-  :deep(.q-icon) {
-    color: rgba(0, 0, 0, 0.45);
-  }
-
-  :deep(.cities-divider .q-separator) {
-    background-color: rgba(0, 0, 0, 0.12);
-  }
-}
-
 .location-instruction {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.6);
@@ -1177,19 +1139,48 @@ watch(localCityId, (newVal) => {
 }
 
 .location-terms {
-  margin: 1rem 0 0.5rem;
-  max-width: 22rem;
+  width: 100%;
+  margin: 0.75rem 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.location-terms-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.4rem;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.location-terms-checkbox {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
 }
 
 .location-terms-label {
-  font-size: 0.85rem;
+  flex: 0 1 auto;
+  font-size: 0.82rem;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.85);
+  text-align: left;
 
   a {
     color: #ff4db8;
     text-decoration: underline;
   }
+}
+
+.location-zeroTolerance {
+  margin: 0.5rem 0 0;
+  max-width: 22rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
 }
 
 .location-nextBtn {
@@ -1201,11 +1192,12 @@ watch(localCityId, (newVal) => {
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
-  margin-top: 0;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  flex-shrink: 0;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.3);
-  flex-shrink: 0;
 
   &:disabled {
     opacity: 0.5;

@@ -230,6 +230,7 @@
             dark
             outlined
             class="who-input"
+            :popup-content-class="onboardingSelectMenuClass"
             fit
             behavior="menu"
             :options-dense="true"
@@ -244,6 +245,7 @@
             dark
             outlined
             class="who-input"
+            :popup-content-class="onboardingSelectMenuClass"
             :disable="!localProfileContinent"
             use-input
             input-debounce="0"
@@ -272,6 +274,7 @@
             dark
             outlined
             class="who-input"
+            :popup-content-class="onboardingSelectMenuClass"
             :disable="!localProfileCountry"
             use-input
             input-debounce="0"
@@ -321,17 +324,16 @@
       <div v-if="onboardingStore.error" class="who-error">
         {{ onboardingStore.error }}
       </div>
+
+      <button
+        type="button"
+        class="who-finishBtn"
+        @click="handleNextStep"
+        :disabled="!isFormValid"
+      >
+        NEXT STEP
+      </button>
     </div>
-
-    <!-- Finish button -->
-    <button
-      class="who-finishBtn"
-      @click="handleNextStep"
-      :disabled="!isFormValid"
-    >
-      <span>NEXT STEP</span>
-    </button>
-
   </div>
 </template>
 
@@ -345,6 +347,7 @@ import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFro
 import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
 const onboardingStore = useOnboardingStore();
+const onboardingSelectMenuClass = "onboarding-select-menu";
 
 const props = withDefaults(defineProps<{
   username: string;
@@ -1309,15 +1312,16 @@ const handleNextStep = async () => {
 .whoAreYou {
   width: 100%;
   max-width: 390px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 16px 20px 40px;
+  min-height: 100dvh;
+  display: block;
+  padding: 16px 20px 0;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
   margin: 0 auto;
   background: transparent;
   overflow-y: auto;
   overflow-x: hidden;
-  position: relative;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .who-header {
@@ -1376,16 +1380,12 @@ const handleNextStep = async () => {
 }
 
 .who-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 0;
-  min-height: 0;
-  overflow-y: visible;
-  overflow-x: hidden;
-  position: relative;
+  width: 100%;
 }
 
 .who-title {
@@ -1846,7 +1846,7 @@ const handleNextStep = async () => {
   cursor: pointer;
   transition: transform 0.01s ease, box-shadow 0.01s ease;
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.3);
-  margin-top: auto;
+  margin-top: 1.25rem;
   margin-bottom: 0;
   flex-shrink: 0;
 

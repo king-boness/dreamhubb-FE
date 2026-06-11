@@ -16,7 +16,7 @@ export default {
   explainerText1: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle2: "Giúp người khác, để người khác giúp bạn",
   explainerText2: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
-  explainerTitle3: "Kiếm Karma bằng cách giúp đỡ",
+  explainerTitle3: "Kiếm Tokens bằng cách giúp đỡ",
   explainerText3: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle4: "Ngay cả sự giúp đỡ một phần cũng có thể đẩy ai đó tiến về phía giấc mơ của họ",
   explainerText4: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. ",

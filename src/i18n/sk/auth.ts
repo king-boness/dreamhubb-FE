@@ -27,7 +27,7 @@ export default {
   explainerText1: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle2: "Pomáhaj iným, nech iní pomáhajú tebe",
   explainerText2: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
-  explainerTitle3: "Zarábaj Karmu pomáhaním",
+  explainerTitle3: "Zarábaj Tokens pomáhaním",
   explainerText3: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle4: "Aj čiastočná pomoc môže niekoho posunúť k jeho snu",
   explainerText4: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. ",

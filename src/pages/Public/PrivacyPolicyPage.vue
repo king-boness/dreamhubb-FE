@@ -4,14 +4,14 @@
       <p class="legal-page__updated">Last updated: May 28, 2026</p>
 
       <nav class="legal-page__anchors" aria-label="Privacy sections">
-        <a href="#who-we-are">Who We Are</a>
-        <a href="#data-we-collect">Data We Collect</a>
-        <a href="#how-we-use-data">How We Use Data</a>
-        <a href="#iap-and-payments">In-App Purchases</a>
-        <a href="#sharing">How We Share Data</a>
-        <a href="#retention">Data Retention</a>
-        <a href="#rights">Your Rights</a>
-        <a href="#contact">Contact</a>
+        <a href="#" @click.prevent="scrollToSection('who-we-are')">Who We Are</a>
+        <a href="#" @click.prevent="scrollToSection('data-we-collect')">Data We Collect</a>
+        <a href="#" @click.prevent="scrollToSection('how-we-use-data')">How We Use Data</a>
+        <a href="#" @click.prevent="scrollToSection('in-app-purchases')">In-App Purchases</a>
+        <a href="#" @click.prevent="scrollToSection('how-we-share-data')">How We Share Data</a>
+        <a href="#" @click.prevent="scrollToSection('data-retention')">Data Retention</a>
+        <a href="#" @click.prevent="scrollToSection('your-rights')">Your Rights</a>
+        <a href="#" @click.prevent="scrollToSection('contact')">Contact</a>
       </nav>
 
       <section id="who-we-are">
@@ -45,7 +45,7 @@
         </ul>
       </section>
 
-      <section id="iap-and-payments">
+      <section id="in-app-purchases">
         <h2>In-App Purchases and Payments</h2>
         <p>
           On iOS, token purchases are processed through Apple In-App Purchases. We do not receive your full
@@ -54,7 +54,7 @@
         </p>
       </section>
 
-      <section id="sharing">
+      <section id="how-we-share-data">
         <h2>How We Share Data</h2>
         <p>We may share data only when needed to run the service, including:</p>
         <ul>
@@ -65,7 +65,7 @@
         </ul>
       </section>
 
-      <section id="retention">
+      <section id="data-retention">
         <h2>Data Retention</h2>
         <p>
           We keep personal data only as long as needed for account operations, legal obligations, security,
@@ -73,7 +73,7 @@
         </p>
       </section>
 
-      <section id="rights">
+      <section id="your-rights">
         <h2>Your Rights</h2>
         <p>
           Depending on your location, you may have rights to request access, correction, deletion, restriction,
@@ -109,6 +109,10 @@
 
 <script setup lang="ts">
 import LegalPageShell from "src/components/Public/LegalPageShell.vue";
+
+function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 </script>
 
 <style scoped lang="scss">
@@ -122,6 +126,7 @@ import LegalPageShell from "src/components/Public/LegalPageShell.vue";
 .legal-page__anchors a {
   color: #ff1f74;
   text-decoration: none;
+  cursor: pointer;
 }
 
 ul {

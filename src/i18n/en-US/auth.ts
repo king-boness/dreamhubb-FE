@@ -27,7 +27,7 @@ export default {
   explainerText1: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle2: "Help others, let others help you",
   explainerText2: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
-  explainerTitle3: "Earn Karma by helping",
+  explainerTitle3: "Earn Tokens by helping",
   explainerText3: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle4: "Even partial help can push someone towards his dream",
   explainerText4: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. ",

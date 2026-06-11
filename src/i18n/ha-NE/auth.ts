@@ -17,7 +17,7 @@ export default {
   explainerText1: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle2: "Ka taimaki wasu, ka bar wasu su taimake ka",
   explainerText2: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
-  explainerTitle3: "Samu Karma ta hanyar taimakawa",
+  explainerTitle3: "Samu Tokens ta hanyar taimakawa",
   explainerText3: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
   explainerTitle4: "Ko da taimakon ɓangare zai iya tura wani zuwa ga mafarkinsa",
   explainerText4: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. ",

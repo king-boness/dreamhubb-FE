@@ -311,8 +311,8 @@ const handleFinish = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+  justify-content: flex-start;
+  min-height: 100dvh;
   padding: 0;
   background: transparent;
 }

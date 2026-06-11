@@ -19,11 +19,17 @@
               />
             </q-btn>
           </div>
-          <div v-if="!isResetFlow" class="landingPage-mapImage">
+          <div
+            v-if="!isResetFlow"
+            class="landingPage-mapImage"
+            :class="{ 'login-welcome-map': route.name === 'login' }"
+          >
             <img
               src="/images/Auth/map-image.svg"
               spinner-color="white"
               class="mapImage"
+              :class="{ 'login-welcome-map__img': route.name === 'login' }"
+              alt=""
             />
           </div>
         </div>
@@ -37,9 +43,15 @@
         </div>
         <div
           class="row col-12 landingPage-contentSection"
-          :class="{ 'landingPage-contentSection--reset': isResetFlow }"
+          :class="{
+            'landingPage-contentSection--reset': isResetFlow,
+            'login-welcome-stack': route.name === 'login'
+          }"
         >
-          <h1 v-if="!isResetFlow" class="col-12 logo">dreamhubb</h1>
+          <div v-if="!isResetFlow && route.name === 'login'" class="login-welcome-brand">
+            <img :src="logoImage" alt="dreamhubb" class="login-welcome-logo" />
+          </div>
+          <h1 v-else-if="!isResetFlow" class="col-12 logo">dreamhubb</h1>
           <router-view />
         </div>
       </q-page>
@@ -50,6 +62,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import logoImage from "src/assets/logos/dreamhubb.svg";
+
 const route = useRoute();
 const router = useRouter();
 
@@ -68,77 +82,11 @@ const handleBack = () => {
   margin: 0 auto;
   width: 100%;
 }
+
 .mapImage {
   height: 16rem;
   width: 100%;
   margin-bottom: 2rem;
-}
-
-/* Login: tighter vertical stack so legal notice fits without scrolling */
-.login--auth-form {
-  min-height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden;
-  box-sizing: border-box;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-}
-
-.login--auth-form .landingPage-mapImage {
-  padding-top: 2.25rem;
-}
-
-.login--auth-form .mapImage {
-  height: 10.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.login--auth-form .buttonDiv {
-  margin: 0.5rem;
-  margin-bottom: -2rem !important;
-}
-
-.login--auth-form .logo {
-  font-size: 3rem;
-  margin-top: -0.35rem;
-  line-height: 1;
-}
-
-.login--auth-form .landingPage-contentSection {
-  margin-top: -0.25rem;
-}
-
-@media (max-height: 780px) {
-  .login--auth-form .landingPage-mapImage {
-    padding-top: 1.25rem;
-  }
-
-  .login--auth-form .mapImage {
-    height: 8.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .login--auth-form .logo {
-    font-size: 2.6rem;
-  }
-}
-
-@media (max-height: 700px) {
-  .login--auth-form .landingPage-mapImage {
-    padding-top: 0.75rem;
-  }
-
-  .login--auth-form .mapImage {
-    height: 7rem;
-    margin-bottom: 0.35rem;
-  }
-
-  .login--auth-form .logo {
-    font-size: 2.25rem;
-  }
-
-  .login--auth-form .buttonDiv {
-    margin-bottom: -1.5rem !important;
-  }
 }
 /* Background from global app (iosSafeArea.scss) */
 .login {

@@ -1,0 +1,553 @@
+/**
+ * Public / auth / onboarding — light mode contrast (dark mode unchanged).
+ */
+.body--light {
+  /* --- Back buttons --- */
+  .who-backBtn,
+  .location-backBtn,
+  .auth-help-back-btn {
+    border-color: rgba(0, 0, 0, 0.28) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .dream-backBtn,
+  .goal-backBtn,
+  .pick-header .pick-backBtn {
+    border-color: rgba(0, 0, 0, 0.28) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  .login .arrowButtonBack,
+  .login--auth-form .arrowButtonBack,
+  .bgExplain .arrowButtonBack {
+    filter: none !important;
+    border: 2px solid rgba(0, 0, 0, 0.28) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .login .arrowButtonBack .arrowButtonBack-icon,
+  .login--auth-form .arrowButtonBack .arrowButtonBack-icon,
+  .bgExplain .arrowButtonBack .arrowButtonBack-icon {
+    filter: brightness(0) saturate(100%) !important;
+  }
+
+  .legal-page__back {
+    border-color: rgba(0, 0, 0, 0.28) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  /* --- Progress bars (track + pink fill) --- */
+  .who-progress,
+  .location-progress,
+  .dream-progress,
+  .goal-progress,
+  .pick-progress,
+  .auth-help-progress {
+    background-color: rgba(0, 0, 0, 0.18) !important;
+  }
+
+  .who-progress_fill,
+  .location-progress_fill,
+  .dream-progress_fill,
+  .goal-progress_fill,
+  .pick-progress_fill,
+  .auth-help-progress-fill {
+    background: #bd0043 !important;
+  }
+
+  /* --- Auth help onboarding carousel copy --- */
+  .auth-help-onboarding .auth-help-title,
+  .auth-help-onboarding .auth-help-title-line {
+    color: #0a0a0a !important;
+  }
+
+  .auth-help-onboarding .auth-help-logo {
+    color: #0a0a0a !important;
+  }
+
+  .auth-help-onboarding .auth-help-text {
+    color: rgba(0, 0, 0, 0.68) !important;
+  }
+
+  .auth-help-onboarding .auth-help-cta-full {
+    color: #ffffff !important;
+  }
+
+  /* --- Onboarding copy --- */
+  .who-title,
+  .location-title {
+    color: #0a0a0a !important;
+  }
+
+  .who-instruction,
+  .location-instruction,
+  .location-zeroTolerance,
+  .location-terms-label {
+    color: rgba(0, 0, 0, 0.62) !important;
+  }
+
+  .location-terms-label a {
+    color: #bd0043 !important;
+  }
+
+  /* --- WhoAreYou fields --- */
+  .whoAreYou .who-input.q-field--outlined .q-field__control,
+  .whoAreYou .who-input .q-field__control {
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    color: #111111 !important;
+  }
+
+  .whoAreYou .who-input.q-field--outlined .q-field__control:before {
+    border-color: rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .whoAreYou .who-input .q-field__label {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .whoAreYou .who-input .q-field__native,
+  .whoAreYou .who-input .q-field__input,
+  .whoAreYou .who-input .q-select__display-value,
+  .whoAreYou .who-input .q-placeholder {
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+  }
+
+  .whoAreYou .who-input .q-icon {
+    color: rgba(0, 0, 0, 0.58) !important;
+  }
+
+  .whoAreYou .who-input--date-trigger {
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .whoAreYou .who-input--date-trigger__label {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .whoAreYou .who-input--date-trigger__value {
+    color: #111111 !important;
+  }
+
+  .whoAreYou .who-input--date-trigger__icon {
+    color: rgba(0, 0, 0, 0.58) !important;
+  }
+
+  /* --- Date wheel picker (WhoAreYou) --- */
+  .whoAreYou .who-date-inline-picker__wheels {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .whoAreYou .who-date-inline-picker__column-wrap::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0) 80%,
+      rgba(255, 255, 255, 0.98) 100%
+    ) !important;
+  }
+
+  .whoAreYou .who-date-inline-picker__column-wrap::before {
+    background: rgba(189, 0, 67, 0.06) !important;
+    border: 1px solid rgba(189, 0, 67, 0.14) !important;
+    border-radius: 8px !important;
+  }
+
+  .whoAreYou .who-date-inline-picker__item {
+    color: #111111 !important;
+  }
+
+  .whoAreYou .who-genderLabel {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .whoAreYou .who-genderSelect {
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid rgba(0, 0, 0, 0.28) !important;
+    color: #111111 !important;
+  }
+
+  .whoAreYou .who-genderValue {
+    color: #111111 !important;
+  }
+
+  .whoAreYou .who-genderValue--placeholder {
+    color: rgba(0, 0, 0, 0.45) !important;
+    opacity: 1 !important;
+  }
+
+  .whoAreYou .who-genderArrow {
+    color: rgba(0, 0, 0, 0.58) !important;
+  }
+
+  .whoAreYou .who-genderDropdown {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .whoAreYou .who-genderOption {
+    color: #111111 !important;
+  }
+
+  /* --- WhereAreYou fields (onboarding, not settings embed) --- */
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--outlined .q-field__control,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-field__control {
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    color: #111111 !important;
+    border: 1px solid rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--outlined .q-field__control:before {
+    border-color: rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-field__label {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-field__native,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-field__input,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-select__display-value,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-placeholder {
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select .q-icon {
+    color: rgba(0, 0, 0, 0.58) !important;
+  }
+
+  /* Embedded location selects (settings card) */
+  .location-form--embed .location-select .q-field__control {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: #1a1a1a !important;
+  }
+
+  .location-form--embed .location-select .q-field__label {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .location-form--embed .location-select .q-field__native,
+  .location-form--embed .location-select .q-field__input {
+    color: #1a1a1a !important;
+  }
+
+  .location-form--embed .location-select .q-field--disabled .q-field__native,
+  .location-form--embed .location-select .q-field--disabled .q-field__input,
+  .location-form--embed .location-select .q-field--disabled .q-field__native *,
+  .location-form--embed .location-select .q-field--disabled .q-field__input *,
+  .location-form--embed .location-select .q-field--disabled .q-placeholder {
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+    opacity: 1 !important;
+  }
+
+  .location-form--embed .location-select .q-field--disabled,
+  .location-form--embed .location-select .q-field--disabled .q-field__control,
+  .location-form--embed .location-select .q-field--disabled .q-field__inner {
+    opacity: 1 !important;
+  }
+
+  .location-form--embed .location-select .q-field--disabled .q-field__label {
+    color: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .location-form--embed .location-select .q-icon {
+    color: rgba(0, 0, 0, 0.45) !important;
+  }
+
+  .location-form--embed .location-select .cities-divider .q-separator {
+    background-color: rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* --- Disabled onboarding CTAs --- */
+  .who-finishBtn:disabled,
+  .dream-nextBtn:disabled,
+  .goal-nextBtn:disabled,
+  .pick-nextBtn:disabled,
+  .location-nextBtn:disabled {
+    background: rgba(189, 0, 67, 0.38) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(189, 0, 67, 0.5) !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+  }
+
+  /* --- Auth welcome --- */
+  .authWelcome-tagline {
+    color: rgba(0, 0, 0, 0.68) !important;
+  }
+
+  .authWelcome .authLegalNotice,
+  .login--auth-form .authLegalNotice,
+  .registerLegal .authLegalNotice,
+  .authLegalNotice.authWelcome-legal,
+  .authLegalNotice.LoginPage-legal,
+  .authLegalNotice.login-welcome-legal,
+  .authLegalNotice.who-legal {
+    color: rgba(0, 0, 0, 0.68) !important;
+  }
+
+  .authLegalNotice-link,
+  .authLegalNotice a.authLegalNotice-link,
+  .whoAreYou .authLegalNotice-link,
+  .whoAreYou a.authLegalNotice-link {
+    color: #bd0043 !important;
+    text-decoration: none;
+  }
+
+  .authWelcome-btn.auth-cta-primary {
+    background: #bd0043 !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(189, 0, 67, 0.28) !important;
+  }
+
+  .authWelcome-btn.auth-cta-secondary {
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 2px solid #bd0043 !important;
+    color: #bd0043 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .authWelcome-help {
+    border-color: rgba(0, 0, 0, 0.28) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+
+    .q-icon {
+      color: #0a0a0a !important;
+    }
+  }
+
+  /* --- Password requirements tooltip (WhoAreYou) --- */
+  .whoAreYou .who-passwordRulesBubble {
+    background: #ffffff !important;
+    border: 1px solid rgba(189, 0, 67, 0.2) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .whoAreYou .who-passwordRulesClose {
+    color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .whoAreYou .who-passwordRulesContent,
+  .whoAreYou .who-passwordRulesTitle {
+    color: #0a0a0a !important;
+    text-shadow: none !important;
+  }
+
+  .whoAreYou .who-passwordRulesList li {
+    color: rgba(0, 0, 0, 0.72) !important;
+    text-shadow: none !important;
+
+    &::before {
+      color: rgba(189, 0, 67, 0.7) !important;
+      text-shadow: none !important;
+    }
+
+    &.who-passwordRule--valid {
+      color: #0a0a0a !important;
+
+      &::before {
+        color: #1a8f4c !important;
+        text-shadow: none !important;
+      }
+    }
+  }
+
+  .whoAreYou .who-passwordRulesArrow {
+    border-top-color: #ffffff !important;
+    filter: drop-shadow(0 1px 0 rgba(189, 0, 67, 0.16));
+  }
+
+  /* --- Field validation errors (WhoAreYou) --- */
+  .whoAreYou .who-input.q-field--error .q-field__control:before {
+    border-color: #ff2c8b !important;
+  }
+
+  .whoAreYou .who-input.q-field--error .q-field__bottom {
+    position: static !important;
+    min-height: 1.125rem;
+    padding-top: 3px;
+  }
+
+  .whoAreYou .who-input.q-field--error .q-field__messages,
+  .whoAreYou .who-input.q-field--error .q-field__messages div,
+  .whoAreYou .who-input.q-field--error .q-field__messages [role="alert"] {
+    color: #ff2c8b !important;
+    -webkit-text-fill-color: #ff2c8b !important;
+  }
+
+  /* --- Disabled location selects --- */
+  .whoAreYou .who-location .who-input.q-field--disabled .q-field__control,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--disabled .q-field__control {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(0, 0, 0, 0.14) !important;
+    opacity: 1 !important;
+  }
+
+  .whoAreYou .who-location .who-input.q-field--disabled .q-field__label,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--disabled .q-field__label {
+    color: rgba(0, 0, 0, 0.45) !important;
+  }
+
+  .whoAreYou .who-location .who-input.q-field--disabled .q-field__native,
+  .whoAreYou .who-location .who-input.q-field--disabled .q-field__input,
+  .whoAreYou .who-location .who-input.q-field--disabled .q-select__display-value,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--disabled .q-field__native,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--disabled .q-field__input,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--disabled .q-select__display-value {
+    color: rgba(0, 0, 0, 0.38) !important;
+    -webkit-text-fill-color: rgba(0, 0, 0, 0.38) !important;
+    opacity: 1 !important;
+  }
+
+  /* --- Onboarding select dropdown menus (teleported) --- */
+  .onboarding-select-menu.q-menu {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    color: #111111 !important;
+  }
+
+  .onboarding-select-menu.q-menu .q-virtual-scroll__content {
+    background: #ffffff !important;
+  }
+
+  .onboarding-select-menu.q-menu .q-item,
+  .onboarding-select-menu.q-menu .q-item__label {
+    color: #111111 !important;
+  }
+
+  .onboarding-select-menu.q-menu .q-item:hover,
+  .onboarding-select-menu.q-menu .q-manual-focusable--focused {
+    background: rgba(189, 0, 67, 0.06) !important;
+  }
+
+  .onboarding-select-menu.q-menu .q-item--active {
+    background: rgba(189, 0, 67, 0.1) !important;
+  }
+
+  .onboarding-select-menu.q-menu .q-item--active .q-item__label {
+    color: #bd0043 !important;
+    font-weight: 600;
+  }
+
+  .onboarding-select-menu.q-menu .text-grey,
+  .onboarding-select-menu.q-menu .q-item__section--main.text-grey {
+    color: rgba(0, 0, 0, 0.45) !important;
+  }
+
+  .onboarding-select-menu.q-menu .cities-divider .q-separator {
+    background-color: rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* --- Terms checkbox (WhereAreYou) --- */
+  .whereAreYou .location-terms-checkbox .q-checkbox__bg {
+    border: 1.5px solid rgba(0, 0, 0, 0.35) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .whereAreYou .location-terms-checkbox .q-checkbox__inner--truthy .q-checkbox__bg {
+    background: #bd0043 !important;
+    border-color: #bd0043 !important;
+  }
+
+  .whereAreYou .location-terms-checkbox .q-checkbox__svg {
+    color: #ffffff !important;
+  }
+
+  .whereAreYou .location-terms-label a {
+    color: #bd0043 !important;
+    text-decoration: none;
+  }
+
+  /* --- Onboarding pink CTA buttons (beat .body--light span { black }) --- */
+  .who-finishBtn,
+  .who-finishBtn span,
+  .who-finishBtn *,
+  .location-nextBtn,
+  .location-nextBtn *,
+  .dream-nextBtn,
+  .dream-nextBtn *,
+  .goal-nextBtn,
+  .goal-nextBtn *,
+  .pick-nextBtn,
+  .pick-nextBtn *,
+  .auth-help-cta-full,
+  .auth-help-cta-full * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+}
+
+/*
+ * iOS Safari + late global span rules — onboarding magenta CTAs must stay white.
+ */
+body.body--light .onboardingFlow .who-finishBtn,
+body.body--light .onboardingFlow .who-finishBtn span,
+body.body--light .onboardingFlow .who-finishBtn *,
+body.body--light .onboardingFlow .location-nextBtn,
+body.body--light .onboardingFlow .location-nextBtn *,
+body.body--light .onboardingFlow .dream-nextBtn,
+body.body--light .onboardingFlow .dream-nextBtn *,
+body.body--light .onboardingFlow .goal-nextBtn,
+body.body--light .onboardingFlow .goal-nextBtn *,
+body.body--light .onboardingFlow .pick-nextBtn,
+body.body--light .onboardingFlow .pick-nextBtn *,
+body.body--light .who-finishBtn,
+body.body--light .who-finishBtn span,
+body.body--light .who-finishBtn *,
+body.body--light .location-nextBtn,
+body.body--light .location-nextBtn *,
+body.body--light .dream-nextBtn,
+body.body--light .dream-nextBtn *,
+body.body--light .goal-nextBtn,
+body.body--light .goal-nextBtn *,
+body.body--light .pick-nextBtn,
+body.body--light .pick-nextBtn *,
+body.body--light .auth-help-onboarding .auth-help-cta-full,
+body.body--light .auth-help-onboarding .auth-help-cta-full * {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+body.body--light .authLegalNotice-link,
+body.body--light a.authLegalNotice-link,
+body.body--light .whoAreYou .authLegalNotice-link,
+body.body--light .whereAreYou .location-terms-label a {
+  color: #bd0043 !important;
+  text-decoration: none !important;
+}
+
+body.body--light .whoAreYou .who-input.q-field--error .q-field__messages,
+body.body--light .whoAreYou .who-input.q-field--error .q-field__messages div,
+body.body--light .whoAreYou .who-input.q-field--error .q-field__messages [role="alert"],
+body.body--light .whoAreYou .who-input.q-field--error .q-field__bottom {
+  color: #ff2c8b !important;
+  -webkit-text-fill-color: #ff2c8b !important;
+}

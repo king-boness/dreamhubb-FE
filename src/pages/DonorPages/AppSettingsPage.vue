@@ -105,15 +105,32 @@
     <div class="acccoutSettings-div">
       <span class="appSettings-title">{{ t("comingSoon") }}</span>
       <div
-        class="appSettings-content appSettings-content--disabled"
+        class="appSettings-content"
+        :class="{ 'appSettings-content--disabled': item.disabled }"
         v-for="(item, i) in comingSoonItems"
         :key="i"
+        @click="!item.disabled && handleComingSoonItemClick(item)"
       >
         <div class="appSetting-description">
           <img :src="item.img" alt="" class="appSettings-img" />
           <span class="appSettings-name">{{ item.title }}</span>
         </div>
-        <span class="appSettings-comingSoon">{{ t("comingSoon") }}</span>
+        <span v-if="item.disabled" class="appSettings-comingSoon">{{ t("comingSoon") }}</span>
+        <q-btn v-else class="arrowBtn"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
+            <g opacity="0.6">
+              <path
+                d="M8.47503 15.8332C8.59952 15.8337 8.72253 15.8062 8.83501 15.7528C8.9475 15.6995 9.04659 15.6216 9.12503 15.5249L13.15 10.5249C13.2726 10.3758 13.3396 10.1888 13.3396 9.99574C13.3396 9.80272 13.2726 9.61568 13.15 9.46657L8.98336 4.46657C8.84191 4.29639 8.63865 4.18937 8.4183 4.16905C8.19794 4.14874 7.97854 4.21679 7.80836 4.35824C7.63818 4.49969 7.53116 4.70295 7.51084 4.9233C7.49053 5.14366 7.55858 5.36306 7.70003 5.53324L11.425 9.9999L7.82503 14.4666C7.72312 14.5889 7.65839 14.7378 7.63849 14.8958C7.61859 15.0538 7.64436 15.2141 7.71274 15.3579C7.78112 15.5017 7.88925 15.6228 8.02434 15.7071C8.15944 15.7913 8.31583 15.8351 8.47503 15.8332Z"
+                fill="#D0DCD8"
+              />
+            </g></svg
+        ></q-btn>
       </div>
     </div>
 
@@ -413,19 +430,31 @@ const currentLanguageLabel = computed(() => {
   return "English (US)";
 });
 
-// Coming soon items
-const comingSoonItems = computed(() => [
+type ComingSoonItem = {
+  img: string;
+  title: string;
+  disabled?: boolean;
+  destination?: string;
+  routeName?: string;
+};
+
+// Coming soon — Privacy opens public /privacy (not Privacy Settings)
+const comingSoonItems = computed<ComingSoonItem[]>(() => [
   {
     img: "/icons/privacyIcon.svg",
-    title: t("notificationsLabel")
+    title: t("notificationsLabel"),
+    disabled: true
   },
   {
     img: "/icons/privacyIcon.svg",
-    title: t("appearance")
+    title: t("appearance"),
+    disabled: true
   },
   {
     img: "/icons/privacyIcon.svg",
-    title: t("privacy")
+    title: t("privacy"),
+    routeName: "privacy-policy",
+    disabled: false
   }
 ]);
 
@@ -547,7 +576,6 @@ const appSettings = computed(() => [
     title: t("privacySettings"),
     destination: "settings-privacy"
   }
-  // Language is now handled directly in the template, not as a separate route
 ]);
 const sources = computed(() => [
   {
@@ -577,6 +605,16 @@ const routeCheck = (name: string) => {
     ? router.push({ name: `donee-${name}` })
     : router.push({ name: `donor-${name}` });
 };
+
+const handleComingSoonItemClick = (item: ComingSoonItem) => {
+  if (item.routeName) {
+    void router.push({ name: item.routeName });
+    return;
+  }
+  if (item.destination) {
+    routeCheck(item.destination);
+  }
+};
 </script>
 <style lang="scss">
 .body--light {
@@ -602,8 +640,25 @@ const routeCheck = (name: string) => {
     color: #1a1a1a !important;
   }
 
-  .appSettings .appSettings-content--destructive .appSettings-name {
-    color: rgba(189, 0, 67, 0.92) !important;
+  .appSettings .appSettings-title,
+  .appSettings .appSettings-name,
+  .appSettings .appSettings-comingSoon,
+  .appSettings .appSettings-logOutButton,
+  .appSettings span {
+    text-decoration: none !important;
+    -webkit-text-decoration: none !important;
+  }
+
+  .appSettings .appSettings-content--destructive {
+    span.appSettings-name {
+      color: #bd0043 !important;
+      font-weight: 600;
+    }
+
+    .appSettings-img {
+      filter: none !important;
+      opacity: 1 !important;
+    }
   }
 
   .appSettings .name-toggle-container :deep(.q-btn:not(.q-btn--active)) {

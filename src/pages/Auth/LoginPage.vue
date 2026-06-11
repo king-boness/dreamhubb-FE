@@ -55,7 +55,7 @@
       {{ t('forgotPassword') }}
     </q-btn>
 
-    <AuthLegalNotice class="LoginPage-legal" />
+    <AuthLegalNotice class="LoginPage-legal login-welcome-legal" />
 
     <div v-if="showForgotHint" class="LoginPage-forgotHint">
       <div class="LoginPage-forgotHintText">{{ forgotHintText }}</div>
@@ -300,20 +300,44 @@ const handleForgotPassword = () => {
 .loginPage-input {
   font-family: montseraat;
   margin: 0.3rem 0;
-  width: 22rem;
+  width: var(--login-form-width, 22rem);
   background-color: rgba(0, 0, 0, 0.324);
+  /* .registerDatas sets height: 3.7rem — error messages need room to grow */
+  height: auto !important;
+  min-height: 3.2rem;
 }
 
 .loginPage-input :deep(.q-field__control) {
   min-height: 3.2rem;
 }
 
+/* hide-bottom-space collapses bottom slot; restore flow only when showing errors */
+.loginPage-input :deep(.q-field__bottom) {
+  position: static !important;
+  min-height: 0;
+  padding-top: 0;
+}
+
+.loginPage-input.q-field--error :deep(.q-field__bottom) {
+  min-height: 1.125rem;
+  padding-top: 3px;
+}
+
+.loginPage-input.q-field--error :deep(.q-field__messages) {
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+
 .loginPage-password.loginPage-input {
   margin-bottom: 0.35rem !important;
 }
 
+.loginPage-password.loginPage-input.q-field--error {
+  margin-bottom: 0.45rem !important;
+}
+
 .LoginPage-rememberContainer {
-  width: 22rem;
+  width: var(--login-form-width, 22rem);
   .LoginPage-rememberInput {
     color: white;
     font-family: poppins;
@@ -323,7 +347,7 @@ const handleForgotPassword = () => {
   }
 }
 .LoginPage-forgotPswButton {
-  width: 22rem;
+  width: var(--login-form-width, 22rem);
   background-color: rgba(141, 31, 70, 0.338) !important;
   color: rgba(218, 3, 82, 0.77) !important;
   font-family: montseraatSemiBold;
@@ -334,7 +358,7 @@ const handleForgotPassword = () => {
 }
 
 .LoginPage-forgotHint {
-  width: 22rem;
+  width: var(--login-form-width, 22rem);
   padding: 12px 14px;
   border-radius: 0.6rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -360,7 +384,7 @@ const handleForgotPassword = () => {
   color: white;
   border: none;
   font-size: 1rem;
-  width: 22rem;
+  width: var(--login-form-width, 22rem);
   font-family: montseraatSemiBold;
   border-radius: 0.5rem !important;
   margin-bottom: 0.45rem !important;
@@ -376,10 +400,16 @@ const handleForgotPassword = () => {
 @media (max-height: 780px) {
   .loginPage-input {
     margin: 0.2rem 0;
+    min-height: 3rem;
   }
 
   .loginPage-input :deep(.q-field__control) {
     min-height: 3rem;
+  }
+
+  .loginPage-input.q-field--error :deep(.q-field__bottom) {
+    min-height: 1rem;
+    padding-top: 2px;
   }
 
   .LoginPage-rememberContainer .LoginPage-rememberInput {
