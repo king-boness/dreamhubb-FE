@@ -1,6 +1,18 @@
 /**
  * Public / auth / onboarding — light mode contrast (dark mode unchanged).
  */
+
+/* Auth/onboarding inline validation — match Quasar q-field negative (email errors) */
+:root,
+body {
+  --dh-auth-field-error-color: #C10015;
+}
+
+.auth-fieldError {
+  color: var(--dh-auth-field-error-color);
+  -webkit-text-fill-color: var(--dh-auth-field-error-color);
+}
+
 .body--light {
   /* --- Back buttons --- */
   .who-backBtn,
@@ -386,7 +398,7 @@
 
   /* --- Field validation errors (WhoAreYou) --- */
   .whoAreYou .who-input.q-field--error .q-field__control:before {
-    border-color: #ff2c8b !important;
+    border-color: var(--dh-auth-field-error-color) !important;
   }
 
   .whoAreYou .who-input.q-field--error .q-field__bottom {
@@ -398,8 +410,30 @@
   .whoAreYou .who-input.q-field--error .q-field__messages,
   .whoAreYou .who-input.q-field--error .q-field__messages div,
   .whoAreYou .who-input.q-field--error .q-field__messages [role="alert"] {
-    color: #ff2c8b !important;
-    -webkit-text-fill-color: #ff2c8b !important;
+    color: var(--dh-auth-field-error-color) !important;
+    -webkit-text-fill-color: var(--dh-auth-field-error-color) !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__control:before {
+    border-color: var(--dh-auth-field-error-color) !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__bottom {
+    position: static !important;
+    min-height: 1.125rem;
+    padding-top: 3px;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__messages,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__messages div,
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__messages [role="alert"] {
+    color: var(--dh-auth-field-error-color) !important;
+    -webkit-text-fill-color: var(--dh-auth-field-error-color) !important;
+  }
+
+  .whereAreYou:not(.whereAreYou--filter-mode) .location-termsError.auth-fieldError {
+    color: var(--dh-auth-field-error-color) !important;
+    -webkit-text-fill-color: var(--dh-auth-field-error-color) !important;
   }
 
   /* --- Disabled location selects --- */
@@ -544,10 +578,16 @@ body.body--light .whereAreYou .location-terms-label a {
   text-decoration: none !important;
 }
 
-body.body--light .whoAreYou .who-input.q-field--error .q-field__messages,
-body.body--light .whoAreYou .who-input.q-field--error .q-field__messages div,
-body.body--light .whoAreYou .who-input.q-field--error .q-field__messages [role="alert"],
 body.body--light .whoAreYou .who-input.q-field--error .q-field__bottom {
-  color: #ff2c8b !important;
-  -webkit-text-fill-color: #ff2c8b !important;
+  color: var(--dh-auth-field-error-color) !important;
+  -webkit-text-fill-color: var(--dh-auth-field-error-color) !important;
+}
+
+body.body--light .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__messages,
+body.body--light .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__messages div,
+body.body--light .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__messages [role="alert"],
+body.body--light .whereAreYou:not(.whereAreYou--filter-mode) .location-select.q-field--error .q-field__bottom,
+body.body--light .whereAreYou:not(.whereAreYou--filter-mode) .location-termsError.auth-fieldError {
+  color: var(--dh-auth-field-error-color) !important;
+  -webkit-text-fill-color: var(--dh-auth-field-error-color) !important;
 }

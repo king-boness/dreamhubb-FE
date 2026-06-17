@@ -27,6 +27,8 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :error="!!continentError"
+            :error-message="continentError"
             :popup-content-class="onboardingSelectMenuClass"
             fit
             @update:model-value="handleContinentChange"
@@ -39,6 +41,8 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :error="!!countryError"
+            :error-message="countryError"
             :popup-content-class="onboardingSelectMenuClass"
             :disable="!localContinent"
             use-input
@@ -65,6 +69,8 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :error="!!cityError"
+            :error-message="cityError"
             :popup-content-class="onboardingSelectMenuClass"
             :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
             :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
@@ -118,6 +124,8 @@
             :dark="!isEmbedMode"
             outlined
             class="location-select"
+            :error="!!cityError"
+            :error-message="cityError"
             :popup-content-class="onboardingSelectMenuClass"
             :disable="!localCountry || !!(emitCityId && cityOptionsLoading)"
             use-input
@@ -316,6 +324,7 @@
           <router-link :to="{ name: 'privacy-policy' }" @click.stop>Privacy Policy</router-link>.
         </span>
       </div>
+      <p v-if="termsError" class="location-termsError auth-fieldError" role="alert">{{ termsError }}</p>
       <p class="location-zeroTolerance">
         dreamhubb has <strong>zero tolerance</strong> for objectionable content and abusive users.
       </p>
@@ -325,8 +334,8 @@
     <template v-if="!hideFooter">
       <button
         class="location-nextBtn"
+        :class="{ 'location-nextBtn--inactive': !isStepValid }"
         @click="handleNext"
-        :disabled="!localContinent || !localCountry || (requireTermsAcceptance && !localAcceptedTerms)"
       >
         {{ nextButtonLabel }}
       </button>
@@ -359,7 +368,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, withDefaults } from "vue";
+import { ref, computed, onMounted, watch, withDefaults, nextTick } from "vue";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
@@ -495,6 +504,46 @@ const cityFilter = ref("");
 const citiesFromBackend = ref<CityFromBackend[]>([]); // Cities with IDs from BE
 const countryIdForCities = ref<number | null>(null); // Store country ID for fetching cities
 const cityOptionsLoading = ref(false);
+const triedSubmit = ref(false);
+
+const cityIsValid = computed(() => {
+  if (useObjectCityModel.value) {
+    return localCityId.value !== null && localCityId.value !== undefined;
+  }
+  const value = localCity.value;
+  return value !== "" && value !== null && value !== undefined && value !== "__divider__";
+});
+
+const continentError = computed(() =>
+  triedSubmit.value && !String(localContinent.value || "").trim() ? "Continent is required." : ""
+);
+const countryError = computed(() =>
+  triedSubmit.value && !String(localCountry.value || "").trim() ? "Country is required." : ""
+);
+const cityError = computed(() => (triedSubmit.value && !cityIsValid.value ? "City is required." : ""));
+const termsError = computed(() =>
+  props.requireTermsAcceptance && triedSubmit.value && !localAcceptedTerms.value
+    ? "You must accept the Terms of Use and Privacy Policy to continue."
+    : ""
+);
+
+const isStepValid = computed(() => {
+  const termsOk = !props.requireTermsAcceptance || localAcceptedTerms.value;
+  return !!String(localContinent.value || "").trim() &&
+    !!String(localCountry.value || "").trim() &&
+    cityIsValid.value &&
+    termsOk;
+});
+
+const scrollToFirstFieldError = () => {
+  nextTick(() => {
+    const root = document.querySelector(".whereAreYou");
+    const target =
+      root?.querySelector(".q-field--error") ||
+      root?.querySelector(".location-termsError");
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+};
 
 const getHttpStatus = (err: unknown): number | null => {
   if (!err || typeof err !== "object") return null;
@@ -787,6 +836,11 @@ const handleCityChange = (value: unknown) => {
 
 // Handle next
 const handleNext = () => {
+  triedSubmit.value = true;
+  if (!isStepValid.value) {
+    scrollToFirstFieldError();
+    return;
+  }
   emit("update:continent", localContinent.value);
   emit("update:country", localCountry.value);
   emit("update:city", useObjectCityModel.value ? (localCityId.value ?? "") : localCity.value);
@@ -925,8 +979,7 @@ watch(localCityId, (newVal) => {
   height: 100dvh;
   max-height: 100dvh;
   display: block;
-  padding: 24px 20px 0;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+  padding: 16px 20px 0;
   padding-bottom: max(32px, calc(env(safe-area-inset-bottom, 0px) + 28px));
   margin: 0 auto;
   background: transparent;
@@ -957,7 +1010,8 @@ watch(localCityId, (newVal) => {
   margin-bottom: 20px;
   flex-shrink: 0;
   position: relative;
-  padding-top: 0;
+  /* Match WhoAreYou — safe-area on header row so title stays below status bar */
+  padding-top: max(0px, calc(env(safe-area-inset-top, 0px) - 10px));
 }
 
 .location-backBtn {
@@ -1067,6 +1121,23 @@ watch(localCityId, (newVal) => {
   z-index: 1;
   width: 100%;
 
+  :deep(.q-field__bottom) {
+    position: static !important;
+    min-height: 0;
+    padding-top: 0;
+  }
+
+  :deep(.q-field--error .q-field__bottom) {
+    min-height: 1.125rem;
+    padding-top: 3px;
+  }
+
+  :deep(.q-field--error .q-field__messages),
+  :deep(.q-field--error .q-field__messages div) {
+    color: var(--dh-auth-field-error-color, #C10015);
+    -webkit-text-fill-color: var(--dh-auth-field-error-color, #C10015);
+  }
+
   :deep(.q-field__control) {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
@@ -1174,6 +1245,14 @@ watch(localCityId, (newVal) => {
   }
 }
 
+.location-termsError.auth-fieldError {
+  margin: 0.35rem 0 0;
+  max-width: 22rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .location-zeroTolerance {
   margin: 0.5rem 0 0;
   max-width: 22rem;
@@ -1199,15 +1278,16 @@ watch(localCityId, (newVal) => {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 8px 24px rgba(189, 0, 67, 0.3);
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  cursor: pointer;
 
-  &:not(:disabled):hover {
+  &:not(.location-nextBtn--inactive):hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 32px rgba(189, 0, 67, 0.4);
   }
+}
+
+.location-nextBtn--inactive {
+  opacity: 0.72;
 }
 
 .geolocation-dialog {

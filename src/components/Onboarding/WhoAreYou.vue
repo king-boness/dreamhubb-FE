@@ -146,8 +146,8 @@
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
             name="password"
-            :error="!!passwordError"
-            :error-message="passwordError || ''"
+            :error="showPasswordError"
+            :error-message="showPasswordError ? (passwordError || '') : ''"
             @focus="handlePasswordFocus"
             @blur="handlePasswordBlur"
           >
@@ -209,8 +209,8 @@
           name="password_confirmation"
           autocomplete="off"
           data-lpignore="true"
-          :error="!!repeatPasswordError"
-          :error-message="repeatPasswordError || ''"
+          :error="showRepeatPasswordError"
+          :error-message="showRepeatPasswordError ? (repeatPasswordError || '') : ''"
         >
           <template #append>
             <q-icon
@@ -230,6 +230,8 @@
             dark
             outlined
             class="who-input"
+            :error="!!continentError"
+            :error-message="continentError"
             :popup-content-class="onboardingSelectMenuClass"
             fit
             behavior="menu"
@@ -245,6 +247,8 @@
             dark
             outlined
             class="who-input"
+            :error="!!countryError"
+            :error-message="countryError"
             :popup-content-class="onboardingSelectMenuClass"
             :disable="!localProfileContinent"
             use-input
@@ -274,6 +278,8 @@
             dark
             outlined
             class="who-input"
+            :error="!!cityError"
+            :error-message="cityError"
             :popup-content-class="onboardingSelectMenuClass"
             :disable="!localProfileCountry"
             use-input
@@ -328,8 +334,8 @@
       <button
         type="button"
         class="who-finishBtn"
+        :class="{ 'who-finishBtn--inactive': !isFormValid }"
         @click="handleNextStep"
-        :disabled="!isFormValid"
       >
         NEXT STEP
       </button>
@@ -713,11 +719,12 @@ const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
 // Email & password validation
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const emailError = computed(() => {
-  if (!localEmail.value) {
-    return null;
+  const value = (localEmail.value || "").trim();
+  if (!value) {
+    return triedSubmit.value ? "Email is required." : null;
   }
-  if (!emailRegex.test(localEmail.value.trim())) {
-    return "Please enter a valid email address";
+  if (!emailRegex.test(value)) {
+    return emailTouched.value || triedSubmit.value ? "Enter a valid email address." : null;
   }
   return null;
 });
@@ -726,15 +733,17 @@ const emailError = computed(() => {
 const emailServerError = computed(() => onboardingStore.fieldErrors?.email || null);
 
 const shouldShowEmailError = computed(() => {
-  // No error at all → nothing to show
   if (!emailError.value && !emailServerError.value) {
     return false;
   }
-  // Show server errors immediately (e.g., existing email), client errors only after blur or submit
   if (emailServerError.value) {
-    return true; // Always show server errors immediately
+    return true;
   }
-  // Show client-side errors only after blur or submit attempt
+  if (!emailError.value) return false;
+  const value = (localEmail.value || "").trim();
+  if (!value) {
+    return triedSubmit.value;
+  }
   return emailTouched.value || triedSubmit.value;
 });
 
@@ -764,23 +773,50 @@ const passwordHasSpecial = computed(() => {
   return /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value);
 });
 
+const passwordTouched = ref(false);
+
 const passwordError = computed(() => {
   const value = localPassword.value || "";
-  if (!value) return null;
+  if (!value) {
+    return triedSubmit.value ? "Password is required." : null;
+  }
 
   if (!passwordHasMinLength.value || !passwordHasUpper.value || !passwordHasNumber.value || !passwordHasSpecial.value) {
-    return "Invalid password";
+    return "Password does not meet the requirements.";
   }
 
   return null;
 });
 
+const showPasswordError = computed(
+  () => !!passwordError.value && (triedSubmit.value || passwordTouched.value)
+);
+
 const repeatPasswordError = computed(() => {
-  if (!localRepeatPassword.value) return null;
-  if (localPassword.value && localPassword.value !== localRepeatPassword.value) {
+  const value = localRepeatPassword.value || "";
+  if (!value) {
+    return triedSubmit.value ? "Repeat password is required." : null;
+  }
+  if (localPassword.value && localPassword.value !== value) {
     return "Passwords do not match.";
   }
   return null;
+});
+
+const showRepeatPasswordError = computed(() => !!repeatPasswordError.value && triedSubmit.value);
+
+const continentError = computed(() =>
+  triedSubmit.value && !String(localProfileContinent.value || "").trim() ? "Continent is required." : ""
+);
+const countryError = computed(() =>
+  triedSubmit.value && !String(localProfileCountry.value || "").trim() ? "Country is required." : ""
+);
+const cityError = computed(() => {
+  if (!triedSubmit.value) return "";
+  const cityVal = localProfileCity.value;
+  const hasCity =
+    cityVal !== undefined && cityVal !== null && cityVal !== "" && cityVal !== "__divider__";
+  return hasCity ? "" : "City is required.";
 });
 
 // Progress bar
@@ -1132,8 +1168,18 @@ const handleAvatarChange = (event: Event) => {
 
 const isFormValid = computed(() => {
   const usernameValid = localUsername.value && localUsername.value.trim() !== "";
-  const emailValid = !!localEmail.value && !emailError.value && !emailServerError.value && !emailChecking.value;
-  const passwordValid = !!localPassword.value && !passwordError.value;
+  const emailValue = (localEmail.value || "").trim();
+  const emailValid =
+    !!emailValue &&
+    emailRegex.test(emailValue) &&
+    !emailServerError.value &&
+    !emailChecking.value;
+  const passwordValid =
+    !!localPassword.value &&
+    passwordHasMinLength.value &&
+    passwordHasUpper.value &&
+    passwordHasNumber.value &&
+    passwordHasSpecial.value;
   const repeatPasswordValid = localRepeatPassword.value && localRepeatPassword.value.trim() !== "";
   const passwordsMatch =
     passwordValid && repeatPasswordValid && localPassword.value === localRepeatPassword.value;
@@ -1174,6 +1220,7 @@ const closePasswordRulesDialog = () => {
 
 // Handle password field blur - close dialog if clicking on another input
 const handlePasswordBlur = () => {
+  passwordTouched.value = true;
   // Small delay to check if focus moved to another input
   setTimeout(() => {
     const activeElement = document.activeElement;
@@ -1230,10 +1277,21 @@ watch(showPasswordRulesDialog, (isOpen) => {
   }
 });
 
+const scrollToFirstFieldError = () => {
+  nextTick(() => {
+    const root = document.querySelector(".whoAreYou");
+    const target =
+      root?.querySelector(".q-field--error") ||
+      root?.querySelector(".who-fieldError--visible");
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+};
+
 const handleNextStep = async () => {
   // Mark that user attempted to submit – errors can now be shown
   triedSubmit.value = true;
   emailTouched.value = true;
+  passwordTouched.value = true;
 
   // Ensure email duplication check has a chance to run BEFORE allowing next step.
   // This fixes the case where user pastes an existing email and clicks "NEXT STEP" immediately.
@@ -1258,23 +1316,7 @@ const handleNextStep = async () => {
   }
 
   if (!isFormValid.value) {
-    // Prefer specific field errors for better UX
-    const firstEmailError = emailError.value || emailServerError.value;
-    const cityMissing =
-      !localProfileCity.value && localProfileCity.value !== 0 &&
-      localProfileContinent.value && localProfileCountry.value;
-    const fieldError =
-      passwordError.value ||
-      repeatPasswordError.value ||
-      firstEmailError ||
-      (cityMissing ? "Please select a city." : "Please fill in all required fields including your location.");
-
-    notifyError({
-      kind: "validation",
-      messageKey: "common.errors.validation",
-      fallbackMessage: fieldError,
-      retryable: false
-    }, { position: "top" });
+    scrollToFirstFieldError();
     return;
   }
   emit("next");
@@ -1469,6 +1511,23 @@ const handleNextStep = async () => {
 }
 
 .who-input {
+  :deep(.q-field__bottom) {
+    position: static !important;
+    min-height: 0;
+    padding-top: 0;
+  }
+
+  :deep(.q-field--error .q-field__bottom) {
+    min-height: 1.125rem;
+    padding-top: 3px;
+  }
+
+  :deep(.q-field--error .q-field__messages),
+  :deep(.q-field--error .q-field__messages div) {
+    color: var(--dh-auth-field-error-color, #C10015);
+    -webkit-text-fill-color: var(--dh-auth-field-error-color, #C10015);
+  }
+
   :deep(.q-field__control) {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
@@ -1849,16 +1908,16 @@ const handleNextStep = async () => {
   margin-top: 1.25rem;
   margin-bottom: 0;
   flex-shrink: 0;
+  cursor: pointer;
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &:not(:disabled):hover {
+  &:not(.who-finishBtn--inactive):hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 32px rgba(189, 0, 67, 0.4);
   }
+}
+
+.who-finishBtn--inactive {
+  opacity: 0.72;
 }
 
 /* Password field wrapper for positioning bubble */
