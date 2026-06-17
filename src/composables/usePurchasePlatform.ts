@@ -5,7 +5,11 @@
 import { computed } from "vue";
 import { Capacitor } from "@capacitor/core";
 import type { TokenPackage, WebPaymentMethodId } from "src/types/purchase";
-import { purchaseApplePackage } from "src/services/appleIapService";
+import {
+  isIosTokenPurchaseBlocked,
+  IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE,
+  purchaseApplePackage
+} from "src/services/appleIapService";
 import { purchaseGooglePackage } from "src/services/googleBillingService";
 import { isPayPalSupportedMethod, startPayPalCheckoutFlow } from "src/services/paypalCheckoutService";
 import { startStripeCheckoutFlow } from "src/services/stripeCheckoutService";
@@ -46,6 +50,12 @@ export function usePurchasePlatform() {
    * On success, backend payload is built and logged; Laravel POST is prepared in the service.
    */
   async function startAppleIapPurchase(pkg: TokenPackage): Promise<AppleIapPurchaseResult> {
+    if (isIosTokenPurchaseBlocked()) {
+      return {
+        status: "unavailable",
+        errorMessage: IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+      };
+    }
     return purchaseApplePackage(pkg);
   }
 

@@ -1,19 +1,6 @@
 <template>
-  <div class="stats-Page">
-    <div class="stats-main" style="min-height: 740px">
-      <div v-if="loadError" class="tokenShop-error">
-        <div class="tokenShop-errorText">{{ loadError }}</div>
-        <q-btn
-          class="tokenShop-retryBtn"
-          unelevated
-          no-caps
-          color="primary"
-          :disable="authStore.loading"
-          @click="handleRetry"
-        >
-          {{ retryLabel }}
-        </q-btn>
-      </div>
+  <div class="stats-Page" :class="{ 'stats-Page--iosPurchaseBlocked': iosPurchaseBlocked }">
+    <div class="stats-main" :class="{ 'stats-main--iosPurchaseBlocked': iosPurchaseBlocked }">
       <div class="karmaAvailable-stats">
         <div class="karmaDisplay">
           <img src="/icons/KarmaIcon.png" alt="" />
@@ -21,34 +8,59 @@
         </div>
         <span>Available Tokens</span>
       </div>
-      <div class="tokenShop-header">
-        <h2>More Tokens</h2>
-      </div>
 
-      <div class="shopTable-stats">
-        <button
-          v-for="pkg in tokenPackages"
-          :key="pkg.id"
-          type="button"
-          class="tokenShop-card"
-          @click="openPurchaseSheet(pkg)"
-        >
-          <div class="cardImg">
-            <img :src="pkg.img" alt="" />
-          </div>
-          <div class="cardDescription">
-            <span
-              >{{ pkg.displayName }} Tokens
-              <span class="descriptionBolder"
-                >({{ formatTokenAmount(pkg.tokenAmount) }})</span
-              >
-            </span>
-          </div>
-          <div class="cardPrice">
-            <span>{{ pkg.priceDisplay }}</span>
-          </div>
-        </button>
-      </div>
+      <template v-if="iosPurchaseBlocked">
+        <div class="tokenShop-header tokenShop-header--blocked">
+          <h2>More Tokens</h2>
+        </div>
+        <div class="tokenShop-unavailable" role="status" aria-live="polite">
+          <p class="tokenShop-unavailableText">{{ IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE }}</p>
+        </div>
+      </template>
+
+      <template v-else>
+        <div v-if="loadError" class="tokenShop-error">
+          <div class="tokenShop-errorText">{{ loadError }}</div>
+          <q-btn
+            class="tokenShop-retryBtn"
+            unelevated
+            no-caps
+            color="primary"
+            :disable="authStore.loading"
+            @click="handleRetry"
+          >
+            {{ retryLabel }}
+          </q-btn>
+        </div>
+        <div class="tokenShop-header">
+          <h2>More Tokens</h2>
+        </div>
+
+        <div class="shopTable-stats">
+          <button
+            v-for="pkg in tokenPackages"
+            :key="pkg.id"
+            type="button"
+            class="tokenShop-card"
+            @click="openPurchaseSheet(pkg)"
+          >
+            <div class="cardImg">
+              <img :src="pkg.img" alt="" />
+            </div>
+            <div class="cardDescription">
+              <span
+                >{{ pkg.displayName }} Tokens
+                <span class="descriptionBolder"
+                  >({{ formatTokenAmount(pkg.tokenAmount) }})</span
+                >
+              </span>
+            </div>
+            <div class="cardPrice">
+              <span>{{ pkg.priceDisplay }}</span>
+            </div>
+          </button>
+        </div>
+      </template>
     </div>
 
     <!-- Web: payment method selection sheet -->
@@ -62,7 +74,7 @@
 
     <!-- iOS / Android: store purchase sheet (Apple IAP / Google Billing) -->
     <StorePurchaseSheet
-      v-else
+      v-else-if="!iosPurchaseBlocked"
       :model-value="showPurchaseSheet"
       :selected-package="selectedPackage"
       :purchase-in-progress="isStorePurchaseInProgress"
@@ -83,7 +95,11 @@ import { usePurchasePlatform } from "src/composables/usePurchasePlatform";
 import type { TokenPackage, WebPaymentMethodId } from "src/types/purchase";
 import { TOKEN_PACKAGES, formatTokenAmount } from "src/config/tokenPackages";
 import { notifySuccess, notifyNegative, notifyInfo } from "src/utils/notify";
-import { isAppleIapReady, APPLE_IAP_BACKEND_ENABLED } from "src/services/appleIapService";
+import {
+  isAppleIapReady,
+  isIosTokenPurchaseBlocked,
+  IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+} from "src/services/appleIapService";
 import PaymentMethodSheet from "src/components/purchase/PaymentMethodSheet.vue";
 import StorePurchaseSheet from "src/components/purchase/StorePurchaseSheet.vue";
 
@@ -105,6 +121,9 @@ const isStorePurchaseInProgress = ref(false);
 
 const tokenPackages = TOKEN_PACKAGES;
 const applePluginUnavailable = ref(false);
+const iosPurchaseBlocked = computed(
+  () => purchaseProvider.value === "apple_iap" && isIosTokenPurchaseBlocked()
+);
 
 watch(showPurchaseSheet, (open) => {
   if (!open) {
@@ -119,13 +138,7 @@ watch(showPurchaseSheet, (open) => {
 });
 
 function openPurchaseSheet(pkg: TokenPackage) {
-  if (purchaseProvider.value === "apple_iap" && !APPLE_IAP_BACKEND_ENABLED) {
-    notifyNegative(
-      "Token purchases are temporarily unavailable on iOS. You can still earn tokens in the app.",
-      { timeout: 5000 }
-    );
-    return;
-  }
+  if (iosPurchaseBlocked.value) return;
   if (applePluginUnavailable.value) {
     notifyNegative(
       "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
@@ -171,6 +184,7 @@ async function onWebContinue(pkg: TokenPackage, method: WebPaymentMethodId) {
 
 async function onStorePurchase(pkg: TokenPackage) {
   if (purchaseProvider.value === "apple_iap") {
+    if (iosPurchaseBlocked.value) return;
     if (applePluginUnavailable.value) {
       notifyNegative(
         "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
@@ -256,16 +270,13 @@ function handleStripeReturn() {
 // Fetch user data on mount if not loaded
 onMounted(async () => {
   handleStripeReturn();
-  if (purchaseProvider.value === "apple_iap") {
+  if (purchaseProvider.value === "apple_iap" && !iosPurchaseBlocked.value) {
     applePluginUnavailable.value = !(await isAppleIapReady());
-    if (!APPLE_IAP_BACKEND_ENABLED) {
-      loadError.value =
-        "Token purchases on iOS are temporarily unavailable. Apple IAP server validation is being finalized.";
-    } else if (applePluginUnavailable.value) {
+    if (applePluginUnavailable.value) {
       loadError.value = "iOS purchases are unavailable in this build (NativePurchases plugin not linked).";
     }
   }
-  if (authStore.isAuthenticated && !authStore.user) {
+  if (authStore.isAuthenticated && !authStore.user && !iosPurchaseBlocked.value) {
     try {
       loadError.value = null;
       await authStore.fetchUser();
@@ -280,6 +291,7 @@ onMounted(async () => {
 });
 
 const handleRetry = async () => {
+  if (iosPurchaseBlocked.value) return;
   if (purchaseProvider.value === "apple_iap") {
     applePluginUnavailable.value = !(await isAppleIapReady());
     if (applePluginUnavailable.value) {
@@ -304,6 +316,45 @@ const handleRetry = async () => {
   scroll-snap-type: none !important;
 }
 
+.stats-Page--iosPurchaseBlocked .stats-main--iosPurchaseBlocked {
+  min-height: min(72vh, 640px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
+}
+
+.tokenShop-unavailable {
+  width: 90%;
+  max-width: 22rem;
+  margin: 0.75rem auto 0;
+  padding: 1.25rem 1.35rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tokenShop-unavailableText {
+  margin: 0;
+  font-family: poppins;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.tokenShop-header--blocked {
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
 .tokenShop-error {
   width: 90%;
   margin: 1rem auto 0.25rem;
@@ -323,6 +374,10 @@ const handleRetry = async () => {
 
 .tokenShop-retryBtn {
   margin-top: 0.6rem;
+}
+
+.stats-main:not(.stats-main--iosPurchaseBlocked) {
+  min-height: 740px;
 }
 
 .karmaAvailable-stats {
@@ -474,5 +529,18 @@ const handleRetry = async () => {
 .body--light .stats-Page .karmaAvailable-stats .karmaDisplay span,
 .body--light .stats-Page .karmaAvailable-stats > span {
   color: #1a1a1a !important;
+}
+
+.body--light .stats-Page .tokenShop-unavailableText {
+  color: #333333 !important;
+}
+
+.body--light .stats-Page--iosPurchaseBlocked .tokenShop-unavailable {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.04) 0%,
+    rgba(0, 0, 0, 0.02) 100%
+  );
 }
 </style>

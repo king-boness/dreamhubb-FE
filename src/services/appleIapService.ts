@@ -15,10 +15,24 @@ import { appleIapAdapter } from "src/services/appleIapAdapter";
  */
 export const APPLE_IAP_BACKEND_ENABLED = false;
 
+/**
+ * Temporary App Store resubmission guard — blocks native StoreKit product loading and purchase().
+ * Flip to false when Apple IAP backend validation is ready for production.
+ */
+export const IOS_TOKEN_PURCHASES_DISABLED = true;
+
+export const IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE =
+  "Token purchases are temporarily unavailable on iOS. This feature will be available in a future update.";
+
 function isIos(): boolean {
   if (typeof window === "undefined") return false;
   const cap = Capacitor as unknown as { getPlatform?: () => string; isNativePlatform?: () => boolean };
   return cap?.isNativePlatform?.() === true && cap?.getPlatform?.() === "ios";
+}
+
+/** Native iOS app with token purchases temporarily disabled for App Review. */
+export function isIosTokenPurchaseBlocked(): boolean {
+  return IOS_TOKEN_PURCHASES_DISABLED && isIos();
 }
 
 /**
@@ -26,7 +40,7 @@ function isIos(): boolean {
  * Returns products when available; on web or when adapter returns empty, consider products unavailable.
  */
 export async function loadAppleProducts(productIds: string[]): Promise<{ products: AppleIapProduct[]; status: AppleIapPurchaseStatus }> {
-  if (!isIos()) {
+  if (!isIos() || isIosTokenPurchaseBlocked()) {
     return { products: [], status: "unavailable" };
   }
   try {
@@ -48,7 +62,7 @@ export async function loadAppleProducts(productIds: string[]): Promise<{ product
  * is shown as controlled state instead of hard purchase error later.
  */
 export async function isAppleIapReady(): Promise<boolean> {
-  if (!isIos()) return false;
+  if (!isIos() || isIosTokenPurchaseBlocked()) return false;
   return appleIapAdapter.isNativePluginAvailable();
 }
 
@@ -61,6 +75,12 @@ export async function purchaseApplePackage(pkg: TokenPackage): Promise<AppleIapP
     return {
       status: "unavailable",
       errorMessage: "Apple IAP is only available on iOS."
+    };
+  }
+  if (isIosTokenPurchaseBlocked()) {
+    return {
+      status: "unavailable",
+      errorMessage: IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
     };
   }
   const productId = pkg.appleProductId;

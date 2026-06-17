@@ -13,7 +13,10 @@
       </div>
     </div>
     <div class="onboarding-buttons">
-      <q-btn class="buy-btn" @click="$router.push('tokenshop')"
+      <q-btn
+        v-if="!iosPurchaseBlocked"
+        class="buy-btn"
+        @click="$router.push('tokenshop')"
         >Buy tokens</q-btn
       >
       <q-btn class="tutorial-btn" @click="$router.push('onBoarding/1')"
@@ -23,10 +26,18 @@
   </div>
 </template>
 <script setup lang="ts">
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
+import { usePurchasePlatform } from "src/composables/usePurchasePlatform";
+import { isIosTokenPurchaseBlocked } from "src/services/appleIapService";
+
 const router = useRouter();
 const route = useRoute();
+const { purchaseProvider } = usePurchasePlatform();
+const iosPurchaseBlocked = computed(
+  () => purchaseProvider.value === "apple_iap" && isIosTokenPurchaseBlocked()
+);
 
 const goBack = () => {
   const defaultFallback = route.path.startsWith("/donee") ? { name: "donee-posts" } : { name: "donor-posts" };
