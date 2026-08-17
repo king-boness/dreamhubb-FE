@@ -130,17 +130,16 @@ import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
-import { useAuthStore } from "src/stores/auth";
 import InspirationComponent from "src/components/partials/InspirationComponent.vue";
 import StorieShowComponent from "src/components/partials/StorieShowComponent.vue";
 import ImageUploader from "src/components/partials/UploadImgComponent.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 import { useInspirationsFeedStore } from "src/stores/inspirationsFeed";
 import type { UploadedImage } from "src/composables/useUpload";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const { t } = useI18n();
 const $q = useQuasar();
-const authStore = useAuthStore();
 const feedStore = useInspirationsFeedStore();
 
 const { items, myStory, stories, error } = storeToRefs(feedStore);
@@ -269,10 +268,16 @@ const submitInspiration = async () => {
     });
     return;
   }
+  if (!cover) {
+    $q.notify({
+      type: "warning",
+      message: t("inspirationNeedTextOrImage")
+    });
+    return;
+  }
   composerSubmitting.value = true;
   try {
-    const imageUrl = cover || "/images/Auth/inspirationImg.jpg";
-    await feedStore.addLocalInspiration(text || " ", imageUrl);
+    await feedStore.createInspiration(text, cover);
     inspirationMessage.value = "";
     composerImages.value = [];
     uploaderKey.value += 1;
@@ -281,6 +286,11 @@ const submitInspiration = async () => {
     $q.notify({
       type: "positive",
       message: t("inspirationPosted")
+    });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: mapAxiosErrorToDhError(e).fallbackMessage || "Failed to post inspiration."
     });
   } finally {
     composerSubmitting.value = false;

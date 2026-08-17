@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
 import type { Inspiration } from "src/components/models";
 import {
+  createInspirationOnApi,
   loadInspirationsFeedPayload,
-  readLocalInspirationsFromStorage,
-  writeLocalInspirationsToStorage,
   type InspirationStory
 } from "src/services/inspirationsFeedSource";
 import { useAuthStore } from "src/stores/auth";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
+
+const DEFAULT_AVATAR = "/images/Auth/profilePicture.jpeg";
 
 let lastViewerStoryLabel = "Your Story";
 
@@ -17,8 +18,7 @@ export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
     myStory: [] as InspirationStory[],
     stories: [] as InspirationStory[],
     loading: false,
-    error: null as string | null,
-    dataSource: null as "api" | "mock" | null
+    error: null as string | null
   }),
 
   actions: {
@@ -30,12 +30,11 @@ export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
       this.error = null;
       try {
         const auth = useAuthStore();
-        const avatar = auth.avatarUrl || "/images/Auth/profilePicture.jpeg";
+        const avatar = auth.avatarUrl || DEFAULT_AVATAR;
         const payload = await loadInspirationsFeedPayload(avatar, lastViewerStoryLabel);
         this.items = payload.inspirations;
         this.myStory = payload.myStory;
         this.stories = payload.stories;
-        this.dataSource = payload.source;
       } catch (e) {
         this.error = mapAxiosErrorToDhError(e).fallbackMessage || "Failed to load inspirations.";
       } finally {
@@ -43,32 +42,8 @@ export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
       }
     },
 
-    /**
-     * Launch-safe: persist to device and refresh feed. Replace with POST /inspirations when API exists.
-     */
-    async addLocalInspiration(description: string, imageUrl: string) {
-      const auth = useAuthStore();
-      const item: Inspiration = {
-        id: `local-${Date.now()}`,
-        user: {
-          userName: auth.name || "You",
-          userPicture: auth.avatarUrl || "/images/Auth/profilePicture.jpeg",
-          userId: auth.user?.id
-        },
-        description: description.trim() || " ",
-        inspirationInfo: {
-          dateCreated: new Date().toLocaleDateString(undefined, {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric"
-          }),
-          likes: 0,
-          inspirationImage: imageUrl
-        },
-        linkedPostId: null
-      };
-      const prev = readLocalInspirationsFromStorage();
-      writeLocalInspirationsToStorage([item, ...prev]);
+    async createInspiration(description: string, imageUrl: string) {
+      await createInspirationOnApi(description, imageUrl);
       await this.fetchFeed(undefined, true);
     },
 

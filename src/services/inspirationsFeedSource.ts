@@ -1,11 +1,11 @@
 /**
- * Launch-safe inspirations feed abstraction.
- * Replace body of tryFetchFromApi() when backend ships; keep normalizeApiRow() aligned with API DTO.
+ * Inspirations feed – loads from Laravel API (GET /inspirations/feed, POST /inspirations).
  */
 import type { Inspiration } from "src/components/models";
 import { api } from "src/boot/axios";
+import { resolveProfileImageSrc } from "src/utils/avatar";
 
-export const LOCAL_INSPIRATIONS_STORAGE_KEY = "dreamhubb_donor_inspirations_local_v1";
+const DEFAULT_AVATAR = "/images/Auth/profilePicture.jpeg";
 
 export type InspirationStorySlide = {
   id: number;
@@ -21,93 +21,24 @@ export type InspirationStory = {
   slides: InspirationStorySlide[];
 };
 
-function isApiEnabled(): boolean {
-  const v = import.meta.env.VITE_INSPIRATIONS_FEED_API;
-  return v === "1" || v === "true";
-}
-
-/** Seed items use only bundled /public assets (offline-safe). */
-function seedInspirations(): Inspiration[] {
-  return [
-    {
-      id: "seed-1",
-      user: {
-        userName: "Community",
-        userPicture: "/images/Auth/profilePicture.jpeg",
-        userId: undefined
-      },
-      description:
-        "Small steps toward a goal still count. Share what moved you today — it might be exactly what someone else needed to read.",
-      inspirationInfo: {
-        dateCreated: "03/15/2024",
-        likes: 128,
-        inspirationImage: "/images/Auth/inspirationImg.jpg"
-      },
-      linkedPostId: null
-    },
-    {
-      id: "seed-2",
-      user: {
-        userName: "Dreamhubb",
-        userPicture: "/images/Auth/profilePicture.jpeg",
-        userId: undefined
-      },
-      description:
-        "Helping others reach their dreams builds a warmer community. Explore posts, leave encouragement, or send a token of support.",
-      inspirationInfo: {
-        dateCreated: "02/02/2024",
-        likes: 256,
-        inspirationImage: "/images/Auth/postBackground.png"
-      },
-      linkedPostId: null
-    },
-    {
-      id: "seed-3",
-      user: {
-        userName: "Dreamhubb",
-        userPicture: "/images/Auth/profilePicture.jpeg",
-        userId: undefined
-      },
-      description:
-        "Your story matters. Use “Add post” to add an image and a short note — it appears in your feed for this session (saved on device until the API is live).",
-      inspirationInfo: {
-        dateCreated: "01/20/2024",
-        likes: 89,
-        inspirationImage: "/images/Auth/inspirationImg.jpg"
-      },
-      linkedPostId: null
-    }
-  ];
-}
-
-export function readLocalInspirationsFromStorage(): Inspiration[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_INSPIRATIONS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((row) => row && typeof row === "object" && typeof (row as Inspiration).id === "string") as Inspiration[];
-  } catch {
-    return [];
-  }
-}
-
-export function writeLocalInspirationsToStorage(items: Inspiration[]): void {
-  try {
-    localStorage.setItem(LOCAL_INSPIRATIONS_STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    /* ignore quota */
-  }
+function resolveMediaUrl(raw: unknown): string {
+  const resolved = resolveProfileImageSrc(raw);
+  return resolved ?? "";
 }
 
 function normalizeApiRow(row: Record<string, unknown>, index: number): Inspiration | null {
   const user = row.user as Record<string, unknown> | undefined;
   const info = row.inspirationInfo as Record<string, unknown> | undefined;
   if (!user || !info) return null;
+
   const id = String(row.id ?? row.uuid ?? `api-${index}`);
-  const pic = String(user.userPicture ?? user.picture ?? "/images/Auth/profilePicture.jpeg");
-  const name = String(user.userName ?? user.name ?? "User");
+  const picRaw = user.userPicture ?? user.picture ?? user.profile_picture ?? "";
+  const pic = resolveMediaUrl(picRaw) || DEFAULT_AVATAR;
+  const name = String(user.userName ?? user.name ?? user.username ?? "User");
   const uid = user.userId ?? user.id;
+  const imageRaw = info.inspirationImage ?? info.image ?? "";
+  const image = resolveMediaUrl(imageRaw);
+
   return {
     id,
     user: {
@@ -119,7 +50,7 @@ function normalizeApiRow(row: Record<string, unknown>, index: number): Inspirati
     inspirationInfo: {
       dateCreated: String(info.dateCreated ?? info.created_at ?? ""),
       likes: Number(info.likes ?? 0),
-      inspirationImage: String(info.inspirationImage ?? info.image ?? "/images/Auth/inspirationImg.jpg")
+      inspirationImage: image
     },
     linkedPostId:
       row.linkedPostId != null
@@ -130,27 +61,50 @@ function normalizeApiRow(row: Record<string, unknown>, index: number): Inspirati
   };
 }
 
-async function tryFetchFromApi(): Promise<Inspiration[] | null> {
-  if (!isApiEnabled()) return null;
-  try {
-    const { data } = await api.get<unknown>("/inspirations/feed");
-    const payload = data as Record<string, unknown>;
-    const rows =
-      (Array.isArray(payload.data) ? payload.data : null) ??
-      (Array.isArray(payload.inspirations) ? payload.inspirations : null) ??
-      (Array.isArray(payload.items) ? payload.items : null);
-    if (!Array.isArray(rows)) return null;
-    const out: Inspiration[] = [];
-    rows.forEach((r, i) => {
-      if (r && typeof r === "object") {
-        const n = normalizeApiRow(r as Record<string, unknown>, i);
-        if (n) out.push(n);
-      }
-    });
-    return out.length ? out : null;
-  } catch {
-    return null;
+function extractFeedRows(payload: unknown): Record<string, unknown>[] {
+  if (!payload || typeof payload !== "object") return [];
+  const root = payload as Record<string, unknown>;
+  const rows =
+    (Array.isArray(root.data) ? root.data : null) ??
+    (Array.isArray(root.inspirations) ? root.inspirations : null) ??
+    (Array.isArray(root.items) ? root.items : null);
+  if (!Array.isArray(rows)) return [];
+
+  return rows.filter((r) => r && typeof r === "object") as Record<string, unknown>[];
+}
+
+function normalizeFeedRows(rows: Record<string, unknown>[]): Inspiration[] {
+  const out: Inspiration[] = [];
+  rows.forEach((r, i) => {
+    const n = normalizeApiRow(r, i);
+    if (n) out.push(n);
+  });
+  return out;
+}
+
+export async function fetchInspirationsFromApi(): Promise<Inspiration[]> {
+  const { data } = await api.get<unknown>("/inspirations/feed");
+  return normalizeFeedRows(extractFeedRows(data));
+}
+
+export async function createInspirationOnApi(
+  description: string,
+  imageUrl: string
+): Promise<Inspiration> {
+  const { data } = await api.post<unknown>("/inspirations", {
+    description: description.trim() || null,
+    image: imageUrl
+  });
+  const payload = data as Record<string, unknown>;
+  const row = payload.data ?? payload.inspiration;
+  if (!row || typeof row !== "object") {
+    throw new Error("Invalid inspiration response");
   }
+  const normalized = normalizeApiRow(row as Record<string, unknown>, 0);
+  if (!normalized) {
+    throw new Error("Invalid inspiration response");
+  }
+  return normalized;
 }
 
 export function buildStoriesFromInspirations(
@@ -202,41 +156,19 @@ export function buildStoriesFromInspirations(
   return { myStory, stories };
 }
 
-/**
- * Remote when VITE_INSPIRATIONS_FEED_API is true and GET /inspirations/feed succeeds;
- * otherwise launch-safe seed + merged local storage.
- */
 export async function loadInspirationsFeedPayload(
-  viewerAvatar = "/images/Auth/profilePicture.jpeg",
+  viewerAvatar = DEFAULT_AVATAR,
   viewerStoryLabel = "Your Story"
 ): Promise<{
   inspirations: Inspiration[];
   myStory: InspirationStory[];
   stories: InspirationStory[];
-  source: "api" | "mock";
 }> {
-  const local = readLocalInspirationsFromStorage();
-  const apiItems = await tryFetchFromApi();
-
-  if (apiItems) {
-    const merged = dedupeById([...local, ...apiItems]);
-    const { myStory, stories } = buildStoriesFromInspirations(merged, viewerAvatar, viewerStoryLabel);
-    return { inspirations: merged, myStory, stories, source: "api" };
-  }
-
-  const seed = seedInspirations();
-  const merged = dedupeById([...local, ...seed]);
-  const { myStory, stories } = buildStoriesFromInspirations(merged, viewerAvatar, viewerStoryLabel);
-  return { inspirations: merged, myStory, stories, source: "mock" };
-}
-
-function dedupeById(items: Inspiration[]): Inspiration[] {
-  const seen = new Set<string>();
-  const out: Inspiration[] = [];
-  for (const it of items) {
-    if (seen.has(it.id)) continue;
-    seen.add(it.id);
-    out.push(it);
-  }
-  return out;
+  const inspirations = await fetchInspirationsFromApi();
+  const { myStory, stories } = buildStoriesFromInspirations(
+    inspirations,
+    viewerAvatar,
+    viewerStoryLabel
+  );
+  return { inspirations, myStory, stories };
 }
