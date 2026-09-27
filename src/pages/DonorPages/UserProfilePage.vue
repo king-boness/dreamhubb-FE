@@ -1,14 +1,16 @@
 <template>
-  <div class="userProfile">
-    <UserProfileHeaderComponent></UserProfileHeaderComponent>
-    <div class="userProfile-detailsContainer">
-      <div v-for="(profile, i) in profiles" :key="i">
-        <UserProfileDetailsComponent
-          :profile="profile"
-        ></UserProfileDetailsComponent>
+  <q-page class="profileTabPage" :padding="false">
+    <div class="userProfile">
+      <UserProfileHeaderComponent></UserProfileHeaderComponent>
+      <div class="userProfile-detailsContainer">
+        <div v-for="(profile, i) in profiles" :key="i">
+          <UserProfileDetailsComponent
+            :profile="profile"
+          ></UserProfileDetailsComponent>
+        </div>
       </div>
     </div>
-  </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";

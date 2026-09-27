@@ -1,8 +1,10 @@
 <template>
-  <div class="myProfileRewievs-page">
-    <MyProfileHeaderComponent></MyProfileHeaderComponent>
-    <ProfileReviewsComponent></ProfileReviewsComponent>
-  </div>
+  <q-page class="profileTabPage" :padding="false">
+    <div class="myProfileRewievs-page">
+      <MyProfileHeaderComponent></MyProfileHeaderComponent>
+      <ProfileReviewsComponent></ProfileReviewsComponent>
+    </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import MyProfileHeaderComponent from "src/components/partials/MyProfileHeaderComponent.vue";

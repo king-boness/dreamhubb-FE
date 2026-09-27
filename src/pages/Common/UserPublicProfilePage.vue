@@ -127,6 +127,10 @@ onMounted(async () => {
 <style scoped lang="scss">
 .publicProfile {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .publicProfile__state {

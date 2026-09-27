@@ -1,5 +1,6 @@
 <template>
-  <div class="userProfile-page">
+  <q-page class="profileTabPage" :padding="false">
+    <div class="userProfile-page">
     <UserProfileHeaderComponent></UserProfileHeaderComponent>
     <div class="userProfile-detailsContainer">
       <div v-for="(profile, i) in profiles" :key="i">
@@ -8,7 +9,8 @@
         ></UserProfileDetailsComponent>
       </div>
     </div>
-  </div>
+    </div>
+  </q-page>
 </template>
 <style scoped lang="scss">
 .userProfile-detailsContainer {

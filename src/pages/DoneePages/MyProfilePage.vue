@@ -1,7 +1,7 @@
 <template>
-  <div class="">
+  <q-page class="doneeMyProfilePage" :padding="false">
     <MyProfileFilterComponent :post="post"></MyProfileFilterComponent>
-  </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import MyProfileFilterComponent from "src/components/doneeComponents/MyProfileFilterComponent.vue";
@@ -22,4 +22,11 @@ const post = ref({
   }
 } as Post);
 </script>
-<style></style>
+<style scoped lang="scss">
+.doneeMyProfilePage {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+</style>

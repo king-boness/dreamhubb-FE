@@ -1,12 +1,14 @@
 <template>
-  <div class="myProfileRewievs-page">
-    <MyProfileHeaderComponent></MyProfileHeaderComponent>
-    <ProfileDreamsComponent
-      :on-going="onGoing"
-      :accomplished="accomplished"
-      :profile="profile"
-    ></ProfileDreamsComponent>
-  </div>
+  <q-page class="profileTabPage" :padding="false">
+    <div class="myProfileRewievs-page">
+      <MyProfileHeaderComponent></MyProfileHeaderComponent>
+      <ProfileDreamsComponent
+        :on-going="onGoing"
+        :accomplished="accomplished"
+        :profile="profile"
+      ></ProfileDreamsComponent>
+    </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import MyProfileHeaderComponent from "src/components/partials/MyProfileHeaderComponent.vue";

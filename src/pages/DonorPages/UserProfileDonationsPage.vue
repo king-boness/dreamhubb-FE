@@ -1,11 +1,13 @@
 <template>
-  <div class="myProfileRewievs-page">
+  <q-page class="profileTabPage" :padding="false">
+    <div class="myProfileRewievs-page">
     <UserProfileHeaderDoneeComponent
       v-if="donee"
     ></UserProfileHeaderDoneeComponent>
     <UserProfileHeaderDonorComponent v-else></UserProfileHeaderDonorComponent>
     <ProfileDonationsComponent></ProfileDonationsComponent>
-  </div>
+    </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import ProfileDonationsComponent from "src/components/partials/ProfileDonationsComponent.vue";

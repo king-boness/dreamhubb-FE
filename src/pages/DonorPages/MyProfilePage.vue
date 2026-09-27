@@ -79,7 +79,11 @@ const handleRetry = async () => {
 </script>
 <style scoped lang="scss">
 .donorMyProfileUnified {
-  /* Match donee profile baseline: no extra bottom reserve */
+  /* Match donee profile baseline: no extra bottom reserve under unified-scroll pad */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding-bottom: 0 !important;
 }
 

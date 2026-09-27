@@ -204,7 +204,130 @@ $dh-bp-desktop: 1200px;
   .dh-settings-scroll-root .q-page.settingsLocation-page {
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
+
+  /* Settings list: keep in feed column (not full ultrawide) */
+  .dh-settings-scroll-root .appSettings-page,
+  .dh-settings-scroll-root .appSettings {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
+/* -------------------------------------------------------------------------
+ * Profile — tablet + desktop shell (mobile layout unchanged)
+ * Own profile, public profile, nested tab pages, settings list, sheets.
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .donorMyProfileUnified,
+  .doneeMyProfilePage,
+  .publicProfile,
+  .profileTabPage {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .doneeMyProfilePage,
+  .publicProfile,
+  .profileTabPage {
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+  }
+
+  .stats-filter--profile,
+  .stats-filter--profile .filterTabs,
+  .stats-filter--profile .panel,
+  .stats-filter--profile .tabPanel,
+  .publicProfile .stats-filter,
+  .publicProfile .filterTabs,
+  .publicProfile .panel {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .myProfile,
+  .myProfile-header,
+  .myProfile-actions,
+  .publicProfileMenu {
+    max-width: min(25rem, 100%);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .myProfile-bio,
+  .myProfile-bioSection {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Keep avatar at existing mobile size — no desktop scale-up */
+  .myProfile-avatarWrapper,
+  .myProfile-avatar,
+  .myProfile-avatarImg {
+    width: 120px;
+    height: 120px;
+  }
+
+  .myProfileRewievs-page,
+  .userProfile,
+  .userProfile-page,
+  .ProfileReview-page,
+  .userPlaceholderPage-inner {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .dh-settings-scroll-root .appSettings-page,
+  .dh-settings-scroll-root .appSettings {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .doneeMyProfilePage,
+  .publicProfile,
+  .profileTabPage {
+    padding-top: 0.35rem;
+    padding-bottom: 1.25rem;
+  }
+
+  /*
+   * Profile bottom sheets: anchor to content column beside left rail
+   * (same model as Notifications action sheet).
+   */
+  .profileActionsSheet-backdrop,
+  .shareProfileSheet-backdrop,
+  .badgeSelector-overlay {
+    left: var(--dh-rail-width, 5.5rem) !important;
+    right: 0 !important;
+    width: auto !important;
+  }
+
+  .profileActionsSheet,
+  .shareProfileSheet,
+  .badgeSelector-drawer {
+    width: min(26rem, calc(100% - 2rem)) !important;
+    max-width: 26rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
 /* -------------------------------------------------------------------------
  * Inspirations — tablet + desktop shell (mobile layout unchanged)
  * Keep stories ring / cards / composer inside the feed-width column.
