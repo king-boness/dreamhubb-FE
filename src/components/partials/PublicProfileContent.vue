@@ -38,18 +38,8 @@
 
     <!-- Note: Settings button is NOT shown for public profiles -->
 
-    <!-- Donor: profile menu list -->
-    <div v-if="isDonorSide" class="publicProfileMenu">
-      <ProfileMenuItem
-        :label="`${t('reviews')} (${counts.reviews})`"
-        icon-src="/icons/starIcon.svg"
-        @click="goToReviews"
-      />
-      <ProfileMenuItem
-        :label="`${t('contributions')} (${counts.contributions})`"
-        icon-src="/icons/redGiftIcon.svg"
-        @click="goToContributions"
-      />
+    <!-- Public profile activity: only sections with a real production data path -->
+    <div class="publicProfileMenu">
       <ProfileMenuItem
         :label="`${t('dreams')} (${counts.dreams})`"
         icon-src="/icons/redCloudIcon.svg"
@@ -112,7 +102,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const isDonorSide = computed(() => route.meta?.side === "donor");
+const profileSide = computed(() => (route.meta?.side === "donee" ? "donee" : "donor"));
 
 const displayName = computed(() => {
   return props.userData?.name || props.userData?.username || "User";
@@ -169,16 +159,12 @@ const displayBio = computed(() => {
 });
 
 type MenuCounts = {
-  reviews: number;
-  contributions: number;
   dreams: number;
   problems: number;
   ideas: number;
 };
 
 const counts = ref<MenuCounts>({
-  reviews: 0,
-  contributions: 0,
   dreams: 0,
   problems: 0,
   ideas: 0
@@ -204,15 +190,10 @@ const loadCategoryCount = async (category: "dream" | "problem" | "idea"): Promis
 };
 
 const refreshCounts = async () => {
-  if (!isDonorSide.value) return;
   if (!props.userData?.id) return;
 
   if (countsAbort) countsAbort.abort();
   countsAbort = new AbortController();
-
-  // Safe-first: reviews & contributions counts are not implemented yet
-  counts.value.reviews = 0;
-  counts.value.contributions = 0;
 
   const [dreams, problems, ideas] = await Promise.all([
     loadCategoryCount("dream"),
@@ -236,23 +217,11 @@ watch(
   }
 );
 
-const goToReviews = () => {
-  const userId = props.userData?.id;
-  if (!userId) return;
-  router.push({ name: "donor-user-reviews", params: { userId: String(userId) } });
-};
-
-const goToContributions = () => {
-  const userId = props.userData?.id;
-  if (!userId) return;
-  router.push({ name: "donor-user-contributions", params: { userId: String(userId) } });
-};
-
 const goToPosts = (type: "dream" | "problem" | "idea") => {
   const userId = props.userData?.id;
   if (!userId) return;
   router.push({
-    name: "donor-user-posts-type",
+    name: `${profileSide.value}-user-posts-type`,
     params: { userId: String(userId), type }
   });
 };

@@ -151,7 +151,8 @@ const handleRetry = () => {
 };
 
 const openPost = (postId: number) => {
-  router.push({ name: "donor-post-detail", params: { id: String(postId) } });
+  const side = route.path.includes("/donee/") ? "donee" : "donor";
+  router.push({ name: `${side}-post-detail`, params: { id: String(postId) } });
 };
 
 const handleCompletedClick = () => {

@@ -13,7 +13,7 @@
         {{ retryLabel }}
       </q-btn>
     </div>
-    <MyProfileFilterComponent :post="post"></MyProfileFilterComponent>
+    <MyProfileFilterComponent />
   </q-page>
 </template>
 <script setup lang="ts">
@@ -21,7 +21,6 @@ import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
 import MyProfileFilterComponent from "src/components/doneeComponents/MyProfileFilterComponent.vue";
-import { Post } from "src/components/models";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
 
@@ -34,23 +33,6 @@ const retryLabel = computed(() => {
   return label === "common.actions.retry" ? "Retry" : label;
 });
 
-// Create post object from auth store data for MyProfileFilterComponent
-const post = computed(() => {
-  return {
-    description: "",
-    goalName: "",
-    goalImage: "/images/Auth/goalPicture.png",
-    karma: authStore.user?.tokens || 0,
-    image: "/images/Auth/postBackground.png",
-    user: {
-      badge: "verified",
-      userName: authStore.user?.username || "User",
-      userPicture: authStore.user?.profile_picture || "/images/Auth/profilePicture.jpeg"
-    }
-  } as Post;
-});
-
-// Fetch user data on mount if not loaded
 onMounted(async () => {
   if (authStore.isAuthenticated && !authStore.user) {
     try {

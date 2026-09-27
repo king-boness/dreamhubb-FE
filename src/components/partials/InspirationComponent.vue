@@ -245,10 +245,6 @@ const openAuthorProfile = () => {
     }
     return;
   }
-  if (isDonor()) {
-    void router.push({ name: "donor-userProfile" });
-    return;
-  }
   $q.notify({
     type: "info",
     message: t("inspirationProfileUnavailable"),

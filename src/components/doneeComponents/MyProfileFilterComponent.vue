@@ -97,12 +97,9 @@ import {
   watch,
   nextTick,
   onMounted,
-  onBeforeUnmount,
-  defineProps,
-  PropType
+  onBeforeUnmount
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { Post } from "src/components/models";
 
 import ProfileContent from "src/components/partials/ProfileContent.vue";
 import StatsPage from "src/pages/DonorPages/StatsPage.vue";
@@ -173,13 +170,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.body.classList.remove(PROFILE_STATS_BODY_CLASS);
   document.body.classList.remove(MY_PROFILE_TABS_BODY_CLASS);
-});
-
-defineProps({
-  post: {
-    type: Object as PropType<Post>,
-    required: true
-  }
 });
 </script>
 <style scoped lang="scss">

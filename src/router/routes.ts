@@ -173,28 +173,6 @@ const routes: RouteRecordRaw[] = [
         name: "donor-user-profile"
       },
       {
-        path: "user/:userId/reviews",
-        meta: {
-          requiresAuth: true,
-          side: "donor",
-          showHeaderBack: true,
-          headerBackFallback: { name: "donor-user-profile", params: { userId: ":userId" } }
-        },
-        component: () => import("src/pages/DonorPages/UserReviewsPage.vue"),
-        name: "donor-user-reviews"
-      },
-      {
-        path: "user/:userId/contributions",
-        meta: {
-          requiresAuth: true,
-          side: "donor",
-          showHeaderBack: true,
-          headerBackFallback: { name: "donor-user-profile", params: { userId: ":userId" } }
-        },
-        component: () => import("src/pages/DonorPages/UserContributionsPage.vue"),
-        name: "donor-user-contributions"
-      },
-      {
         path: "user/:userId/posts/:type",
         meta: {
           requiresAuth: true,
@@ -234,12 +212,6 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
         component: () => import("src/pages/DonorPages/TokensPage.vue"),
         name: "donor-tokenshop"
-      },
-      {
-        path: "userprofile",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfilePage.vue"),
-        name: "donor-userProfile"
       },
       {
         path: "myprofile",
@@ -343,66 +315,6 @@ const routes: RouteRecordRaw[] = [
         name: "donor-help"
       },
       {
-        path: "myprofile/donations",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileDonationsPage.vue"),
-        name: "donor-myprofile-donations"
-      },
-      {
-        path: "myprofile/dreams",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileDreamsPage.vue"),
-        name: "donor-myprofile-dreams"
-      },
-      {
-        path: "myprofile/problems",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileProblemsPage.vue"),
-        name: "donor-myprofile-problems"
-      },
-      {
-        path: "myprofile/ideas",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileIdeasPage.vue"),
-        name: "donor-myprofile-ideas"
-      },
-      {
-        path: "myprofile/reviews",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileReviewsPage.vue"),
-        name: "donor-myprofile-reviews"
-      },
-      {
-        path: "userprofile/donations",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileDonationsPage.vue"),
-        name: "donor-userprofile-donations"
-      },
-      {
-        path: "userprofile/dreams",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileDreamsPage.vue"),
-        name: "donor-userprofile-dreams"
-      },
-      {
-        path: "userprofile/problems",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileProblemsPage.vue"),
-        name: "donor-userprofile-problems"
-      },
-      {
-        path: "userprofile/ideas",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileIdeasPage.vue"),
-        name: "donor-userprofile-ideas"
-      },
-      {
-        path: "userprofile/reviews",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileReviewsPage.vue"),
-        name: "donor-userprofile-reviews"
-      },
-      {
         path: "post-detail/details",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/DreamDetailPage.vue"),
@@ -489,42 +401,6 @@ const routes: RouteRecordRaw[] = [
         name: "donee-inspirations"
       },
       {
-        path: "userProfile",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DoneePages/UserProfilePage.vue"),
-        name: "donee-userProfile"
-      },
-      {
-        path: "userProfile/reviews",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileReviewsPage.vue"),
-        name: "donee-userProfile-reviews"
-      },
-      {
-        path: "userProfile/donations",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileDonationsPage.vue"),
-        name: "donee-userProfile-donations"
-      },
-      {
-        path: "userProfile/dreams",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileDreamsPage.vue"),
-        name: "donee-userProfile-dreams"
-      },
-      {
-        path: "userProfile/problems",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileProblemsPage.vue"),
-        name: "donee-userProfile-problems"
-      },
-      {
-        path: "userProfile/ideas",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/UserProfileIdeasPage.vue"),
-        name: "donee-userProfile-ideas"
-      },
-      {
         path: "myprofile",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/MyProfilePage.vue"),
@@ -553,36 +429,6 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true, showHeaderBack: true, headerBackFallback: "donee-token", hideFooter: true },
         component: () => import("src/pages/DonorPages/TokensPage.vue"),
         name: "donee-tokenshop"
-      },
-      {
-        path: "myprofile/donations",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileDonationsPage.vue"),
-        name: "donee-myprofile-donations"
-      },
-      {
-        path: "myprofile/dreams",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileDreamsPage.vue"),
-        name: "donee-myprofile-dreams"
-      },
-      {
-        path: "myprofile/problems",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileProblemsPage.vue"),
-        name: "donee-myprofile-problems"
-      },
-      {
-        path: "myprofile/ideas",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileIdeasPage.vue"),
-        name: "donee-myprofile-ideas"
-      },
-      {
-        path: "myprofile/reviews",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/MyProfileReviewsPage.vue"),
-        name: "donee-myprofile-reviews"
       },
       {
         path: "post-detail",
@@ -625,6 +471,17 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true, side: "donee" },
         component: () => import("src/pages/Common/UserPublicProfilePage.vue"),
         name: "donee-user-profile"
+      },
+      {
+        path: "user/:userId/posts/:type",
+        meta: {
+          requiresAuth: true,
+          side: "donee",
+          showHeaderBack: true,
+          headerBackFallback: { name: "donee-user-profile", params: { userId: ":userId" } }
+        },
+        component: () => import("src/pages/DonorPages/UserPostsByTypePage.vue"),
+        name: "donee-user-posts-type"
       },
       {
         path: "postCreation",
