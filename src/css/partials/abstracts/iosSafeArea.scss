@@ -2,10 +2,10 @@
 /* Platform class .platform-ios on body added by boot/capacitor-status-bar.ts */
 
 /* Jednotné pozadie – shared app background (app-bg-main.png) + fallback farba */
-$app-bg-url: url("~assets/backgrounds/app-bg-main.png");
+/* Quasar Vite alias `assets` → src/assets (webpack "~assets/..." is not resolved). */
 html, body, #q-app, .q-layout, .q-page-container {
   background-color: #0a0a0a !important;
-  background-image: $app-bg-url !important;
+  background-image: url("assets/backgrounds/app-bg-main.png") !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: cover !important;
@@ -17,7 +17,7 @@ html, body, #q-app, .q-layout, .q-page-container {
 .platform-ios html, .platform-ios body, .platform-ios #q-app,
 .platform-ios .q-layout, .platform-ios .q-page-container {
   background-color: #0a0a0a !important;
-  background-image: $app-bg-url !important;
+  background-image: url("assets/backgrounds/app-bg-main.png") !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: cover !important;
