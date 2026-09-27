@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import type { Inspiration } from "src/components/models";
 import {
   createInspirationOnApi,
+  deleteInspirationOnApi,
   loadInspirationsFeedPayload,
   type InspirationStory
 } from "src/services/inspirationsFeedSource";
@@ -10,7 +11,7 @@ import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const DEFAULT_AVATAR = "/images/Auth/profilePicture.jpeg";
 
-let lastViewerStoryLabel = "Your Story";
+let lastViewerStoryLabel = "You";
 
 export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
   state: () => ({
@@ -31,7 +32,12 @@ export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
       try {
         const auth = useAuthStore();
         const avatar = auth.avatarUrl || DEFAULT_AVATAR;
-        const payload = await loadInspirationsFeedPayload(avatar, lastViewerStoryLabel);
+        const viewerId = auth.user?.id != null ? Number(auth.user.id) : null;
+        const label =
+          lastViewerStoryLabel ||
+          auth.user?.username ||
+          "You";
+        const payload = await loadInspirationsFeedPayload(avatar, label, viewerId);
         this.items = payload.inspirations;
         this.myStory = payload.myStory;
         this.stories = payload.stories;
@@ -42,8 +48,19 @@ export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
       }
     },
 
-    async createInspiration(description: string, imageUrl: string) {
-      await createInspirationOnApi(description, imageUrl);
+    async createInspiration(
+      description: string,
+      imageUrl: string,
+      imagePublicId?: string | null
+    ) {
+      const created = await createInspirationOnApi(description, imageUrl, imagePublicId);
+      this.items = [created, ...this.items.filter((x) => x.id !== created.id)];
+      await this.fetchFeed(undefined, true);
+    },
+
+    async deleteInspiration(id: string) {
+      await deleteInspirationOnApi(id);
+      this.items = this.items.filter((x) => x.id !== id);
       await this.fetchFeed(undefined, true);
     },
 

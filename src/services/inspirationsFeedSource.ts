@@ -19,6 +19,8 @@ export type InspirationStory = {
   userProfileImage: string;
   seen: boolean;
   slides: InspirationStorySlide[];
+  /** When set, ring item opens that user's public profile */
+  userId?: number | null;
 };
 
 function resolveMediaUrl(raw: unknown): string {
@@ -89,12 +91,17 @@ export async function fetchInspirationsFromApi(): Promise<Inspiration[]> {
 
 export async function createInspirationOnApi(
   description: string,
-  imageUrl: string
+  imageUrl: string,
+  imagePublicId?: string | null
 ): Promise<Inspiration> {
-  const { data } = await api.post<unknown>("/inspirations", {
+  const payloadBody: Record<string, unknown> = {
     description: description.trim() || null,
     image: imageUrl
-  });
+  };
+  if (imagePublicId) {
+    payloadBody.image_public_id = imagePublicId;
+  }
+  const { data } = await api.post<unknown>("/inspirations", payloadBody);
   const payload = data as Record<string, unknown>;
   const row = payload.data ?? payload.inspiration;
   if (!row || typeof row !== "object") {
@@ -107,10 +114,15 @@ export async function createInspirationOnApi(
   return normalized;
 }
 
+export async function deleteInspirationOnApi(id: string | number): Promise<void> {
+  await api.delete(`/inspirations/${id}`);
+}
+
 export function buildStoriesFromInspirations(
   inspirations: Inspiration[],
   myAvatar: string,
-  myLabel: string
+  myLabel: string,
+  viewerUserId?: number | null
 ): { myStory: InspirationStory[]; stories: InspirationStory[] } {
   const myStory: InspirationStory[] = [
     {
@@ -118,12 +130,16 @@ export function buildStoriesFromInspirations(
       label: myLabel,
       userProfileImage: myAvatar,
       seen: false,
-      slides: []
+      slides: [],
+      userId: viewerUserId ?? null
     }
   ];
 
   const byKey = new Map<string, Inspiration[]>();
   for (const it of inspirations) {
+    if (viewerUserId != null && it.user.userId === viewerUserId) {
+      continue;
+    }
     const key = it.user.userId != null ? `u:${it.user.userId}` : `n:${it.user.userName}`;
     let bucket = byKey.get(key);
     if (!bucket) {
@@ -149,7 +165,8 @@ export function buildStoriesFromInspirations(
       label: first.user.userName,
       userProfileImage: first.user.userPicture,
       seen: false,
-      slides
+      slides,
+      userId: first.user.userId ?? null
     });
   }
 
@@ -158,7 +175,8 @@ export function buildStoriesFromInspirations(
 
 export async function loadInspirationsFeedPayload(
   viewerAvatar = DEFAULT_AVATAR,
-  viewerStoryLabel = "Your Story"
+  viewerStoryLabel = "You",
+  viewerUserId?: number | null
 ): Promise<{
   inspirations: Inspiration[];
   myStory: InspirationStory[];
@@ -168,7 +186,8 @@ export async function loadInspirationsFeedPayload(
   const { myStory, stories } = buildStoriesFromInspirations(
     inspirations,
     viewerAvatar,
-    viewerStoryLabel
+    viewerStoryLabel,
+    viewerUserId
   );
   return { inspirations, myStory, stories };
 }

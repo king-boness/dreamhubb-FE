@@ -8,8 +8,9 @@
   >
     <a
       class="story"
-      @click="setSeen(item.id)"
-      :class="!item.slides.length ? '' : 'noStoryProfile'"
+      href="#"
+      @click.prevent="openProfile(item)"
+      :class="!item.slides?.length ? '' : 'noStoryProfile'"
     >
       <div :class="!item.seen ? 'profile' : 'profile visited'">
         <img
@@ -29,6 +30,15 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from "vue";
 
+type StoryItem = {
+  id?: number;
+  label?: string;
+  userProfileImage?: string;
+  seen?: boolean;
+  slides?: unknown[];
+  userId?: number | null;
+};
+
 const props = defineProps({
   stories: {
     type: Array,
@@ -36,21 +46,19 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["clicked"]);
+const emit = defineEmits(["open-profile"]);
+
 const scrollRef = ref<{ $el?: HTMLElement } | null>(null);
 let wheelTarget: HTMLElement | null = null;
 
-const setSeen = (index: number) => {
-  // will send to backend
-  // stories.value[index].seen = true;
-  emit("clicked", index);
+const openProfile = (item: StoryItem) => {
+  emit("open-profile", item?.userId ?? null);
 };
 
 /** Desktop mouse wheel → horizontal scroll when the strip overflows. */
 const onWheel = (event: WheelEvent) => {
   if (!wheelTarget) return;
   if (wheelTarget.scrollWidth <= wheelTarget.clientWidth + 1) return;
-  // Prefer native horizontal deltas (trackpad); map vertical wheel otherwise.
   const delta =
     Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
   if (delta === 0) return;
@@ -92,8 +100,8 @@ onBeforeUnmount(() => {
 }
 .scroll::-webkit-scrollbar,
 .stories-horizontal-scroll::-webkit-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   display: none;
 }
 
@@ -113,6 +121,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
+  text-decoration: none;
 }
 .story .profile {
   background: $primary;

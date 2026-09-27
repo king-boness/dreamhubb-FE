@@ -22,7 +22,6 @@
       <StorieShowComponent
         :my-story="myStory"
         :stories="stories"
-        @seen="(i: number) => feedStore.markStorySeen(i)"
       />
 
       <div class="inspiration-header">
@@ -261,6 +260,7 @@ const onComposerImages = (imgs: UploadedImage[]) => {
 const submitInspiration = async () => {
   const text = inspirationMessage.value.trim();
   const cover = composerImages.value[0]?.secure_url;
+  const publicId = composerImages.value[0]?.public_id || null;
   if (!text && !cover) {
     $q.notify({
       type: "warning",
@@ -277,7 +277,7 @@ const submitInspiration = async () => {
   }
   composerSubmitting.value = true;
   try {
-    await feedStore.createInspiration(text, cover);
+    await feedStore.createInspiration(text, cover, publicId);
     inspirationMessage.value = "";
     composerImages.value = [];
     uploaderKey.value += 1;

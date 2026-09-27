@@ -39,6 +39,14 @@
           <span class="userName">{{ props.inspiration.user.userName }}</span>
         </div>
         <div class="inspiration-icons" @click.stop>
+          <q-btn
+            v-if="isOwner"
+            class="PostDetail-btn"
+            aria-label="More actions"
+            @click.stop="isActionsOpen = true"
+          >
+            <q-icon name="more_horiz" size="20px" color="white" />
+          </q-btn>
         <q-btn class="PostDetail-btn"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
@@ -99,6 +107,50 @@
         </div>
       </div>
     </div>
+
+    <q-dialog v-model="isActionsOpen" position="bottom">
+      <q-card class="inspiration-actionsSheet">
+        <q-card-section class="inspiration-actionsSheetHeader">
+          <div class="inspiration-actionsSheetHandle" />
+        </q-card-section>
+        <q-card-section class="inspiration-actionsSheetContent">
+          <button
+            class="inspiration-actionsSheetBtn danger"
+            type="button"
+            @click="requestDelete"
+          >
+            {{ t("inspirationDeleteAction") }}
+          </button>
+          <button
+            class="inspiration-actionsSheetBtn secondary"
+            type="button"
+            @click="isActionsOpen = false"
+          >
+            {{ t("cancel") }}
+          </button>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="isDeleteConfirmOpen" persistent>
+      <q-card class="inspiration-confirmCard">
+        <q-card-section>
+          <div class="inspiration-confirmTitle">{{ t("inspirationDeleteConfirmTitle") }}</div>
+          <div class="inspiration-confirmText">{{ t("inspirationDeleteConfirmText") }}</div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat no-caps :label="t('cancel')" @click="isDeleteConfirmOpen = false" />
+          <q-btn
+            flat
+            no-caps
+            color="negative"
+            :loading="isDeleting"
+            :label="t('inspirationDeleteConfirmCta')"
+            @click="confirmDelete"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -108,9 +160,15 @@ import { Inspiration } from "src/components/models";
 import { useRouter, useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
+import { useAuthStore } from "src/stores/auth";
+import { useInspirationsFeedStore } from "src/stores/inspirationsFeed";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const isLiked = ref(false);
 const mainImageReady = ref(false);
+const isActionsOpen = ref(false);
+const isDeleteConfirmOpen = ref(false);
+const isDeleting = ref(false);
 
 interface Props {
   inspiration: Inspiration;
@@ -126,6 +184,15 @@ const props: Props = defineProps({
 const coverImageSrc = computed(
   () => props.inspiration.inspirationInfo.inspirationImage
 );
+
+const authStore = useAuthStore();
+const feedStore = useInspirationsFeedStore();
+
+const isOwner = computed(() => {
+  const uid = props.inspiration.user.userId;
+  const me = authStore.user?.id;
+  return uid != null && me != null && Number(uid) === Number(me);
+});
 
 watch(
   coverImageSrc,
@@ -164,8 +231,16 @@ const openAuthorProfile = () => {
   const uid = props.inspiration.user.userId;
   if (uid != null && uid > 0) {
     if (isDonor()) {
+      if (authStore.user?.id != null && Number(uid) === Number(authStore.user.id)) {
+        void router.push({ name: "donor-myprofile" });
+        return;
+      }
       void router.push({ name: "donor-user-profile", params: { userId: String(uid) } });
     } else {
+      if (authStore.user?.id != null && Number(uid) === Number(authStore.user.id)) {
+        void router.push({ name: "donee-myprofile" });
+        return;
+      }
       void router.push({ name: "donee-user-profile", params: { userId: String(uid) } });
     }
     return;
@@ -179,6 +254,32 @@ const openAuthorProfile = () => {
     message: t("inspirationProfileUnavailable"),
     timeout: 2800
   });
+};
+
+const requestDelete = () => {
+  isActionsOpen.value = false;
+  isDeleteConfirmOpen.value = true;
+};
+
+const confirmDelete = async () => {
+  if (isDeleting.value) return;
+  isDeleting.value = true;
+  try {
+    await feedStore.deleteInspiration(props.inspiration.id);
+    isDeleteConfirmOpen.value = false;
+    $q.notify({
+      type: "positive",
+      message: t("inspirationDeleted")
+    });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message:
+        mapAxiosErrorToDhError(e).fallbackMessage || t("inspirationDeleteFailed")
+    });
+  } finally {
+    isDeleting.value = false;
+  }
 };
 </script>
 <style scoped lang="scss">
@@ -343,5 +444,71 @@ $text-max-length: 10000; // set the maximum length of the text
       font-size: 0.8rem;
     }
   }
+}
+
+.inspiration-actionsSheet {
+  background: #1a1a1a;
+  border-radius: 16px 16px 0 0;
+  color: white;
+}
+
+.inspiration-actionsSheetHeader {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0;
+}
+
+.inspiration-actionsSheetHandle {
+  width: 40%;
+  height: 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.inspiration-actionsSheetContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.inspiration-actionsSheetBtn {
+  width: 100%;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  font-family: poppinsSemiBold, sans-serif;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  text-align: left;
+
+  &.danger {
+    color: #ff6b8a;
+  }
+
+  &.secondary {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+  }
+}
+
+.inspiration-confirmCard {
+  min-width: min(20rem, 92vw);
+  background: #1a1a1a;
+  color: white;
+}
+
+.inspiration-confirmTitle {
+  font-family: poppinsSemiBold, sans-serif;
+  font-size: 1.05rem;
+  margin-bottom: 0.4rem;
+}
+
+.inspiration-confirmText {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
 }
 </style>
