@@ -244,6 +244,8 @@ $text-max-length: 10000; // set the maximum length of the text
   .inspiration-qimg :deep(.inspiration-imgEl) {
     opacity: 0;
     transition: opacity 0.42s ease;
+    object-fit: cover;
+    object-position: center;
   }
 
   .inspiration-qimg--ready :deep(.inspiration-imgEl) {

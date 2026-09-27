@@ -180,6 +180,16 @@ export default {
   padding-bottom: 0.5rem;
   display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Horizontal stories strip must own remaining width and scroll inside the shell */
+.storiesComponent > .scroll,
+.storiesComponent > .q-virtual-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .close-slide {
   margin-top: 1rem;

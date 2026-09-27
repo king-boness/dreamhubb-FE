@@ -123,19 +123,6 @@ $dh-bp-desktop: 1200px;
     box-sizing: border-box;
   }
 
-  /* Inspiration feed cards follow the same shell */
-  .inspiration-page .inspiration-header,
-  .inspiration-page .inspiration-body,
-  .inspiration-page .inspiration-feed,
-  .inspiration-page .storiesComponent,
-  .inspiration-page .inspiration-panel {
-    max-width: var(--dh-feed-max);
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
   /* -------- Desktop nav rail (same destinations as bottom nav) -------- */
   .footer.footer--donor4,
   .footer.footer--doneeNav {
@@ -218,6 +205,140 @@ $dh-bp-desktop: 1200px;
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+/* -------------------------------------------------------------------------
+ * Inspirations — tablet + desktop shell (mobile layout unchanged)
+ * Keep stories ring / cards / composer inside the feed-width column.
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .inspiration-page {
+    .storiesComponent,
+    .inspiration-header,
+    .inspiration-body,
+    .inspiration-feed,
+    .inspiration-feed--boot,
+    .inspiration-panel {
+      max-width: var(--dh-feed-max);
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Stories row: pack left, scroll horizontally inside the shell */
+    .storiesComponent {
+      min-width: 0;
+      overflow: hidden;
+      padding-left: var(--dh-content-gutter);
+      padding-right: var(--dh-content-gutter);
+
+      .myStoryComponent {
+        flex-shrink: 0;
+      }
+
+      .scroll,
+      .q-virtual-scroll {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+      }
+
+      .story {
+        width: 4.75rem;
+        max-width: 4.75rem;
+      }
+
+      .story .title {
+        max-width: 4.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.72rem;
+        line-height: 1.15;
+      }
+
+      .story .profile {
+        margin-left: 0.25rem;
+        margin-right: 0.25rem;
+      }
+    }
+
+    .inspiration-header {
+      padding-left: var(--dh-content-gutter);
+      padding-right: var(--dh-content-gutter);
+    }
+
+    .inspiration-body,
+    .inspiration-feed--boot {
+      padding-left: var(--dh-content-gutter);
+      padding-right: var(--dh-content-gutter);
+      box-sizing: border-box;
+    }
+
+    .inspiration-Component {
+      max-width: 100%;
+    }
+
+    .inspiration-description {
+      display: block;
+      max-width: 42rem;
+      overflow-wrap: anywhere;
+    }
+
+    .inspiration-panel--empty,
+    .inspiration-panel--error {
+      max-width: 22rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /*
+     * Add Inspiration drawer: center in available width (not full ultrawide),
+     * keep JS translateY transform intact (use left/right + margin, not transform).
+     */
+    .slide-drawer.slide-drawer--bottom {
+      left: 0;
+      right: 0;
+      width: min(26rem, calc(100vw - 2rem));
+      max-width: 26rem;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
+    }
+
+    .badge-swiper-desc-div .confirm-button {
+      width: min(22rem, 100%);
+      max-width: 100%;
+    }
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .inspiration-page {
+    /* Center drawer in the content column beside the left rail */
+    .slide-drawer.slide-drawer--bottom {
+      left: var(--dh-rail-width);
+      right: 0;
+      width: min(26rem, calc(100vw - var(--dh-rail-width) - 2rem));
+      max-width: 26rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .inspiration-header {
+      padding-top: 1.15rem;
+      padding-bottom: 1.15rem;
+    }
+
+    .add-post-btn {
+      flex-shrink: 0;
+    }
+  }
+}
+
 /* -------------------------------------------------------------------------
  * Post detail — kill viewport bleed on tablet/desktop
  * ------------------------------------------------------------------------- */
