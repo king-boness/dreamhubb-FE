@@ -4,7 +4,10 @@
   <q-layout
     view="lHh Lpr lFf"
     class="LayoutBackground"
-    :class="{ 'dh-donor-feed-layout': isDonorUnifiedScrollRoute }"
+    :class="{
+      'dh-donor-feed-layout': isDonorUnifiedScrollRoute,
+      'dh-has-rail': shouldShowDonorFooterShell
+    }"
     @touchstart.passive="onTouchStart"
     @touchend.passive="onTouchEnd"
   >

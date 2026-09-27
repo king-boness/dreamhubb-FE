@@ -2,7 +2,7 @@
   <!-- Splash screen for role switch - outside q-layout -->
   <AppSplash v-if="isSwitchingRole" class="splash-overlay" />
 
-  <q-layout view="lHh Lpr lFf" class="LayoutBackground">
+  <q-layout view="lHh Lpr lFf" class="LayoutBackground" :class="{ 'dh-has-rail': hasDesktopRail }">
 
     <HeaderComponent
       :karma="tokenBalance"
@@ -34,19 +34,7 @@
       <router-view :key="route.name?.toString() ?? route.fullPath" />
     </q-page-container>
     <FooterDoneeComponent
-      v-if="
-        !(route.name === 'donor-post-detail') &&
-        !(route.name === 'donor-search') &&
-        !(route.name === 'donor-help') &&
-        !onBoarding &&
-        !submit &&
-        !postDetail &&
-        !settings &&
-        !isDonorRoute &&
-        !(route.name === 'donee-postCreation-goal') &&
-        !(route.name === 'donee-postCreation-category') &&
-        !(route.meta?.hideFooter === true)
-      "
+      v-if="hasDesktopRail"
       :class="{ 'footer--hidden': !showNavbar || isSwitchingRole || isDonorRoute || isBadgeDrawerOpen }"
       class="navbar"
     />
@@ -69,14 +57,11 @@ let settingsPage = false;
 let onBoarding = false;
 let submit = false;
 let postDetail = false;
-let settings = false;
 const route = useRoute();
 let routesName = route.name?.toString() || "";
 
 const routeCheck = () => {
   routesName = route.name?.toString() || "";
-  // No noisy logs in production
-  // If needed, add temporary dev-only debug here.
   // Show back button only on settings sub-pages, not on main settings page
   routesName.startsWith("donee-settings") && routesName !== "donee-settings"
     ? (settingsPage = true)
@@ -84,9 +69,6 @@ const routeCheck = () => {
   routesName.startsWith("donee-onBoarding")
     ? (onBoarding = true)
     : (onBoarding = false);
-  routesName.includes("donee-settings-")
-    ? (settings = true)
-    : (settings = false);
   routesName.startsWith("submit") ? (submit = true) : (submit = false);
   routesName.startsWith("donee-post-detail")
     ? (postDetail = true)
@@ -164,6 +146,19 @@ const checkBadgeDrawerState = () => {
 const isDoneeSettingsTreeRoute = computed(() => {
   const n = route.name?.toString() || "";
   return n === "donee-settings" || n.startsWith("donee-settings-");
+});
+
+/** Same visibility gate as FooterDoneeComponent — drives desktop rail / content offset. */
+const hasDesktopRail = computed(() => {
+  const name = route.name?.toString() || "";
+  if (route.meta?.hideFooter === true) return false;
+  if (name === "donor-post-detail" || name === "donor-search" || name === "donor-help") return false;
+  if (name.startsWith("donee-onBoarding") || name.startsWith("submit")) return false;
+  if (name.startsWith("donee-post-detail")) return false;
+  if (name.includes("donee-settings-")) return false;
+  if (name.startsWith("donor-")) return false;
+  if (name === "donee-postCreation-goal" || name === "donee-postCreation-category") return false;
+  return true;
 });
 
 onMounted(() => {

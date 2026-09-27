@@ -13,55 +13,94 @@
       </q-btn>
       <CloseOverlayButton @click="handleClose" />
     </div>
-    <div class="postCreation-uploadedImgContainer">
-      <ImageIndexSlider
-        v-if="hasUploadedImages"
-        :images="uploadedImages.images"
-        class="postCreation-imageSlider"
-        :count="uploadedImages.images.length"
-        @change="handleIndex"
-        key="image-slider"
-      ></ImageIndexSlider>
-      <UploadPostImgComponent
-        v-else
-        @images-updated="handleImagesFromChild"
-        key="upload-component"
-      />
-      <div
-        class="postCreation-imgOptionsContainer"
-        v-if="uploadedImages.images.length != 0"
-      >
-        <q-btn class="postCreation-deleteImgButton" @click="deleteImg">
-          <img
-            class="postCreation-deleteImgIcon"
-            src="/icons/deleteImg-icon.svg"
-            alt=""
-          />Remove Image</q-btn
-        >
-        <q-btn
-          ref="postCreationAddImgAnchorRef"
-          class="postCreation-addImgButton"
-          @click="openFileInput"
-          :disabled="isUploadingAdditional || uploadedImages.images.length >= 5"
-        >
-          <img
-            src="/icons/addImg-icon.svg"
-            alt=""
-            class="postCreation-addImgIcon"
-          />
-        </q-btn>
-        <input
-          type="file"
-          ref="fileInput"
-          @change="handleFileChange"
-          style="display: none"
-          multiple
-          accept="image/*"
-          :disabled="isUploadingAdditional"
-          data-testid="dh-post-creation-upload"
+    <div class="postCreation-desktopMedia">
+      <div class="postCreation-uploadedImgContainer">
+        <ImageIndexSlider
+          v-if="hasUploadedImages"
+          :images="uploadedImages.images"
+          class="postCreation-imageSlider"
+          :count="uploadedImages.images.length"
+          @change="handleIndex"
+          key="image-slider"
+        ></ImageIndexSlider>
+        <UploadPostImgComponent
+          v-else
+          @images-updated="handleImagesFromChild"
+          key="upload-component"
         />
+        <div
+          class="postCreation-imgOptionsContainer"
+          v-if="uploadedImages.images.length != 0"
+        >
+          <q-btn class="postCreation-deleteImgButton" @click="deleteImg">
+            <img
+              class="postCreation-deleteImgIcon"
+              src="/icons/deleteImg-icon.svg"
+              alt=""
+            />Remove Image</q-btn
+          >
+          <q-btn
+            ref="postCreationAddImgAnchorRef"
+            class="postCreation-addImgButton"
+            @click="openFileInput"
+            :disabled="isUploadingAdditional || uploadedImages.images.length >= 5"
+          >
+            <img
+              src="/icons/addImg-icon.svg"
+              alt=""
+              class="postCreation-addImgIcon"
+            />
+          </q-btn>
+          <input
+            type="file"
+            ref="fileInput"
+            @change="handleFileChange"
+            style="display: none"
+            multiple
+            accept="image/*"
+            :disabled="isUploadingAdditional"
+            data-testid="dh-post-creation-upload"
+          />
+        </div>
+        <div class="postCreation-detailContainer">
+          <div class="postCreation-postTypeContainer">
+            <div class="postCreation-categoryContainer">
+              <img
+                :src="categories.goalImg"
+                alt=""
+                class="postCreation-goalImage postCreation-clickable"
+                @click="$router.push({ name: 'donee-postCreation-goal' })"
+              />
+              <img
+                :src="categories.specificGoalImg"
+                alt=""
+                class="postCreation-goalImage postCreation-clickable"
+                @click="handleCategoryClick"
+              />
+            </div>
+            <q-btn
+              class="postCreation-changeTypeButton"
+              @click="$router.push({ name: 'donee-postCreation-goal' })"
+              >Change Post Type</q-btn
+            >
+          </div>
+          <q-input
+            borderless
+            dark
+            hide-bottom-space
+            bottom-slots
+            label-color="grey-6"
+            dense
+            v-model="postTitle"
+            :label="postTitleLabel"
+            class="registerDatas registerSecrete postCreation-postTitleInput"
+          >
+          </q-input>
+        </div>
       </div>
-      <div class="postCreation-detailContainer">
+    </div>
+    <div class="postCreation-desktopForm">
+      <div class="postCreation-detailContainer postCreation-detailContainer--desktop">
         <div class="postCreation-postTypeContainer">
           <div class="postCreation-categoryContainer">
             <img
@@ -76,7 +115,6 @@
               class="postCreation-goalImage postCreation-clickable"
               @click="handleCategoryClick"
             />
-            <!-- Subcategory picker removed - category and subcategory are the same in post creation flow -->
           </div>
           <q-btn
             class="postCreation-changeTypeButton"
@@ -97,129 +135,129 @@
         >
         </q-input>
       </div>
-    </div>
-    <div class="postCreation-featuresContainer">
-      <q-btn class="postCreation-addInfoButton"
-        ><img
-          src="/icons/date-icon.svg"
-          alt=""
-          class="postCreation-featureIcon"
-        />
-        Add Info</q-btn
-      >
-      <q-separator vertical inset class="postCreation-separator" />
-      <q-btn class="postCreation-addInfoButton"
-        ><img
-          src="/icons/location-icon.svg"
-          alt=""
-          class="postCreation-featureIcon"
-        />
-        Add Info</q-btn
-      >
-      <q-separator vertical inset class="postCreation-separator" />
-      <q-btn class="postCreation-addFeatureButton">+ Add Feature</q-btn>
-    </div>
-    <div class="postCreation-aboutDreamContainer">
-      <span class="postCreation-dreamTitle">{{ "About " + selectedGoalLabel }}</span>
-      <q-input
-        borderless
-        dark
-        hide-bottom-space
-        bottom-slots
-        label-color="grey-7"
-        v-model="aboutDream"
-        :label="postDescriptionLabel"
-        class="registerDatas registerSecrete postCreation-dreamDescription"
-        type="textarea"
-      >
-      </q-input>
-      <div class="postCreation-rewardContainer">
-        <span class="postCreation-rewardTitle">Initial Reward</span>
-        <div class="postCreation-tokenInputWrapper">
-          <q-input
-            v-model.number="rewardUi"
-            type="number"
-            :min="MIN_SUBMIT_TOKENS"
-            :max="rewardUiMax"
-            dark
-            outlined
-            class="postCreation-tokenInput"
-            :error="hasTokenError"
-            :error-message="tokenErrorMessage"
-            :disable="rewardControlsDisabled"
-            @update:model-value="(val: string | number | null) => handleTokenInputChange(val ?? 0)"
-          >
-            <template #append>
-              <q-icon name="img:/icons/karma-icon.svg" />
-            </template>
-          </q-input>
-        </div>
-        <div class="postCreation-sliderWrapper">
-          <q-slider
-            v-model.number="rewardUi"
-            :min="MIN_SUBMIT_TOKENS"
-            :max="rewardUiMax"
-            :step="1"
-            :disable="rewardControlsDisabled"
-            color="primary"
-            track-size="10px"
-            thumb-size="22px"
-            class="tokens-slider q-mt-md"
-            @update:model-value="handleSliderChange"
+      <div class="postCreation-featuresContainer">
+        <q-btn class="postCreation-addInfoButton"
+          ><img
+            src="/icons/date-icon.svg"
+            alt=""
+            class="postCreation-featureIcon"
           />
-        </div>
-        <div class="postCreation-tokenBalance">
-          {{ t("funds") }}: {{ remainingFunds }} tokens
-        </div>
-      </div>
-    </div>
-    <div class="postCreation-submitDreamContainer">
-      <!-- Error message -->
-      <div v-if="postCreationStore.error" class="postCreation-error" data-testid="dh-post-creation-error">
-        {{ postCreationStore.error }}
-      </div>
-      <div ref="submitCtaWrapperRef" class="postCreation-submitCtaWrapper" @click.stop>
-        <div v-if="showMinTokensBubble" class="postCreation-submitBubble" @click.stop>
-          <HintBubble
-            :title="t('minTokensPublishTitle')"
-            :text="t('minTokensPublishText')"
-            arrow="down"
-            :show-close="true"
-            @close="showMinTokensBubble = false"
-          >
-            <div class="postCreation-submitBubbleActions">
-              <q-btn
-                flat
-                no-caps
-                class="postCreation-submitBubbleBtn"
-                @click.stop="handleGoHowToGetTokens"
-              >
-                {{ t("howToGetTokens") }}
-              </q-btn>
-              <q-btn
-                flat
-                no-caps
-                class="postCreation-submitBubbleBtn postCreation-submitBubbleBtn--primary"
-                @click.stop="handleGoBuyTokens"
-              >
-                {{ t("buyTokens") }}
-              </q-btn>
-            </div>
-          </HintBubble>
-        </div>
-
-        <q-btn
-          class="postCreation-submitButton"
-          :class="{ 'postCreation-submitButton--minTokensBlocked': isMinTokensBlocked }"
-          @click="handleSubmitPost"
-          :disabled="!postCreationStore.isValid || postCreationStore.loading"
-          :ripple="!isMinTokensBlocked"
-          :aria-disabled="isMinTokensBlocked ? 'true' : undefined"
-          data-testid="dh-post-creation-submit"
+          Add Info</q-btn
         >
-          <span v-if="postCreationStore.loading">Creating post...</span>
-          <span v-else>Submit Post</span>
-        </q-btn>
+        <q-separator vertical inset class="postCreation-separator" />
+        <q-btn class="postCreation-addInfoButton"
+          ><img
+            src="/icons/location-icon.svg"
+            alt=""
+            class="postCreation-featureIcon"
+          />
+          Add Info</q-btn
+        >
+        <q-separator vertical inset class="postCreation-separator" />
+        <q-btn class="postCreation-addFeatureButton">+ Add Feature</q-btn>
+      </div>
+      <div class="postCreation-aboutDreamContainer">
+        <span class="postCreation-dreamTitle">{{ "About " + selectedGoalLabel }}</span>
+        <q-input
+          borderless
+          dark
+          hide-bottom-space
+          bottom-slots
+          label-color="grey-7"
+          v-model="aboutDream"
+          :label="postDescriptionLabel"
+          class="registerDatas registerSecrete postCreation-dreamDescription"
+          type="textarea"
+        >
+        </q-input>
+        <div class="postCreation-rewardContainer">
+          <span class="postCreation-rewardTitle">Initial Reward</span>
+          <div class="postCreation-tokenInputWrapper">
+            <q-input
+              v-model.number="rewardUi"
+              type="number"
+              :min="MIN_SUBMIT_TOKENS"
+              :max="rewardUiMax"
+              dark
+              outlined
+              class="postCreation-tokenInput"
+              :error="hasTokenError"
+              :error-message="tokenErrorMessage"
+              :disable="rewardControlsDisabled"
+              @update:model-value="(val: string | number | null) => handleTokenInputChange(val ?? 0)"
+            >
+              <template #append>
+                <q-icon name="img:/icons/karma-icon.svg" />
+              </template>
+            </q-input>
+          </div>
+          <div class="postCreation-sliderWrapper">
+            <q-slider
+              v-model.number="rewardUi"
+              :min="MIN_SUBMIT_TOKENS"
+              :max="rewardUiMax"
+              :step="1"
+              :disable="rewardControlsDisabled"
+              color="primary"
+              track-size="10px"
+              thumb-size="22px"
+              class="tokens-slider q-mt-md"
+              @update:model-value="handleSliderChange"
+            />
+          </div>
+          <div class="postCreation-tokenBalance">
+            {{ t("funds") }}: {{ remainingFunds }} tokens
+          </div>
+        </div>
+      </div>
+      <div class="postCreation-submitDreamContainer">
+        <!-- Error message -->
+        <div v-if="postCreationStore.error" class="postCreation-error" data-testid="dh-post-creation-error">
+          {{ postCreationStore.error }}
+        </div>
+        <div ref="submitCtaWrapperRef" class="postCreation-submitCtaWrapper" @click.stop>
+          <div v-if="showMinTokensBubble" class="postCreation-submitBubble" @click.stop>
+            <HintBubble
+              :title="t('minTokensPublishTitle')"
+              :text="t('minTokensPublishText')"
+              arrow="down"
+              :show-close="true"
+              @close="showMinTokensBubble = false"
+            >
+              <div class="postCreation-submitBubbleActions">
+                <q-btn
+                  flat
+                  no-caps
+                  class="postCreation-submitBubbleBtn"
+                  @click.stop="handleGoHowToGetTokens"
+                >
+                  {{ t("howToGetTokens") }}
+                </q-btn>
+                <q-btn
+                  flat
+                  no-caps
+                  class="postCreation-submitBubbleBtn postCreation-submitBubbleBtn--primary"
+                  @click.stop="handleGoBuyTokens"
+                >
+                  {{ t("buyTokens") }}
+                </q-btn>
+              </div>
+            </HintBubble>
+          </div>
+
+          <q-btn
+            class="postCreation-submitButton"
+            :class="{ 'postCreation-submitButton--minTokensBlocked': isMinTokensBlocked }"
+            @click="handleSubmitPost"
+            :disabled="!postCreationStore.isValid || postCreationStore.loading"
+            :ripple="!isMinTokensBlocked"
+            :aria-disabled="isMinTokensBlocked ? 'true' : undefined"
+            data-testid="dh-post-creation-submit"
+          >
+            <span v-if="postCreationStore.loading">Creating post...</span>
+            <span v-else>Submit Post</span>
+          </q-btn>
+        </div>
       </div>
     </div>
   </div>
@@ -583,7 +621,7 @@ const handleSubmitPost = async () => {
 
     // Refresh posts feed and my posts (for Donee home) - using new API
     await Promise.all([
-      postsStore.fetchPosts({ sort: "help" }),
+      postsStore.fetchPosts({}),
       postsStore.fetchMyDreams({ category: "dream" }),
       postsStore.fetchMyProblems({ category: "problem" }),
       postsStore.fetchMyIdeas({ category: "idea" })
@@ -890,6 +928,15 @@ const addPhotoFromWebPath = async (photo: {
       display: block !important;
     }
   }
+
+  @media (min-width: 1200px) {
+    .flicking-camera {
+      height: min(28rem, 52vh);
+    }
+    .postCreation-imageSlider {
+      height: min(28rem, 52vh) !important;
+    }
+  }
 }
 </style>
 <style scoped lang="scss">
@@ -900,6 +947,96 @@ const addPhotoFromWebPath = async (photo: {
 .postCreation-page {
   /* Edge-to-edge hero: avoid artificial top gap above image area */
   padding-top: 0;
+
+  .postCreation-desktopMedia,
+  .postCreation-desktopForm {
+    display: contents;
+  }
+
+  @media (min-width: 1200px) {
+    display: grid;
+    grid-template-columns: minmax(18rem, 1.05fr) minmax(22rem, 28rem);
+    grid-template-areas:
+      "header header"
+      "media form";
+    column-gap: 2rem;
+    row-gap: 1rem;
+    align-items: start;
+    max-width: min(72rem, calc(100% - 4rem));
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1.25rem 2rem 2.5rem;
+    box-sizing: border-box;
+
+    .postCreation-desktopMedia {
+      display: block;
+      grid-area: media;
+      min-width: 0;
+    }
+
+    .postCreation-desktopForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      grid-area: form;
+      min-width: 0;
+      padding-bottom: 1rem;
+    }
+
+    .postCreation-headerWrapper {
+      grid-area: header;
+      height: auto;
+      min-height: 3rem;
+    }
+
+    .postCreation-uploadedImgContainer {
+      height: min(28rem, 52vh);
+      border-radius: 1rem;
+      overflow: hidden;
+
+      > .postCreation-detailContainer:not(.postCreation-detailContainer--desktop) {
+        display: none;
+      }
+
+      .postCreation-imgOptionsContainer {
+        top: auto;
+        bottom: 1rem;
+      }
+    }
+
+    .postCreation-imageSlider {
+      height: min(28rem, 52vh) !important;
+    }
+
+    .postCreation-detailContainer--desktop {
+      display: flex !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      transform: none !important;
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 1rem !important;
+      border-radius: 1rem;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(23, 23, 23, 0.35) 100%
+      );
+      backdrop-filter: blur(10px);
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      z-index: 1;
+    }
+
+    .postCreation-submitDreamContainer {
+      position: sticky;
+      bottom: 1rem;
+      z-index: 5;
+    }
+  }
 
   .postCreation-headerWrapper {
     position: relative;
@@ -942,6 +1079,10 @@ const addPhotoFromWebPath = async (photo: {
     position: relative;
     width: 100%;
     height: 40rem;
+    @media (min-width: 1200px) {
+      height: min(28rem, 52vh);
+      max-height: min(28rem, 52vh);
+    }
     --dh-upload-stage-height: calc(31.5rem - 10px);
     background: transparent;
     overflow: hidden;
@@ -1016,6 +1157,14 @@ const addPhotoFromWebPath = async (photo: {
         }
       }
     }
+
+    @media (min-width: 1200px) {
+      .postCreation-uploadedImgContainer {
+        height: min(28rem, 52vh) !important;
+        max-height: min(28rem, 52vh) !important;
+      }
+    }
+
     .postCreation-categoryContainer {
       display: flex;
       gap: 1rem;
@@ -1098,6 +1247,56 @@ const addPhotoFromWebPath = async (photo: {
         height: 2.875rem;
         padding: 0.1rem 1rem;
       }
+    }
+  }
+
+  /* Shared type/title card styles for desktop form column duplicate */
+  .postCreation-detailContainer--desktop {
+    .postCreation-postTypeContainer {
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding-top: 0.25rem;
+
+      .postCreation-categoryContainer {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.5rem 0.5rem 0.5rem 0;
+        margin-right: auto;
+      }
+
+      .postCreation-goalImage {
+        height: 2.5rem;
+        width: auto;
+        margin: 0;
+
+        &.postCreation-clickable {
+          cursor: pointer;
+        }
+      }
+
+      .postCreation-changeTypeButton {
+        border: 0.1rem solid $primary;
+        width: 9.6rem;
+        font-size: 0.8rem;
+        border-radius: 6.1875rem;
+        color: $primary;
+        text-transform: capitalize;
+        padding: 0 !important;
+        font-family: poppins;
+      }
+    }
+
+    .postCreation-postTitleInput {
+      background-color: rgba(23, 23, 23, 0.72);
+      border-radius: 0.625rem;
+      width: 100%;
+      height: 2.875rem;
+      padding: 0.1rem 1rem;
     }
   }
   .postCreation-featuresContainer {

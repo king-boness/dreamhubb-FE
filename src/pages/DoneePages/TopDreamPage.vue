@@ -17,6 +17,7 @@
 
     <!-- Post content -->
     <template v-else-if="postDetail">
+      <div class="post-edit-desktopMedia">
       <!-- HERO + SLIDER (rovnaký komponent ako na detaile) -->
       <PostHeader
         v-if="heroImages.length > 0"
@@ -112,7 +113,9 @@
           </div>
         </div>
       </div>
+      </div>
 
+      <div class="post-edit-desktopForm">
       <!-- ABOUT YOUR PROBLEM ROLL-UP SECTION — medzera pod hero ako .postDetailContent (24px / q-mt-lg) -->
       <section class="edit-rollup q-mt-lg">
         <div class="edit-rollup_card" :class="{ 'edit-rollup_card--open': isEditRollupOpen }">
@@ -249,6 +252,7 @@
         :disabled="!hasChanges"
         @click="onSaveChanges"
       />
+      </div>
     </template>
 
     <!-- DIALOGS -->
@@ -523,6 +527,42 @@
   justify-content: flex-start;
   padding: 0 0 4rem; // priestor pre SAVE CHANGES CTA
   background: transparent;
+
+  @media (min-width: 1200px) {
+    &.post-edit-page--editMode {
+      display: grid;
+      grid-template-columns: minmax(18rem, 1.05fr) minmax(22rem, 28rem);
+      column-gap: 2rem;
+      row-gap: 1rem;
+      align-items: start;
+      max-width: min(72rem, calc(100% - 4rem));
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      box-sizing: border-box;
+
+      .post-edit-desktopMedia {
+        display: block;
+        grid-column: 1;
+        min-width: 0;
+      }
+
+      .post-edit-desktopForm {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        grid-column: 2;
+        min-width: 0;
+      }
+
+      .post-edit-hero-placeholder {
+        max-height: min(28rem, 52vh);
+        border-radius: 1rem;
+        overflow: hidden;
+      }
+    }
+  }
 }
 
 /* Hero placeholder – unified app bg shows; subtle overlay for contrast */

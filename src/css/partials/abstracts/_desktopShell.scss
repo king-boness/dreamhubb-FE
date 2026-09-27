@@ -61,30 +61,37 @@ $dh-bp-desktop: 1200px;
   }
 
   /*
-   * Reserve space for the left nav rail.
-   * Bottom padding for mobile tab bar is no longer needed.
-   * Skip when footer/rail is not rendered (post detail, etc.).
+   * Reserve space for the left nav rail ONLY when the rail is actually rendered.
+   * Layout sets .dh-has-rail when footer/rail is present (not on search, filters,
+   * create/edit post, post detail, etc.).
    */
-  .LayoutBackground > .q-page-container:not(.dh-donor-post-detail) {
+  .LayoutBackground.dh-has-rail > .q-page-container:not(.dh-donor-post-detail) {
     padding-left: var(--dh-rail-width);
     box-sizing: border-box;
   }
 
-  .LayoutBackground.dh-donor-feed-layout.q-layout > .q-page-container.donor-feed-unified-scroll:not(.dh-donor-post-detail) {
+  .LayoutBackground.dh-has-rail.dh-donor-feed-layout.q-layout > .q-page-container.donor-feed-unified-scroll:not(.dh-donor-post-detail) {
     padding-left: var(--dh-rail-width);
     box-sizing: border-box;
   }
 
   /* Integrated chrome (feed header + tabs) sits in the content column */
-  .LayoutBackground.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome.roleChrome-topStack {
+  .LayoutBackground.dh-has-rail.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome.roleChrome-topStack {
     width: calc(100% - var(--dh-rail-width));
     margin-left: var(--dh-rail-width);
     max-width: none;
     box-sizing: border-box;
   }
 
-  /* Non-feed sticky header (settings, etc.) */
-  .LayoutBackground > .roleChrome-topStack.navbar {
+  /* Non-feed sticky header (settings, etc.) — donor roleChrome stack */
+  .LayoutBackground.dh-has-rail > .roleChrome-topStack.navbar {
+    width: calc(100% - var(--dh-rail-width));
+    margin-left: var(--dh-rail-width);
+    box-sizing: border-box;
+  }
+
+  /* Donee header root is .header.navbar (no roleChrome wrapper) — same content column */
+  .LayoutBackground.dh-has-rail > .header.navbar {
     width: calc(100% - var(--dh-rail-width));
     margin-left: var(--dh-rail-width);
     box-sizing: border-box;
@@ -231,6 +238,7 @@ $dh-bp-desktop: 1200px;
     box-sizing: border-box;
   }
 
+  .donorMyProfileUnified,
   .doneeMyProfilePage,
   .publicProfile,
   .profileTabPage {
@@ -238,7 +246,15 @@ $dh-bp-desktop: 1200px;
     padding-right: var(--dh-content-gutter);
   }
 
-  .stats-filter--profile,
+  /* One centered profile panel: tabs + card share the same column */
+  .stats-filter--profile {
+    max-width: min(28rem, 100%);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .stats-filter--profile .filterTabs,
   .stats-filter--profile .panel,
   .stats-filter--profile .tabPanel,
@@ -257,6 +273,8 @@ $dh-bp-desktop: 1200px;
   .publicProfileMenu {
     max-width: min(25rem, 100%);
     width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     box-sizing: border-box;
   }
 
@@ -300,6 +318,7 @@ $dh-bp-desktop: 1200px;
 
 @media (min-width: $dh-bp-desktop) {
   .doneeMyProfilePage,
+  .donorMyProfileUnified,
   .publicProfile,
   .profileTabPage {
     padding-top: 0.35rem;
@@ -310,9 +329,9 @@ $dh-bp-desktop: 1200px;
    * Profile bottom sheets: anchor to content column beside left rail
    * (same model as Notifications action sheet).
    */
-  .profileActionsSheet-backdrop,
-  .shareProfileSheet-backdrop,
-  .badgeSelector-overlay {
+  .LayoutBackground.dh-has-rail .profileActionsSheet-backdrop,
+  .LayoutBackground.dh-has-rail .shareProfileSheet-backdrop,
+  .LayoutBackground.dh-has-rail .badgeSelector-overlay {
     left: var(--dh-rail-width, 5.5rem) !important;
     right: 0 !important;
     width: auto !important;
@@ -442,6 +461,7 @@ $dh-bp-desktop: 1200px;
 @media (min-width: $dh-bp-desktop) {
   .inspiration-page {
     /* Center drawer in the content column beside the left rail */
+    .LayoutBackground.dh-has-rail & .slide-drawer.slide-drawer--bottom,
     .slide-drawer.slide-drawer--bottom {
       left: var(--dh-rail-width);
       right: 0;
@@ -626,5 +646,282 @@ $dh-bp-desktop: 1200px;
   .login.login--auth-form .login-welcome-map,
   .login.login--auth-form .login-welcome-stack {
     max-width: min(28rem, 100%);
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Search — tablet + desktop shell (mobile layout unchanged)
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .search-page {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+
+    .search-barDiv {
+      max-width: min(36rem, 100%);
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .searchPage-sortingContainer,
+    .searchPage-resultsList,
+    .searchPage-empty {
+      max-width: min(36rem, 100%);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .search-page {
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Filters — keep roller + CTAs in a constrained panel (not ultrawide)
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .filters-page {
+    max-width: min(28rem, 100%) !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .filters-swapCategoryToo-anchor {
+    max-width: min(28rem, 100%);
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .filters-page {
+    max-width: min(32rem, 100%) !important;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+  }
+
+  .filters-swapCategoryToo-anchor {
+    max-width: min(32rem, 100%);
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Create / Edit Post — desktop-native editor (mobile single-column unchanged)
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .postCreation-page,
+  .postEditPage {
+    max-width: var(--dh-detail-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .postCreation-page {
+    max-width: min(72rem, calc(100% - 2 * var(--dh-content-gutter)));
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1.25rem var(--dh-content-gutter) 2.5rem;
+    box-sizing: border-box;
+
+    display: grid;
+    grid-template-columns: minmax(18rem, 1.05fr) minmax(22rem, 28rem);
+    grid-template-areas:
+      "header header"
+      "media form";
+    column-gap: 2rem;
+    row-gap: 1rem;
+    align-items: start;
+
+    .postCreation-headerWrapper {
+      grid-area: header;
+      height: auto;
+      min-height: 3rem;
+      position: relative;
+    }
+
+    .postCreation-desktopMedia {
+      grid-area: media;
+      min-width: 0;
+      display: block;
+    }
+
+    .postCreation-desktopForm {
+      grid-area: form;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+    }
+
+    .postCreation-uploadedImgContainer {
+      height: min(28rem, 52vh);
+      border-radius: 1rem;
+      overflow: hidden;
+
+      /* Mobile overlay title/type card — hide on desktop (form column owns it) */
+      > .postCreation-detailContainer:not(.postCreation-detailContainer--desktop) {
+        display: none;
+      }
+
+      .postCreation-imgOptionsContainer {
+        top: auto;
+        bottom: 1rem;
+      }
+    }
+
+    .postCreation-imageSlider {
+      height: min(28rem, 52vh) !important;
+    }
+
+    .flicking-camera {
+      height: min(28rem, 52vh);
+    }
+
+    .postCreation-detailContainer--desktop {
+      display: flex !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      transform: none !important;
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 1rem !important;
+      border-radius: 1rem;
+      background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(23, 23, 23, 0.35) 100%
+      );
+      backdrop-filter: blur(10px);
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      z-index: 1;
+    }
+
+    .postCreation-featuresContainer,
+    .postCreation-aboutDreamContainer,
+    .postCreation-submitDreamContainer {
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .postCreation-aboutDreamContainer {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .postCreation-submitDreamContainer {
+      position: sticky;
+      bottom: 1rem;
+      z-index: 5;
+    }
+  }
+
+  .postEditPage {
+    max-width: min(72rem, calc(100% - 2 * var(--dh-content-gutter)));
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+    box-sizing: border-box;
+
+    .post-edit-hero-placeholder,
+    :deep(.post-header),
+    :deep(.postHeader),
+    :deep(.post-detail-header) {
+      max-width: 100%;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .post-edit-hero-placeholder {
+      max-height: min(28rem, 52vh);
+    }
+
+    .edit-rollup,
+    .edit-topup-section {
+      max-width: min(42rem, 100%);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  /* Desktop-native edit: media left, editor controls right */
+  .postEditPage.post-edit-page--editMode {
+    display: grid;
+    grid-template-columns: minmax(18rem, 1.05fr) minmax(22rem, 28rem);
+    column-gap: 2rem;
+    row-gap: 1rem;
+    align-items: start;
+
+    > .postDetail-loading,
+    > .postDetail-error {
+      grid-column: 1 / -1;
+    }
+
+    > .post-edit-desktopMedia {
+      grid-column: 1;
+      min-width: 0;
+    }
+
+    > .post-edit-desktopForm {
+      grid-column: 2;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .edit-rollup,
+    .edit-topup-section {
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+}
+
+/* Desktop-only form card / wrappers — hidden on mobile */
+.postCreation-detailContainer--desktop {
+  display: none;
+}
+
+.post-edit-desktopMedia,
+.post-edit-desktopForm {
+  display: contents;
+}
+
+@media (min-width: 1200px) {
+  .postEditPage.post-edit-page--editMode {
+    .post-edit-desktopMedia {
+      display: block;
+      grid-column: 1;
+      min-width: 0;
+    }
+
+    .post-edit-desktopForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      grid-column: 2;
+      min-width: 0;
+    }
   }
 }
