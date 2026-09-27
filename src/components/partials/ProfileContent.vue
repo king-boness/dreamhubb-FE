@@ -389,14 +389,13 @@ const displayUsername = computed(() => {
   return authStore.user?.username || "User";
 });
 
-// Display tokens - must match tokenBalance in DonorMainLayout
+// Display tokens - must match tokenBalance in DonorMainLayout / DoneeMainLayout
 const displayTokens = computed(() => {
   const tokens = authStore.user?.tokens;
   if (tokens !== undefined && tokens !== null) {
     return formatNumber(tokens);
   }
-  // Fallback to 30 to match DonorMainLayout tokenBalance fallback
-  return formatNumber(30);
+  return formatNumber(0);
 });
 
 // Display bio

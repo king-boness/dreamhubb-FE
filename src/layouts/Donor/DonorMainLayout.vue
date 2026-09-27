@@ -91,7 +91,7 @@ const router = useRouter();
 useEdgeSwipeBack();
 useRouteSettlingBodyClass();
 
-const tokenBalance = computed(() => authStore.user?.tokens ?? 50);
+const tokenBalance = computed(() => authStore.user?.tokens ?? 0);
 const isSwitchingRole = ref(false);
 const lastScrollPosition = ref(0);
 const showNavbar = ref(true);

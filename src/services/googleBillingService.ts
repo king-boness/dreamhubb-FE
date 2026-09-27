@@ -14,10 +14,24 @@ import type {
 import { buildPurchasePayload } from "src/types/purchase";
 import { googleBillingAdapter } from "src/services/googleBillingAdapter";
 
+/**
+ * Flip to true after Laravel validates Google Play purchases (POST /api/purchases/validate-google).
+ * While false, Android token purchases show as unavailable — avoids fake success without server credit.
+ */
+export const GOOGLE_BILLING_BACKEND_ENABLED = false;
+
+export const ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE =
+  "Token purchases are temporarily unavailable on Android. This feature will be available in a future update.";
+
 function isAndroid(): boolean {
   if (typeof window === "undefined") return false;
   const cap = Capacitor as unknown as { getPlatform?: () => string; isNativePlatform?: () => boolean };
   return cap?.isNativePlatform?.() === true && cap?.getPlatform?.() === "android";
+}
+
+/** Native Android app with token purchases blocked until Play Billing backend validation ships. */
+export function isAndroidTokenPurchaseBlocked(): boolean {
+  return !GOOGLE_BILLING_BACKEND_ENABLED && isAndroid();
 }
 
 /**
@@ -27,7 +41,7 @@ function isAndroid(): boolean {
 export async function loadGoogleProducts(
   productIds: string[]
 ): Promise<{ products: GoogleBillingProduct[]; status: GoogleBillingPurchaseStatus }> {
-  if (!isAndroid()) {
+  if (!isAndroid() || isAndroidTokenPurchaseBlocked()) {
     return { products: [], status: "unavailable" };
   }
   try {
@@ -55,6 +69,12 @@ export async function purchaseGooglePackage(pkg: TokenPackage): Promise<GoogleBi
       errorMessage: "Google Play Billing is only available on Android."
     };
   }
+  if (isAndroidTokenPurchaseBlocked()) {
+    return {
+      status: "unavailable",
+      errorMessage: ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+    };
+  }
   const productId = pkg.googleProductId;
   try {
     const result = await googleBillingAdapter.purchase(productId);
@@ -67,6 +87,13 @@ export async function purchaseGooglePackage(pkg: TokenPackage): Promise<GoogleBi
       );
       if (import.meta.env.DEV) {
         console.debug("[GoogleBilling] Purchase success – backend payload for Laravel:", backendPayload);
+      }
+      if (!GOOGLE_BILLING_BACKEND_ENABLED) {
+        return {
+          status: "unavailable",
+          errorMessage: ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE,
+          productId
+        };
       }
       // TODO: POST backendPayload to Laravel (e.g. POST /api/purchases/validate-google) and refresh user tokens
     }

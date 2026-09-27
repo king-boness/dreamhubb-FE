@@ -494,4 +494,53 @@ defineExpose({
   max-width: 42%;
   @extend .task;
 }
+
+@media (min-width: 1200px) {
+  .earn-page {
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .verifyContent-earn {
+    justify-content: flex-start;
+    max-width: 40rem;
+    margin: 0 auto 0.75rem;
+    padding: 1rem 0.5rem;
+  }
+
+  .onGoingTasks {
+    padding: 0.35rem 0.25rem 0.75rem;
+
+    .onGoingTasks-header {
+      margin-bottom: 0.9rem;
+    }
+  }
+
+  .onGoingTasks:not(.finishedTasksContainer) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 0.85rem;
+    align-items: stretch;
+
+    .onGoingTasks-header,
+    .earnPage-empty {
+      grid-column: 1 / -1;
+    }
+
+    .task-earn {
+      margin-bottom: 0;
+      min-height: 4.4rem;
+      height: 100%;
+    }
+  }
+
+  .finishedTasksContainer {
+    display: block;
+    margin-top: 0.5rem;
+
+    .task-earn {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
 </style>

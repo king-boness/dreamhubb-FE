@@ -1,6 +1,12 @@
 <template>
-  <div class="stats-Page" :class="{ 'stats-Page--iosPurchaseBlocked': iosPurchaseBlocked }">
-    <div class="stats-main" :class="{ 'stats-main--iosPurchaseBlocked': iosPurchaseBlocked }">
+  <div
+    class="stats-Page"
+    :class="{
+      'stats-Page--iosPurchaseBlocked': storePurchaseBlocked,
+      'stats-Page--desktopShop': true
+    }"
+  >
+    <div class="stats-main" :class="{ 'stats-main--iosPurchaseBlocked': storePurchaseBlocked }">
       <div class="karmaAvailable-stats">
         <div class="karmaDisplay">
           <img src="/icons/KarmaIcon.png" alt="" />
@@ -9,12 +15,12 @@
         <span>Available Tokens</span>
       </div>
 
-      <template v-if="iosPurchaseBlocked">
+      <template v-if="storePurchaseBlocked">
         <div class="tokenShop-header tokenShop-header--blocked">
           <h2>More Tokens</h2>
         </div>
         <div class="tokenShop-unavailable" role="status" aria-live="polite">
-          <p class="tokenShop-unavailableText">{{ IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE }}</p>
+          <p class="tokenShop-unavailableText">{{ storePurchaseBlockedMessage }}</p>
         </div>
       </template>
 
@@ -74,7 +80,7 @@
 
     <!-- iOS / Android: store purchase sheet (Apple IAP / Google Billing) -->
     <StorePurchaseSheet
-      v-else-if="!iosPurchaseBlocked"
+      v-else-if="!storePurchaseBlocked"
       :model-value="showPurchaseSheet"
       :selected-package="selectedPackage"
       :purchase-in-progress="isStorePurchaseInProgress"
@@ -100,6 +106,10 @@ import {
   isIosTokenPurchaseBlocked,
   IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
 } from "src/services/appleIapService";
+import {
+  isAndroidTokenPurchaseBlocked,
+  ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+} from "src/services/googleBillingService";
 import PaymentMethodSheet from "src/components/purchase/PaymentMethodSheet.vue";
 import StorePurchaseSheet from "src/components/purchase/StorePurchaseSheet.vue";
 
@@ -124,6 +134,17 @@ const applePluginUnavailable = ref(false);
 const iosPurchaseBlocked = computed(
   () => purchaseProvider.value === "apple_iap" && isIosTokenPurchaseBlocked()
 );
+const androidPurchaseBlocked = computed(
+  () => purchaseProvider.value === "google_billing" && isAndroidTokenPurchaseBlocked()
+);
+const storePurchaseBlocked = computed(
+  () => iosPurchaseBlocked.value || androidPurchaseBlocked.value
+);
+const storePurchaseBlockedMessage = computed(() =>
+  iosPurchaseBlocked.value
+    ? IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+    : ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+);
 
 watch(showPurchaseSheet, (open) => {
   if (!open) {
@@ -138,7 +159,7 @@ watch(showPurchaseSheet, (open) => {
 });
 
 function openPurchaseSheet(pkg: TokenPackage) {
-  if (iosPurchaseBlocked.value) return;
+  if (storePurchaseBlocked.value) return;
   if (applePluginUnavailable.value) {
     notifyNegative(
       "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
@@ -183,8 +204,8 @@ async function onWebContinue(pkg: TokenPackage, method: WebPaymentMethodId) {
 }
 
 async function onStorePurchase(pkg: TokenPackage) {
+  if (storePurchaseBlocked.value) return;
   if (purchaseProvider.value === "apple_iap") {
-    if (iosPurchaseBlocked.value) return;
     if (applePluginUnavailable.value) {
       notifyNegative(
         "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
@@ -198,6 +219,9 @@ async function onStorePurchase(pkg: TokenPackage) {
       if (result.status === "success") {
         showPurchaseSheet.value = false;
         notifySuccess("common.success.purchaseComplete", "Purchase complete. Your tokens have been added.", {});
+        if (authStore.isAuthenticated) {
+          await authStore.fetchUser().catch(() => undefined);
+        }
       } else if (result.status === "cancelled") {
         showPurchaseSheet.value = false;
       } else if (result.status === "failed" || result.status === "unavailable") {
@@ -213,6 +237,9 @@ async function onStorePurchase(pkg: TokenPackage) {
       if (result.status === "success") {
         showPurchaseSheet.value = false;
         notifySuccess("common.success.purchaseComplete", "Purchase complete. Your tokens have been added.", {});
+        if (authStore.isAuthenticated) {
+          await authStore.fetchUser().catch(() => undefined);
+        }
       } else if (result.status === "cancelled") {
         showPurchaseSheet.value = false;
       } else if (result.status === "failed" || result.status === "unavailable") {
@@ -228,8 +255,8 @@ const retryLabel = computed(() => {
   return label === "common.actions.retry" ? "Retry" : label;
 });
 
-// Use auth store tokens - must match tokenBalance in DonorMainLayout
-const tokenBalance = computed(() => authStore.user?.tokens ?? 30);
+// Use auth store tokens - must match tokenBalance in DonorMainLayout / DoneeMainLayout
+const tokenBalance = computed(() => authStore.user?.tokens ?? 0);
 
 // Handle return from Stripe Checkout (success/cancel) and clean URL
 function handleStripeReturn() {
@@ -276,7 +303,7 @@ onMounted(async () => {
       loadError.value = "iOS purchases are unavailable in this build (NativePurchases plugin not linked).";
     }
   }
-  if (authStore.isAuthenticated && !authStore.user && !iosPurchaseBlocked.value) {
+  if (authStore.isAuthenticated && !authStore.user && !storePurchaseBlocked.value) {
     try {
       loadError.value = null;
       await authStore.fetchUser();
@@ -291,7 +318,7 @@ onMounted(async () => {
 });
 
 const handleRetry = async () => {
-  if (iosPurchaseBlocked.value) return;
+  if (storePurchaseBlocked.value) return;
   if (purchaseProvider.value === "apple_iap") {
     applePluginUnavailable.value = !(await isAppleIapReady());
     if (applePluginUnavailable.value) {
@@ -512,6 +539,57 @@ const handleRetry = async () => {
   .shopTable-stats .tokenShop-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Desktop-native package grid — same packages/prices, wider card layout */
+@media (min-width: 1200px) {
+  .stats-Page {
+    padding-bottom: 1.5rem;
+  }
+
+  .karmaAvailable-stats {
+    max-width: 28rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tokenShop-header h2 {
+    font-size: 1.65rem;
+  }
+
+  .shopTable-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 48rem;
+    padding: 0 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .shopTable-stats .tokenShop-card {
+    min-height: 10.5rem;
+    padding: 0.85rem 0.5rem;
+  }
+
+  .stats-main:not(.stats-main--iosPurchaseBlocked) {
+    min-height: auto;
+  }
+
+  .tokenShop-unavailable {
+    max-width: 28rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .shopTable-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 50rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .shopTable-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 </style>

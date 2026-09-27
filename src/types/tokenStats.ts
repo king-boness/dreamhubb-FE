@@ -20,6 +20,8 @@ export interface TokenStatsResponse {
     from_purchases: number;
     from_help: number;
     from_received_contributions: number;
+    from_earn_tasks: number;
+    from_registration: number;
   };
   spent: {
     total: number;

@@ -236,8 +236,15 @@ const tokensGainedFromSupport = computed(
 const tokensGainedFromPurchases = computed(
   () => tokenStats.value?.earned?.from_purchases ?? 0
 );
-const tokensGainedFromHelp = computed(
-  () => tokenStats.value?.earned?.from_help ?? 0
+/** Real earn-task rewards from ledger (from_help is always 0 on BE — do not show). */
+const tokensGainedFromEarnTasks = computed(
+  () => tokenStats.value?.earned?.from_earn_tasks ?? 0
+);
+const tokensGainedFromRegistration = computed(
+  () => tokenStats.value?.earned?.from_registration ?? 0
+);
+const tokensGainedFromEarn = computed(
+  () => tokensGainedFromEarnTasks.value + tokensGainedFromRegistration.value
 );
 const remainingTokens = computed(() => tokenStats.value?.balance ?? 0);
 
@@ -275,9 +282,9 @@ const cards = computed(
       {
         overview: {
           title: "Earned",
-          comesFrom: "Help Rewards",
+          comesFrom: "Earn Tasks",
           comesFromImg: "/icons/giftIcon-red.svg",
-          comesFromValue: tokensGainedFromHelp.value
+          comesFromValue: tokensGainedFromEarn.value
         }
       },
       {
@@ -705,6 +712,61 @@ defineExpose({
         margin-left: 0.1rem;
         font-size: 1rem;
       }
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .statsPage {
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .overwiev-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem 0.85rem;
+    align-items: stretch;
+    padding: 0 0.25rem;
+
+    .overwievTitleDiv {
+      grid-column: 1 / -1;
+      margin-bottom: 0.15rem;
+    }
+
+    .karmaUsed {
+      display: none;
+    }
+
+    .cardContainer {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .statsOverviewRow.karmaGainedCard {
+      margin-bottom: 0;
+      width: 100%;
+    }
+  }
+
+  .detailed-stats {
+    margin-top: 1.25rem;
+    padding: 0 0.25rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 0.85rem 1rem;
+    align-items: start;
+
+    .DetailedStats-div {
+      grid-column: 1 / -1;
+    }
+
+    .usedOnStats {
+      margin: 0;
+    }
+
+    .usedOnStats-categoryContainer {
+      margin-top: 0;
     }
   }
 }

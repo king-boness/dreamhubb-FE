@@ -10,7 +10,11 @@ import {
   IOS_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE,
   purchaseApplePackage
 } from "src/services/appleIapService";
-import { purchaseGooglePackage } from "src/services/googleBillingService";
+import {
+  isAndroidTokenPurchaseBlocked,
+  ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE,
+  purchaseGooglePackage
+} from "src/services/googleBillingService";
 import { isPayPalSupportedMethod, startPayPalCheckoutFlow } from "src/services/paypalCheckoutService";
 import { startStripeCheckoutFlow } from "src/services/stripeCheckoutService";
 import type { AppleIapPurchaseResult } from "src/types/appleIap";
@@ -64,6 +68,12 @@ export function usePurchasePlatform() {
    * On success, backend payload is built and logged; Laravel POST is prepared in the service.
    */
   async function startGoogleBillingPurchase(pkg: TokenPackage): Promise<GoogleBillingPurchaseResult> {
+    if (isAndroidTokenPurchaseBlocked()) {
+      return {
+        status: "unavailable",
+        errorMessage: ANDROID_TOKEN_PURCHASE_UNAVAILABLE_MESSAGE
+      };
+    }
     return purchaseGooglePackage(pkg);
   }
 

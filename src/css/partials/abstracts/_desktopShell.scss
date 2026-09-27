@@ -255,6 +255,12 @@ $dh-bp-desktop: 1200px;
     box-sizing: border-box;
   }
 
+  /* Funds / Stats / Earn: wider desktop-native column (same data, more room) */
+  .stats-filter--profile.stats-filter--profileWide,
+  .stats-filter--tokens {
+    max-width: min(52rem, 100%);
+  }
+
   .stats-filter--profile .filterTabs,
   .stats-filter--profile .panel,
   .stats-filter--profile .tabPanel,

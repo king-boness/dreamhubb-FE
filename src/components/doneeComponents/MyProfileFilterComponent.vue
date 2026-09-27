@@ -1,7 +1,10 @@
 <template>
   <div
     class="stats-filter stats-filter--profile"
-    :class="{ 'stats-filter--profileStatsActive': tab === 'stats' }"
+    :class="{
+      'stats-filter--profileStatsActive': tab === 'stats',
+      'stats-filter--profileWide': tab === 'funds' || tab === 'stats' || tab === 'earn'
+    }"
   >
     <q-tabs
       class="text-white filterTabs"
