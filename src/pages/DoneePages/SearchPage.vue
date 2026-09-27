@@ -12,6 +12,8 @@
         borderless
         placeholder="Search my dreams"
         dense
+        clearable
+        @keydown.enter.prevent="focusFirstResult"
       >
         <template v-slot:prepend>
           <q-icon name="search" class="searchIcon" />
@@ -33,14 +35,29 @@
       />
     </div>
     <div v-if="postsStore.myDreamsLoading" class="searchPage-empty">Loading...</div>
+    <div v-else-if="postsStore.myDreamsError" class="searchPage-empty searchPage-empty--error">
+      {{ postsStore.myDreamsError }}
+      <q-btn
+        flat
+        dense
+        no-caps
+        class="searchPage-retry"
+        label="Retry"
+        @click="reloadDreams"
+      />
+    </div>
     <div v-else-if="filteredPosts.length === 0" class="searchPage-empty">
       {{ search ? "No dreams match your search." : "No dreams yet." }}
     </div>
     <ul v-else class="searchPage-resultsList">
       <li
         v-for="(post, i) in filteredPosts"
-        :key="post.post_id ?? post.id ?? i"
+        :key="String(getPostId(post) ?? i)"
         class="searchPage-resultItem"
+        role="button"
+        tabindex="0"
+        @click="openPost(post)"
+        @keydown.enter.prevent="openPost(post)"
       >
         <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
         <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
@@ -60,6 +77,12 @@ const postsStore = usePostsStore();
 const search = ref("");
 const sorting = ref("Newest");
 
+function getPostId(p: Record<string, unknown>): string | number | null {
+  const id = p.post_id ?? p.id;
+  if (id === null || id === undefined || id === "") return null;
+  return id as string | number;
+}
+
 function getPostTitle(p: Record<string, unknown>): string {
   const t = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
   return t || "Untitled";
@@ -74,15 +97,14 @@ function getPostSnippet(p: Record<string, unknown>): string {
 const filteredPosts = computed(() => {
   const list = postsStore.myDreams;
   const term = search.value.trim().toLowerCase();
-  if (!term) {
-    return [...list];
-  }
-  const filtered = list.filter((p: Record<string, unknown>) => {
-    const goalName = String(p.goal_name ?? p.goalName ?? "").toLowerCase();
-    const description = String(p.description ?? "").toLowerCase();
-    const title = String(p.title ?? "").toLowerCase();
-    return goalName.includes(term) || description.includes(term) || title.includes(term);
-  });
+  const filtered = !term
+    ? [...list]
+    : list.filter((p: Record<string, unknown>) => {
+      const goalName = String(p.goal_name ?? p.goalName ?? "").toLowerCase();
+      const description = String(p.description ?? "").toLowerCase();
+      const title = String(p.title ?? "").toLowerCase();
+      return goalName.includes(term) || description.includes(term) || title.includes(term);
+    });
   const sorted = [...filtered];
   const order = sorting.value === "Oldest" ? 1 : -1;
   sorted.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
@@ -93,9 +115,24 @@ const filteredPosts = computed(() => {
   return sorted;
 });
 
+function reloadDreams() {
+  void postsStore.fetchMyDreams({ category: "dream" });
+}
+
 onMounted(() => {
-  postsStore.fetchMyDreams({ category: "dream" });
+  reloadDreams();
 });
+
+function openPost(post: Record<string, unknown>) {
+  const id = getPostId(post);
+  if (id === null) return;
+  void router.push({ name: "donee-post-detail", params: { id: String(id) } });
+}
+
+function focusFirstResult() {
+  const first = filteredPosts.value[0];
+  if (first) openPost(first);
+}
 
 function handleCloseIconClick() {
   if (search.value !== "") {
@@ -120,6 +157,8 @@ function handleCloseIconClick() {
     align-items: center;
     padding: 1.3rem;
     padding-bottom: 0.5rem;
+    gap: 0.5rem;
+    box-sizing: border-box;
 
     .inputSearch {
       background: linear-gradient(
@@ -130,16 +169,18 @@ function handleCloseIconClick() {
       border-radius: 0.8rem;
       padding: 0.15rem 1rem;
       height: 2.7rem;
-      width: 18rem;
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
       display: flex;
     }
 
     .searchbar-Btn {
-      margin: 0 0.4rem;
+      margin: 0;
       width: 2.8rem;
       height: 2.8rem;
+      flex-shrink: 0;
       border-radius: 2rem;
-      margin-left: 1rem;
       background: linear-gradient(
         90deg,
         rgba(57, 57, 57, 0.832) 10%,
@@ -153,12 +194,14 @@ function handleCloseIconClick() {
     align-items: center;
     color: white;
     padding: 1rem 1.3rem;
+    gap: 1rem;
     .searchPage-sortingTitle {
       font-family: poppinsSemiBold;
       font-size: 1.3rem;
     }
     .searchPage-sortingComponent {
       width: 11rem;
+      max-width: 45%;
       margin: 0;
       height: 3.2rem;
       padding-top: 0.3rem;
@@ -172,6 +215,17 @@ function handleCloseIconClick() {
     text-align: center;
     padding: 2rem 1.3rem;
     font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .searchPage-empty--error {
+    color: rgba(255, 180, 180, 0.9);
+  }
+  .searchPage-retry {
+    color: #fff;
+    text-decoration: underline;
   }
   .searchPage-resultsList {
     list-style: none;
@@ -188,8 +242,18 @@ function handleCloseIconClick() {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    cursor: pointer;
+    min-width: 0;
     &:last-child {
       border-bottom: none;
+    }
+    &:hover .searchPage-resultTitle,
+    &:focus-visible .searchPage-resultTitle {
+      color: #ff6b9d;
+    }
+    &:focus-visible {
+      outline: 1px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 2px;
     }
   }
   .searchPage-resultTitle {
@@ -197,12 +261,16 @@ function handleCloseIconClick() {
     font-weight: 600;
     color: #fff;
     font-family: poppinsSemiBold;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .searchPage-resultSnippet {
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.7);
     line-height: 1.4;
     font-family: poppins;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
 </style>

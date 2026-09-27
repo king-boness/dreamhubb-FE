@@ -137,7 +137,7 @@ import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
-import { useDonorPostsUiStore } from "src/stores/donorPostsUi";
+import { isCategorySlug, isSubcategorySlug } from "src/domain/categories";
 
 const { t, locale } = useI18n();
 
@@ -152,12 +152,10 @@ const dismissEmptyFiltersHint = () => {
   isEmptyFiltersHintDismissed.value = true;
 };
 
-const donorPostsUiStore = useDonorPostsUiStore();
-
 const feedError = computed(() => postsStore.error);
 
 const retryFetch = async () => {
-  await postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
+  await postsStore.fetchPosts({});
 };
 
 // Function to apply initial filters from preferences (must be defined before watcher)
@@ -166,10 +164,12 @@ const applyInitialFiltersFromPreferences = () => {
   preferencesStore.loadDonorFiltersFromStorage();
   const lastUsed = preferencesStore.lastUsedFeedFilters;
 
+  // Preferences still store legacy keys (postType / subcategory);
+  // map them onto the live postsStore slug fields.
   if (lastUsed) {
     postsStore.setFilters({
-      type: lastUsed.postType,
-      feCategory: lastUsed.subcategory,
+      categorySlug: isCategorySlug(lastUsed.postType) ? lastUsed.postType : null,
+      subcategorySlug: isSubcategorySlug(lastUsed.subcategory) ? lastUsed.subcategory : null,
       continentId: lastUsed.location.continentId,
       countryId: lastUsed.location.countryId,
       cityId: lastUsed.location.cityId
@@ -178,8 +178,12 @@ const applyInitialFiltersFromPreferences = () => {
     return;
   }
   postsStore.setFilters({
-    type: preferencesStore.preferredPostType,
-    feCategory: preferencesStore.preferredSubcategory,
+    categorySlug: isCategorySlug(preferencesStore.preferredPostType)
+      ? preferencesStore.preferredPostType
+      : null,
+    subcategorySlug: isSubcategorySlug(preferencesStore.preferredSubcategory)
+      ? preferencesStore.preferredSubcategory
+      : null,
     continentId: preferencesStore.preferredFeedLocation.continentId,
     countryId: preferencesStore.preferredFeedLocation.countryId,
     cityId: preferencesStore.preferredFeedLocation.cityId
@@ -209,7 +213,7 @@ watch(
     applyInitialFiltersFromPreferences();
     // Načítať posty s novými filtrami (len ak už máme user ID a došlo k zmene)
     if (newId && newId !== oldId) {
-      postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
+      postsStore.fetchPosts({});
     }
   },
   { immediate: true }
@@ -230,8 +234,8 @@ onMounted(() => {
 
   applyInitialFiltersFromPreferences();
 
-  // Fetch initial posts with default "help" sort (filters sa automaticky použijú z store)
-  postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
+  // Fetch initial posts (filters sa automaticky použijú z store)
+  postsStore.fetchPosts({});
 });
 
 // Reload posts when returning from filters page (kept-alive component)
@@ -243,7 +247,7 @@ onActivated(() => {
   applyInitialFiltersFromPreferences();
 
   // Načítať posty s aktuálnymi filtrami pri návrate na stránku
-  postsStore.fetchPosts({ sort: donorPostsUiStore.activeTab });
+  postsStore.fetchPosts({});
 });
 
 // Computed properties from store
@@ -273,7 +277,6 @@ const emptyStateText = computed(() => {
 interface DonorPost {
   id: number;
   backendPostId: number; // ID that exists in BE (e.g., 3)
-  tab: "help" | "pay" | "top";
   type: "dream" | "problem" | "idea"; // Post type for icon
   authorId: number | null;
   authorName: string;
@@ -330,7 +333,6 @@ const mapPostData = (post: Record<string, unknown>): DonorPost => {
   return {
     id: normalized.post_id,
     backendPostId: normalized.post_id,
-    tab: donorPostsUiStore.activeTab, // Use current active tab
     type: categorySlug as "dream" | "problem" | "idea", // Category slug for icon
     authorId,
     authorName,

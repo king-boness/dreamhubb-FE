@@ -12,6 +12,8 @@
         borderless
         placeholder="Search anything"
         dense
+        clearable
+        @keydown.enter.prevent="focusFirstResult"
       >
         <template v-slot:prepend>
           <q-icon name="search" class="searchIcon" />
@@ -22,6 +24,17 @@
       </q-btn>
     </div>
     <div v-if="postsStore.loading" class="searchPage-empty">Loading...</div>
+    <div v-else-if="postsStore.error" class="searchPage-empty searchPage-empty--error">
+      {{ postsStore.error }}
+      <q-btn
+        flat
+        dense
+        no-caps
+        class="searchPage-retry"
+        label="Retry"
+        @click="reloadFeed"
+      />
+    </div>
     <div v-else-if="search.trim() === ''" class="searchPage-empty">
       Enter a keyword to search posts.
     </div>
@@ -31,8 +44,12 @@
     <ul v-else class="searchPage-resultsList">
       <li
         v-for="(post, i) in filteredPosts"
-        :key="post.post_id ?? post.id ?? i"
+        :key="String(getPostId(post) ?? i)"
         class="searchPage-resultItem"
+        role="button"
+        tabindex="0"
+        @click="openPost(post)"
+        @keydown.enter.prevent="openPost(post)"
       >
         <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
         <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
@@ -50,6 +67,12 @@ const router = useRouter();
 const postsStore = usePostsStore();
 
 const search = ref("");
+
+function getPostId(p: Record<string, unknown>): string | number | null {
+  const id = p.post_id ?? p.id;
+  if (id === null || id === undefined || id === "") return null;
+  return id as string | number;
+}
 
 function getPostTitle(p: Record<string, unknown>): string {
   const t = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
@@ -78,11 +101,26 @@ const filteredPosts = computed(() => {
   });
 });
 
+async function reloadFeed() {
+  await postsStore.fetchPosts({});
+}
+
 onMounted(async () => {
   if (postsStore.posts.length === 0) {
     await postsStore.fetchPosts({});
   }
 });
+
+function openPost(post: Record<string, unknown>) {
+  const id = getPostId(post);
+  if (id === null) return;
+  void router.push({ name: "donor-post-detail", params: { id: String(id) } });
+}
+
+function focusFirstResult() {
+  const first = filteredPosts.value[0];
+  if (first) openPost(first);
+}
 
 function handleCloseIconClick() {
   if (search.value !== "") {
@@ -108,6 +146,8 @@ function handleCloseIconClick() {
     align-items: center;
     padding: 0.4rem 1rem 0.5rem;
     padding-bottom: 0.5rem;
+    gap: 0.5rem;
+    box-sizing: border-box;
 
     .inputSearch {
       font-family: montseraat;
@@ -120,15 +160,17 @@ function handleCloseIconClick() {
       padding: 0.15rem 0.5rem;
       height: 2.7rem;
       width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
       display: flex;
     }
 
     .searchbar-Btn {
-      margin: 0 0.4rem;
+      margin: 0;
       width: 2.8rem;
       height: 2.8rem;
+      flex-shrink: 0;
       border-radius: 2rem;
-      margin-left: 1rem;
       background: linear-gradient(
         90deg,
         rgba(57, 57, 57, 0.832) 10%,
@@ -142,6 +184,19 @@ function handleCloseIconClick() {
     text-align: center;
     padding: 2rem 1.3rem;
     font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .searchPage-empty--error {
+    color: rgba(255, 180, 180, 0.9);
+  }
+
+  .searchPage-retry {
+    color: #fff;
+    text-decoration: underline;
   }
 
   .searchPage-resultsList {
@@ -160,8 +215,21 @@ function handleCloseIconClick() {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    cursor: pointer;
+    min-width: 0;
+
     &:last-child {
       border-bottom: none;
+    }
+
+    &:hover .searchPage-resultTitle,
+    &:focus-visible .searchPage-resultTitle {
+      color: #ff6b9d;
+    }
+
+    &:focus-visible {
+      outline: 1px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 2px;
     }
   }
 
@@ -170,6 +238,8 @@ function handleCloseIconClick() {
     font-weight: 600;
     color: #fff;
     font-family: poppinsSemiBold;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .searchPage-resultSnippet {
@@ -177,6 +247,8 @@ function handleCloseIconClick() {
     color: rgba(255, 255, 255, 0.7);
     line-height: 1.4;
     font-family: poppins;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
 </style>

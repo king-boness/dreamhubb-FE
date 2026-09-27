@@ -431,12 +431,6 @@ const routes: RouteRecordRaw[] = [
         name: "donee-tokenshop"
       },
       {
-        path: "post-detail",
-        meta: { requiresAuth: true },
-        component: () => import("src/pages/DonorPages/PostDetailPage.vue"),
-        name: "donee-post-detail"
-      },
-      {
         path: "post-detail/topDream",
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/TopDreamPage.vue"),
@@ -465,6 +459,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
         component: () => import("src/pages/DoneePages/DonatorReviewPage.vue"),
         name: "donee-post-details-review"
+      },
+      {
+        path: "post-detail/:id",
+        meta: { requiresAuth: true, hideFooter: true, hideMainHeader: true },
+        component: () => import("src/pages/DonorPages/PostDetailPage.vue"),
+        name: "donee-post-detail"
       },
       {
         path: "user/:userId",

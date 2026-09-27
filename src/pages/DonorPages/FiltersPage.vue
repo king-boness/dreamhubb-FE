@@ -76,6 +76,13 @@
       <template v-if="currentStep === 1 || currentStep === 2">
         <p class="filters-footerHint">choose by swiping up or down</p>
         <button class="filters-searchBtn" @click="handleSearch">SEARCH</button>
+        <button
+          class="filters-clearBtn"
+          type="button"
+          @click="handleClearFilters"
+        >
+          Clear filters
+        </button>
         <div
           v-if="currentStep === 1"
           ref="swapCategoryTooSlotRef"
@@ -100,6 +107,13 @@
           :disabled="!filterContinent || !filterCountry"
         >
           {{ currentNextLabel }}
+        </button>
+        <button
+          class="filters-clearBtn"
+          type="button"
+          @click="handleClearFilters"
+        >
+          Clear filters
         </button>
       </template>
 
@@ -398,6 +412,18 @@ const handleSearch = () => {
     // Ak sme v kroku 2 alebo 3, použiť normálny applyFilters
     applyFilters();
   }
+};
+
+const handleClearFilters = () => {
+  filterCategory.value = null;
+  filterSubcategory.value = null;
+  filterContinent.value = "";
+  filterCountry.value = "";
+  filterCityId.value = null;
+  currentStep.value = 1;
+  postsStore.resetFilters();
+  preferencesStore.clearLastUsedFeedFilters();
+  void router.push({ name: "donor-posts" });
 };
 
 // Sync filter values with store on mount - using new API
@@ -799,6 +825,23 @@ body:not(.body--light) .filters-footer {
   &:hover {
     transform: translateY(-2px);
     background: rgba(189, 0, 67, 0.1);
+  }
+}
+
+.filters-clearBtn {
+  width: 100%;
+  height: 40px;
+  margin-top: 0.35rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.9);
   }
 }
 
