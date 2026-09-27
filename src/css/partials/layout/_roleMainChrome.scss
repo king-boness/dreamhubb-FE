@@ -271,7 +271,7 @@ body:has(.splash-overlay) {
  */
 .LayoutBackground:has(.footer.navbar.footer--hidden)
   .q-page-container:not(.donor-feed-unified-scroll):not(.dh-settings-scroll-root)
-  .q-page {
+  .q-page:not(.notification-Page) {
   padding-bottom: env(safe-area-inset-bottom, 0px) !important;
 }
 

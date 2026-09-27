@@ -227,6 +227,8 @@ function handleAction(kind: "delete" | "turnOff" | "report") {
   cursor: pointer;
   transition: background-color 0.2s ease;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 
   &:hover {
@@ -236,6 +238,8 @@ function handleAction(kind: "delete" | "turnOff" | "report") {
   .notification-avatar-wrapper {
     cursor: pointer;
     flex-shrink: 0;
+    width: 48px;
+    height: 48px;
     transition: transform 0.2s ease;
 
     &:hover {
@@ -248,7 +252,8 @@ function handleAction(kind: "delete" | "turnOff" | "report") {
   }
 
   .nofication-Content {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     line-height: 1rem;
     display: flex;
     justify-content: center;
@@ -261,6 +266,9 @@ function handleAction(kind: "delete" | "turnOff" | "report") {
       font-family: poppinsSemiBold;
       font-size: 0.9rem;
       margin-bottom: 0.4rem;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .nofitication-Text {
@@ -268,12 +276,19 @@ function handleAction(kind: "delete" | "turnOff" | "report") {
       font-family: poppins;
       margin-bottom: 0.3rem;
       opacity: 0.8;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .nofitication-Time {
       font-size: 0.75rem;
       font-family: poppins;
       opacity: 0.6;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -404,5 +419,19 @@ body.q-ios-padding .q-dialog.notification-actionsDialog.fullscreen {
   right: 0 !important;
   bottom: 0 !important;
   margin: 0 !important;
+}
+
+/* Desktop: anchor sheet to content column beside left rail (not full viewport).
+ * q-card IS the dialog inner > div — beat scoped max-width:600px and center in the
+ * available area (left: rail … right: 0) via auto margins. */
+@media (min-width: 1200px) {
+  .q-dialog.notification-actionsDialog .q-dialog__inner--bottom > div.notification-actionsSheet {
+    left: var(--dh-rail-width, 5.5rem) !important;
+    right: 0 !important;
+    width: min(26rem, calc(100% - 2rem)) !important;
+    max-width: 26rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
 }
 </style>

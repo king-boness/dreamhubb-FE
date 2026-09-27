@@ -1,33 +1,39 @@
 <template>
-  <div class="notification-Page">
-    <PageTitle title="Notifications" />
-    <!-- Iba do konca prvého fetchu; potom PTR (vlastný indikátor pri ťahu). -->
-    <div v-if="!initialFetchDone" class="notifications-loading">
-      <q-spinner color="primary" size="2rem" />
+  <q-page class="notification-Page" :padding="false">
+    <div class="notifications-shell">
+      <PageTitle title="Notifications" />
+      <!-- Iba do konca prvého fetchu; potom PTR (vlastný indikátor pri ťahu). -->
+      <div v-if="!initialFetchDone" class="notifications-loading">
+        <q-spinner color="primary" size="2rem" />
+      </div>
+      <q-pull-to-refresh v-else @refresh="refresh">
+        <div v-if="error" class="notifications-error" data-testid="dh-notifications-error">
+          <RetryPanel
+            :message="error"
+            :on-retry="retry"
+            variant="inline"
+            button-class="notifications-retryBtn"
+            data-testid="dh-notifications-retry"
+          />
+        </div>
+        <div
+          v-else-if="notifications.length === 0"
+          class="notifications-empty"
+          data-testid="dh-notifications-empty"
+        >
+          <p>No notifications yet.</p>
+        </div>
+        <div v-else class="notifications-list" data-testid="dh-notifications-list">
+          <NotificationComponent
+            v-for="notification in notifications"
+            :key="notification.id"
+            :notification="notification"
+            @click="handleNotificationClick(notification)"
+          />
+        </div>
+      </q-pull-to-refresh>
     </div>
-    <q-pull-to-refresh v-else @refresh="refresh">
-      <div v-if="error" class="notifications-error" data-testid="dh-notifications-error">
-        <RetryPanel
-          :message="error"
-          :on-retry="retry"
-          variant="inline"
-          button-class="notifications-retryBtn"
-          data-testid="dh-notifications-retry"
-        />
-      </div>
-      <div v-else-if="notifications.length === 0" class="notifications-empty" data-testid="dh-notifications-empty">
-        <p>No notifications yet.</p>
-      </div>
-      <div v-else class="notifications-list" data-testid="dh-notifications-list">
-        <NotificationComponent
-          v-for="notification in notifications"
-          :key="notification.id"
-          :notification="notification"
-          @click="handleNotificationClick(notification)"
-        />
-      </div>
-    </q-pull-to-refresh>
-  </div>
+  </q-page>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
@@ -103,7 +109,20 @@ onMounted(async () => {
 <style scoped lang="scss">
 .notification-Page {
   background-position: center;
-  padding: 0.05rem 0.2rem 0.75rem;
+  /* Match donor feed footer reserve; keep stable while footer hides via transform. */
+  padding: 0.05rem 0.2rem calc(5.7rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(5.7rem + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  .notifications-shell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
 
   .notifications-loading,
   .notifications-error,
@@ -113,9 +132,13 @@ onMounted(async () => {
     align-items: center;
     flex-direction: column;
     gap: 12px;
-    padding: 3rem 0;
+    padding: 3rem 1rem;
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.95rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: center;
   }
 
   .notifications-retryBtn {
@@ -126,10 +149,20 @@ onMounted(async () => {
   .notifications-list {
     padding: 0 4px;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
     margin-top: -10px;
+    box-sizing: border-box;
+  }
+}
+
+@media (min-width: 1200px) {
+  .notification-Page {
+    /* Left rail replaces bottom nav — drop mobile footer reserve. */
+    padding-bottom: 1.25rem !important;
   }
 }
 </style>

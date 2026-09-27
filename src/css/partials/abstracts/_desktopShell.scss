@@ -340,6 +340,61 @@ $dh-bp-desktop: 1200px;
 }
 
 /* -------------------------------------------------------------------------
+ * Notifications — tablet + desktop shell (mobile layout unchanged)
+ * List / empty / error sit in the feed-width column beside the rail.
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .notification-Page {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+
+    .notifications-shell,
+    .notifications-list,
+    .notifications-loading,
+    .notifications-error,
+    .notifications-empty {
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .notifications-loading,
+    .notifications-error,
+    .notifications-empty {
+      max-width: 22rem;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .notification-Component {
+      max-width: 100%;
+    }
+
+    .nofication-Content {
+      .nofitication-Heading,
+      .nofitication-Text {
+        max-width: 42rem;
+      }
+    }
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .notification-Page {
+    padding-top: 0.35rem;
+    /* Rail replaces bottom nav — drop mobile footer reserve. */
+    padding-bottom: 1.25rem !important;
+  }
+}
+
+/* -------------------------------------------------------------------------
  * Post detail — kill viewport bleed on tablet/desktop
  * ------------------------------------------------------------------------- */
 @media (min-width: $dh-bp-tablet) {
