@@ -538,4 +538,61 @@ const handleMapError = (event: Event) => {
     max-width: 390px;
   }
 }
+
+/* Tablet+: stage container — cards anchored to stage, not ultrawide viewport */
+@media (min-width: 768px) {
+  .auth-map-wrapper,
+  .auth-map,
+  .authWelcome-content {
+    max-width: min(40rem, 100%);
+  }
+
+  .auth-floating-cards {
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 40rem);
+    max-width: 40rem;
+  }
+
+  .authWelcome-legal {
+    max-width: 28rem;
+    width: 100%;
+  }
+}
+
+@media (min-width: 1200px) {
+  .authWelcome {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .auth-map-wrapper {
+    padding-top: 3.5rem;
+    max-width: min(52rem, 100%);
+  }
+
+  .auth-map {
+    height: 18rem;
+    max-width: min(42rem, 100%);
+    margin-bottom: 1.5rem;
+  }
+
+  .authWelcome-content {
+    max-width: min(28rem, 100%);
+    gap: 2rem;
+  }
+
+  .auth-floating-cards {
+    width: min(100%, 52rem);
+    max-width: 52rem;
+  }
+
+  .authWelcome-help {
+    margin-top: 0.75rem;
+  }
+
+  .authWelcome-actions {
+    z-index: 4;
+  }
+}
 </style>

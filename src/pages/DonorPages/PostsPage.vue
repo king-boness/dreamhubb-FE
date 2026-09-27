@@ -450,6 +450,25 @@ const emitOpenAuthor = (post: DonorPost) => {
   padding-bottom: 20px;
 }
 
+@media (min-width: 768px) {
+  .donorPosts-feed {
+    max-width: 50rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .donorPosts-feed {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 .donorPosts-feed--nativeList {
   display: flex;
   flex-direction: column;

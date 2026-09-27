@@ -1,0 +1,331 @@
+/**
+ * dreamhubb desktop / tablet responsive foundation.
+ *
+ * Mobile-first layout stays unchanged below $dh-bp-tablet.
+ * Tablet: constrain content width, keep bottom nav.
+ * Desktop (>= $dh-bp-desktop): left nav rail + centered content shells.
+ *
+ * Breakpoints intentionally align with existing project media queries
+ * (768 already used in iosSafeArea / postDetail) and the product brief (1200).
+ */
+
+$dh-bp-tablet: 768px;
+$dh-bp-desktop: 1200px;
+
+:root {
+  --dh-feed-max: 50rem; /* 800px */
+  --dh-detail-max: 70rem; /* 1120px */
+  --dh-detail-text-max: 42.5rem; /* 680px */
+  --dh-auth-stage-max: 52rem; /* 832px */
+  --dh-rail-width: 5.5rem; /* 88px */
+  --dh-content-gutter: 1.5rem;
+}
+
+/* -------------------------------------------------------------------------
+ * Tablet: readable content width, bottom nav unchanged
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) and (max-width: #{$dh-bp-desktop - 1px}) {
+  .LayoutBackground .q-page-container .q-page,
+  .landingLayout .q-page {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Post detail may use the wider shell on tablet */
+  .LayoutBackground .q-page-container.dh-donor-post-detail .q-page,
+  .LayoutBackground .q-page-container .q-page.postDetail,
+  .q-page.postDetail {
+    max-width: min(100%, var(--dh-detail-max));
+  }
+
+  .donorPosts-integratedChrome,
+  .donorFeed-topControls,
+  .donorPosts-feed {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Desktop: left rail + constrained shells
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-desktop) {
+  :root {
+    --dh-content-gutter: 2rem;
+  }
+
+  /*
+   * Reserve space for the left nav rail.
+   * Bottom padding for mobile tab bar is no longer needed.
+   * Skip when footer/rail is not rendered (post detail, etc.).
+   */
+  .LayoutBackground > .q-page-container:not(.dh-donor-post-detail) {
+    padding-left: var(--dh-rail-width);
+    box-sizing: border-box;
+  }
+
+  .LayoutBackground.dh-donor-feed-layout.q-layout > .q-page-container.donor-feed-unified-scroll:not(.dh-donor-post-detail) {
+    padding-left: var(--dh-rail-width);
+    box-sizing: border-box;
+  }
+
+  /* Integrated chrome (feed header + tabs) sits in the content column */
+  .LayoutBackground.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome.roleChrome-topStack {
+    width: calc(100% - var(--dh-rail-width));
+    margin-left: var(--dh-rail-width);
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  /* Non-feed sticky header (settings, etc.) */
+  .LayoutBackground > .roleChrome-topStack.navbar {
+    width: calc(100% - var(--dh-rail-width));
+    margin-left: var(--dh-rail-width);
+    box-sizing: border-box;
+  }
+
+  .LayoutBackground.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome .donorFeed-topControls {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+    box-sizing: border-box;
+  }
+
+  .LayoutBackground .q-page-container .q-page,
+  .landingLayout .q-page {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .LayoutBackground .q-page-container.dh-donor-post-detail .q-page,
+  .LayoutBackground .q-page-container .q-page.postDetail,
+  .q-page.postDetail {
+    max-width: min(100%, var(--dh-detail-max));
+  }
+
+  .donorPosts-feed {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Inspiration feed cards follow the same shell */
+  .inspiration-page .inspiration-header,
+  .inspiration-page .inspiration-body,
+  .inspiration-page .inspiration-feed,
+  .inspiration-page .storiesComponent,
+  .inspiration-page .inspiration-panel {
+    max-width: var(--dh-feed-max);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* -------- Desktop nav rail (same destinations as bottom nav) -------- */
+  .footer.footer--donor4,
+  .footer.footer--doneeNav {
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    width: var(--dh-rail-width) !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    flex-direction: column !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: calc(env(safe-area-inset-top, 0px) + 1rem) 0.35rem
+      calc(env(safe-area-inset-bottom, 0px) + 1rem) !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.35) !important;
+    box-sizing: border-box !important;
+  }
+
+  body.body--light .footer.footer--donor4,
+  body.body--light .footer.footer--doneeNav,
+  .footer.footer--donor4.footer--light,
+  .footer.footer--doneeNav.footer--light {
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Scroll-hide used translateY for bottom bar — keep rail visible on desktop */
+  .footer.navbar.footer--hidden,
+  .footer.footer--hidden {
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .footer.footer--donor4 > .button-footer,
+  .footer.footer--doneeNav > .button-footer.footer-left,
+  .footer.footer--doneeNav > .button-footer.footer-right,
+  .footer.footer--doneeNav > .button-footer.red,
+  .footer.footer--doneeNav > .button-footer.profileIcon {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0.35rem 0.15rem !important;
+    transform: none !important;
+  }
+
+  .footer.footer--donor4 .footer-pageName,
+  .footer.footer--doneeNav .footer-pageName {
+    display: block !important;
+    font-size: 0.62rem !important;
+    line-height: 1.1 !important;
+    margin-top: 0.2rem !important;
+    white-space: normal !important;
+    text-align: center !important;
+    max-width: 4.6rem !important;
+  }
+
+  .footer.footer--doneeNav .circle-wrap {
+    margin: 0.25rem 0 !important;
+    transform: none !important;
+    justify-self: auto !important;
+  }
+
+  .footer.footer--doneeNav .circle {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+  }
+
+  /* Settings pages: no need for tall bottom clearance above absent tab bar */
+  .dh-settings-scroll-root .q-page,
+  .dh-settings-scroll-root .appSettings-page,
+  .dh-settings-scroll-root .q-page.settingsLocation-page {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+/* -------------------------------------------------------------------------
+ * Post detail — kill viewport bleed on tablet/desktop
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .postDetail {
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+    box-sizing: border-box;
+
+    .postDetailBg {
+      left: auto;
+      right: auto;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      max-width: var(--dh-detail-max);
+      border-radius: 0 0 24px 24px;
+    }
+
+    .postDetail-inner {
+      max-width: var(--dh-detail-text-max);
+      width: 100%;
+    }
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .postDetail {
+    .postDetailBg {
+      height: calc(480px + env(safe-area-inset-top, 0px));
+    }
+
+    .postDetail-about,
+    .postDetail-description,
+    .postDetail-section {
+      max-width: var(--dh-detail-text-max);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Auth welcome / public landing stage
+ * ------------------------------------------------------------------------- */
+@media (min-width: $dh-bp-tablet) {
+  .authWelcome {
+    --dh-auth-stage-max: 40rem;
+  }
+
+  .authWelcome .auth-map-wrapper,
+  .authWelcome .auth-map,
+  .authWelcome .authWelcome-content {
+    max-width: var(--dh-auth-stage-max);
+  }
+
+  /* Anchor floating cards to the stage, not the ultrawide viewport */
+  .authWelcome .auth-floating-cards {
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, var(--dh-auth-stage-max));
+    max-width: var(--dh-auth-stage-max);
+  }
+
+  .authWelcome .authWelcome-legal {
+    max-width: 28rem;
+  }
+}
+
+@media (min-width: $dh-bp-desktop) {
+  .authWelcome {
+    --dh-auth-stage-max: 52rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .authWelcome .auth-map-wrapper {
+    padding-top: 3.5rem;
+  }
+
+  .authWelcome .auth-map {
+    height: 18rem;
+    max-width: 42rem;
+  }
+
+  .authWelcome .authWelcome-content {
+    gap: 2rem;
+  }
+
+  .authWelcome .authWelcome-help {
+    margin-top: 0.75rem;
+  }
+
+  /* Keep help CTA clear of primary buttons / stage edges */
+  .authWelcome .authWelcome-actions {
+    position: relative;
+    z-index: 4;
+  }
+}
+
+/* Login form under LandingLayout — share stage width on large screens */
+@media (min-width: $dh-bp-tablet) {
+  .login.login--auth-form {
+    --login-content-max: min(390px, 100%);
+  }
+
+  .login.login--auth-form .login-welcome-map,
+  .login.login--auth-form .login-welcome-stack {
+    max-width: min(28rem, 100%);
+  }
+}

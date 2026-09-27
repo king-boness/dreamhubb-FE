@@ -146,6 +146,25 @@ const handleOpenFilters = () => {
   padding: 0;
 }
 
+@media (min-width: 768px) {
+  .donorFeed-topControls {
+    max-width: 50rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .donorFeed-topControls {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 .donor-tabs {
   display: flex;
   gap: 12px;

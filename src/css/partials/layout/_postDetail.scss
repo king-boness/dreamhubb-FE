@@ -1094,11 +1094,17 @@
     padding: 0 0 5rem;
 
     .postDetail-inner {
-      max-width: 390px;
+      max-width: 42.5rem; // ~680px readable about/text column
     }
 
     .postDetailBg {
       height: calc(420px + env(safe-area-inset-top, 0px));
+      left: auto;
+      right: auto;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      max-width: 70rem; // ~1120px
     }
   }
 }
@@ -1106,7 +1112,15 @@
 @media (min-width: 1024px) {
   .postDetail {
     .postDetail-inner {
-      max-width: 390px;
+      max-width: 42.5rem;
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .postDetail {
+    .postDetailBg {
+      height: calc(480px + env(safe-area-inset-top, 0px));
     }
   }
 }
