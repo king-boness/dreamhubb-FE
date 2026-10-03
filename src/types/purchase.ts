@@ -8,7 +8,7 @@
  * Used by UI and by purchase handlers; product ids map to store / web backend.
  */
 export interface TokenPackage {
-  /** Internal id (e.g. tokens_100) – used in backend payload and as stable key */
+  /** Internal id (e.g. tokens_10) – used in backend payload and as stable key */
   id: string;
   /** Display name for UI (e.g. "Fist full of") */
   displayName: string;

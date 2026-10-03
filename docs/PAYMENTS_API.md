@@ -14,12 +14,12 @@ Base path: same as other API (e.g. `VITE_API_BASE` = `http://localhost:8000/api`
 
 ```json
 {
-  "packageId": "tokens_100",
+  "packageId": "tokens_10",
   "provider": "web",
   "platform": "web",
-  "webSku": "tokens_100",
+  "webSku": "tokens_10",
   "selectedMethod": "card",
-  "tokenAmount": 100,
+  "tokenAmount": 10,
   "price": 1.99,
   "currency": "EUR"
 }
@@ -53,12 +53,12 @@ Base path: same as other API (e.g. `VITE_API_BASE` = `http://localhost:8000/api`
 
 ```json
 {
-  "packageId": "tokens_100",
+  "packageId": "tokens_10",
   "provider": "web",
   "platform": "web",
-  "webSku": "tokens_100",
+  "webSku": "tokens_10",
   "selectedMethod": "paypal",
-  "tokenAmount": 100,
+  "tokenAmount": 10,
   "price": 1.99,
   "currency": "EUR"
 }

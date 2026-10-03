@@ -13,7 +13,7 @@ export interface StripeWebCheckoutPayload {
   packageId: string;
   provider: "web";
   platform: "web";
-  /** Web SKU (e.g. tokens_100) – maps to Stripe Price/Product. */
+  /** Web SKU (e.g. tokens_10) – maps to Stripe Price/Product. */
   webSku: string;
   /** Selected payment method for Stripe (card, apple_pay, google_pay). */
   selectedMethod: WebPaymentMethodId;

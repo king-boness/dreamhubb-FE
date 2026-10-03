@@ -157,7 +157,7 @@ export default {
   tokensToAdd: "Tokeny na pridanie",
   youDontHaveEnoughTokens: "Nemáš dostatok tokenov.",
   pleaseEnterValueBetween: "Prosím zadaj hodnotu medzi {min} a {max}.",
-  minTokensPublishTitle: "Na publikovanie príspevku potrebuješ aspoň 10 tokenov.",
+  minTokensPublishTitle: "Na publikovanie príspevku potrebuješ aspoň 3 tokeny.",
   minTokensPublishText: "Tokeny môžeš získať aktivitou alebo si ich kúpiť.",
   howToGetTokens: "Ako získať tokeny",
   buyTokens: "Kúpiť tokeny",

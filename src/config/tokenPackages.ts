@@ -13,70 +13,70 @@ function formatPrice(price: number): string {
 /** All token packages available for purchase. Order = display order in shop. */
 export const TOKEN_PACKAGES: TokenPackage[] = [
   {
-    id: "tokens_100",
+    id: "tokens_10",
     displayName: "Fist full of",
-    tokenAmount: 100,
+    tokenAmount: 10,
     price: 1.99,
     priceDisplay: formatPrice(1.99),
     img: "/icons/KarmaIcon.png",
+    appleProductId: "com.dreamhubb.ap.tokens_10",
+    googleProductId: "tokens_10",
+    webSku: "tokens_10"
+  },
+  {
+    id: "tokens_25",
+    displayName: "Hands full of",
+    tokenAmount: 25,
+    price: 4.49,
+    priceDisplay: formatPrice(4.49),
+    img: "/icons/karmaIcon-500.svg",
+    appleProductId: "com.dreamhubb.ap.tokens_25",
+    googleProductId: "tokens_25",
+    webSku: "tokens_25"
+  },
+  {
+    id: "tokens_50",
+    displayName: "Wallet full of",
+    tokenAmount: 50,
+    price: 7.99,
+    priceDisplay: formatPrice(7.99),
+    img: "/icons/karmaIcon-1000.svg",
+    appleProductId: "com.dreamhubb.ap.tokens_50",
+    googleProductId: "tokens_50",
+    webSku: "tokens_50"
+  },
+  {
+    id: "tokens_100",
+    displayName: "Bag full of",
+    tokenAmount: 100,
+    price: 13.99,
+    priceDisplay: formatPrice(13.99),
+    img: "/icons/karmaIcon-2000.svg",
     appleProductId: "com.dreamhubb.ap.tokens_100",
     googleProductId: "tokens_100",
     webSku: "tokens_100"
   },
   {
-    id: "tokens_500",
-    displayName: "Hands full of",
-    tokenAmount: 500,
-    price: 3.99,
-    priceDisplay: formatPrice(3.99),
-    img: "/icons/karmaIcon-500.svg",
-    appleProductId: "com.dreamhubb.ap.tokens_500",
-    googleProductId: "tokens_500",
-    webSku: "tokens_500"
-  },
-  {
-    id: "tokens_1000",
-    displayName: "Wallet full of",
-    tokenAmount: 1000,
-    price: 6.99,
-    priceDisplay: formatPrice(6.99),
-    img: "/icons/karmaIcon-1000.svg",
-    appleProductId: "com.dreamhubb.ap.tokens_1000",
-    googleProductId: "tokens_1000",
-    webSku: "tokens_1000"
-  },
-  {
-    id: "tokens_2500",
-    displayName: "Bag full of",
-    tokenAmount: 2500,
-    price: 11.99,
-    priceDisplay: formatPrice(11.99),
-    img: "/icons/karmaIcon-2000.svg",
-    appleProductId: "com.dreamhubb.ap.tokens_2500",
-    googleProductId: "tokens_2500",
-    webSku: "tokens_2500"
-  },
-  {
-    id: "tokens_5000",
+    id: "tokens_200",
     displayName: "Chest full of",
-    tokenAmount: 5000,
-    price: 19.99,
-    priceDisplay: formatPrice(19.99),
+    tokenAmount: 200,
+    price: 24.99,
+    priceDisplay: formatPrice(24.99),
     img: "/icons/karmaIcon-5000.svg",
-    appleProductId: "com.dreamhubb.ap.tokens_5000",
-    googleProductId: "tokens_5000",
-    webSku: "tokens_5000"
+    appleProductId: "com.dreamhubb.ap.tokens_200",
+    googleProductId: "tokens_200",
+    webSku: "tokens_200"
   },
   {
-    id: "tokens_10000",
+    id: "tokens_300",
     displayName: "Truck full of",
-    tokenAmount: 10000,
-    price: 36.99,
-    priceDisplay: formatPrice(36.99),
+    tokenAmount: 300,
+    price: 34.99,
+    priceDisplay: formatPrice(34.99),
     img: "/icons/karmaIcon-10000.svg",
-    appleProductId: "com.dreamhubb.ap.tokens_10000",
-    googleProductId: "tokens_10000",
-    webSku: "tokens_10000"
+    appleProductId: "com.dreamhubb.ap.tokens_300",
+    googleProductId: "tokens_300",
+    webSku: "tokens_300"
   }
 ];
 

@@ -455,7 +455,7 @@ const isLightboxOpen = ref(false);
 const lightboxInitialIndex = ref(0);
 const isShareSheetOpen = ref(false);
 const isTopUpModalOpen = ref(false);
-const selectedTokens = ref(10);
+const selectedTokens = ref(3);
 const showComments = ref(false);
 const activeCommentsTab = ref<"help" | "accomplish">("help");
 let errorTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -996,7 +996,7 @@ const openTopUpModal = () => {
   closeContributeSheet();
   nextTick().then(() => {
     const userTokens = authStore.user?.tokens ?? 0;
-    selectedTokens.value = Math.min(10, Math.max(1, userTokens));
+    selectedTokens.value = Math.min(3, Math.max(1, userTokens));
     isTopUpModalOpen.value = true;
   });
 };
@@ -1005,7 +1005,7 @@ const closeTopUpModal = () => {
   isTopUpModalOpen.value = false;
   // Reset to default when closing
   const userTokens = authStore.user?.tokens ?? 0;
-  selectedTokens.value = Math.min(10, Math.max(1, userTokens));
+  selectedTokens.value = Math.min(3, Math.max(1, userTokens));
   // Reset drag state
   topUpDragOffset.value = 0;
   topUpIsDragging.value = false;

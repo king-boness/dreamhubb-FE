@@ -85,7 +85,7 @@ const authStore = useAuthStore();
 
 useRouteSettlingBodyClass();
 
-// Token balance - must match DonorMainLayout (fallback to 50 after migration)
+// Token balance - must match DonorMainLayout (missing → 0)
 const tokenBalance = computed(() => authStore.user?.tokens ?? 0);
 
 const lastScrollPosition = ref(0);

@@ -138,9 +138,9 @@ export const usePostCreationStore = defineStore("postCreation", {
     // Create post - vždy používa FormData (multipart/form-data) pre jednotnú logiku
     // imageFiles: voliteľné File[] - ak sú prítomné, prvý sa posiela ako 'file', ostatné ako 'images[]'
     async createPost(imageFiles?: File[]): Promise<{ post_id: number } | null> {
-      const MIN_SUBMIT_TOKENS = 10;
+      const MIN_SUBMIT_TOKENS = 3;
 
-      // Frontend guard (extra safety): reward must be at least 10 before hitting BE
+      // Frontend guard (extra safety): reward must be at least 3 before hitting BE
       if ((this.tokens ?? 0) < MIN_SUBMIT_TOKENS) {
         this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
         return null;

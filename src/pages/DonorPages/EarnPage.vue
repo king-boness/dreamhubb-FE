@@ -165,7 +165,7 @@ const completedTasks = computed(() =>
 const verifyBannerButtonLabel = computed(() => {
   const task = verifyEmailTask.value;
   if (!task) {
-    return "Verify and claim 150";
+    return "Verify and claim 1";
   }
   if (task.status === "claimable") {
     return `Verify and claim ${task.reward_tokens}`;

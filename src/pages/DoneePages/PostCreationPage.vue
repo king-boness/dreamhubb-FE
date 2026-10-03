@@ -288,7 +288,7 @@ const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
 
-const MIN_SUBMIT_TOKENS = 10;
+const MIN_SUBMIT_TOKENS = 3;
 
 // Handle close button click - same behavior as PostDetailPage
 const handleClose = () => {

@@ -8,7 +8,7 @@ export interface PayPalWebCheckoutPayload {
   packageId: string;
   provider: "web";
   platform: "web";
-  /** Web SKU (e.g. tokens_100) – maps to PayPal product/plan. */
+  /** Web SKU (e.g. tokens_10) – maps to PayPal product/plan. */
   webSku: string;
   /** Always "paypal" for this flow. */
   selectedMethod: "paypal";

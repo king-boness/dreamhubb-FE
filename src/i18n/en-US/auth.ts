@@ -161,7 +161,7 @@ export default {
   tokensToAdd: "Tokens to add",
   youDontHaveEnoughTokens: "You don't have enough tokens.",
   pleaseEnterValueBetween: "Please enter a value between {min} and {max}.",
-  minTokensPublishTitle: "You need at least 10 tokens to publish a post.",
+  minTokensPublishTitle: "You need at least 3 tokens to publish a post.",
   minTokensPublishText: "You can earn tokens by activity or buy them.",
   howToGetTokens: "How to get tokens",
   buyTokens: "Buy tokens",
