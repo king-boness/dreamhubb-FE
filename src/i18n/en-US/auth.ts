@@ -133,6 +133,8 @@ export default {
   loadingPosts: "Loading posts...",
   noPosts: "No posts yet.",
   noPostsMatchFilters: "No posts match your filters yet.",
+  noPostsWithTheseFilters: "No posts with these filters.",
+  beFirstOrChangeFilters: "Be the first or change the filters.",
   noPostsFromThisCityYet: "No posts from this city yet.",
   resetFilters: "Reset filters",
   filters: "filters",

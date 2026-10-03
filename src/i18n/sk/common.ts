@@ -27,7 +27,8 @@ export default {
     postUpdated: "Príspevok bol aktualizovaný.",
     donationSuccessful: "Úspešne prispel {amount} tokenmi!",
     reportSubmitted: "Nahlásenie bolo úspešne odoslané",
-    badgeSaved: "Odznak bol úspešne uložený"
+    badgeSaved: "Odznak bol úspešne uložený",
+    purchaseComplete: "Nákup bol úspešný. Tokeny boli pridané."
   },
   actions: {
     retry: "Skúsiť znova"

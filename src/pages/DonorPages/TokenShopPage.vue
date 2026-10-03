@@ -95,6 +95,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore, type Side } from "src/stores/preferences";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
 import { usePurchasePlatform } from "src/composables/usePurchasePlatform";
@@ -117,7 +118,11 @@ import {
 import PaymentMethodSheet from "src/components/purchase/PaymentMethodSheet.vue";
 import StorePurchaseSheet from "src/components/purchase/StorePurchaseSheet.vue";
 
+/** Navigation-only hint across Stripe full-page round-trip. Not a payment authority. */
+const CHECKOUT_ORIGIN_SIDE_KEY = "dreamhubb_checkout_origin_side";
+
 const authStore = useAuthStore();
+const preferencesStore = usePreferencesStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -175,6 +180,40 @@ function openPurchaseSheet(pkg: TokenPackage) {
   showPurchaseSheet.value = true;
 }
 
+function resolveAppSide(): Side {
+  const routeName = String(route.name ?? "");
+  if (routeName.startsWith("donee") || route.meta.side === "donee") return "donee";
+  if (routeName.startsWith("donor") || route.meta.side === "donor") return "donor";
+  return preferencesStore.currentSide === "donee" ? "donee" : "donor";
+}
+
+function rememberCheckoutOriginSide(side: Side): void {
+  try {
+    sessionStorage.setItem(CHECKOUT_ORIGIN_SIDE_KEY, side);
+  } catch {
+    // ignore storage failures — routing falls back to preferences/currentSide
+  }
+}
+
+function consumeCheckoutOriginSide(): Side {
+  try {
+    const raw = sessionStorage.getItem(CHECKOUT_ORIGIN_SIDE_KEY);
+    sessionStorage.removeItem(CHECKOUT_ORIGIN_SIDE_KEY);
+    if (raw === "donor" || raw === "donee") return raw;
+  } catch {
+    // ignore
+  }
+  return resolveAppSide();
+}
+
+function feedRouteName(side: Side): "donor-posts" | "donee-posts" {
+  return side === "donee" ? "donee-posts" : "donor-posts";
+}
+
+function tokenShopRouteName(side: Side): "donor-tokenshop" | "donee-tokenshop" {
+  return side === "donee" ? "donee-tokenshop" : "donor-tokenshop";
+}
+
 async function onWebContinue(pkg: TokenPackage, method: WebPaymentMethodId) {
   if (import.meta.env.DEV) {
     console.debug("[token-shop] onWebContinue: start", {
@@ -193,6 +232,8 @@ async function onWebContinue(pkg: TokenPackage, method: WebPaymentMethodId) {
   } else if (result.status === "stripe_ready" || result.status === "paypal_ready") {
     showPurchaseSheet.value = false;
     if (result.checkoutUrl) {
+      // Navigation hint only — not used for grants/amounts/webhook.
+      rememberCheckoutOriginSide(resolveAppSide());
       if (import.meta.env.DEV) {
         console.debug("[token-shop] Redirecting to Stripe checkout", {
           checkoutUrl: result.checkoutUrl
@@ -222,10 +263,14 @@ async function onStorePurchase(pkg: TokenPackage) {
       const result = await startAppleIapPurchase(pkg);
       if (result.status === "success") {
         showPurchaseSheet.value = false;
-        notifySuccess("common.success.purchaseComplete", "Purchase complete. Your tokens have been added.", {});
         if (authStore.isAuthenticated) {
           await authStore.fetchUser().catch(() => undefined);
         }
+        notifySuccess(
+          "common.success.purchaseComplete",
+          "Purchase complete. Your tokens have been added.",
+          {}
+        );
       } else if (result.status === "cancelled") {
         showPurchaseSheet.value = false;
       } else if (result.status === "failed" || result.status === "unavailable") {
@@ -240,10 +285,14 @@ async function onStorePurchase(pkg: TokenPackage) {
       const result = await startGoogleBillingPurchase(pkg);
       if (result.status === "success") {
         showPurchaseSheet.value = false;
-        notifySuccess("common.success.purchaseComplete", "Purchase complete. Your tokens have been added.", {});
         if (authStore.isAuthenticated) {
           await authStore.fetchUser().catch(() => undefined);
         }
+        notifySuccess(
+          "common.success.purchaseComplete",
+          "Purchase complete. Your tokens have been added.",
+          {}
+        );
       } else if (result.status === "cancelled") {
         showPurchaseSheet.value = false;
       } else if (result.status === "failed" || result.status === "unavailable") {
@@ -262,49 +311,68 @@ const retryLabel = computed(() => {
 // Use auth store tokens - must match tokenBalance in DonorMainLayout / DoneeMainLayout
 const tokenBalance = computed(() => authStore.user?.tokens ?? 0);
 
-// Handle return from Stripe Checkout (success/cancel) and clean URL
-function handleStripeReturn() {
+/**
+ * Standalone `/token-shop` is the Stripe return target (outside role layouts).
+ * Embedded usages (donor/donee tokenshop tabs) must not auto-redirect.
+ */
+async function handleStandaloneTokenShopEntry() {
+  if (route.name !== "token-shop") return;
+
   const checkout = route.query.checkout as string | undefined;
+  const side = consumeCheckoutOriginSide();
+
   if (import.meta.env.DEV) {
-    console.debug("[token-shop] handleStripeReturn", {
+    console.debug("[token-shop] handleStandaloneTokenShopEntry", {
       checkout,
+      side,
       query: route.query
     });
   }
+
   if (checkout === "success") {
-    notifySuccess("common.success.purchaseComplete", "Purchase complete. Your tokens have been added.", { timeout: 4000 });
+    // Refresh wallet from server only — never grant tokens from return URL.
     if (authStore.isAuthenticated) {
-      authStore
-        .fetchUser()
-        .then(() => {
-          if (import.meta.env.DEV) {
-            console.debug("[token-shop] User refreshed after Stripe success");
-          }
-        })
-        .catch(() => {
-          if (import.meta.env.DEV) {
-            console.debug("[token-shop] Failed to refresh user after Stripe success");
-          }
-        });
+      try {
+        await authStore.fetchUser();
+        if (import.meta.env.DEV) {
+          console.debug("[token-shop] User refreshed after Stripe success");
+        }
+      } catch {
+        if (import.meta.env.DEV) {
+          console.debug("[token-shop] Failed to refresh user after Stripe success");
+        }
+      }
     }
-  } else if (checkout === "cancelled") {
+    notifySuccess(
+      "common.success.purchaseComplete",
+      "Purchase complete. Your tokens have been added.",
+      { timeout: 4000 }
+    );
+    await router.replace({ name: feedRouteName(side) });
+    return;
+  }
+
+  if (checkout === "cancelled") {
     notifyInfo(
       "common.info.paymentCancelled",
       "Payment was cancelled. You were not charged.",
       { timeout: 4000 }
     );
+    await router.replace({ name: tokenShopRouteName(side) });
+    return;
   }
-  if (checkout === "success" || checkout === "cancelled") {
-    if (import.meta.env.DEV) {
-      console.debug("[token-shop] Cleaning checkout query params from URL");
-    }
-    router.replace({ path: route.path, query: {} });
-  }
+
+  // Direct /token-shop without callback query — leave standalone shell.
+  await router.replace({ name: tokenShopRouteName(side) });
 }
 
 // Fetch user data on mount if not loaded
 onMounted(async () => {
-  handleStripeReturn();
+  await handleStandaloneTokenShopEntry();
+  if (route.name === "token-shop") {
+    // Redirect already in progress / done — skip embedded shop bootstrap.
+    return;
+  }
   if (purchaseProvider.value === "apple_iap" && !iosPurchaseBlocked.value) {
     applePluginUnavailable.value = !(await isAppleIapReady());
     if (applePluginUnavailable.value) {

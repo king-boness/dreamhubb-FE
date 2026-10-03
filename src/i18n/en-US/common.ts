@@ -27,7 +27,8 @@ export default {
     postUpdated: "Post has been updated.",
     donationSuccessful: "Successfully donated {amount} tokens!",
     reportSubmitted: "Report submitted successfully",
-    badgeSaved: "Badge saved successfully"
+    badgeSaved: "Badge saved successfully",
+    purchaseComplete: "Purchase complete. Your tokens have been added."
   },
   actions: {
     retry: "Retry"

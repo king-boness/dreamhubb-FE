@@ -129,6 +129,8 @@ export default {
   loadingPosts: "Načítavajú sa príspevky...",
   noPosts: "Zatiaľ žiadne príspevky.",
   noPostsMatchFilters: "Zatiaľ žiadne príspevky nezodpovedajú filtrom.",
+  noPostsWithTheseFilters: "Žiadne príspevky pre tieto filtre.",
+  beFirstOrChangeFilters: "Buď prvý alebo zmeň filtre.",
   noPostsFromThisCityYet: "Z tohto mesta zatiaľ nie sú žiadne príspevky.",
   resetFilters: "Resetovať filtre",
   filters: "filtre",

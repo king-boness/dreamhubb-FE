@@ -266,11 +266,11 @@ const hasActiveFilters = computed(() => {
 });
 
 const emptyStateTitle = computed(() => {
-  return hasActiveFilters.value ? "No posts with these filters." : t("noPosts");
+  return hasActiveFilters.value ? t("noPostsWithTheseFilters") : t("noPosts");
 });
 
 const emptyStateText = computed(() => {
-  return "Be the first or change the filters.";
+  return t("beFirstOrChangeFilters");
 });
 
 // Post interface
@@ -527,9 +527,17 @@ const emitOpenAuthor = (post: DonorPost) => {
   transform: translateY(-32px);
 }
 
-/* Keep the first sentence on one line (match donee bubble sizing/typography otherwise) */
+/* Allow wrap so longer locales (e.g. SK) do not overflow the bubble on narrow widths */
 :deep(.donorPosts-emptyHintBubble .dhHintBubble-title) {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: center;
+}
+
+@media (min-width: 1440px) {
+  :deep(.donorPosts-emptyHintBubble .dhHintBubble-title) {
+    white-space: nowrap;
+  }
 }
 
 // POST CARD — surface + body text tokens from global _darkMode.scss (.postCard / .body--light .postCard)
