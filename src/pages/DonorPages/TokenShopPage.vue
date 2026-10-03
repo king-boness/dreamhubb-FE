@@ -12,12 +12,12 @@
           <img src="/icons/KarmaIcon.png" alt="" />
           <span>{{ formatNumber(tokenBalance) }}</span>
         </div>
-        <span>Available Tokens</span>
+        <span>{{ t("tokenShop.availableTokens") }}</span>
       </div>
 
       <template v-if="storePurchaseBlocked">
         <div class="tokenShop-header tokenShop-header--blocked">
-          <h2>More Tokens</h2>
+          <h2>{{ t("tokenShop.moreTokens") }}</h2>
         </div>
         <div class="tokenShop-unavailable" role="status" aria-live="polite">
           <p class="tokenShop-unavailableText">{{ storePurchaseBlockedMessage }}</p>
@@ -39,7 +39,7 @@
           </q-btn>
         </div>
         <div class="tokenShop-header">
-          <h2>More Tokens</h2>
+          <h2>{{ t("tokenShop.moreTokens") }}</h2>
         </div>
 
         <div class="shopTable-stats">
@@ -55,7 +55,7 @@
             </div>
             <div class="cardDescription">
               <span
-                >{{ pkg.displayName }} Tokens
+                >{{ t(tokenPackageDisplayNameKey(pkg.id), pkg.displayName) }}
                 <span class="descriptionBolder"
                   >({{ formatTokenAmount(pkg.tokenAmount) }})</span
                 >
@@ -99,7 +99,11 @@ import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
 import { usePurchasePlatform } from "src/composables/usePurchasePlatform";
 import type { TokenPackage, WebPaymentMethodId } from "src/types/purchase";
-import { TOKEN_PACKAGES, formatTokenAmount } from "src/config/tokenPackages";
+import {
+  TOKEN_PACKAGES,
+  formatTokenAmount,
+  tokenPackageDisplayNameKey
+} from "src/config/tokenPackages";
 import { notifySuccess, notifyNegative, notifyInfo } from "src/utils/notify";
 import {
   isAppleIapReady,
@@ -284,7 +288,11 @@ function handleStripeReturn() {
         });
     }
   } else if (checkout === "cancelled") {
-    notifyInfo("common.info.paymentCancelled", "Payment was cancelled. Your tokens were not charged.", { timeout: 4000 });
+    notifyInfo(
+      "common.info.paymentCancelled",
+      "Payment was cancelled. You were not charged.",
+      { timeout: 4000 }
+    );
   }
   if (checkout === "success" || checkout === "cancelled") {
     if (import.meta.env.DEV) {

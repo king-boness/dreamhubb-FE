@@ -33,11 +33,11 @@
           <div class="paymentSheet-package">
             <img :src="selectedPackage.img" alt="" class="paymentSheet-packageImg" />
             <div class="paymentSheet-packageInfo">
-              <span class="paymentSheet-packageName">{{ selectedPackage.displayName }} Tokens ({{ selectedPackage.tokenAmount.toLocaleString('de-DE') }})</span>
+              <span class="paymentSheet-packageName">{{ t(tokenPackageDisplayNameKey(selectedPackage.id), selectedPackage.displayName) }} ({{ selectedPackage.tokenAmount.toLocaleString('de-DE') }})</span>
               <span class="paymentSheet-packagePrice">{{ selectedPackage.priceDisplay }}</span>
             </div>
           </div>
-          <h2 class="paymentSheet-title">Choose payment method</h2>
+          <h2 class="paymentSheet-title">{{ t("tokenShop.choosePaymentMethod") }}</h2>
           <div class="paymentSheet-grid">
             <button
               v-for="method in WEB_PAYMENT_METHODS"
@@ -58,7 +58,7 @@
             :disabled="!selectedMethod"
             @click="onContinue"
           >
-            CONTINUE
+            {{ t("tokenShop.continue") }}
           </button>
         </template>
     </div>
@@ -67,10 +67,14 @@
 
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
 import type { TokenPackage, WebPaymentMethodId } from "src/types/purchase";
 import { WEB_PAYMENT_METHODS } from "src/types/purchase";
+import { tokenPackageDisplayNameKey } from "src/config/tokenPackages";
 import { isPayPalSupportedMethod } from "src/services/paypalCheckoutService";
 import { isStripeSupportedMethod } from "src/services/stripeCheckoutService";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{

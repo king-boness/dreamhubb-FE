@@ -10,7 +10,7 @@
 export interface TokenPackage {
   /** Internal id (e.g. tokens_10) – used in backend payload and as stable key */
   id: string;
-  /** Display name for UI (e.g. "Fist full of") */
+  /** EN fallback display name for UI; prefer i18n `tokenPackages.{id}` */
   displayName: string;
   /** Token amount as number (for backend and logic) */
   tokenAmount: number;

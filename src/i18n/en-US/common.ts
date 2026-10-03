@@ -37,6 +37,23 @@ export default {
     comingSoon: "Coming soon",
     replyNotAllowed: "Reply not allowed",
     profilePhotoNotSet: "Profile photo is not set yet.",
-    locationAutoFilled: "Location filled automatically. You can still edit it if needed."
+    locationAutoFilled: "Location filled automatically. You can still edit it if needed.",
+    paymentCancelled: "Payment was cancelled. You were not charged."
+  },
+  tokenPackages: {
+    tokens_10: "Fistful of Tokens",
+    tokens_25: "Handful of Tokens",
+    tokens_50: "Wallet Full of Tokens",
+    tokens_100: "Bag Full of Tokens",
+    tokens_200: "Chest Full of Tokens",
+    tokens_300: "Truckload of Tokens"
+  },
+  tokenShop: {
+    availableTokens: "Available Tokens",
+    moreTokens: "More Tokens",
+    choosePaymentMethod: "Choose payment method",
+    continue: "CONTINUE",
+    completePurchase: "Complete your purchase…",
+    purchase: "Purchase"
   }
 };

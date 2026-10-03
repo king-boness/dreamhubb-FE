@@ -33,12 +33,12 @@
           <div class="storePurchaseSheet-package">
             <img :src="selectedPackage.img" alt="" class="storePurchaseSheet-packageImg" />
             <div class="storePurchaseSheet-packageInfo">
-              <span class="storePurchaseSheet-packageName">{{ selectedPackage.displayName }} Tokens ({{ selectedPackage.tokenAmount.toLocaleString('de-DE') }})</span>
+              <span class="storePurchaseSheet-packageName">{{ t(tokenPackageDisplayNameKey(selectedPackage.id), selectedPackage.displayName) }} ({{ selectedPackage.tokenAmount.toLocaleString('de-DE') }})</span>
               <span class="storePurchaseSheet-packagePrice">{{ selectedPackage.priceDisplay }}</span>
             </div>
           </div>
           <p class="storePurchaseSheet-description">
-            Complete your purchase using your device's payment method.
+            {{ t("tokenShop.completePurchase") }}
           </p>
           <button
             type="button"
@@ -46,7 +46,7 @@
             :disabled="purchaseInProgress"
             @click="onPurchase"
           >
-            {{ purchaseInProgress ? "…" : "Purchase" }}
+            {{ purchaseInProgress ? "…" : t("tokenShop.purchase") }}
           </button>
         </template>
     </div>
@@ -55,7 +55,11 @@
 
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
 import type { TokenPackage } from "src/types/purchase";
+import { tokenPackageDisplayNameKey } from "src/config/tokenPackages";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{

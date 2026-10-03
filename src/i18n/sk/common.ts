@@ -37,6 +37,23 @@ export default {
     comingSoon: "Čoskoro",
     replyNotAllowed: "Odpoveď nie je povolená",
     profilePhotoNotSet: "Profilová fotka ešte nie je nastavená.",
-    locationAutoFilled: "Poloha bola automaticky vyplnená. Stále ju môžeš upraviť."
+    locationAutoFilled: "Poloha bola automaticky vyplnená. Stále ju môžeš upraviť.",
+    paymentCancelled: "Platba bola zrušená. Nič vám nebolo účtované."
+  },
+  tokenPackages: {
+    tokens_10: "Hrsť tokenov",
+    tokens_25: "Plné ruky tokenov",
+    tokens_50: "Peňaženka plná tokenov",
+    tokens_100: "Vrece plné tokenov",
+    tokens_200: "Truhlica plná tokenov",
+    tokens_300: "Náklaďák plný tokenov"
+  },
+  tokenShop: {
+    availableTokens: "Dostupné tokeny",
+    moreTokens: "Viac tokenov",
+    choosePaymentMethod: "Vyber spôsob platby",
+    continue: "POKRAČOVAŤ",
+    completePurchase: "Dokonči nákup…",
+    purchase: "Kúpiť"
   }
 };
