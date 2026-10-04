@@ -3,6 +3,12 @@ import enUS from "../en-US/auth";
 // Polish - use en-US as base, all keys available
 export default {
   ...enUS,
+  aboutThePost: "O poście",
+  aboutTheUser: "O użytkowniku",
+  translate: "Przetłumacz",
+  showOriginal: "Pokaż oryginał",
+  translateFailed: "Tłumaczenie niedostępne. Wyświetlany jest oryginał.",
+  alreadyInYourLanguage: "Już w Twoim języku.",
   changeLanguage: "Zmień język",
   saveChanges: "Zapisz zmiany",
   cancel: "Anuluj",

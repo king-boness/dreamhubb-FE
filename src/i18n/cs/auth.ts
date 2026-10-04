@@ -3,6 +3,12 @@ import enUS from "../en-US/auth";
 // Czech - use en-US as base, all keys available
 export default {
   ...enUS,
+  aboutThePost: "Více o příspěvku",
+  aboutTheUser: "Více o uživateli",
+  translate: "Přeložit",
+  showOriginal: "Zobrazit originál",
+  translateFailed: "Překlad není k dispozici. Zobrazuje se originál.",
+  alreadyInYourLanguage: "Už je ve tvém jazyce.",
   changeLocation: "Změnit polohu",
   changeLanguage: "Změnit jazyk",
   saveChanges: "Uložit změny",

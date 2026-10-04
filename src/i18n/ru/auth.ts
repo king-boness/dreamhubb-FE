@@ -3,6 +3,12 @@ import enUS from "../en-US/auth";
 // Russian - use en-US as base, all keys available
 export default {
   ...enUS,
+  aboutThePost: "О публикации",
+  aboutTheUser: "О пользователе",
+  translate: "Перевести",
+  showOriginal: "Показать оригинал",
+  translateFailed: "Перевод недоступен. Показан оригинал.",
+  alreadyInYourLanguage: "Уже на вашем языке.",
   changeLanguage: "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u044f\u0437\u044b\u043a",
   saveChanges: "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f",
   cancel: "\u041e\u0442\u043c\u0435\u043d\u0430",

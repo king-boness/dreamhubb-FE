@@ -1124,6 +1124,13 @@ const addPhotoFromWebPath = async (photo: {
       align-items: center;
       justify-content: end;
 
+      /* Desktop preview is shorter (min(28rem, 52vh)); keep controls pinned to
+         the preview footer so Add/Remove stay in-view without scrolling. */
+      @media (min-width: 1200px) {
+        top: auto;
+        bottom: 1rem;
+      }
+
       .postCreation-deleteImgButton {
         background: rgba(84, 0, 29, 0.841);
         font-family: poppins;

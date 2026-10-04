@@ -110,6 +110,12 @@ const esOverrides = {
 // Merge en-US as base with Spanish overrides
 export default {
   ...enUS,
+  aboutThePost: "Sobre la publicación",
+  aboutTheUser: "Sobre el usuario",
+  translate: "Traducir",
+  showOriginal: "Mostrar original",
+  translateFailed: "Traducción no disponible. Se muestra el original.",
+  alreadyInYourLanguage: "Ya está en tu idioma.",
   changeLocation: "Cambiar ubicación",
   ...esOverrides,
   // Merge languages object

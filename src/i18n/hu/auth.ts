@@ -3,6 +3,12 @@ import enUS from "../en-US/auth";
 // Hungarian - use en-US as base, all keys available
 export default {
   ...enUS,
+  aboutThePost: "A bejegyzésről",
+  aboutTheUser: "A felhasználóról",
+  translate: "Fordítás",
+  showOriginal: "Eredeti megjelenítése",
+  translateFailed: "A fordítás nem érhető el. Az eredeti jelenik meg.",
+  alreadyInYourLanguage: "Már a nyelveden van.",
   changeLocation: "Hely módosítása",
   changeLanguage: "Nyelv váltása",
   saveChanges: "Változások mentése",

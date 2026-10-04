@@ -144,22 +144,54 @@
           />
         </template>
 
-        <!-- Original Content (About Dream/Problem/Idea, About Author, Report) -->
+        <!-- Original Content (About post, About user, Report) -->
         <template v-else>
           <div class="postDetailAbout">
-            <!-- A) About {post type} -->
+            <!-- A) About the post -->
             <section class="postDetailAbout-section">
-              <PageTitle :title="aboutTypeTitle" />
+              <PageTitle :title="t('aboutThePost')">
+                <template v-if="canTranslatePost" #action>
+                  <button
+                    type="button"
+                    class="postDetailTranslateBtn"
+                    :disabled="postTranslating"
+                    :aria-busy="postTranslating"
+                    data-testid="dh-translate-post"
+                    @click="togglePostTranslation"
+                  >
+                    {{ postTranslateButtonLabel }}
+                  </button>
+                </template>
+              </PageTitle>
+              <p v-if="postTranslateError" class="postDetailTranslateError" role="status">
+                {{ postTranslateError }}
+              </p>
               <p class="postDetailAbout-text">
-                {{ post.description }}
+                {{ displayedDescription }}
               </p>
             </section>
 
             <div class="postDetailAbout-separator" />
 
-            <!-- B) About donee -->
+            <!-- B) About the user -->
             <section class="postDetailAbout-section postDetailAbout-section--donee">
-              <PageTitle :title="t('aboutDonee')" />
+              <PageTitle :title="t('aboutTheUser')">
+                <template v-if="canTranslateBio" #action>
+                  <button
+                    type="button"
+                    class="postDetailTranslateBtn"
+                    :disabled="bioTranslating"
+                    :aria-busy="bioTranslating"
+                    data-testid="dh-translate-bio"
+                    @click="toggleBioTranslation"
+                  >
+                    {{ bioTranslateButtonLabel }}
+                  </button>
+                </template>
+              </PageTitle>
+              <p v-if="bioTranslateError" class="postDetailTranslateError" role="status">
+                {{ bioTranslateError }}
+              </p>
 
               <div
                 class="postDetailDoneeCard"
@@ -187,13 +219,13 @@
             </section>
 
             <!-- C) Bio -->
-            <section v-if="displayAuthorBioText" class="postDetailAbout-section">
+            <section v-if="originalAuthorBioText" class="postDetailAbout-section">
               <p class="postDetailAbout-text">
-                {{ displayAuthorBioText }}
+                {{ displayedAuthorBioText }}
               </p>
             </section>
 
-            <div v-if="displayAuthorBioText" class="postDetailAbout-separator" />
+            <div v-if="originalAuthorBioText" class="postDetailAbout-separator" />
 
             <!-- Report / block -->
             <div class="postDetail-reportSection">
@@ -394,8 +426,11 @@ import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { useCommentsStore } from "src/stores/comments";
 import { api } from "boot/axios";
 import { useBlockUser } from "src/composables/useBlockUser";
+import { translateEntity, type TranslationResponseData } from "src/services/translationService";
+import { resolveTargetLanguage } from "src/utils/resolveTargetLanguage";
 
 const { t, locale } = useI18n();
+const LANGUAGE_STORAGE_KEY = "dreamhubb_language";
 
 // Enable swipe-back gesture
 useEdgeSwipeBack();
@@ -499,9 +534,32 @@ const displayTokens = computed(() => {
   return post.value?.tokens ?? 0;
 });
 
-// Computed property to get title from post
+// --- UGC translation state (declared early for display computeds) ---
+const showPostTranslation = ref(false);
+const postTranslation = ref<TranslationResponseData | null>(null);
+const postTranslating = ref(false);
+const postTranslateError = ref("");
+const postSameLanguage = ref(false);
+
+const showBioTranslation = ref(false);
+const bioTranslation = ref<TranslationResponseData | null>(null);
+const bioTranslating = ref(false);
+const bioTranslateError = ref("");
+const bioSameLanguage = ref(false);
+
+// Computed property to get title from post (translated when toggled)
 const displayTitle = computed(() => {
+  if (showPostTranslation.value && postTranslation.value?.fields?.title) {
+    return postTranslation.value.fields.title;
+  }
   return post.value?.title ?? "";
+});
+
+const displayedDescription = computed(() => {
+  if (showPostTranslation.value && postTranslation.value?.fields?.description) {
+    return postTranslation.value.fields.description;
+  }
+  return post.value?.description ?? "";
 });
 
 // Computed property to get formatted date from post
@@ -579,36 +637,6 @@ const isAuthor = computed(() => {
   return ownerId === authStore.user.id;
 });
 
-// Computed property to get post category (dream/problem/idea) - using new API
-const postType = computed(() => {
-  const norm = normalizedPost.value;
-  if (!norm) return "dream"; // Default fallback
-  return norm.category?.slug || "dream";
-});
-
-const getPostTypeLowerLabel = (type: string): "dream" | "problem" | "idea" => {
-  if (type === "problem") return "problem";
-  if (type === "idea") return "idea";
-  return "dream";
-};
-
-const aboutTypeTitle = computed(() => {
-  const type = getPostTypeLowerLabel(postType.value);
-
-  // EN: "About dream/problem/idea" (type always lowercase)
-  if (!locale.value?.toString().startsWith("sk")) {
-    return `About ${type}`;
-  }
-
-  // SK: keep lowercase type as well
-  const skType: Record<typeof type, string> = {
-    dream: "sen",
-    problem: "problém",
-    idea: "nápad"
-  };
-  return `O ${skType[type]}`;
-});
-
 type PublicUserProfile = {
   id: number;
   bio?: string | null;
@@ -616,7 +644,7 @@ type PublicUserProfile = {
 
 const authorProfile = ref<PublicUserProfile | null>(null);
 
-const displayAuthorBioText = computed(() => {
+const originalAuthorBioText = computed(() => {
   const bio =
     authorProfile.value?.bio ||
     // fallback if BE ever embeds it in post payload
@@ -630,6 +658,152 @@ const displayAuthorBioText = computed(() => {
   return trimmed;
 });
 
+const displayedAuthorBioText = computed(() => {
+  if (showBioTranslation.value && bioTranslation.value?.fields?.bio) {
+    return bioTranslation.value.fields.bio;
+  }
+  return originalAuthorBioText.value;
+});
+
+const targetLanguage = computed(() => {
+  let preferred: string | null = null;
+  try {
+    preferred = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  } catch {
+    preferred = null;
+  }
+  return resolveTargetLanguage({
+    preferredLanguage: preferred,
+    i18nLocale: locale.value?.toString() ?? null
+  });
+});
+
+const postContentFingerprint = computed(() => {
+  const title = post.value?.title ?? "";
+  const description = post.value?.description ?? "";
+  return `${title}\n${description}`;
+});
+
+const canTranslatePost = computed(() => {
+  if (!authStore.isAuthenticated) return false;
+  if (postSameLanguage.value) return false;
+  const title = (post.value?.title ?? "").trim();
+  const description = (post.value?.description ?? "").trim();
+  return !!(title || description);
+});
+
+const canTranslateBio = computed(() => {
+  if (!authStore.isAuthenticated) return false;
+  if (bioSameLanguage.value) return false;
+  return !!originalAuthorBioText.value;
+});
+
+const postTranslateButtonLabel = computed(() => {
+  if (postTranslating.value) return t("translate");
+  return showPostTranslation.value ? t("showOriginal") : t("translate");
+});
+
+const bioTranslateButtonLabel = computed(() => {
+  if (bioTranslating.value) return t("translate");
+  return showBioTranslation.value ? t("showOriginal") : t("translate");
+});
+
+const resetPostTranslationState = () => {
+  showPostTranslation.value = false;
+  postTranslation.value = null;
+  postTranslating.value = false;
+  postTranslateError.value = "";
+  postSameLanguage.value = false;
+};
+
+const resetBioTranslationState = () => {
+  showBioTranslation.value = false;
+  bioTranslation.value = null;
+  bioTranslating.value = false;
+  bioTranslateError.value = "";
+  bioSameLanguage.value = false;
+};
+
+const togglePostTranslation = async () => {
+  if (postTranslating.value) return;
+
+  if (showPostTranslation.value) {
+    showPostTranslation.value = false;
+    postTranslateError.value = "";
+    return;
+  }
+
+  if (postTranslation.value) {
+    showPostTranslation.value = true;
+    return;
+  }
+
+  const entityId = Number(post.value?.post_id);
+  if (!entityId) return;
+
+  postTranslating.value = true;
+  postTranslateError.value = "";
+  try {
+    const result = await translateEntity({
+      entityType: "post",
+      entityId,
+      targetLanguage: targetLanguage.value,
+      contentFingerprint: postContentFingerprint.value
+    });
+    if (result.same_language) {
+      postSameLanguage.value = true;
+      postTranslateError.value = t("alreadyInYourLanguage");
+      return;
+    }
+    postTranslation.value = result;
+    showPostTranslation.value = true;
+  } catch {
+    postTranslateError.value = t("translateFailed");
+  } finally {
+    postTranslating.value = false;
+  }
+};
+
+const toggleBioTranslation = async () => {
+  if (bioTranslating.value) return;
+
+  if (showBioTranslation.value) {
+    showBioTranslation.value = false;
+    bioTranslateError.value = "";
+    return;
+  }
+
+  if (bioTranslation.value) {
+    showBioTranslation.value = true;
+    return;
+  }
+
+  const entityId = Number(authorId.value);
+  if (!entityId || !originalAuthorBioText.value) return;
+
+  bioTranslating.value = true;
+  bioTranslateError.value = "";
+  try {
+    const result = await translateEntity({
+      entityType: "user",
+      entityId,
+      targetLanguage: targetLanguage.value,
+      contentFingerprint: originalAuthorBioText.value
+    });
+    if (result.same_language) {
+      bioSameLanguage.value = true;
+      bioTranslateError.value = t("alreadyInYourLanguage");
+      return;
+    }
+    bioTranslation.value = result;
+    showBioTranslation.value = true;
+  } catch {
+    bioTranslateError.value = t("translateFailed");
+  } finally {
+    bioTranslating.value = false;
+  }
+};
+
 const loadAuthorProfile = async (id: number) => {
   try {
     const { data } = await api.get(`/user/${id}`);
@@ -642,6 +816,7 @@ const loadAuthorProfile = async (id: number) => {
 };
 
 watch(authorId, async (newId) => {
+  resetBioTranslationState();
   if (!newId) {
     authorProfile.value = null;
     return;
@@ -1293,6 +1468,7 @@ const onContributeOption = async (option: ContributeOption | string) => {
 watch(
   () => post.value,
   (newPost) => {
+    resetPostTranslationState();
     if (newPost) {
       // TODO: BE ešte neposiela likes/comments - keď bude, pridať:
       // likesCount.value = newPost.likes_count ?? null;
@@ -1310,6 +1486,7 @@ watch(
   },
   { immediate: true }
 );
+
 </script>
 
 <style lang="scss">
