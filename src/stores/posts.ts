@@ -2,6 +2,7 @@
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
 import { normalizePost, type NormalizedPost } from "src/utils/normalizePost";
+import { rebucketMyPost } from "src/utils/rebucketMyPost";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
@@ -176,29 +177,19 @@ export const usePostsStore = defineStore("posts", {
         this.posts.push(normalizedPost);
       }
 
-      // Update in myDreams if exists
-      const myDreamsIndex = this.myDreams.findIndex(
-        (p) => (p.post_id || p.id) === postId
+      // Rebucket across Dreams / Problems / Ideas when category (type) changes.
+      // In-place update left posts stuck in the old section after Dream→Problem edits.
+      const rebuckeed = rebucketMyPost(
+        {
+          myDreams: this.myDreams as NormalizedPost[],
+          myProblems: this.myProblems as NormalizedPost[],
+          myIdeas: this.myIdeas as NormalizedPost[]
+        },
+        normalizedPost
       );
-      if (myDreamsIndex !== -1) {
-        this.myDreams[myDreamsIndex] = normalizedPost;
-      }
-
-      // Update in myProblems if exists
-      const myProblemsIndex = this.myProblems.findIndex(
-        (p) => (p.post_id || p.id) === postId
-      );
-      if (myProblemsIndex !== -1) {
-        this.myProblems[myProblemsIndex] = normalizedPost;
-      }
-
-      // Update in myIdeas if exists
-      const myIdeasIndex = this.myIdeas.findIndex(
-        (p) => (p.post_id || p.id) === postId
-      );
-      if (myIdeasIndex !== -1) {
-        this.myIdeas[myIdeasIndex] = normalizedPost;
-      }
+      this.myDreams = rebuckeed.myDreams;
+      this.myProblems = rebuckeed.myProblems;
+      this.myIdeas = rebuckeed.myIdeas;
 
       // Update currentPost if it's the same post
       if (this.currentPost && (this.currentPost.post_id || this.currentPost.id) === postId) {
