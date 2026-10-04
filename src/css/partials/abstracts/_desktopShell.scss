@@ -13,7 +13,8 @@ $dh-bp-tablet: 768px;
 $dh-bp-desktop: 1200px;
 
 :root {
-  --dh-feed-max: 50rem; /* 800px */
+  --dh-feed-max: 50rem; /* 800px — phone-adjacent / desktop feed column */
+  --dh-tablet-feed-max: 72.5rem; /* 1160px — iPad portrait readable shell */
   --dh-detail-max: 70rem; /* 1120px */
   --dh-detail-text-max: 42.5rem; /* 680px */
   --dh-auth-stage-max: 52rem; /* 832px */
@@ -22,15 +23,40 @@ $dh-bp-desktop: 1200px;
 }
 
 /* -------------------------------------------------------------------------
- * Tablet: readable content width, bottom nav unchanged
+ * Tablet: full-width chrome + wider centered main column; bottom nav stays
  * ------------------------------------------------------------------------- */
 @media (min-width: $dh-bp-tablet) and (max-width: #{$dh-bp-desktop - 1px}) {
+  :root {
+    /* iPad / tablet: widen the shared content shell (desktop keeps 50rem) */
+    --dh-feed-max: var(--dh-tablet-feed-max);
+    --dh-content-gutter: 1.75rem;
+  }
+
+  /*
+   * Header / integrated chrome must span the full viewport on tablet.
+   * A max-width here + grid justify-self:stretch left-anchors chrome and
+   * leaves a large empty band on the right (13" iPad portrait).
+   */
+  .LayoutBackground.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome.roleChrome-topStack,
+  .LayoutBackground > .donorPosts-integratedChrome.roleChrome-topStack,
+  .LayoutBackground > .roleChrome-topStack.navbar,
+  .LayoutBackground > .header.navbar {
+    max-width: none;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    justify-self: stretch;
+    box-sizing: border-box;
+  }
+
   .LayoutBackground .q-page-container .q-page,
   .landingLayout .q-page {
-    max-width: var(--dh-feed-max);
+    max-width: min(100%, var(--dh-feed-max));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
     box-sizing: border-box;
   }
 
@@ -41,14 +67,35 @@ $dh-bp-desktop: 1200px;
     max-width: min(100%, var(--dh-detail-max));
   }
 
-  .donorPosts-integratedChrome,
+  /* Feed list + tab strip: centered under full-width header */
   .donorFeed-topControls,
   .donorPosts-feed {
-    max-width: var(--dh-feed-max);
+    max-width: min(100%, var(--dh-feed-max));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .LayoutBackground.dh-donor-feed-layout.q-layout > .donorPosts-integratedChrome .donorFeed-topControls {
+    max-width: min(100%, var(--dh-feed-max));
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+    box-sizing: border-box;
+  }
+
+  /* Bottom nav: full-width bar (not a left rail — rail is desktop-only) */
+  .footer.footer--donor4,
+  .footer.footer--doneeNav {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 }
 

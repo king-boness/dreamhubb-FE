@@ -168,10 +168,14 @@ html, body, #q-app, .q-layout, .q-page-container {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* iPad / large phones: keep primary content readable, avoid edge-to-edge stretch */
+/*
+ * iPad / large phones: share desktopShell tokens so iOS does not force a
+ * narrower 720px column (that left a large empty band on 13" iPad portrait).
+ * Tablet band overrides --dh-feed-max to --dh-tablet-feed-max in _desktopShell.
+ */
 @media (min-width: 768px) {
   .platform-ios .q-page {
-    max-width: 720px;
+    max-width: min(100%, var(--dh-feed-max, 50rem));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
@@ -183,7 +187,7 @@ html, body, #q-app, .q-layout, .q-page-container {
   .platform-ios .settingsSupport-page,
   .platform-ios .settingsBan-page,
   .platform-ios .stats-Page {
-    max-width: 720px;
+    max-width: min(100%, var(--dh-feed-max, 50rem));
     margin-left: auto;
     margin-right: auto;
   }

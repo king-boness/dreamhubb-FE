@@ -454,13 +454,13 @@ const emitOpenAuthor = (post: DonorPost) => {
 
 @media (min-width: 768px) {
   .donorPosts-feed {
-    max-width: 50rem;
+    max-width: min(100%, var(--dh-feed-max, 50rem));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
     box-sizing: border-box;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: var(--dh-content-gutter, 1.5rem);
+    padding-right: var(--dh-content-gutter, 1.5rem);
   }
 }
 
