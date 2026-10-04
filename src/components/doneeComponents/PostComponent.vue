@@ -1,9 +1,11 @@
 <template>
   <q-virtual-scroll
+    :key="scrollLayoutKey"
     :items="props.post"
-    virtual-scroll-horizontal
+    :virtual-scroll-horizontal="!isTabletColumn"
     v-slot="{ item }"
     class="scroll"
+    :class="{ 'scroll--tabletColumn': isTabletColumn }"
   >
     <div
       class="post-component"
@@ -110,9 +112,56 @@
     }
   }
 }
+
+/* Tablet columns: stack cards vertically and fill bucket width (aspect preserved). */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .scroll.scroll--tabletColumn {
+    width: 100%;
+    margin-top: 0.65rem;
+    max-height: none;
+  }
+
+  .post-component {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 18 / 13;
+    margin: 0 0 0.85rem;
+    box-sizing: border-box;
+
+    .postComponent-valueContainer {
+      width: clamp(5.25rem, 42%, 6.5rem);
+      height: 2.65rem;
+
+      .postComponent-valueImg {
+        height: 1.15rem;
+      }
+
+      .postComponent-value {
+        font-size: 0.92rem;
+      }
+    }
+
+    .postComponent-categoryContainer {
+      width: min(100%, 13.5rem);
+      max-width: calc(100% - 0.25rem);
+      height: 2.9rem;
+      padding: 0 0.55rem;
+      box-sizing: border-box;
+
+      .postComponent-categoryTitle {
+        font-size: clamp(0.85rem, 2.6vw, 1.05rem);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+      }
+    }
+  }
+}
 </style>
 <script setup lang="ts">
-import { defineProps, PropType } from "vue";
+import { defineProps, PropType, ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { Post } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
@@ -130,6 +179,28 @@ const props: Props = defineProps({
 });
 
 const router = useRouter();
+
+/** Tablet Donee wall: vertical stack inside each Dreams/Problems/Ideas column. */
+const isTabletColumn = ref(false);
+let tabletMq: MediaQueryList | null = null;
+
+const syncTabletLayout = () => {
+  isTabletColumn.value = Boolean(tabletMq?.matches);
+};
+
+const scrollLayoutKey = computed(() => (isTabletColumn.value ? "tablet-col" : "phone-row"));
+
+onMounted(() => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+  tabletMq = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
+  syncTabletLayout();
+  tabletMq.addEventListener("change", syncTabletLayout);
+});
+
+onBeforeUnmount(() => {
+  tabletMq?.removeEventListener("change", syncTabletLayout);
+  tabletMq = null;
+});
 
 const handlePostClick = (post: Post) => {
   if (post.post_id) {

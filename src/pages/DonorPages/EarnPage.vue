@@ -495,6 +495,165 @@ defineExpose({
   @extend .task;
 }
 
+/* -------------------------------------------------------------------------
+ * Tablet (768–1199): wider hero + 2-column ongoing tasks.
+ * Phone (<768) and desktop (>=1200) keep their existing rules.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .earn-page {
+    padding-top: 0.85rem;
+    padding-bottom: 2.25rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .verifyContent-earn {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 1.85rem;
+    padding: 1.65rem 1.25rem;
+    min-height: 10.5rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
+    box-sizing: border-box;
+    border-radius: 1rem;
+    background: linear-gradient(
+      108.46deg,
+      rgba(37, 37, 37, 0.45) 0%,
+      rgba(23, 23, 23, 0.28) 100%
+    );
+
+    .verifyContent-left {
+      flex: 1 1 auto;
+      min-width: 0;
+      max-width: 34rem;
+      padding-left: 0.25rem;
+
+      .verifyContent-heading {
+        font-size: 1.45rem;
+        line-height: 1.2;
+      }
+
+      .verifyContent-description {
+        font-size: 0.9rem;
+        line-height: 1.35;
+        max-width: 28rem;
+      }
+
+      .verifyContent-button {
+        align-self: flex-start;
+        margin-top: 1.25rem;
+        margin-bottom: 0 !important;
+        height: 2.45rem;
+        font-size: 0.88rem;
+        padding: 0 1rem !important;
+        min-width: 11.5rem;
+        max-width: 16rem;
+      }
+    }
+
+    .verifyContentRight {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .verifyContent-img {
+      width: clamp(7.5rem, 18vw, 11rem);
+      height: auto;
+      max-height: 10.75rem;
+      object-fit: contain;
+    }
+  }
+
+  .onGoingTasks {
+    padding: 0.45rem 0.1rem 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
+
+    .onGoingTasks-header {
+      margin-bottom: 1.15rem;
+
+      .onGoingTasks-heading {
+        font-size: 1.05rem;
+      }
+    }
+
+    .task-earn {
+      min-height: 5.35rem;
+      padding: 1rem 0.75rem;
+      gap: 0.5rem;
+
+      .taskImgDiv {
+        height: 2.75rem;
+        width: 2.75rem;
+
+        .taskTrophyImg {
+          height: 1.35rem;
+        }
+      }
+
+      .taskTitle {
+        font-size: 0.9rem;
+        white-space: normal;
+      }
+
+      .taskDescription {
+        font-size: 0.78rem;
+        -webkit-line-clamp: 3;
+      }
+
+      .taskMeta {
+        font-size: 0.72rem;
+      }
+
+      .task-side {
+        max-width: 42%;
+      }
+
+      .taskClaimBtn {
+        font-size: 0.78rem;
+        min-height: 1.75rem;
+        padding: 0 0.7rem;
+      }
+    }
+  }
+
+  .onGoingTasks:not(.finishedTasksContainer) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 0.9rem;
+    align-items: stretch;
+
+    .onGoingTasks-header,
+    .earnPage-empty {
+      grid-column: 1 / -1;
+    }
+
+    .task-earn {
+      margin-bottom: 0;
+      height: 100%;
+    }
+  }
+
+  .finishedTasksContainer {
+    display: block;
+    margin-top: 1.5rem;
+    width: 100%;
+
+    .task-earn {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .FinishedtaskReward {
+    max-width: 38%;
+  }
+}
+
 @media (min-width: 1200px) {
   .earn-page {
     padding-top: 0.5rem;

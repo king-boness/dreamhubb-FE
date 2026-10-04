@@ -50,51 +50,21 @@
       />
     </div>
 
-    <!-- My Dreams Section -->
-    <div class="postPage-header postPgae-myDreamsContainer">
-      <div class="postPage-headerContainer">
-        <span class="postPage-title">{{ t("myDreams") }} ({{ mappedMyDreams.length }})</span>
-      </div>
-      <!-- Loading state -->
-      <div v-if="postsStore.myDreamsLoading" class="postPage-loading">
-        <p>{{ t("loading") }}</p>
-      </div>
-      <!-- Error state -->
-      <div v-else-if="postsStore.myDreamsError" class="postPage-error">
-        <RetryPanel
-          :message="postsStore.myDreamsError"
-          :on-retry="retryMyPosts"
-          :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
-          variant="card"
-          button-class="postPage-retryBtn"
-        />
-      </div>
-      <!-- Empty state -->
-      <div v-else-if="!postsStore.myDreamsLoading && mappedMyDreams.length === 0" class="postPage-empty">
-        <p>{{ t("noDreamsYet") }}</p>
-      </div>
-      <!-- Posts -->
-      <PostComponent
-        v-else
-        class="postPage-postComponent"
-        :post="mappedMyDreams"
-      ></PostComponent>
-    </div>
-
-    <!-- My Problems Section -->
-    <div class="postPage-postsContainer">
-      <div class="postPage-header">
+    <!-- Dreams / Problems / Ideas — stacked on phone; 3-col grid on tablet -->
+    <div class="postPage-buckets">
+      <!-- My Dreams Section -->
+      <div class="postPage-header postPgae-myDreamsContainer postPage-bucket">
         <div class="postPage-headerContainer">
-          <span class="postPage-title">{{ t("myProblems") }} ({{ mappedMyProblems.length }})</span>
+          <span class="postPage-title">{{ t("myDreams") }} ({{ mappedMyDreams.length }})</span>
         </div>
         <!-- Loading state -->
-        <div v-if="postsStore.myProblemsLoading" class="postPage-loading">
+        <div v-if="postsStore.myDreamsLoading" class="postPage-loading">
           <p>{{ t("loading") }}</p>
         </div>
         <!-- Error state -->
-        <div v-else-if="postsStore.myProblemsError" class="postPage-error">
+        <div v-else-if="postsStore.myDreamsError" class="postPage-error">
           <RetryPanel
-            :message="postsStore.myProblemsError"
+            :message="postsStore.myDreamsError"
             :on-retry="retryMyPosts"
             :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
             variant="card"
@@ -102,48 +72,81 @@
           />
         </div>
         <!-- Empty state -->
-        <div v-else-if="!postsStore.myProblemsLoading && mappedMyProblems.length === 0" class="postPage-empty">
-          <p>{{ t("noProblemsYet") }}</p>
+        <div v-else-if="!postsStore.myDreamsLoading && mappedMyDreams.length === 0" class="postPage-empty">
+          <p>{{ t("noDreamsYet") }}</p>
         </div>
         <!-- Posts -->
         <PostComponent
           v-else
           class="postPage-postComponent"
-          :post="mappedMyProblems"
+          :post="mappedMyDreams"
         ></PostComponent>
       </div>
-    </div>
 
-    <!-- My Ideas Section -->
-    <div class="postPage-postsContainer">
-      <div class="postPage-header">
-        <div class="postPage-headerContainer">
-          <span class="postPage-title">{{ t("myIdeas") }} ({{ mappedMyIdeas.length }})</span>
+      <!-- My Problems Section -->
+      <div class="postPage-postsContainer postPage-bucket">
+        <div class="postPage-header">
+          <div class="postPage-headerContainer">
+            <span class="postPage-title">{{ t("myProblems") }} ({{ mappedMyProblems.length }})</span>
+          </div>
+          <!-- Loading state -->
+          <div v-if="postsStore.myProblemsLoading" class="postPage-loading">
+            <p>{{ t("loading") }}</p>
+          </div>
+          <!-- Error state -->
+          <div v-else-if="postsStore.myProblemsError" class="postPage-error">
+            <RetryPanel
+              :message="postsStore.myProblemsError"
+              :on-retry="retryMyPosts"
+              :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
+              variant="card"
+              button-class="postPage-retryBtn"
+            />
+          </div>
+          <!-- Empty state -->
+          <div v-else-if="!postsStore.myProblemsLoading && mappedMyProblems.length === 0" class="postPage-empty">
+            <p>{{ t("noProblemsYet") }}</p>
+          </div>
+          <!-- Posts -->
+          <PostComponent
+            v-else
+            class="postPage-postComponent"
+            :post="mappedMyProblems"
+          ></PostComponent>
         </div>
-        <!-- Loading state -->
-        <div v-if="postsStore.myIdeasLoading" class="postPage-loading">
-          <p>{{ t("loading") }}</p>
+      </div>
+
+      <!-- My Ideas Section -->
+      <div class="postPage-postsContainer postPage-bucket">
+        <div class="postPage-header">
+          <div class="postPage-headerContainer">
+            <span class="postPage-title">{{ t("myIdeas") }} ({{ mappedMyIdeas.length }})</span>
+          </div>
+          <!-- Loading state -->
+          <div v-if="postsStore.myIdeasLoading" class="postPage-loading">
+            <p>{{ t("loading") }}</p>
+          </div>
+          <!-- Error state -->
+          <div v-else-if="postsStore.myIdeasError" class="postPage-error">
+            <RetryPanel
+              :message="postsStore.myIdeasError"
+              :on-retry="retryMyPosts"
+              :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
+              variant="card"
+              button-class="postPage-retryBtn"
+            />
+          </div>
+          <!-- Empty state -->
+          <div v-else-if="!postsStore.myIdeasLoading && mappedMyIdeas.length === 0" class="postPage-empty">
+            <p>{{ t("noIdeasYet") }}</p>
+          </div>
+          <!-- Posts -->
+          <PostComponent
+            v-else
+            class="postPage-postComponent"
+            :post="mappedMyIdeas"
+          ></PostComponent>
         </div>
-        <!-- Error state -->
-        <div v-else-if="postsStore.myIdeasError" class="postPage-error">
-          <RetryPanel
-            :message="postsStore.myIdeasError"
-            :on-retry="retryMyPosts"
-            :loading="postsStore.myDreamsLoading || postsStore.myProblemsLoading || postsStore.myIdeasLoading"
-            variant="card"
-            button-class="postPage-retryBtn"
-          />
-        </div>
-        <!-- Empty state -->
-        <div v-else-if="!postsStore.myIdeasLoading && mappedMyIdeas.length === 0" class="postPage-empty">
-          <p>{{ t("noIdeasYet") }}</p>
-        </div>
-        <!-- Posts -->
-        <PostComponent
-          v-else
-          class="postPage-postComponent"
-          :post="mappedMyIdeas"
-        ></PostComponent>
       </div>
     </div>
 
@@ -561,6 +564,88 @@ onActivated(async () => {
 
   .postPage-empty {
     color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Tablet (768–1199): quote/toggle full shell width; Dreams/Problems/Ideas
+ * as equal 3-column grid inside shared --dh-feed-max / --dh-tablet-feed-max.
+ * Phone (<768) and desktop (>=1200) keep stacked + horizontal card rows.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .post-page {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 1.25rem;
+
+    .postPage-carouselContainer {
+      width: 100%;
+      margin-bottom: 0.9rem;
+
+      .postPage-carousel {
+        height: 7.5rem;
+        border-radius: 0.85rem;
+        overflow: hidden;
+      }
+    }
+
+    .postPage-switcherContainer {
+      margin-bottom: 1.35rem;
+      padding: 0 0.35rem;
+
+      :deep(.segmented-toggle-container) {
+        max-width: 26rem;
+      }
+    }
+
+    .postPage-buckets {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 1rem;
+      row-gap: 1.25rem;
+      width: 100%;
+      align-items: start;
+      box-sizing: border-box;
+    }
+
+    .postPage-bucket {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .postPage-postsContainer {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .postPage-header {
+      width: 100%;
+      min-height: 0;
+      align-items: stretch;
+
+      .postPage-headerContainer {
+        padding: 0 0.15rem;
+        margin-bottom: 0.15rem;
+      }
+
+      .postPage-title {
+        font-size: 1.05rem;
+        line-height: 1.25;
+      }
+    }
+
+    .postPgae-myDreamsContainer {
+      margin-bottom: 0;
+    }
+
+    .postPage-loading,
+    .postPage-error,
+    .postPage-empty {
+      padding: 1.25rem 0.5rem;
+      font-size: 0.85rem;
+      box-sizing: border-box;
+    }
   }
 }
 

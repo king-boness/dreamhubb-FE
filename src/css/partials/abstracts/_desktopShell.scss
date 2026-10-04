@@ -308,6 +308,34 @@ $dh-bp-desktop: 1200px;
     max-width: min(52rem, 100%);
   }
 
+  /*
+   * Tablet: Tokens/Earn must use the shared iPad feed shell (--dh-tablet-feed-max
+   * via --dh-feed-max), not the narrower 52rem desktop Tokens column.
+   * Desktop (>=1200) keeps 52rem above.
+   */
+  @media (max-width: #{$dh-bp-desktop - 1px}) {
+    .stats-filter--tokens {
+      max-width: min(100%, var(--dh-feed-max));
+    }
+
+    .stats-filter--tokens .statsFilter {
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+
+    .stats-filter--tokens .panel,
+    .stats-filter--tokens .q-tab-panels,
+    .stats-filter--tokens .q-tab-panel {
+      max-width: 100%;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+  }
+
   .stats-filter--profile .filterTabs,
   .stats-filter--profile .panel,
   .stats-filter--profile .tabPanel,
