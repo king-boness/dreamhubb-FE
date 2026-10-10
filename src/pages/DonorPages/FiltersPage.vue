@@ -593,7 +593,8 @@ watch(filterCategory, (newVal) => {
   }
 }
 
-.filters-page--swapPosts .filters-title.filters-title--swapPosts {
+/* Dark only — light uses shared .body--light .filters-page .filters-title (#1a1a1a). */
+body:not(.body--light) .filters-page--swapPosts .filters-title.filters-title--swapPosts {
   color: #ffffff !important;
 }
 
@@ -973,14 +974,19 @@ body:not(.body--light) .filters-footer {
   }
 }
 
-/* Short desktop viewports: slightly smaller Step 3 map so selects + CTAs fit with less scroll. */
+/*
+ * Short desktop viewports (incl. common notebook Safari ~800–850vh): soft map cap.
+ * 15rem keeps the map desktop-native (not the old 11rem thumbnail) while leaving
+ * room for all 3 selects above the fixed footer at 1200×800. Taller desktops
+ * (960+) stay uncapped at the ~30–34rem stage width.
+ */
 @media (min-width: 1200px) and (max-height: 850px) {
   .filters-content--step3 :deep(.whereAreYou.whereAreYou--filter-mode .location-map) {
-    max-height: 11rem;
+    max-height: 15rem;
     overflow: hidden;
 
     img {
-      max-height: 11rem;
+      max-height: 15rem;
       width: 100%;
       height: auto;
       object-fit: contain;
@@ -1042,7 +1048,7 @@ body.filters-wheel-scroll-lock .swiper {
   color: #1a1a1a !important;
 }
 
-/* “swap posts” blue: see src/css/partials/abstracts/_darkMode.scss (beats .body--light h1) */
+/* Dark “swap posts”: same white as other Filters titles (no blue special-case). */
 body:not(.body--light) .filters-page.filters-page--swapPosts .filters-title.filters-title--swapPosts {
   color: #ffffff !important;
 }

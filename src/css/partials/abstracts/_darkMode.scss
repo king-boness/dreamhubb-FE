@@ -18,10 +18,6 @@
   h4 {
     color: black !important;
   }
-  /* Donor Filters step 1 — must beat generic .body--light h1 { black !important } (incl. iOS Safari) */
-  .filters-page h1.filters-title.filters-title--swapPosts {
-    color: #2563eb !important;
-  }
   .passwordPage-input,
   .emailPage-input,
   .bioPage-input {
@@ -1899,11 +1895,6 @@
   .taskReward,.FinishedtaskReward{
     border-left: 0.07rem solid #0f002659 !important;
   }
-}
-
-/* Donor Filters step 1 — dark theme: blue “swap posts” (no .body--light) */
-body:not(.body--light) .filters-page h1.filters-title.filters-title--swapPosts {
-  color: #6bb3ff !important;
 }
 
 /* Post detail light — meta len v hero overlay (bez karty pod fotkou) */
