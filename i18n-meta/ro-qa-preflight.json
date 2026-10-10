@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "phase": "4E.5",
+  "locale": "ro",
+  "generatedAt": "2026-10-10T18:30:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. No key was marked REVIEWED/APPROVED; the human-review work package reports 761 MACHINE_DRAFT / 74 EXISTING_UNREVIEWED / 24 NEEDS_REVIEW (tooling-derived classification, none REVIEWED); no reviewOverrides APPROVED entries were written; no other locale was modified.",
+  "addressStyle": {
+    "decision": "tu (informal singular)",
+    "rationale": "Spot-check found consistent tu forms throughout src/i18n/ro/*.ts (Alege, Introdu, Ai nevoie, Te rugăm, ți-, -ți, tău/ta). No dumneavoastră / dvs / Vă forms and no 2nd-person-plural imperatives. 'Te rugăm' (we-ask-you, singular object) is the idiomatic pairing with tu.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "pluralPipeCountMismatches": "0 unexpected. ro intentionally uses +1 form vs EN (EN 2-form → ro 3-form one|few|other; EN 3-form feed.resultsCount → ro 4-form zero|one|few|other), allowed by validateImport for ro.",
+    "tuConsistency": "OK — scan for dumneavoastră/dvs/vă/dumneata and 2pl verb endings returned no real hits.",
+    "diacritics": "OK — no legacy cedilla ş/ţ/Ş/Ţ; comma-below ș/ț used throughout.",
+    "spacing": "OK — no double spaces, space-before-comma or stray '..'.",
+    "englishLeftoverScan": "OK — no untranslated English sentences. 42 keys identical to EN (see identicalNote).",
+    "postVsContributionDisambiguation": "OK — Post = 'postare' (Adaugă postare, Raportează o postare, postarea ta), Contribution = 'contribuție' (CONTRIBUIE, Contribuții, Contribuție privată, contribuția a fost trimisă). Tab 'contribuție' / 'ajutor' / 'realizare' distinct.",
+    "numberPlusDe": "OK — Romanian 'de' linking rule (n%100 in 1..19 → no 'de'; 20–100, 120+ → 'de') implemented via 3-form/4-form plural strings ('{n} de zile', '{n} de tokenuri', '{n} de rezultate'). Hard-coded numerals ('cel puțin 3 tokenuri', 'maxim 5 MB', '8 caractere') are grammatical as written. Number-only placeholders ('Număr maxim de fotografii: {n}', 'Tokenuri donate cu succes: {amount}!', 'tokenuri: {amount}') avoid the 'de' agreement problem by construction.",
+    "pluralRuntime": "VERIFIED_RUNTIME — executed real vue-i18n createI18n({ pluralRules: { ro: romanianPluralRule } }) (rule extracted verbatim from src/boot/i18n.ts) against Intl.PluralRules('ro') for n = 0,1,2,5,12,19,20,21,22,100,101,102,119,120,121,1000,1001,1019,1020. All 9 plural keys (feed.resultsCount, posts.daysAgo/hoursAgo/minutesAgo/weeksAgo/monthsAgo/fundsTokens/rewardLabel, profileUi.tokensMeta): 0 mismatches. 0 → 'Niciun rezultat' (UX zero) for resultsCount, 'N tokenuri/zile…' for others; 1 → singular; 2–19, 101–119 → plural without 'de'; 20–100, 120+ → 'de'."
+  },
+  "intentionalIdenticalMarked": 42,
+  "identicalTotal": 42,
+  "identicalNote": "Brand (dreamhubb), US states/cities/countries (Alabama, Chicago, Canada…), language autonyms/names coinciding with EN (Hindi, Urdu, Lao, Tamil, Telugu, Swahili, Hausa, Gujarati, Kannada, Marathi, Punjabi, Wu, Cantonese…), loanwords normal in Romanian UI (Continent, Contact, Patron) and product role names Donor/Donee (PRODUCT_DECISION_REQUIRED).",
+  "sampleSpotCheck": [
+    { "keyPath": "contribute", "ro": "CONTRIBUIE", "en": "CONTRIBUTE" },
+    { "keyPath": "contributions", "ro": "Contribuții", "en": "Contributions" },
+    { "keyPath": "addPost", "ro": "Adaugă postare", "en": "Add Post" },
+    { "keyPath": "reportPost", "ro": "Raportează o postare", "en": "Report Post" },
+    {
+      "keyPath": "helpAndSupport",
+      "ro": "Ajutor și asistență",
+      "en": "Help and Support",
+      "note": "Fixed in 4E.5 (was 'Ajutor și suport' — 'suport' is an anglicism and contradicted settings FAQ q6 'Setări → Ajutor și asistență', legal.support.title 'Ajutor și asistență' and ban.supportLink 'Asistență')."
+    },
+    {
+      "keyPath": "legal.englishOnlyNotice",
+      "ro": "Acest document juridic este disponibil momentan doar în engleză. O versiune în limba română va fi publicată după verificarea juridică.",
+      "en": "This legal document is currently available in English only. A Slovak version will be published after legal review.",
+      "note": "Fixed in 4E.5 (was 'O versiune în slovacă…' — literal copy of the EN source's Slovak reference; Romanian users would be told a Slovak version is coming. nl/cs/de use their own language; pl/fr still say Slovak)."
+    },
+    { "keyPath": "success.donationSuccessful", "ro": "Tokenuri donate cu succes: {amount}!", "en": "Successfully donated {amount} tokens!" },
+    { "keyPath": "notifications.topUpTitle", "ro": "{name} ți-a susținut postarea – tokenuri: {amount}", "en": "{name} topped up your post by {amount} tokens" },
+    { "keyPath": "feed.resultsCount", "ro": "Niciun rezultat | {n} rezultat | {n} rezultate | {n} de rezultate", "en": "No results | {n} result | {n} results" },
+    { "keyPath": "posts.daysAgo", "ro": "acum {n} zi | acum {n} zile | acum {n} de zile", "en": "{n} day ago | {n} days ago" },
+    { "keyPath": "posts.rewardLabel", "ro": "RECOMPENSĂ: {n} token | RECOMPENSĂ: {n} tokenuri | RECOMPENSĂ: {n} de tokenuri", "en": "REWARD: {n} token | REWARD: {n} tokens" },
+    { "keyPath": "tokensOnboarding.title", "ro": "Îți prezentăm tokenurile-monedă", "en": "Introducing Currency Tokens" },
+    { "keyPath": "feed.searchPlaceholder", "ro": "Caută orice", "en": "Search anything" }
+  ],
+  "openTerminology": [
+    "Donor",
+    "Donee",
+    "Post (Postare) vs Contribution (Contribuție)",
+    "Donation (Sprijin / Susținere / Încărcare)",
+    "Feed (loanword vs Flux)",
+    "Badge (Insignă)",
+    "Terms (Termeni și condiții vs Termenii de utilizare)"
+  ],
+  "confirmedErrorsFixed": 2,
+  "confirmedErrorsFixedDetail": [
+    "legal.englishOnlyNotice — 'versiune în slovacă' → 'versiune în limba română' (src/i18n/ro/legal.ts and scripts/i18n/ro-4e5-translations-data.mjs patched so re-running ro-4e5-fill-and-apply does not regress)",
+    "helpAndSupport — 'Ajutor și suport' → 'Ajutor și asistență' (consistency with FAQ navigation path and legal support title; src/i18n/ro/auth.ts)"
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — kept as English loanwords ('Donor', 'Donee'). 'Donor' is an accepted Romanian word; 'donee' is not and is declined ad hoc ('un donee', 'doneii', 'Donorului'). Alternatives: Dăruitor / Ajutător / Beneficiar / Solicitant."
+    },
+    {
+      "severity": "P2",
+      "note": "Donation vocabulary is mixed: edit.donations='Sprijin', tokensToTopUp='TOKENURI PENTRU SPRIJIN', topUpThePost='SUSȚINE POSTAREA', notifications 'a susținut', success 'Tokenuri donate cu succes', glossary lists 'Sprijin / Încărcare'. Human to finalise (Sprijin/Susținere vs Donație)."
+    },
+    {
+      "severity": "P2",
+      "note": "'Feed' kept as loanword with Romanian definite article ('feedul'); alternative 'Flux' (LINGUISTIC_REVIEW_REQUIRED)."
+    },
+    {
+      "severity": "P2",
+      "note": "Number-carrying strings without plural choice (success.donationSuccessful, notifications.topUpTitle) use number-agnostic 'Tokenuri …: {amount}' wording to avoid '1 tokenuri' / missing 'de'. Proper fix requires plural-aware call sites (FE code change, out of scope for 4E.5)."
+    },
+    {
+      "severity": "P2",
+      "note": "legal.englishOnlyNotice: EN source hard-codes 'A Slovak version…' (a source/product bug). pl and fr translations still say 'slovacă/słowacka'; ro now says Romanian. Source should become locale-neutral or per-locale."
+    },
+    {
+      "severity": "P3",
+      "note": "Terms naming inconsistency: settingsPages.privacy.terms 'Termeni și condiții' vs termsOfUseLink/legal 'Termenii de utilizare' (mirrors EN 'Terms and Conditions' vs 'Terms of Use')."
+    },
+    {
+      "severity": "P3",
+      "note": "onboarding.tokens.page1Title 'Titlu despre cum funcționează' and page2Option 'Îi punem în legătură pe visători cu cei' mirror EN placeholder/incomplete-sentence source copy ('Headline of how it works', 'We connect dreamers with those'); product copy needs final text before translation can be judged."
+    },
+    {
+      "severity": "P3",
+      "note": "Gender-neutral possessives: 'lui' / 'visul lui' / 'Postările lui' (userBlocked, explainerTitle4, legacySideBlurb) vs 'lor' elsewhere; EN uses 'their'/'his or her'. Consider 'sale' / 'lor' or rephrasing. Not a grammatical error."
+    },
+    {
+      "severity": "P3",
+      "note": "Token package names are playful calques (pumn / mână / portofel / sac / cufăr / camion de tokenuri) — humans to confirm tone and size ordering."
+    },
+    {
+      "severity": "P3",
+      "note": "common.iosPaymentsUnavailable keeps developer wording ('cap sync/pod install'); earnUi.beTaskTitlesNote mentions API/backend i18n — internal-facing strings, confirm they should be user-visible."
+    },
+    {
+      "severity": "P3",
+      "note": "42 identical-to-EN keys (brand, place names, language autonyms, loanwords)."
+    }
+  ]
+}

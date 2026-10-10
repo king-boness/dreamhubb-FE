@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "phase": "4E.1",
+  "locale": "pl",
+  "generatedAt": "2026-10-10T13:27:08.125Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED.",
+  "addressStyle": {
+    "decision": "ty (informal singular)",
+    "rationale": "Aligned with DE informal du and ES tú for social app tone. Existing pl/auth should be checked; prefer ty if already present. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "intentionalIdenticalMarked": 38,
+  "identicalTotal": 38,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "contribute",
+      "pl": "WESPRZYJ",
+      "en": "CONTRIBUTE"
+    },
+    {
+      "keyPath": "contributions",
+      "pl": "Wsparcie",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "pl": "Przekazano Tokeny: {amount}!",
+      "en": "Successfully donated {amount} tokens!"
+    },
+    {
+      "keyPath": "aboutDonee",
+      "pl": "O Donee",
+      "en": "About Donee"
+    },
+    {
+      "keyPath": "signIn",
+      "pl": "Zaloguj się",
+      "en": "Sign In"
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "pl": "Brak wyników | {n} wynik | {n} wyniki | {n} wyników",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "pl": "Szukaj wszystkiego",
+      "en": "Search anything"
+    },
+    {
+      "keyPath": "posts.edit.donations",
+      "pl": "Wsparcie",
+      "en": "Donations"
+    }
+  ],
+  "pluralRule": "polishPluralRule (one=exactly 1)",
+  "openTerminology": [
+    "Donor",
+    "Donee",
+    "Contribution",
+    "Donation",
+    "Feed",
+    "Wpis vs Post"
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee"
+    },
+    {
+      "severity": "P2",
+      "note": "Feed loanword vs Tablica"
+    },
+    {
+      "severity": "P2",
+      "note": "SK plural rule still treats 21 as one — known SK behavior, unchanged"
+    }
+  ]
+}

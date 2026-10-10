@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "phase": "4E.4",
+  "locale": "cs",
+  "generatedAt": "2026-10-10T16:45:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. All cs keys remain MACHINE_DRAFT; no reviewOverrides APPROVED entries were written.",
+  "addressStyle": {
+    "decision": "ty (informal singular)",
+    "rationale": "Existing cs strings consistently use ty-forms (Vyber, Zkus, Zadej, Mrkni na). Gendered verbs use the 'splnil(a) / jsi vybral(a)' pattern. Keep consistent across MACHINE_DRAFT strings.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "slovakismScan": "No SK-specific lexemes or diacritics (ľ, ô, ä, ŕ, ĺ, užívateľ, prispieť, ďakujem, sa/sú/byť) found. 'Uživatel', 'přispět', 'příspěvek', 'odznak', 'vyzvednout' are valid Czech.",
+    "postVsContributionDisambiguation": "OK — Post = 'příspěvek', Contribution = 'příspěvek pomoci', verb CTA 'PŘISPĚT'.",
+    "pluralPipeLayouts": "3-form (one|few|many) for time-ago/token strings, 4-form (zero|one|few|many) for feed.resultsCount — consistent with boot/i18n.ts layout."
+  },
+  "intentionalIdenticalMarked": 26,
+  "identicalTotal": 26,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "contribute",
+      "cs": "PŘISPĚT",
+      "en": "CONTRIBUTE"
+    },
+    {
+      "keyPath": "contributions",
+      "cs": "Příspěvky pomoci",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "privateContribution",
+      "cs": "Soukromý příspěvek pomoci",
+      "en": "Private Contribution"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "cs": "Úspěšně podpořeno! Počet tokenů: {amount}",
+      "en": "Successfully donated {amount} tokens!",
+      "note": "Fixed in 4E.4 (was 'podpořeno {amount} tokeny' — wrong instrumental for amount=1)."
+    },
+    {
+      "keyPath": "notifications.topUpTitle",
+      "cs": "{name} dobil(a) tvůj příspěvek – počet tokenů: {amount}",
+      "en": "{name} topped up your post by {amount} tokens",
+      "note": "Fixed in 4E.4 (was 'o {amount} tokenů' — wrong plural for 1–4)."
+    },
+    {
+      "keyPath": "legal.support.contactIntro",
+      "cs": "Pokud potřebuješ pomoc s účtem, chceš nahlásit nevhodný obsah, zablokovat zneužívajícího uživatele nebo máš dotazy ke schvalování v App Storu, obrať se na:",
+      "en": "For account help, reporting inappropriate content, blocking abusive users, or App Store review questions, contact:",
+      "note": "Fixed in 4E.4 (was ungrammatical 'S pomocí k účtu, nahlášením …')."
+    },
+    {
+      "keyPath": "languages.te-IN.name",
+      "cs": "Telugština (Indie)",
+      "en": "Telugu (India)",
+      "note": "Fixed in 4E.4 (was untranslated 'Telugu')."
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "cs": "Žádné výsledky | {n} výsledek | {n} výsledky | {n} výsledků",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "posts.daysAgo",
+      "cs": "před {n} dnem | před {n} dny | před {n} dny",
+      "en": "{n} day ago | {n} days ago"
+    },
+    {
+      "keyPath": "tokensOnboarding.title",
+      "cs": "Představujeme měnové tokeny",
+      "en": "Introducing Currency Tokens"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "cs": "Hledat cokoli",
+      "en": "Search anything"
+    }
+  ],
+  "openTerminology": [
+    "Donor",
+    "Donee",
+    "Contribution (Příspěvek pomoci) vs Post (Příspěvek)",
+    "Donation (Dobití / Podpora)",
+    "Feed (loanword vs Nástěnka/Přehled)",
+    "Doneeové (invented plural) vs indeclinable Donee"
+  ],
+  "confirmedErrorsFixed": 4,
+  "confirmedErrorsFixedDetail": [
+    "notifications.topUpTitle — number-agnostic wording (wrong plural for amount 1–4)",
+    "success.donationSuccessful — number-agnostic wording (wrong instrumental for amount 1)",
+    "legal.support.contactIntro — ungrammatical Czech rewritten",
+    "languages.te-IN.name — 'Telugu (Indie)' → 'Telugština (Indie)'"
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — kept as loanwords; declension is inconsistent (VYBRAT DONORA, Ohodnoť svého Donora, 'Doneeové', 'O Donee', 'pro Donee')."
+    },
+    {
+      "severity": "P0",
+      "scope": "fixed-4E.4R",
+      "note": "FIXED 4E.4R: cs incorrectly used polishPluralRule (22–24 as few). Unicode CLDR Czech few = only 2,3,4; 22→other. Now czechPluralRule; '22 výsledků' / '22 tokenů'. Independent Intl.PluralRules('cs') table in i18n-plural-smoke.js."
+    },
+    {
+      "severity": "P2",
+      "note": "Feed loanword vs Nástěnka/Přehled (LINGUISTIC_REVIEW_REQUIRED)."
+    },
+    {
+      "severity": "P2",
+      "note": "Donation/Dobití vs Podpora wording: edit.donations='Dobití', success='podpořeno', notifications='dobil(a)' — mixed 'top up' vs 'support' metaphors."
+    },
+    {
+      "severity": "P3",
+      "note": "onboarding.tokens.page1Title/page2Option/page3Title mirror EN placeholder-like copy ('Nadpis o tom, jak to funguje', 'Tok peněz')."
+    },
+    {
+      "severity": "P3",
+      "note": "Gender-neutral style inconsistent: 'sám/sama' (onboardingInfo.goal.problem) vs 'sám(a)'/'(a)' pattern elsewhere."
+    },
+    {
+      "severity": "P3",
+      "note": "settings.privacy.terms 'Smluvní podmínky' vs termsOfUseLink/legal 'Podmínky používání' — terminology consistency (EN source differs: 'Terms and Conditions')."
+    },
+    {
+      "severity": "P3",
+      "note": "scripts/i18n/cs-4e4-translations-data.mjs still holds the pre-fix strings; re-running cs-4e4-fill-and-apply would overwrite the 4 fixes."
+    },
+    {
+      "severity": "P3",
+      "note": "26 identical-to-EN keys (mostly proper names, cities, roles)."
+    }
+  ]
+}

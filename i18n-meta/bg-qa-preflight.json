@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "phase": "4E.6",
+  "locale": "bg",
+  "generatedAt": "2026-10-10T17:00:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. No reviewOverrides APPROVED entries were written. Work package export reports 761 MACHINE_DRAFT + 85 EXISTING_UNREVIEWED + 13 NEEDS_REVIEW (0 APPROVED/REVIEWED). Other locales untouched.",
+  "addressStyle": {
+    "decision": "ти (informal singular)",
+    "rationale": "Strings consistently use informal singular imperatives and 2nd person (Избери, Опитай отново, Провери, Въведи, Нямаш, твоя/твоята). No formal (Вие/Ви) forms found.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "placeholderMismatchNote": "Placeholder SET identical to EN for all 859 keys (scripted compare of {…} tokens, including the 9 plural-pipe keys). npm run i18n:check: missing 0, extra 0, empty 0, invalid 0, structuralConflicts 0.",
+    "pluralization": {
+      "status": "VERIFIED_RUNTIME",
+      "rule": "vue-i18n default pluralRules (no custom bg rule in src/boot/i18n.ts)",
+      "method": "Built src/i18n/index.ts with esbuild, created vue-i18n instance (locale bg) and rendered all 9 plural-pipe keys for n in {0,1,2,5,11,21,22,101}. Intl.PluralRules('bg') yields one only for n=1, other for everything else — same partition as the vue-i18n default for 2-form (n=1→form 0, else form 1) and 3-form/zero|one|other (0→zero, 1→one, else other) layouts. Output grammatical for every sampled n (e.g. '1 резултат / 2 резултата', 'преди 1 ден / преди 21 дни', 'преди 1 минута / преди 5 минути').",
+      "layouts": {
+        "feed.resultsCount": "3-form zero|one|other",
+        "posts.daysAgo, hoursAgo, minutesAgo, weeksAgo, monthsAgo; posts.fundsTokens, posts.rewardLabel; profileUi.tokensMeta": "2-form one|other"
+      },
+      "keysChecked": 9
+    },
+    "cyrillicScan": "Scripted scan of src/i18n/bg/*.ts: no Russian-only letters (ы, э, ё), no mixed Latin/Cyrillic homoglyph words (only intentional brand/loan terms dreamhubb, Tokens, Feed, Donor/Donee, AI), no doubled-ъ typos besides the one fixed below.",
+    "postVsContributionDisambiguation": "OK — Post = 'публикация', Contribution = 'принос', CTA contribute = 'ДОПРИНЕСИ'. Top-up = 'ЗАРЕДИ ПУБЛИКАЦИЯТА'. No Post/Contribution confusion.",
+    "terminologyConsistency": "Публикация/Мечта/Идея/Проблем/Tokens/Награда/Значка/Отзив/Вдъхновение/Сбъднати/В процес consistent with glossary.bg.json. Feed, Donor, Donee and Tokens are kept as Latin loanwords everywhere (consistent, PRODUCT_DECISION_REQUIRED). Нулиране used consistently for password reset."
+  },
+  "intentionalIdenticalMarked": 58,
+  "identicalTotal": 22,
+  "identicalNote": "Work-package export marks 58 entries as identicalToEnIntentional; a strict string-equality compare of bg vs en-US gives 22 identical (dreamhubb, Tokens, Donor/Donee, Latin nativeNames of languages). The tooling's wider flag (58) was not broken down further in this preflight; all strictly identical keys are brand/loan terms or native-script language names.",
+  "sampleSpotCheck": [
+    { "keyPath": "contribute", "bg": "ДОПРИНЕСИ", "en": "CONTRIBUTE" },
+    { "keyPath": "contributions", "bg": "Приноси", "en": "Contributions" },
+    { "keyPath": "privateContribution", "bg": "Личен принос", "en": "Private Contribution" },
+    {
+      "keyPath": "success.donationSuccessful",
+      "bg": "Успешно дари {amount} Tokens!",
+      "en": "Successfully donated {amount} tokens!"
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "bg": "Няма резултати | {n} резултат | {n} резултата",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "posts.daysAgo",
+      "bg": "преди {n} ден | преди {n} дни",
+      "en": "{n} day ago | {n} days ago"
+    },
+    {
+      "keyPath": "posts.minutesAgo",
+      "bg": "преди {n} минута | преди {n} минути",
+      "en": "{n} minute ago | {n} minutes ago"
+    },
+    {
+      "keyPath": "legal.englishOnlyNotice",
+      "bg": "Този правен документ в момента е наличен само на английски език. Българска версия ще бъде публикувана след правен преглед.",
+      "en": "This legal document is currently available in English only."
+    },
+    {
+      "keyPath": "resetLinkSentGeneric",
+      "bg": "Ако профилът съществува, ти изпратихме имейл с инструкции.",
+      "en": "If the account exists, we sent you an email with instructions."
+    },
+    { "keyPath": "languages.bg.name", "bg": "Български", "en": "Bulgarian" }
+  ],
+  "openTerminology": [
+    "Donor / Donee — English role labels kept ('Donor', 'Donee', 'Donees', 'Donors'); PRODUCT_DECISION_REQUIRED. Bulgarian alternatives: Дарител / Получател (Подпомаган). English words are uninflected inside Bulgarian text ('За Donee', 'Оцени своя Donor', 'Donors могат да помогнат').",
+    "Feed — loanword 'Feed' vs 'Емисия' / 'Лента' — LINGUISTIC_REVIEW_REQUIRED.",
+    "Tokens — kept as English plural everywhere, incl. singular forms '{n} Token | {n} Tokens' and in compounds ('Юмрук Tokens', 'Шепа Tokens'); consider 'токен/токени' or 'жетон/жетони' — PRODUCT/LINGUISTIC decision.",
+    "Donation wording mixed: 'Дарения' (posts.edit.donations), 'Успешно дари … Tokens' (success.donationSuccessful), 'Получена подкрепа' (statsUi.supportReceived), 'Зареждане' (top-up); glossary lists 'Подкрепа / Зареждане'.",
+    "Contribution = 'Принос' (formal/abstract) — LINGUISTIC_REVIEW_REQUIRED; 'Принос' is understood but less natural for a UI button than e.g. 'Подкрепа'.",
+    "Language names: 'Холандски' (nl) is the common form but 'Нидерландски' is the official standard; 'Тайландски' (th) vs 'Тайски'; 'Лаоски' — style choices for linguist.",
+    "Password reset — 'Нулиране на парола' vs 'Възстановяване на парола' — LINGUISTIC_REVIEW_REQUIRED.",
+    "auth.appearance = 'Вид' (EN 'Appearance') — consider 'Външен вид'/'Тема'."
+  ],
+  "confirmedErrorsFixed": 7,
+  "confirmedErrorsFixedDetail": [
+    "auth.helpAndSupport — 'Помощ и поддъръжка' → 'Помощ и поддръжка' (typo, doubled ъ).",
+    "auth.nickname — 'Презиме' (middle name) → 'Прякор' (nickname; matches nicknameRequired 'Прякорът е задължителен').",
+    "auth.languages.hr.name — 'Хръватски' → 'Хърватски' (spelling).",
+    "auth.languages.ka.name — 'Гръцки' (Greek, wrong — duplicate of el) → 'Грузински' (Georgian).",
+    "auth.languages.tr.name — 'Турцки' → 'Турски' (spelling).",
+    "onboardingInfo.category.relationships.description — 'откликнат с съпричастност' → 'откликнат със съпричастност' (preposition с→със before с-).",
+    "settingsPages.password.resetCodeSent — 'Изпратихме ти код за нулиране на имейл адрес {email}' (literal EN calque, reads as resetting the email address) → 'Изпратихме кода за нулиране до имейл адрес {email}'."
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — English role labels kept inside Bulgarian text; uninflected and not definite-articled (Bulgarian would normally use 'Donor-ът'/'Donee-то' or a native noun)."
+    },
+    {
+      "severity": "P1",
+      "note": "Tokens naming: English plural used as singular noun in compounds ('Юмрук Tokens', 'Торба с Tokens') and counted forms ('1 Token'); wording needs product + linguist decision (токени/жетони)."
+    },
+    {
+      "severity": "P2",
+      "note": "Grammatical gender / style: onboarding.tokens.page4Title 'А сега всичко е готово за старт!' fine; no masculine-speaker assumptions found, but accomplishedDream.description 'Твоята мечта беше сбъдната от' + name relies on runtime name concatenation — verify layout."
+    },
+    {
+      "severity": "P2",
+      "note": "onboarding.tokens.page1Text / tokensOnboarding.description are long near-duplicates; page3Title 'Паричен поток' ('Cash flow') mirrors EN placeholder-like copy — product copy to be rewritten for all locales."
+    },
+    {
+      "severity": "P2",
+      "note": "common.tokenShop.iosPaymentsUnavailable contains developer-facing text ('Изгради iOS отново след cap sync/pod install.') copied from EN; should not be shown to end users."
+    },
+    {
+      "severity": "P2",
+      "note": "Word-for-word EN calques worth a linguist's pass: 'Ами сега. Тук няма нищо...' (system.notFoundTitle), 'Печели' (Earn), 'Профил' vs 'Акаунт' (both used: 'Създай профил' vs 'Настройки на акаунта'), 'Имейл' vs 'електронна поща' (changeEmailAddress)."
+    },
+    {
+      "severity": "P3",
+      "note": "22 strict identical-to-EN keys (language nativeNames, dreamhubb, Donor/Donee, Tokens) — acceptable."
+    },
+    {
+      "severity": "P3",
+      "note": "legal.* namespace is navigation/labels only; full Terms/Privacy bodies remain English-only (englishOnlyNotice present) pending legal review."
+    }
+  ]
+}

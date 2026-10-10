@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "it",
+  "phase": "4E.2",
+  "source": "Derived from EN/SK product meanings. Not human-approved.",
+  "addressStyle": {
+    "decision": "tu (informal singular)",
+    "rationale": "Aligned with ES tú / DE du for social app tone. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    { "en": "Dream", "sk": "Sen", "recommendedIt": "Sogno", "decision": "DECIDED_AI" },
+    { "en": "Problem", "sk": "Problém", "recommendedIt": "Problema", "decision": "DECIDED_AI" },
+    { "en": "Idea", "sk": "Nápad", "recommendedIt": "Idea", "decision": "DECIDED_AI" },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedIt": "Pubblicazione",
+      "alternatives": ["Post"],
+      "decision": "DECIDED_AI_WITH_REVIEW"
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedIt": "Feed",
+      "alternatives": ["Bacheca", "Flusso"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedIt": "Donor",
+      "alternatives": ["Donatore", "Aiutante"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedIt": "Donee",
+      "alternatives": ["Beneficiario", "Richiedente"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    { "en": "Help", "sk": "Pomoc", "recommendedIt": "Aiuto", "decision": "DECIDED_AI" },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedIt": "Contributo / Atto di aiuto",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedIt": "Ricarica (token) / Sostegno",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid charity Donazione for token top-ups."
+    },
+    { "en": "Token", "sk": "Token", "recommendedIt": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "sk": "Odmena", "recommendedIt": "Ricompensa", "decision": "DECIDED_AI" },
+    { "en": "Badge", "sk": "Odznak", "recommendedIt": "Badge", "alternatives": ["Distintivo"], "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Review", "sk": "Recenzia", "recommendedIt": "Recensione", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "sk": "Inšpirácia", "recommendedIt": "Ispirazione", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "sk": "Splnené", "recommendedIt": "Realizzato", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "sk": "Prebiehajúce", "recommendedIt": "In corso", "decision": "DECIDED_AI" }
+  ]
+}

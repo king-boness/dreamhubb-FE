@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "ro",
+  "phase": "4E.5",
+  "source": "Derived from EN product meanings; SK for product sense only. Not human-approved. Do not copy FR/IT mechanically.",
+  "addressStyle": {
+    "decision": "tu (informal singular)",
+    "rationale": "Aligned with social-app informal tone. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    { "en": "Dream", "recommendedRo": "Vis", "decision": "DECIDED_AI" },
+    { "en": "Problem", "recommendedRo": "Problemă", "decision": "DECIDED_AI" },
+    { "en": "Idea", "recommendedRo": "Idee", "decision": "DECIDED_AI" },
+    {
+      "en": "Post",
+      "recommendedRo": "Postare",
+      "alternatives": ["Post"],
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "User content unit — not Contribution."
+    },
+    {
+      "en": "Feed",
+      "recommendedRo": "Feed",
+      "alternatives": ["Flux", "Timpeline"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "recommendedRo": "Donor",
+      "alternatives": ["Dăruitor", "Ajutător"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "recommendedRo": "Donee",
+      "alternatives": ["Beneficiar", "Solicitant"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    { "en": "Help", "recommendedRo": "Ajutor", "decision": "DECIDED_AI" },
+    {
+      "en": "Contribution",
+      "recommendedRo": "Contribuție",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Act of help — distinct from Postare."
+    },
+    {
+      "en": "Donation",
+      "recommendedRo": "Sprijin / Încărcare",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid charity Donație for token top-ups where context is wallet."
+    },
+    { "en": "Token", "recommendedRo": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "recommendedRo": "Recompensă", "decision": "DECIDED_AI" },
+    { "en": "Badge", "recommendedRo": "Insignă", "decision": "DECIDED_AI" },
+    { "en": "Review", "recommendedRo": "Recenzie", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "recommendedRo": "Inspirație", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "recommendedRo": "Realizat", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "recommendedRo": "În curs", "decision": "DECIDED_AI" }
+  ],
+  "pluralization": {
+    "note": "Romanian CLDR one/few/other via romanianPluralRule in boot/i18n.ts. few includes 0,2–19,101–119; other includes 20–100,120+. Prefer 4-form for resultsCount: zero|one|few|other with 'de' in other (e.g. {n} de rezultate). validateImport allows +2 forms for ro. Verified in Phase 4E.5 by running real vue-i18n createI18n with the actual romanianPluralRule against Intl.PluralRules('ro') for n=0,1,2,5,12,19,20,21,22,100,101,102,119,120,121,1000,1001,1019,1020 on all 9 plural keys (feed.resultsCount 4-form; posts.daysAgo/hoursAgo/minutesAgo/weeksAgo/monthsAgo/fundsTokens/rewardLabel and profileUi.tokensMeta 3-form): 0 mismatches; 'de' appears exactly for CLDR 'other'.",
+    "status": "VERIFIED_RUNTIME",
+    "rule": "ro: romanianPluralRule",
+    "source": "https://unicode.org/cldr/charts/49/supplemental/language_plural_rules.html"
+  }
+}

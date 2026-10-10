@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "phase": "4E.6",
+  "generatedAt": "2026-10-10T19:00:00.000Z",
+  "note": "Central product/linguistic decision register. AI drafts do NOT resolve these. No APPROVED invented. 4E.6 added hr/bg/uk. Slovenian (sl) BLOCKED — not in APP_LANGUAGES and no message pack; do not invent.",
+  "decisions": [
+    {
+      "id": "PD-PT-REGION-001",
+      "title": "Portuguese regional variant (pt vs pt-PT vs pt-BR)",
+      "type": "PRODUCT_DECISION_REQUIRED",
+      "status": "OPEN",
+      "languages": ["pt"],
+      "namespaces": ["*"],
+      "currentBehavior": "UI locale code is `pt` only. Quasar maps pt→pt-BR. Machine drafts use international Portuguese (você) with PT/BR lexical mix (e.g. Utilizador vs senha/Salvar).",
+      "alternatives": [
+        {
+          "id": "A",
+          "label": "pt-BR — Brazilian Portuguese",
+          "pros": ["Matches Quasar pt-BR", "Large user base", "Consistent with você"],
+          "cons": ["May alienate PT-PT users", "Would require lexical cleanup of PT-PT forms"],
+          "impact": {
+            "translations": "Rewrite PT-PT-leaning strings toward BR",
+            "quasar": "Keep pt→pt-BR",
+            "htmlLang": "lang=pt or pt-BR (product choice)",
+            "preferred_locale": "Stay `pt` or migrate to `pt-BR` (requires APP_LANGUAGES + DB migration)",
+            "uiOptions": "Would change 59-language list if introducing pt-BR"
+          }
+        },
+        {
+          "id": "B",
+          "label": "pt-PT — European Portuguese",
+          "pros": ["Formal European market alignment", "Matches Utilizador/Introduza"],
+          "cons": ["Quasar has no first-class pt-PT pack (would use pt or custom)", "Conflicts with current Quasar pt-BR mapping"],
+          "impact": {
+            "translations": "Rewrite BR-leaning strings (senha→palavra-passe, etc.)",
+            "quasar": "Need alternate pack or accept pt-BR chrome mismatch",
+            "htmlLang": "lang=pt-PT",
+            "preferred_locale": "New code requires migration",
+            "uiOptions": "Would change language list"
+          }
+        },
+        {
+          "id": "C",
+          "label": "pt — single code with documented working norm",
+          "pros": ["No migration", "Keeps 59 UI options unchanged", "Lowest technical risk"],
+          "cons": ["Lexical mix remains until human regional pass", "Quasar chrome stays BR-flavored"],
+          "impact": {
+            "translations": "Human review enforces chosen norm under `pt`",
+            "quasar": "Keep pt→pt-BR (document as framework chrome)",
+            "htmlLang": "lang=pt (current)",
+            "preferred_locale": "No change",
+            "uiOptions": "No change"
+          }
+        }
+      ],
+      "recommendation": "Prefer VARIANT C short-term (stabilize under `pt`, human regional pass). Defer introducing pt-PT/pt-BR locale codes until product explicitly wants split markets.",
+      "risk": "Shipping mixed PT/BR copy without decision confuses users and reviewers.",
+      "decider": "Product owner + language lead",
+      "doNotAutoExecute": true
+    },
+    {
+      "id": "PD-ROLE-DONOR-DONEE-001",
+      "title": "Donor / Donee product role labels",
+      "type": "PRODUCT_DECISION_REQUIRED",
+      "status": "OPEN",
+      "languages": ["de", "fr", "es", "pl", "it", "pt", "cs", "hu", "nl", "ro", "*"],
+      "namespaces": ["auth", "onboarding", "profile", "posts", "common"],
+      "currentBehavior": "English role terms kept in MACHINE_DRAFT catalogs (aligned DE/FR/ES/PL/IT/PT/CS/HU/NL/RO).",
+      "alternatives": [
+        "Keep English Donor/Donee globally",
+        "Localize per language (Donateur/Beneficiaire, Donante/Beneficiario, …)",
+        "Rename product roles entirely (Helper/Seeker, etc.)"
+      ],
+      "recommendation": "Keep English until global UX terminology workshop; do not localize piecemeal.",
+      "risk": "Inconsistent role names across languages damage product clarity.",
+      "decider": "Product owner",
+      "doNotAutoExecute": true
+    },
+    {
+      "id": "PD-TERM-CONTRIBUTION-DONATION-001",
+      "title": "Contribution vs Donation vs Token top-up wording",
+      "type": "LINGUISTIC_REVIEW_REQUIRED",
+      "status": "OPEN",
+      "languages": ["de", "fr", "es", "pl", "it", "pt", "cs", "hu", "nl", "ro"],
+      "namespaces": ["auth", "posts", "common", "profile"],
+      "currentBehavior": "Help act ≈ Contribution/Wsparcie/Contributo/Příspěvek pomoci/Hozzájárulás/Bijdrage/Contribuție; wallet recharge ≈ Recarga/Ricarica/Auffüllung/Dobití/Feltöltés/Steun/Sprijin — charity 'donation' avoided where context is tokens.",
+      "alternatives": ["Unify under Contribution", "Keep Donation only for charity contexts", "Always say Top-up/Recarga for tokens"],
+      "recommendation": "Human linguistic review per language; preserve product meaning (help ≠ charity-only).",
+      "risk": "Users may think dreamhubb is only financial fundraising.",
+      "decider": "Language reviewers + product",
+      "doNotAutoExecute": true
+    },
+    {
+      "id": "PD-TERM-POST-001",
+      "title": "Post terminology (Publication / Wpis / Beitrag / …)",
+      "type": "LINGUISTIC_REVIEW_REQUIRED",
+      "status": "OPEN",
+      "languages": ["de", "fr", "es", "pl", "it", "pt", "cs", "hu", "nl", "ro"],
+      "namespaces": ["feed", "posts", "auth"],
+      "currentBehavior": "FE uses localized content-unit terms (Publication, Wpis, Beitrag, Publicación, Pubblicazione, Publicação, Příspěvek, Bejegyzés, Bericht, Postare).",
+      "alternatives": ["Keep loanword Post", "Keep localized Publication/Wpis/…"],
+      "recommendation": "Keep localized forms; confirm in human review.",
+      "risk": "Low if consistent within each locale.",
+      "decider": "Language reviewers",
+      "doNotAutoExecute": true
+    },
+    {
+      "id": "PD-TERM-FEED-001",
+      "title": "Feed label (loanword vs localized)",
+      "type": "LINGUISTIC_REVIEW_REQUIRED",
+      "status": "OPEN",
+      "languages": ["de", "fr", "es", "pl", "it", "pt", "cs", "hu", "nl", "ro"],
+      "namespaces": ["feed", "common"],
+      "currentBehavior": "Often kept as Feed; FR Fil; CS Nástěnka; HU Hírfolyam; NL Tijdlijn; RO Flux — alternatives in glossaries.",
+      "alternatives": ["Keep Feed", "Localize (Fil, Tablica, Bacheca, Nástěnka, Hírfolyam, Tijdlijn, Flux, …)"],
+      "recommendation": "Human review per locale.",
+      "risk": "Medium UX consistency.",
+      "decider": "Language reviewers",
+      "doNotAutoExecute": true
+    },
+    {
+      "id": "PD-TERM-TOKEN-001",
+      "title": "Token product term",
+      "type": "PRODUCT_DECISION_REQUIRED",
+      "status": "OPEN",
+      "languages": ["*"],
+      "namespaces": ["common", "posts", "profile", "earnUi"],
+      "currentBehavior": "Token kept as product term (not ficha/jeton/moneda).",
+      "alternatives": ["Keep Token globally", "Localize currency metaphor"],
+      "recommendation": "Keep Token unless product rebrands economy.",
+      "risk": "Localizing may break brand/economy clarity.",
+      "decider": "Product owner",
+      "doNotAutoExecute": true
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "de",
+  "phase": "4C.1",
+  "source": "Derived from glossary.en-sk.json, EN/SK/DE catalogs, and product UI context. Not legal advice. Not human-approved.",
+  "addressStyle": {
+    "decision": "du (informal singular)",
+    "rationale": "Existing DE catalog overwhelmingly uses du/dein (137+ hits). Formal Sie appears only as false positives (3rd person) or rare edge cases. Matches SK informal style and mobile social-app tone.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    {
+      "en": "Dream",
+      "sk": "Sen",
+      "existingDe": "Traum / Träume",
+      "recommendedDe": "Traum",
+      "context": "Post category; feed filters; create flow",
+      "exceptions": ["Brand dreamhubb never translated"],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": "Plural Träume. Lowercase traum in feed.postType is stylistic UI label."
+    },
+    {
+      "en": "Problem",
+      "sk": "Problém",
+      "existingDe": "Problem / Probleme",
+      "recommendedDe": "Problem",
+      "context": "Post category",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": "Identical to EN is correct German; keep."
+    },
+    {
+      "en": "Idea",
+      "sk": "Nápad",
+      "existingDe": "Idee / Ideen",
+      "recommendedDe": "Idee",
+      "context": "Post category",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": null
+    },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "existingDe": "Beitrag",
+      "recommendedDe": "Beitrag",
+      "context": "UGC item (dream/problem/idea) in feed and detail",
+      "exceptions": [],
+      "confusionRisk": "high — overlaps German everyday use of Beitrag with Contribution",
+      "decision": "DECIDED_AI",
+      "notes": "Reserve Beitrag for Post. Do not use Beitrag for help/contribution actions."
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed / Nástenka",
+      "existingDe": "Feed",
+      "recommendedDe": "Feed",
+      "context": "Main scrolling list",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Loanword acceptable in DE product UI; Start-Feed used in longer copy."
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "existingDe": "Donor (mixed Empfänger elsewhere)",
+      "recommendedDe": "Donor",
+      "context": "User role / side picker / reviews",
+      "exceptions": [],
+      "confusionRisk": "medium — Spender implies money",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Keep English product role term. Avoid Spender/Geber. Align all role labels to Donor."
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "existingDe": "Donee / Empfänger (inconsistent)",
+      "recommendedDe": "Donee",
+      "context": "User role / help message target",
+      "exceptions": [],
+      "confusionRisk": "high — Empfänger sounds like parcel recipient",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Prefer Donee as product term over Empfänger. Human may choose Hilfesuchende/r later."
+    },
+    {
+      "en": "Help",
+      "sk": "Pomoc",
+      "existingDe": "Hilfe",
+      "recommendedDe": "Hilfe",
+      "context": "Help flow, contribution_type help, support chrome",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": "Distinct from token top-up."
+    },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "existingDe": "Beitrag / Hilfeaktion (mixed)",
+      "recommendedDe": "Hilfeaktion",
+      "context": "Help/comment action on a post; comments tab",
+      "exceptions": ["CTA may use Helfen"],
+      "confusionRisk": "high if translated as Beitrag",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Do not call contributions Beitrag. Align with posts.commentsTabContribution."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN / Prispenia (token context)",
+      "existingDe": "Spende / gespendet (misleading for tokens)",
+      "recommendedDe": "Auffüllung (token top-up) / Unterstützung (generic)",
+      "context": "Token top-up UI (posts.edit.donations); success.donationSuccessful",
+      "exceptions": ["Physical goods 'Spenden' may appear in possessions category copy"],
+      "confusionRisk": "high — Spende implies money charity",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Token transfers are not charity Spenden. Use auffüllen/aufstocken for token top-ups."
+    },
+    {
+      "en": "Token",
+      "sk": "Token",
+      "existingDe": "Token / Tokens",
+      "recommendedDe": "Token",
+      "context": "Currency, shop, earn, balances",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": "Invariant plural Token is fine in DE UI; Tokens also appears and is acceptable."
+    },
+    {
+      "en": "Reward",
+      "sk": "Odmena",
+      "existingDe": "Belohnung",
+      "recommendedDe": "Belohnung",
+      "context": "Post reward label, earn incentives",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": null
+    },
+    {
+      "en": "Badge",
+      "sk": "Odznak",
+      "existingDe": "Abzeichen",
+      "recommendedDe": "Abzeichen",
+      "context": "Profile badges",
+      "exceptions": ["Patron badge name may stay English"],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": null
+    },
+    {
+      "en": "Review",
+      "sk": "Recenzia",
+      "existingDe": "Bewertung / Rezension",
+      "recommendedDe": "Bewertung",
+      "context": "Post-accomplishment thank-you review",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Prefer Bewertung over Rezension for in-app feedback."
+    },
+    {
+      "en": "Inspiration",
+      "sk": "Inšpirácia",
+      "existingDe": "Inspiration",
+      "recommendedDe": "Inspiration",
+      "context": "Inspiration feed feature",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": "Same form in DE."
+    },
+    {
+      "en": "Accomplished",
+      "sk": "Splnené",
+      "existingDe": "Erfüllt",
+      "recommendedDe": "Erfüllt",
+      "context": "Post status",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": "Consistent with dream fulfilment framing."
+    },
+    {
+      "en": "Ongoing",
+      "sk": "Prebieha",
+      "existingDe": "Laufend",
+      "recommendedDe": "Laufend",
+      "context": "Active post status filters",
+      "exceptions": [],
+      "confusionRisk": "low",
+      "decision": "DECIDED_AI",
+      "notes": null
+    }
+  ]
+}

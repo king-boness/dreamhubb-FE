@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "source": "Derived from existing EN/SK UI catalogs and product usage (Phase 3/3F). Not legal advice.",
+  "terms": [
+    {
+      "en": "Dream",
+      "sk": "Sen",
+      "meaning": "One of three post categories: a personal goal the donee wants to fulfil with community help.",
+      "context": "Post type / category / feed filters / creation flow",
+      "exceptions": ["Brand/product name dreamhubb is never translated."],
+      "notes": "UI often uses lowercase in running text; category labels may be title case."
+    },
+    {
+      "en": "Problem",
+      "sk": "Problém",
+      "meaning": "Post category for a difficulty the donee wants help solving.",
+      "context": "Post type / category / feed filters / creation flow",
+      "exceptions": [],
+      "notes": null
+    },
+    {
+      "en": "Idea",
+      "sk": "Nápad",
+      "meaning": "Post category for an idea seeking support, feedback, or resources.",
+      "context": "Post type / category / feed filters / creation flow",
+      "exceptions": [],
+      "notes": null
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "meaning": "User role / side focused on helping others (browse feed, contribute, earn tokens).",
+      "context": "Onboarding side picker, navigation, settings",
+      "exceptions": [],
+      "notes": "Product term; keep consistent across UI."
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "meaning": "User role / side focused on sharing dreams/problems/ideas and receiving help.",
+      "context": "Onboarding side picker, post creation, profiles",
+      "exceptions": [],
+      "notes": "English product term 'Donee' may remain in some partial packs; SK catalog uses Príjemca."
+    },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "meaning": "User-generated content item (dream/problem/idea) shown in feed and detail.",
+      "context": "Feed cards, detail, create/edit",
+      "exceptions": [],
+      "notes": "Do not confuse with social-network 'post' jargon in other products."
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "meaning": "Main scrolling list of posts for the current side/filters.",
+      "context": "Donor/Donee home posts screens",
+      "exceptions": ["SK may keep 'Feed' as loanword in some strings — OPEN for terminology review."],
+      "notes": "OPEN: confirm preferred SK rendering (Feed vs Prehľad/Nástenka) with product."
+    },
+    {
+      "en": "Help",
+      "sk": "Pomoc",
+      "meaning": "Act of offering non-token or message-based support on a post (contribution_type help), and general support UI.",
+      "context": "Help flow CTA, contribution type, support pages",
+      "exceptions": [],
+      "notes": "Distinct from Token top-up / donate flows."
+    },
+    {
+      "en": "Contribution",
+      "sk": "Príspevok / prispenie",
+      "meaning": "A help/comment action attached to a post (message, optional return_message), including replies.",
+      "context": "Comments, help offers, notifications",
+      "exceptions": ["SK UI may use 'komentár' in comment chrome — OPEN if contribution ≠ comment."],
+      "notes": "OPEN: align Contribution vs Comment terminology in SK."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "meaning": "Ambiguous in product copy: may refer to token top-up or general giving. Requires product confirmation before locking SK.",
+      "context": "Possibly legacy strings / donate endpoints",
+      "exceptions": [],
+      "notes": "OPEN: do not invent a SK equivalent until product confirms meaning vs Token top-up."
+    },
+    {
+      "en": "Token",
+      "sk": "Token",
+      "meaning": "In-app virtual currency unit used for rewards, shop, and post top-ups.",
+      "context": "Token shop, earn, balances, post funding",
+      "exceptions": ["Usually left as 'Token' in SK."],
+      "notes": "Brand/product currency name — intentional unchanged candidate."
+    },
+    {
+      "en": "Reward",
+      "sk": "Odmena",
+      "meaning": "Tokens granted for completing Earn tasks or similar incentives.",
+      "context": "Earn tasks",
+      "exceptions": [],
+      "notes": null
+    },
+    {
+      "en": "Accomplished",
+      "sk": "Splnené / Dosiahnuté",
+      "meaning": "Post/dream reached its goal / marked accomplished.",
+      "context": "Post status, accomplished dream screens",
+      "exceptions": [],
+      "notes": "OPEN: pick one primary SK adjective across UI."
+    },
+    {
+      "en": "Ongoing",
+      "sk": "Prebieha / Prebiehajúce",
+      "meaning": "Active post that is not yet accomplished.",
+      "context": "Post status filters",
+      "exceptions": [],
+      "notes": null
+    },
+    {
+      "en": "Badge",
+      "sk": "Odznak",
+      "meaning": "Profile achievement/badge shown on user profiles.",
+      "context": "Profile badges swiper",
+      "exceptions": [],
+      "notes": null
+    },
+    {
+      "en": "Review",
+      "sk": "Recenzia",
+      "meaning": "Thank-you / feedback review after a dream is accomplished.",
+      "context": "Donator review flow",
+      "exceptions": [],
+      "notes": null
+    },
+    {
+      "en": "Inspiration",
+      "sk": "Inšpirácia",
+      "meaning": "Inspiration feed item / shared motivational content feature.",
+      "context": "Inspirations feed",
+      "exceptions": [],
+      "notes": null
+    }
+  ]
+}

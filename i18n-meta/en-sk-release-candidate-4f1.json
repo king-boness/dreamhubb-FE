@@ -1,0 +1,171 @@
+{
+  "phase": "4F.1",
+  "title": "EN/SK Release Candidate Readiness",
+  "generatedAt": "2026-10-10T19:20:00.000Z",
+  "scope": {
+    "officialSupportedLocales": ["en-US", "sk"],
+    "alias": { "en-GB": "en-US messages + Quasar en-US; html lang preserved as en-GB" },
+    "notOfficiallySupported": "Other APP_LANGUAGES entries may be TECHNICALLY_COMPLETE / AWAITING_REVIEW / EXPERIMENTAL — not OFFICIALLY_SUPPORTED"
+  },
+  "baselineVerified": {
+    "uiLanguages": 59,
+    "messagePacks": 58,
+    "referenceKeys": 859,
+    "technicallyCompletePacks": 15,
+    "incompletePacks": 43,
+    "i18nErrors": 0,
+    "i18nWarnings": 43,
+    "toolingTests": "49/49 PASS",
+    "build": "PASS"
+  },
+  "enUs": {
+    "feCatalog": { "status": "READY", "explicitOwn": 859, "inheritedEn": 0, "runtimeMissing": 0 },
+    "quasar": "READY",
+    "htmlLang": "READY",
+    "reviewStatuses": { "NEEDS_REVIEW": 854, "INTENTIONALLY_UNCHANGED": 5, "REVIEWED": 0, "APPROVED": 0 },
+    "backendMessages": "PARTIAL",
+    "emails": "PARTIAL (lang/en/mail.php + templates)",
+    "legalBody": "published EN",
+    "legalApproval": "NOT READY (no independent counsel evidence in repo)",
+    "overallRelease": "NOT READY"
+  },
+  "sk": {
+    "feCatalog": { "status": "READY", "explicitOwn": 859, "inheritedEn": 0, "runtimeMissing": 0, "identicalToEn": 30 },
+    "quasar": "READY",
+    "htmlLang": "READY",
+    "reviewStatuses": {
+      "EXISTING_UNREVIEWED": 829,
+      "NEEDS_REVIEW": 28,
+      "INTENTIONALLY_UNCHANGED": 2,
+      "REVIEWED": 0,
+      "APPROVED": 0
+    },
+    "backendMessages": "PARTIAL (Accept-Language sk → earn/validation/password; most API JSON still EN)",
+    "emails": "PARTIAL (preferred_locale → system sk|en)",
+    "legalChrome": "READY",
+    "legalBody": "EN-only + englishOnlyNotice (languages.sk.status=not_available)",
+    "legalApproval": "NOT READY",
+    "overallRelease": "NOT READY"
+  },
+  "localePersistence": {
+    "guest": {
+      "storageKey": "dreamhubb_language",
+      "default": "en-US",
+      "browserLocaleUsedForUiBoot": false,
+      "status": "READY WITH CONDITIONS",
+      "notes": "No public guest language picker; register copies guest locale to preferred_locale"
+    },
+    "authenticated": {
+      "sourceOfTruth": "users.preferred_locale when set; else force en-US",
+      "api": "PUT /api/user/update",
+      "acceptLanguage": "from localStorage per request (apiLanguage.ts)",
+      "logoutClearsLanguageStorage": false,
+      "status": "READY WITH CONDITIONS"
+    }
+  },
+  "migration": {
+    "file": "database/migrations/2026_10_10_120000_add_preferred_locale_to_users_table.php",
+    "codeStatus": "READY",
+    "productionStatus": "UNKNOWN",
+    "backfillRequired": false
+  },
+  "phpunitLocaleEmail": { "result": "26/26 PASS", "assertions": 87 },
+  "e2e": {
+    "environment": {
+      "fe": "http://127.0.0.1:9001",
+      "be": "http://127.0.0.1:8002",
+      "db": "dreamhubb_e2e",
+      "workers": 1,
+      "fullyParallel": false
+    },
+    "stabilityNotes": [
+      "Fixture JWTs expire (prepare with JWT_TTL=120 minutes); remint via dreamhubb:e2e-prepare --force before dense suites",
+      "Language Save test hardened against delayed router.back() destroying evaluate context",
+      "UK donee assertion targets .settingsLang-title 'Змінити мову' + html lang=uk"
+    ],
+    "suites": {
+      "authenticated-flows": "PARTIAL — core donor/donee/locale/help/legal covered; some timing flakes observed on feed/notifications waits",
+      "i18n-locale": "PASS",
+      "i18n-acceptance": "PASS",
+      "sk-feed-authenticated": "PASS",
+      "uk-feed-authenticated": "PASS"
+    }
+  },
+  "ukFollowUp": {
+    "decimalMapping": "CLDR other → many pipe index (catalogs lack dedicated other form)",
+    "runtimeInputs": "Integer counts only (e.g. filteredPosts.length) — no production decimal call-site found",
+    "doneeAssertion": "PASS — asserts changeLanguage title + html lang=uk",
+    "catalogRewrite": "NOT DONE (out of scope)"
+  },
+  "releasePolicyProposal": {
+    "official": ["en-US", "sk"],
+    "experimentalUiOptions": "remaining APP_LANGUAGES (59 total) remain selectable pending product gating",
+    "doNotHideSelectorInThisPhase": true,
+    "userFacingDisclosureRecommended": "Settings/About note that only EN/SK are officially supported for system emails and legal body"
+  },
+  "blockers": {
+    "P0": [
+      {
+        "id": "RC-P0-DEPLOY-UNKNOWN",
+        "description": "Production preferred_locale migration + deploy state unverified",
+        "releaseBlocking": true
+      },
+      {
+        "id": "RC-P0-LEGAL-SK",
+        "description": "SK Terms/Privacy body not available/approved; EN body only",
+        "releaseBlocking": true,
+        "note": "May ship EN/SK UI with EN legal + notice if product accepts"
+      }
+    ],
+    "P1": [
+      {
+        "id": "RC-P1-BE-HARDCODED",
+        "description": "Most API JSON messages remain hardcoded English outside earn/validation/password",
+        "releaseBlocking": false
+      },
+      {
+        "id": "RC-P1-NOTIFICATIONS-EN",
+        "description": "In-app notification titles persisted in English at write time",
+        "releaseBlocking": false
+      },
+      {
+        "id": "RC-P1-E2E-JWT-FLAKES",
+        "description": "Dense Playwright suites require reminted fixture JWTs; some UI timing flakes remain",
+        "releaseBlocking": false
+      }
+    ],
+    "P2": [
+      {
+        "id": "RC-P2-59-LANG-DISCLOSURE",
+        "description": "59 UI languages may imply full support; needs product disclosure/gating decision",
+        "releaseBlocking": false
+      },
+      {
+        "id": "RC-P2-SK-HUMAN-REVIEW",
+        "description": "SK REVIEWED/APPROVED = 0; EXISTING_UNREVIEWED dominant",
+        "releaseBlocking": false
+      }
+    ],
+    "P3": [
+      {
+        "id": "RC-P3-VERIFYEMAIL-SK-ONLY",
+        "description": "verifyEmail API JSON responses are Slovak-only regardless of Accept-Language",
+        "releaseBlocking": false
+      },
+      {
+        "id": "RC-P3-INCOMPLETE-PACKS",
+        "description": "43 incomplete foreign packs — not EN/SK release blockers",
+        "releaseBlocking": false
+      }
+    ]
+  },
+  "verdicts": {
+    "frontendReadiness": "READY WITH CONDITIONS",
+    "backendReadiness": "READY WITH CONDITIONS",
+    "emailReadiness": "READY WITH CONDITIONS",
+    "functionalE2eReadiness": "READY WITH CONDITIONS",
+    "legalReadiness": "NOT READY",
+    "deploymentReadiness": "NOT READY",
+    "overallReleaseReadiness": "NOT READY"
+  }
+}

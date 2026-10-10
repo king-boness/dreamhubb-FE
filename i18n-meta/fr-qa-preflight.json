@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "phase": "4D",
+  "locale": "fr",
+  "generatedAt": "2026-10-10T12:42:41.148Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED.",
+  "addressStyle": {
+    "decision": "vous (formal singular/plural)",
+    "rationale": "Existing fr/auth already uses votre/vous (e.g. « Déjà dans votre langue. »). Keep consistency across new MACHINE_DRAFT strings.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "intentionalIdenticalMarked": 40,
+  "identicalTotal": 53,
+  "identicalStillOpen": [
+    {
+      "keyPath": "inspirations",
+      "value": "Inspirations"
+    },
+    {
+      "keyPath": "notificationsLabel",
+      "value": "Notifications"
+    },
+    {
+      "keyPath": "sources",
+      "value": "Sources"
+    },
+    {
+      "keyPath": "continent",
+      "value": "Continent"
+    },
+    {
+      "keyPath": "languages.bn.name",
+      "value": "Bengali"
+    },
+    {
+      "keyPath": "languages.kk.name",
+      "value": "Kazakh"
+    },
+    {
+      "keyPath": "languages.lo.name",
+      "value": "Lao"
+    },
+    {
+      "keyPath": "languages.sw-TZ.name",
+      "value": "Swahili"
+    },
+    {
+      "keyPath": "notificationsPage.title",
+      "value": "Notifications"
+    },
+    {
+      "keyPath": "onboardingInfo.category.profession.title",
+      "value": "Profession"
+    },
+    {
+      "keyPath": "badges.badge",
+      "value": "Badge"
+    },
+    {
+      "keyPath": "profession",
+      "value": "Profession"
+    },
+    {
+      "keyPath": "subcategories.profession",
+      "value": "Profession"
+    }
+  ],
+  "sampleSpotCheck": [
+    {
+      "keyPath": "contribute",
+      "fr": "CONTRIBUER",
+      "en": "CONTRIBUTE"
+    },
+    {
+      "keyPath": "contributions",
+      "fr": "Cotisations",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "privateContribution",
+      "fr": "Contribution privée",
+      "en": "Private Contribution"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "fr": "Recharge réussie : {amount} Tokens !",
+      "en": "Successfully donated {amount} tokens!"
+    },
+    {
+      "keyPath": "posts.edit.donations",
+      "fr": "Recharges",
+      "en": "Donations"
+    },
+    {
+      "keyPath": "aboutDonee",
+      "fr": "À propos du Donee",
+      "en": "About Donee"
+    },
+    {
+      "keyPath": "signIn",
+      "fr": "Se connecter",
+      "en": "Sign In"
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "fr": "Aucun résultat | {n} résultat | {n} résultats",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "tokensOnboarding.title",
+      "fr": "Présentation des tokens de devise",
+      "en": "Introducing Currency Tokens"
+    }
+  ],
+  "openTerminology": [
+    "Donor",
+    "Donee",
+    "Contribution",
+    "Donation",
+    "Feed",
+    "Publication vs Post"
+  ],
+  "fixesAppliedKeys": [
+    "contributions",
+    "tokensOnboarding.title",
+    "posts.fundsTokens",
+    "posts.rewardLabel",
+    "profileUi.tokensMeta"
+  ],
+  "fixesApplied": [
+    {
+      "keyPath": "contributions",
+      "from": "Cotisations",
+      "to": "Contributions",
+      "reason": "false friend: membership dues"
+    },
+    {
+      "keyPath": "tokensOnboarding.title",
+      "from": "Présentation des tokens de devise",
+      "to": "Découvrez les Currency Tokens",
+      "reason": "more natural onboarding CTA title"
+    }
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "keyPath": "Donor/Donee",
+      "note": "PRODUCT_DECISION_REQUIRED — keep EN role labels"
+    },
+    {
+      "severity": "P1",
+      "keyPath": "contributions vs Cotisations",
+      "note": "fixed Cotisations→Contributions"
+    },
+    {
+      "severity": "P2",
+      "keyPath": "Feed→Fil",
+      "note": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "severity": "P2",
+      "keyPath": "Post→Publication",
+      "note": "consistent with existing auth FR"
+    },
+    {
+      "severity": "P3",
+      "keyPath": "identical cognates",
+      "note": "13+40 INTENTIONALLY_UNCHANGED"
+    }
+  ],
+  "confirmedErrorsFixed": 5,
+  "finalMetrics": {
+    "explicitOwn": 859,
+    "inherited": 0,
+    "missing": 0,
+    "machineDraft": 724,
+    "existingUnreviewed": 82,
+    "intentionallyUnchanged": 53,
+    "reviewed": 0,
+    "approved": 0,
+    "needsReview": 0
+  },
+  "humanReviewPackage": "i18n-meta/packages/fr-4d-human-review-workpackage.json"
+}

@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "es",
+  "phase": "4E.1",
+  "source": "Derived from EN/SK product meanings and existing ES auth tone. Not human-approved.",
+  "addressStyle": {
+    "decision": "tú (informal singular)",
+    "rationale": "Existing es/auth already uses tú/te/tu forms (e.g. informal CTAs). Keep consistency across new MACHINE_DRAFT strings. International Spanish, not ES/LATAM regional variants.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    {
+      "en": "Dream",
+      "sk": "Sen",
+      "recommendedEs": "Sueño",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Problem",
+      "sk": "Problém",
+      "recommendedEs": "Problema",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Idea",
+      "sk": "Nápad",
+      "recommendedEs": "Idea",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedEs": "Publicación",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "User content unit; prefer Publicación over anglicism post."
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedEs": "Feed",
+      "alternatives": ["Inicio", "Muro"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedEs": "Donor",
+      "alternatives": ["Donante", "Ayudante"],
+      "decision": "PRODUCT_DECISION_REQUIRED",
+      "notes": "Keep English product role term for now (aligned with DE/FR)."
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedEs": "Donee",
+      "alternatives": ["Beneficiario", "Solicitante"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Help",
+      "sk": "Pomoc",
+      "recommendedEs": "Ayuda",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedEs": "Contribución / Acto de ayuda",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Do not confuse with Publicación (Post)."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedEs": "Recarga (tokens) / Apoyo",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid implying charity donación for token top-ups when context is wallet recharge."
+    },
+    {
+      "en": "Token",
+      "sk": "Token",
+      "recommendedEs": "Token",
+      "decision": "DECIDED_AI",
+      "notes": "Keep product term Token (not ficha/moneda)."
+    },
+    {
+      "en": "Reward",
+      "sk": "Odmena",
+      "recommendedEs": "Recompensa",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Badge",
+      "sk": "Odznak",
+      "recommendedEs": "Insignia",
+      "alternatives": ["Badge"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Review",
+      "sk": "Recenzia",
+      "recommendedEs": "Reseña",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Inspiration",
+      "sk": "Inšpirácia",
+      "recommendedEs": "Inspiración",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Accomplished",
+      "sk": "Splnené",
+      "recommendedEs": "Logrado",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Ongoing",
+      "sk": "Prebiehajúce",
+      "recommendedEs": "En curso",
+      "decision": "DECIDED_AI"
+    }
+  ]
+}

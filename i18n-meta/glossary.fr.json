@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "fr",
+  "phase": "4D",
+  "source": "Derived from EN/SK product meanings and existing FR auth tone. Not human-approved.",
+  "addressStyle": {
+    "decision": "vous (formal singular/plural)",
+    "rationale": "Existing fr/auth already uses votre/vous (e.g. « Déjà dans votre langue. »). Keep consistency across new MACHINE_DRAFT strings.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    {
+      "en": "Dream",
+      "sk": "Sen",
+      "recommendedFr": "Rêve",
+      "decision": "DECIDED_AI",
+      "notes": "Category label; lowercase rêve in feed.postType for stylistic UI."
+    },
+    {
+      "en": "Problem",
+      "sk": "Problém",
+      "recommendedFr": "Problème",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Idea",
+      "sk": "Nápad",
+      "recommendedFr": "Idée",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedFr": "Publication",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "Existing FR auth uses « publication ». Prefer over « post » loanword."
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedFr": "Fil",
+      "alternatives": ["Feed"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "« Fil » is clear; some apps keep Feed."
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedFr": "Donor",
+      "alternatives": ["Donateur", "Aidant"],
+      "decision": "PRODUCT_DECISION_REQUIRED",
+      "notes": "Keep English product role term for now (aligned with DE decision)."
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedFr": "Donee",
+      "alternatives": ["Bénéficiaire", "Demandeur d'aide"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Help",
+      "sk": "Pomoc",
+      "recommendedFr": "Aide",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedFr": "Contribution / Acte d'aide",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Do not confuse with Publication (Post)."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedFr": "Recharge (tokens) / Soutien",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid implying charity « don » for token top-ups."
+    },
+    {
+      "en": "Token",
+      "sk": "Token",
+      "recommendedFr": "Token",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Reward",
+      "sk": "Odmena",
+      "recommendedFr": "Récompense",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Badge",
+      "sk": "Odznak",
+      "recommendedFr": "Badge",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Review",
+      "sk": "Recenzia",
+      "recommendedFr": "Avis",
+      "decision": "DECIDED_AI_WITH_REVIEW"
+    },
+    {
+      "en": "Inspiration",
+      "sk": "Inšpirácia",
+      "recommendedFr": "Inspiration",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Accomplished",
+      "sk": "Splnené",
+      "recommendedFr": "Accompli",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Ongoing",
+      "sk": "Prebieha",
+      "recommendedFr": "En cours",
+      "decision": "DECIDED_AI"
+    }
+  ]
+}

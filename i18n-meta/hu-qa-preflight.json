@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "phase": "4E.4",
+  "locale": "hu",
+  "generatedAt": "2026-10-10T17:00:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. All hu keys remain MACHINE_DRAFT; no reviewOverrides APPROVED entries were written.",
+  "addressStyle": {
+    "decision": "te (informal singular)",
+    "rationale": "Existing hu strings consistently use informal singular forms (Válaszd, Add meg, Próbáld újra, Nézd meg, Kérlek + imperative). Keep consistent across MACHINE_DRAFT strings; no formal (ön/Ön) forms found.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "placeholderSuffixScan": "No case/vowel-harmony suffix is attached directly to a {placeholder}. Constructions use 'Label: {value}' (e.g. 'Itt: {postTitle}', 'használd ezt: {report}', 'erre a címre: {email}') or a possessive on the following word ('{name} profilja', '{name} válasza'), which are safe with nominative runtime values. Exception: 'Sikeresen támogattál {amount} tokennel!' — '-nel' is attached to the noun, not the number, and is correct after numerals (singular noun).",
+    "postVsContributionDisambiguation": "OK — Post = 'bejegyzés', Contribution = 'hozzájárulás', CTA contribute = 'HOZZÁJÁRULÁS'. No confusion found in common/posts/auth/settings/legal.",
+    "pluralPipeLayouts": "Hungarian uses singular after numerals; pipe counts mirror EN (2-form for time-ago/token strings, 3-form for feed.resultsCount). Both forms identical by design — verified no extra CLDR forms.",
+    "slovakismScan": "One leak found and fixed: legal.englishOnlyNotice referred to 'A szlovák változat' (Slovak version) — corrected to 'A magyar változat'."
+  },
+  "intentionalIdenticalMarked": 33,
+  "identicalTotal": 33,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "contribute",
+      "hu": "HOZZÁJÁRULÁS",
+      "en": "CONTRIBUTE"
+    },
+    {
+      "keyPath": "contributions",
+      "hu": "Hozzájárulások",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "privateContribution",
+      "hu": "Privát hozzájárulás",
+      "en": "Private Contribution"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "hu": "Sikeresen támogattál {amount} tokennel!",
+      "en": "Successfully donated {amount} tokens!"
+    },
+    {
+      "keyPath": "notifications.topUpTitle",
+      "hu": "{name} {amount} tokennel feltöltötte a bejegyzésedet",
+      "en": "{name} topped up your post by {amount} tokens"
+    },
+    {
+      "keyPath": "legal.englishOnlyNotice",
+      "hu": "Ez a jogi dokumentum jelenleg csak angol nyelven érhető el. A magyar változat jogi felülvizsgálat után kerül közzétételre.",
+      "en": "This legal document is currently available in English only.",
+      "note": "Fixed in 4E.4 (was 'A szlovák változat' — wrong language)."
+    },
+    {
+      "keyPath": "languages.en-GB.name",
+      "hu": "Angol (Egyesült Királyság)",
+      "en": "English (United Kingdom)",
+      "note": "Fixed in 4E.4 (typo 'Egyesúlt')."
+    },
+    {
+      "keyPath": "explainerTitle3",
+      "hu": "Szerezz Tokeneket segítségnyújtással",
+      "en": "Earn Tokens by helping",
+      "note": "Fixed in 4E.4 (was unnatural 'segítéssel'); same fix in onboarding.help.slide3Title."
+    },
+    {
+      "keyPath": "resetLinkSentGeneric",
+      "hu": "Ha létezik ilyen fiók, elküldtük az e-mailt a további teendőkkel.",
+      "en": "If the account exists, we sent you an email with instructions.",
+      "note": "Fixed in 4E.4 (was stilted 'Ha a fiók létezik, e-mailt küldtünk neked az útmutatással.')."
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "hu": "Nincs találat | {n} találat | {n} találat",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "posts.daysAgo",
+      "hu": "{n} napja | {n} napja",
+      "en": "{n} day ago | {n} days ago"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "hu": "Keress bármire",
+      "en": "Search anything"
+    }
+  ],
+  "openTerminology": [
+    "Donor / Donee — kept as English role labels with Hungarian suffixes ('A Donee-ről', 'donee-k', 'Donorodat'); alternatives Adományozó/Támogató and Kedvezményezett/Segítségkérő",
+    "Contribution (Hozzájárulás) vs Post (Bejegyzés)",
+    "Donation (Támogatás / Feltöltés) — success='támogattál', notifications='feltöltötte', edit.donations='Támogatások': mixed 'support' vs 'top up' metaphors",
+    "Feed (loanword 'feed' vs Hírfolyam/Főoldal)",
+    "Token capitalization ('Tokenek' in FAQ/explainer vs 'tokenek' elsewhere)"
+  ],
+  "confirmedErrorsFixed": 8,
+  "confirmedErrorsFixedDetail": [
+    "legal.englishOnlyNotice — 'szlovák változat' → 'magyar változat' (wrong language)",
+    "languages.en-GB.name — 'Egyesúlt' → 'Egyesült' (typo)",
+    "accountSettings — 'Fiók beállítások' → 'Fiókbeállítások' (compound orthography)",
+    "appSettings — 'Alkalmazás beállítások' → 'Alkalmazásbeállítások' (compound orthography)",
+    "explainerTitle3 + onboarding.help.slide3Title — 'segítéssel' → 'segítségnyújtással'",
+    "resetLinkSentGeneric — unnatural wording rewritten",
+    "inspirationDeleteConfirmText — stilted passive 'el lesz távolítva' → 'törlődik'"
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — English role labels kept; suffixing is awkward in Hungarian (hyphenated 'Donee-ről', 'donee-knek', 'donee-k'). Native alternatives should be decided."
+    },
+    {
+      "severity": "P2",
+      "note": "Feed loanword vs Hírfolyam/Főoldal (LINGUISTIC_REVIEW_REQUIRED); 'feededből', 'feedhez' inflections are valid but informal."
+    },
+    {
+      "severity": "P2",
+      "note": "Donation wording mixed: 'Támogatások' (posts.edit.donations), 'támogattál' (success), 'feltöltötte' (notification), 'Kapott támogatás' (stats)."
+    },
+    {
+      "severity": "P3",
+      "note": "onboarding.tokens.page2Option / page3Title ('Pénzforgalom') mirror EN placeholder-like copy."
+    },
+    {
+      "severity": "P3",
+      "note": "Capitalization of 'Token/Tokenek' inconsistent: capitalized in FAQ/explainer/legal anchors, lowercase in UI strings."
+    },
+    {
+      "severity": "P3",
+      "note": "profileUi.earnTasks / statsUi.earnTasks 'Szerzési feladatok' is slightly stiff; consider 'Jutalomfeladatok' / 'Feladatok'."
+    },
+    {
+      "severity": "P3",
+      "note": "languages.lo.name 'Lao' → conventional Hungarian 'Laoszi'; Hindi/Kannada/Marathi/Tamil/Telugu/Thai/Urdu names identical to EN (acceptable, check against Hungarian exonyms: kannada, maráthi)."
+    },
+    {
+      "severity": "P3",
+      "note": "Gender-neutral handling: Hungarian has no grammatical gender; 'Nő/Férfi' labels and 'Egyéb' fine. No action."
+    },
+    {
+      "severity": "P3",
+      "note": "33 identical-to-EN keys (language endonyms, US city/state names, 'Donee'/'Donor', 'dreamhubb')."
+    },
+    {
+      "severity": "P3",
+      "scope": "tooling",
+      "note": "scripts/i18n/hu-4e4-translations-data.mjs was synced with the fixes that apply to it (inherited/missing keys); fixes to own auth.ts strings (en-GB typo, accountSettings, appSettings) existed only in src/i18n/hu/auth.ts."
+    }
+  ]
+}

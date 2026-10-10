@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "phase": "4E.6",
+  "locale": "hr",
+  "generatedAt": "2026-10-10T16:40:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. All hr keys remain MACHINE_DRAFT (859/859 at start); no reviewOverrides APPROVED entries were written. Other locales untouched.",
+  "addressStyle": {
+    "decision": "ti (informal singular)",
+    "rationale": "Strings consistently use informal singular imperatives and 2nd person (Odaberi, Pokušaj ponovno, Provjeri, Unesi, Nemaš, Tvoj). No formal (Vi/vi) forms found.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "placeholderMismatchNote": "Raw {n} counts differ from EN only in the 9 plural-pipe keys because hr has more forms (3/4 vs 2/3); the placeholder SET is identical in every form. All other keys: identical placeholder sets, no case suffix attached directly to a {placeholder} ('korisnika {name}', 'O korisniku {name}', 'Profil korisnika {name}' put the noun before the name; 'tokeni: {amount}' uses a label construction).",
+    "pluralization": {
+      "status": "VERIFIED_RUNTIME",
+      "rule": "croatianPluralRule (src/boot/i18n.ts)",
+      "method": "Rule extracted from source and compared to Intl.PluralRules('hr') for n in {0–5,10–15,19–22,24,25,31,101,102,111,112,121,1000} for 2-, 3- and 4-form pipes: 0 mismatches. scripts/i18n-plural-smoke.js hr feed.resultsCount (18 counts) + HR vs SK n=21 contrast: PASS.",
+      "layouts": {
+        "feed.resultsCount": "4-form zero|one|few|other",
+        "posts.daysAgo, hoursAgo, minutesAgo, weeksAgo, monthsAgo, fundsTokens, rewardLabel; profileUi.tokensMeta": "3-form one|few|other"
+      },
+      "keysChecked": 9
+    },
+    "postVsContributionDisambiguation": "OK — Post = 'objava', Contribution = 'doprinos', CTA contribute = 'PRIDONESI', verb 'pridonijeti'. Donation uses 'doniranje'/'podrška' (mixed, see open findings). No confusion between Post and Contribution.",
+    "serbianBosnianLeakScan": "No ekavian/Serbian/Bosnian forms found: ijekavian ('svijet', 'riječ', 'vrijedi'), Croatian lexis ('tjedan', 'kupnja', 'poveznica', 'zaslon', 'tisuće' n/a, 'glazba'). 'Hrvatski'/'Srpski' language names correct.",
+    "slovakCzechLeakScan": "No Slovak/Czech diacritics or function words found outside intentional nativeName values; regex hits ('sa svijetom', 'sa svojim tokenima', 'Ako ne sanjaš') are valid Croatian.",
+    "terminologyConsistency": "Objava/San/Ideja/Problem/Token/Nagrada/Značka/Recenzija/Inspiracija/Ostvareno/U tijeku consistent with glossary.hr.json. 'Feed' kept as loanword consistently. Poništi/poništavanje used consistently for password reset."
+  },
+  "intentionalIdenticalMarked": 33,
+  "identicalTotal": 33,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "contribute",
+      "hr": "PRIDONESI",
+      "en": "CONTRIBUTE"
+    },
+    {
+      "keyPath": "contributions",
+      "hr": "Doprinosi",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "privateContribution",
+      "hr": "Privatni doprinos",
+      "en": "Private Contribution"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "hr": "Doniranje je uspješno! Tokeni: {amount}",
+      "en": "Successfully donated {amount} tokens!",
+      "note": "Label construction avoids numeral+noun agreement with a runtime {amount}."
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "hr": "Nema rezultata | {n} rezultat | {n} rezultata | {n} rezultata",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "posts.daysAgo",
+      "hr": "prije {n} dan | prije {n} dana | prije {n} dana",
+      "en": "{n} day ago | {n} days ago"
+    },
+    {
+      "keyPath": "posts.minutesAgo",
+      "hr": "prije {n} minutu | prije {n} minute | prije {n} minuta",
+      "en": "{n} minute ago | {n} minutes ago"
+    },
+    {
+      "keyPath": "legal.englishOnlyNotice",
+      "hr": "Ovaj pravni dokument trenutačno je dostupan samo na engleskom jeziku. Hrvatska verzija bit će objavljena nakon pravne provjere.",
+      "en": "This legal document is currently available in English only."
+    },
+    {
+      "keyPath": "legal.support.blockManage",
+      "hr": "Blokiranim računima možeš upravljati u aplikaciji: Postavke → Blokirani korisnici.",
+      "en": "Manage blocked accounts in the app under Settings → Blocked users.",
+      "note": "Fixed in 4E.6 (was 'Blokirane račune možeš upravljati u aplikaciji u Postavke → …': wrong case government — 'upravljati' takes instrumental — and 'u Postavke' wrong preposition case)."
+    },
+    {
+      "keyPath": "resetLinkSentGeneric",
+      "hr": "Ako račun postoji, poslali smo ti e-mail s uputama.",
+      "en": "If the account exists, we sent you an email with instructions."
+    },
+    {
+      "keyPath": "languages.hr.name",
+      "hr": "Hrvatski",
+      "en": "Croatian"
+    },
+    {
+      "keyPath": "languages.sr.name",
+      "hr": "Srpski",
+      "en": "Serbian"
+    }
+  ],
+  "openTerminology": [
+    "Donor / Donee — English role labels kept ('Donor', 'Donee', plural hack 'Donees', 'donori'); PRODUCT_DECISION_REQUIRED. Croatian alternatives: Darovatelj/Donator, Primatelj/Korisnik pomoći. 'Donee' has no Croatian inflection (O Donee, za Donee, Donees).",
+    "Contribution (Doprinos) vs Donation (Doniranje / Podrška / 'Nadopuna' in glossary) — LINGUISTIC_REVIEW_REQUIRED; glossary suggests 'Nadopuna / Podrška' but UI uses 'Podrška' and 'Doniranje'.",
+    "Feed — loanword 'feed' vs 'Sažetak' / 'Vremenska crta' — LINGUISTIC_REVIEW_REQUIRED.",
+    "Password reset — 'Poništi lozinku' / 'poveznica za poništavanje' vs more idiomatic 'Ponovno postavi lozinku' — LINGUISTIC_REVIEW_REQUIRED.",
+    "obavezan vs obvezan — UI uses 'obavezan' (colloquial/common); standard-language purists prefer 'obvezan'."
+  ],
+  "confirmedErrorsFixed": 1,
+  "confirmedErrorsFixedDetail": [
+    "legal.support.blockManage — 'Blokirane račune možeš upravljati u aplikaciji u Postavke → Blokirani korisnici.' → 'Blokiranim računima možeš upravljati u aplikaciji: Postavke → Blokirani korisnici.' (case government + preposition)."
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — English role labels kept; Donee is uninflectable and 'Donees' is an English plural inside Croatian text (onboarding.side.donee, aboutDonee, typeYourMessageForDonee, profileUi.rateDonor 'Donora')."
+    },
+    {
+      "severity": "P1",
+      "note": "Grammatical gender: several strings assume masculine speaker/user — 'Još nisi blokirao nikoga' (settingsPages.ban.empty), 'jesi li odabrao' (onboarding.validation.locationProcessFailed), 'A sada si spreman!' (onboarding.tokens.page4Title), 'nisi siguran' (onboardingInfo.category.other), 'želio otići' (onboardingInfo.category.traveling), 'što si već pokušao' (goal.problem), 'Tvoj san ostvario je' (accomplishedDream.description, speaker unknown). Neutral rephrasings recommended (e.g. 'Nemaš blokiranih korisnika.', 'Sve je spremno!'). Not auto-fixed — style/product decision, not a clear error."
+    },
+    {
+      "severity": "P2",
+      "note": "accomplishedDream.description 'Tvoj san ostvario je' + name: mirrors EN fragment; masculine 'ostvario' wrong if the accomplisher is female — consider 'Tvoj san ostvaruje/Tvoj san ostvaruje korisnik …' or restructure with {name}."
+    },
+    {
+      "severity": "P2",
+      "note": "Donation wording mixed: 'Doniranje' (success), 'Podrška' (posts.edit.donations, statsUi.supportReceived), 'Nadopuna / Podrška' in glossary, 'DOPUNI OBJAVU' for top-up."
+    },
+    {
+      "severity": "P2",
+      "note": "onboarding.tokens.page1Title 'Naslov o tome kako funkcionira', page2Option 'Povezujemo sanjare s onima', page3Title 'Tijek novca' mirror EN placeholder-like copy ('Headline of how it works', 'Cash flow'); product copy to be rewritten for all locales."
+    },
+    {
+      "severity": "P2",
+      "note": "common.tokenShop.iosPaymentsUnavailable contains developer-facing text ('Ponovno izgradi iOS nakon cap sync/pod install.') copied from EN; should not be shown to end users."
+    },
+    {
+      "severity": "P3",
+      "note": "Capitalization of 'Donee/Donor' inside running text and 'Token(i)' (lowercase in UI, capitalized in anchors) — consistency check."
+    },
+    {
+      "severity": "P3",
+      "note": "33 identical-to-EN keys (language nativeNames, US city/state names, 'dreamhubb', 'Chicago', etc.) — acceptable; 'Hausa', 'Lao', 'Hindi', 'Telugu', 'Urdu' language names acceptable per Croatian usage."
+    }
+  ]
+}

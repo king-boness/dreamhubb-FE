@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "phase": "4E.6",
+  "locale": "uk",
+  "generatedAt": "2026-10-10T17:00:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. No reviewOverrides APPROVED/REVIEWED entries were written. Other locales untouched; sl not invented. Actual status at export time: 761 MACHINE_DRAFT / 85 EXISTING_UNREVIEWED / 13 NEEDS_REVIEW (nativeName values) — not 859/859 MACHINE_DRAFT.",
+  "statusCounts": {
+    "MACHINE_DRAFT": 761,
+    "EXISTING_UNREVIEWED": 85,
+    "NEEDS_REVIEW": 13,
+    "REVIEWED": 0,
+    "APPROVED": 0
+  },
+  "addressStyle": {
+    "decision": "ти (informal singular)",
+    "rationale": "Strings consistently use informal singular imperatives and 2nd person (Обери, Спробуй, Перевір, Введи, Твій, У тебе). No formal (Ви/ви) forms in new strings; one existing plural-imperative bug fixed (changeLanguage).",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "placeholderMismatchNote": "Placeholder SETS identical to en-US for all 859 keys (scripted comparison). Raw counts differ only in plural-pipe keys (UK has more forms).",
+    "pluralization": {
+      "status": "VERIFIED_RUNTIME",
+      "rule": "ukrainianPluralRule (src/boot/i18n.ts)",
+      "method": "3-form rule compared to Intl.PluralRules('uk') for n in {1–5,10–15,19–22,24,25,31,101,102,111,112,121,1000}: 0 mismatches. scripts/i18n-plural-smoke.js UK feed.resultsCount 19 integer counts + 3 decimals: PASS (21=one, 22=few, 25=many, 11–14=many, 0=zero form, decimals→many).",
+      "layouts": {
+        "feed.resultsCount": "4-form zero|one|few|many",
+        "posts.daysAgo, hoursAgo, minutesAgo, weeksAgo, monthsAgo, fundsTokens, rewardLabel; profileUi.tokensMeta": "3-form one|few|many (Token labels use identical forms: indeclinable loanword)"
+      },
+      "keysChecked": 9
+    },
+    "ukrainianNotRussianScan": "No Russian-only letters (ы, э, ъ, ё) remain after the fix of languages.he.name ('Эврейська' → 'Єврейська'). No Russianisms (что/это/или/если etc.) found. Apostrophe consistently ASCII ' (no ’/ʼ mix). Ukrainian lexis used: 'застосунок', 'допис', 'електронна адреса', 'скасувати', 'розв'язувати', 'Налаштування'.",
+    "postVsContributionDisambiguation": "OK — Post = 'допис', Contribution = 'внесок', CTA contribute = 'ЗРОБИТИ ВНЕСОК'. Donation uses 'Підтримка'/'Успішно надіслано Token' (mixed, see open findings). No confusion between Post and Contribution.",
+    "terminologyConsistency": "Допис/Мрія/Ідея/Проблема/Token/Нагорода/Значок/Відгук/Натхнення/Здійснено/Триває consistent with glossary.uk.json. 'Feed', 'Token', 'Donor', 'Donee' kept as loanwords. Token treated as indeclinable (plural forms identical)."
+  },
+  "intentionalIdenticalMarked": 16,
+  "identicalTotal": 16,
+  "identicalNote": "13 language nativeName values (Latin/other scripts), explainerTitle5 'dreamhubb', onboarding.sideDonor/sideDonee (Donor/Donee product-decision loanwords).",
+  "sampleSpotCheck": [
+    { "keyPath": "contribute", "uk": "ЗРОБИТИ ВНЕСОК", "en": "CONTRIBUTE" },
+    { "keyPath": "feed.resultsCount", "uk": "Немає результатів | {n} результат | {n} результати | {n} результатів", "en": "No results | {n} result | {n} results" },
+    { "keyPath": "posts.daysAgo", "uk": "{n} день тому | {n} дні тому | {n} днів тому", "en": "{n} day ago | {n} days ago" },
+    { "keyPath": "posts.minutesAgo", "uk": "{n} хвилину тому | {n} хвилини тому | {n} хвилин тому", "en": "{n} minute ago | {n} minutes ago" },
+    { "keyPath": "success.donationSuccessful", "uk": "Успішно надіслано Token: {amount}!", "en": "Successfully donated {amount} tokens!", "note": "Label construction avoids numeral+noun agreement with a runtime {amount}." },
+    { "keyPath": "settingsPages.support.reviewPolicies", "uk": "Також можна переглянути: {privacy} та {terms}.", "en": "You can also review our {privacy} and {terms}.", "note": "Fixed in 4E.6 (was 'ознайомитися з {privacy} та {terms}': preposition 'з' needs instrumental, but placeholders are nominative link labels)." },
+    { "keyPath": "legal.support.blockManage", "uk": "Керуй заблокованими акаунтами в застосунку: Налаштування → Заблоковані користувачі.", "en": "Manage blocked accounts in the app under Settings → Blocked users." },
+    { "keyPath": "resetLinkSentGeneric", "uk": "Якщо акаунт існує, ми надіслали тобі листа з інструкціями.", "en": "If the account exists, we sent you an email with instructions." },
+    { "keyPath": "languages.uk.name", "uk": "Українська", "en": "Ukrainian" },
+    { "keyPath": "languages.he.name", "uk": "Єврейська", "en": "Hebrew", "note": "Fixed in 4E.6: Russian letter 'Э' → Ukrainian 'Є' (see open findings: 'Іврит' is the standard name for the language)." }
+  ],
+  "confirmedErrorsFixed": 8,
+  "confirmedErrorsFixedDetail": [
+    "[existing, EXISTING_UNREVIEWED] auth.changeLanguage — 'Змінить мову' (2nd-person plural imperative, inconsistent with ти-style) → 'Змінити мову'.",
+    "[existing, EXISTING_UNREVIEWED] auth.nickname — 'Прізвище' (= surname) → 'Псевдонім' (matches nicknameRequired 'Псевдонім обов'язковий' and EN 'Nickname').",
+    "[existing, EXISTING_UNREVIEWED] auth.realName — 'Справжній ім'я' (gender disagreement) → 'Справжнє ім'я'.",
+    "[existing, EXISTING_UNREVIEWED] auth.languages.he.name — 'Эврейська' (Russian letter Э) → 'Єврейська'.",
+    "[existing, EXISTING_UNREVIEWED] auth.languages.vi-VN.name — 'В'їтнамська' (typo) → 'В'єтнамська'.",
+    "[MACHINE_DRAFT] settingsPages.support.reviewPolicies — 'Також можна ознайомитися з {privacy} та {terms}.' (case mismatch: 'з' + nominative placeholders) → 'Також можна переглянути: {privacy} та {terms}.'",
+    "[MACHINE_DRAFT] onboardingInfo.side.donee.description — 'Donor, яким відгукується твоя історія' (calque of Russian 'отзывается' / EN 'resonate') → 'Donor, яким близька твоя історія'.",
+    "[code comment] src/i18n/uk/auth.ts header said 'German' → 'Ukrainian'."
+  ],
+  "sourceFilesAlsoUpdated": [
+    "scripts/i18n/uk-4e6-translations-data.mjs (reviewPolicies, onboardingInfo.side.donee.description — so a re-run does not regress fixes)",
+    "i18n-meta/packages/uk-4e6-import-settings.json, uk-4e6-import-onboarding.json (same two strings)"
+  ],
+  "openTerminology": [
+    "Donor / Donee — English role labels kept; PRODUCT_DECISION_REQUIRED. Ukrainian alternatives: Донор/Благодійник, Отримувач/Той, хто просить про допомогу. Donor/Donee cannot be declined (profileUi.rateDonor 'свого Donor', 'для Donee', 'допомагати Donee').",
+    "Contribution (Внесок) vs Donation (Підтримка / Поповнення) — LINGUISTIC_REVIEW_REQUIRED; 'Підтримка' (posts.edit.donations), 'Успішно надіслано Token' (success), 'ПОПОВНИТИ ДОПИС' mixed.",
+    "Feed — loanword 'Feed' vs 'Стрічка' — LINGUISTIC_REVIEW_REQUIRED (Ukrainian speakers widely use 'стрічка').",
+    "Password reset — 'Скинути пароль / Скидання пароля' vs 'Відновити пароль / Відновлення пароля' (more idiomatic in UA apps) — LINGUISTIC_REVIEW_REQUIRED.",
+    "'додаток' (existing auth.aboutApp, appSettings) vs 'застосунок' (new legal/common/settings) — pick one app term.",
+    "'Чорний список' (existing banList) vs 'Заблоковані користувачі' (new settingsPages.ban.heading).",
+    "'Допомога і підтримка' (existing helpAndSupport) vs 'Допомога та підтримка' (new legal.support.title).",
+    "'Мова успішно збережена' (existing auth.languageSaved) vs 'Мову успішно збережено' (new success.languageSaved) — passive form inconsistency."
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — untranslated, uninflectable English labels inside Ukrainian sentences (onboarding.sideDonee/sideDonor, onboardingInfo.side.*, profileUi.rateDonor 'Оціни свого Donor', reviewPlaceholder, typeYourMessageForDonee, aboutDonee, plural 'Donor можуть…')."
+    },
+    {
+      "severity": "P1",
+      "note": "Brand/term 'Token' used as indeclinable Latin loanword in every case ('Мішок, повний Token', 'Придбані Token', 'Твої Token додано', 'їх' as pronoun). Natural alternative: 'токен/токени' (Cyrillic, declinable). Pluralization identical for all forms, so runtime-safe; style/product decision."
+    },
+    {
+      "severity": "P2",
+      "note": "Existing language names: 'he' → 'Єврейська' is ambiguous (could mean Yiddish); standard Ukrainian name for Hebrew language is 'Іврит'. 'nl' → 'Голландська' (existing); 'Нідерландська' is the standard name. Not auto-changed (style/consistency with adjective pattern)."
+    },
+    {
+      "severity": "P2",
+      "note": "{name} placeholders after prepositions that require case (profileUi.aboutUser 'Про {name}', notificationsPage.commentTitle/replyTitle 'від {name}', posts.replyFrom, auth.replyToUser 'Відповідь для {name}…') — fine for usernames/handles, wrong if real first names are shown (UA names inflect: 'від Олени')."
+    },
+    {
+      "severity": "P2",
+      "note": "onboarding.tokens.page1Title 'Заголовок про те, як це працює', page2Option 'Ми поєднуємо мрійників із тими', page3Title 'Рух коштів' mirror placeholder-like EN copy; product copy to be rewritten for all locales."
+    },
+    {
+      "severity": "P2",
+      "note": "common.tokenShop.iosPaymentsUnavailable contains developer-facing text ('Перезбери iOS після cap sync/pod install.') copied from EN; should not be shown to end users. earnUi.beTaskTitlesNote is also developer-facing ('…доки на сервері не буде i18n').",
+      "keyPaths": ["common.tokenShop.iosPaymentsUnavailable", "earnUi.beTaskTitlesNote"]
+    },
+    {
+      "severity": "P2",
+      "note": "onboardingInfo.goal.problem.description — 'залишатися сам на сам' uses a masculine-leaning idiom with 'сам'; consider neutral 'залишатися наодинці'. Other strings are gender-neutral ('І тепер усе готово!', 'Заблокованих користувачів поки немає.')."
+    },
+    {
+      "severity": "P3",
+      "note": "'Wi‑Fi' in common.info.openNetworkSettings uses U+2011 (non-breaking hyphen); some fonts lack the glyph — consider ASCII hyphen."
+    },
+    {
+      "severity": "P3",
+      "note": "settingsPages.faq.q6 'Перейди до Налаштування → Допомога та підтримка' — menu path in nominative after 'до'; consider «Налаштування» in guillemets like q4/q5."
+    },
+    {
+      "severity": "P3",
+      "note": "16 identical-to-EN keys (13 nativeName, 'dreamhubb', Donor, Donee) — acceptable/intentional; 13 nativeName values stay NEEDS_REVIEW."
+    }
+  ]
+}

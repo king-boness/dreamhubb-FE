@@ -1,0 +1,207 @@
+{
+  "phase": "4F.4B",
+  "generated": "2026-10-10",
+  "git_mutations_executed": false,
+  "awaiting": "APPROVE LOCAL RELEASE COMMITS",
+  "forbidden_until_approval": ["git add", "git rm --cached", "git commit", "git push", "deploy"],
+  "baseline": {
+    "fe": {
+      "branch": "release/1.0.0",
+      "head": "1a67b3d870e7a2f405fa6c7a8576d8486f2c246c",
+      "dirty": 336,
+      "staged": 0
+    },
+    "be": {
+      "branch": "main",
+      "head": "448295132c000c88324bf77079d8a6287e149130",
+      "dirty": 45,
+      "staged": 0
+    }
+  },
+  "be_allowlist": {
+    "RELEASE_MIGRATION": [
+      "database/migrations/2026_10_10_120000_add_preferred_locale_to_users_table.php",
+      "database/migrations/2026_10_10_180000_create_jobs_table_for_local_queue.php"
+    ],
+    "RELEASE_CODE": [
+      "app/Exceptions/Handler.php",
+      "app/Http/Controllers/AuthController.php",
+      "app/Http/Controllers/ContributionController.php",
+      "app/Http/Controllers/EarnTaskController.php",
+      "app/Http/Controllers/NotificationController.php",
+      "app/Http/Controllers/PostController.php",
+      "app/Http/Controllers/UserController.php",
+      "app/Http/Controllers/PasswordResetController.php",
+      "app/Http/Kernel.php",
+      "app/Http/Middleware/CapacitorCors.php",
+      "app/Http/Middleware/SetLocaleFromAcceptLanguage.php",
+      "app/Models/User.php",
+      "app/Providers/AuthServiceProvider.php",
+      "app/Providers/RouteServiceProvider.php",
+      "app/Services/EarnTaskService.php",
+      "app/Support/ContentModeration.php",
+      "app/Support/NotificationLocalizer.php",
+      "app/Support/UserLocale.php",
+      "config/app_locales.php",
+      "config/translation.php",
+      "lang/en/auth.php",
+      "lang/en/earn.php",
+      "lang/en/mail.php",
+      "lang/en/messages.php",
+      "lang/en/passwords.php",
+      "lang/en/validation.php",
+      "lang/sk/auth.php",
+      "lang/sk/earn.php",
+      "lang/sk/mail.php",
+      "lang/sk/messages.php",
+      "lang/sk/passwords.php",
+      "lang/sk/validation.php",
+      "resources/views/email/verify.blade.php",
+      "resources/views/email/reset.blade.php",
+      "routes/api.php"
+    ],
+    "RELEASE_TEST": [
+      "tests/Feature/AsyncMailLocaleIsolationTest.php",
+      "tests/Feature/AuthRateLimitEnabledTest.php",
+      "tests/Feature/ConcurrentDonateTokenTest.php",
+      "tests/Feature/ConcurrentPostTopUpTokenTest.php",
+      "tests/Feature/DatabaseQueueMailLocaleTest.php",
+      "tests/Feature/E2eSecurityGuardsTest.php",
+      "tests/Feature/EnSkApiMessagesTest.php",
+      "tests/Feature/LocaleAndEarnLocalizationTest.php",
+      "tests/Feature/ModerationComplianceTest.php",
+      "tests/Feature/NotificationLocalizerEdgeCasesTest.php",
+      "tests/Feature/NotificationXssRenderingContractTest.php",
+      "tests/Feature/NotificationsUnreadCountTest.php",
+      "tests/Feature/PasswordResetSecurityTest.php",
+      "tests/Feature/PreferredLocaleAndMailTest.php",
+      "tests/Feature/PreferredLocaleMigrationRehearsalTest.php"
+    ],
+    "RELEASE_TEST_OPTIONAL_E2E_TOOLING": [
+      "app/Console/Commands/PrepareE2eDatabaseCommand.php",
+      "database/seeders/E2eScenarioSeeder.php",
+      "scripts/e2e-prepare-db.sh",
+      "scripts/e2e-queue-mail-rehearsal.php"
+    ],
+    "SECRET": [],
+    "EXCLUDED": [".env", ".env.*", "storage/logs/*", "*.sql", "*.dump"]
+  },
+  "fe_allowlist": {
+    "RELEASE_CODE": [
+      "src/",
+      "index.html",
+      "package.json",
+      "public/static-legal/"
+    ],
+    "RELEASE_CODE_DELETIONS_NEEDS_HOSTING_CONFIRM": [
+      "public/terms/index.html",
+      "public/privacy/index.html",
+      "public/privacy-policy/index.html"
+    ],
+    "RELEASE_TEST": [
+      "e2e/authenticated-flows.spec.ts",
+      "e2e/pure-browser-onboarding.spec.ts",
+      "e2e/registration-onboarding.spec.ts",
+      "e2e/i18n-acceptance.spec.ts",
+      "e2e/i18n-locale.spec.ts",
+      "e2e/sk-feed-authenticated.spec.ts",
+      "e2e/helpers/",
+      "e2e/bg-feed-authenticated.spec.ts",
+      "e2e/cs-feed-authenticated.spec.ts",
+      "e2e/de-feed-authenticated.spec.ts",
+      "e2e/es-feed-authenticated.spec.ts",
+      "e2e/fr-feed-authenticated.spec.ts",
+      "e2e/hr-feed-authenticated.spec.ts",
+      "e2e/hu-feed-authenticated.spec.ts",
+      "e2e/it-feed-authenticated.spec.ts",
+      "e2e/nl-feed-authenticated.spec.ts",
+      "e2e/pl-feed-authenticated.spec.ts",
+      "e2e/pt-feed-authenticated.spec.ts",
+      "e2e/ro-feed-authenticated.spec.ts",
+      "e2e/uk-feed-authenticated.spec.ts",
+      "scripts/i18n-check.js",
+      "scripts/i18n-plural-smoke.js",
+      "scripts/api-language-smoke.js",
+      "scripts/i18n/"
+    ],
+    "RELEASE_DOCUMENTATION_SLIM": [
+      "i18n-meta/en-sk-release-candidate-4f1.json",
+      "i18n-meta/en-sk-release-blockers-4f2.json",
+      "i18n-meta/en-sk-final-gates-4f4.json",
+      "i18n-meta/en-sk-final-gates-4f4.md",
+      "i18n-meta/pre-staging-freeze-4f4a.json",
+      "i18n-meta/pre-staging-freeze-4f4a.md",
+      "i18n-meta/secure-release-freeze-4f4b.md",
+      "i18n-meta/secure-release-allowlist-4f4b.json",
+      "i18n-meta/legal-review-package-4f4.md",
+      "i18n-meta/legal-counsel-checklist-4f4a.md",
+      "i18n-meta/product-decision-pack-4f4.md",
+      "i18n-meta/glossary.en-sk.json",
+      "i18n-meta/locale-names.json"
+    ],
+    "SECRET": [".env"],
+    "EXCLUDED": [
+      ".env",
+      "dist/",
+      "test-results/",
+      "playwright-report/",
+      ".tmp-uk/",
+      "i18n-meta/packages/"
+    ],
+    "LOCAL_ONLY": [".env"]
+  },
+  "proposed_commits": {
+    "be": [
+      {
+        "id": "BE-1",
+        "message": "feat(i18n): add preferred_locale and EN/SK API localization",
+        "groups": ["RELEASE_MIGRATION", "RELEASE_CODE"]
+      },
+      {
+        "id": "BE-2",
+        "message": "fix(tokens): serialize donate and post top-up with lockForUpdate",
+        "note": "included in Controllers already listed; may fold into BE-1 if same files"
+      },
+      {
+        "id": "BE-3",
+        "message": "test: locale, mail queue, concurrent tokens, auth rate limit, fixture fixes",
+        "groups": ["RELEASE_TEST"]
+      },
+      {
+        "id": "BE-4",
+        "message": "chore(e2e): isolated DB prepare command and seeder",
+        "groups": ["RELEASE_TEST_OPTIONAL_E2E_TOOLING"],
+        "optional": true
+      }
+    ],
+    "fe": [
+      {
+        "id": "FE-0",
+        "message": "chore(security): stop tracking FE .env",
+        "ops": ["git rm --cached -- .env"],
+        "requires_separate_or_same_approval": true
+      },
+      {
+        "id": "FE-1",
+        "message": "feat(i18n): locale runtime and complete message catalogs",
+        "paths": ["src/", "index.html", "package.json"]
+      },
+      {
+        "id": "FE-2",
+        "message": "feat(legal): static-legal mirrors and SPA legal routes integration",
+        "paths": ["public/static-legal/", "public/terms/index.html", "public/privacy/index.html", "public/privacy-policy/index.html"]
+      },
+      {
+        "id": "FE-3",
+        "message": "test(e2e): registration, onboarding, and authenticated EN/SK flows",
+        "paths": ["e2e/", "scripts/"]
+      },
+      {
+        "id": "FE-4",
+        "message": "docs(i18n): release readiness and freeze reports",
+        "paths": ["RELEASE_DOCUMENTATION_SLIM"],
+        "optional": true
+      }
+    ]
+  }
+}

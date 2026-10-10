@@ -1,0 +1,55 @@
+{
+  "phase": "4F.4",
+  "generatedAt": "2026-10-10T19:00:00Z",
+  "baseline": {
+    "feBranch": "release/1.0.0",
+    "feHead": "1a67b3d870e7a2f405fa6c7a8576d8486f2c246c",
+    "feDirty": 336,
+    "beBranch": "main",
+    "beHead": "448295132c000c88324bf77079d8a6287e149130",
+    "beDirty": 45,
+    "productionCommitSha": "UNKNOWN",
+    "versionedReleaseArtifact": "NOT READY"
+  },
+  "phpunit": {
+    "fullSuite": "144/144 PASS",
+    "formerFailures": {
+      "NotificationsUnreadCountTest": {
+        "class": "TEST_BUG",
+        "preExistingAtHead": true,
+        "fixed": true
+      },
+      "ModerationComplianceTest::post_create_rejects_blocked_terms": {
+        "class": "TEST_BUG",
+        "preExistingAtHead": true,
+        "fixed": true
+      }
+    }
+  },
+  "e2e": {
+    "pureBrowserOnboarding": "11/11 PASS",
+    "authenticatedFlows": { "run1": "12/12", "run2": "12/12", "run3": "12/12" },
+    "rateLimitsDuringE2e": "ON (cache clear between tests; not RATE_LIMITER disabled)",
+    "auth429Evidence": "PASS (attempt 6)"
+  },
+  "security": {
+    "notificationXss": "SAFE (Vue text interpolation; no v-html)",
+    "donateLock": "PRESERVED",
+    "topUpLock": "ADDED"
+  },
+  "localization": {
+    "uiLanguages": 59,
+    "messagePacks": 58,
+    "referenceKeys": 859,
+    "technicallyComplete": 15,
+    "incomplete": 43,
+    "errors": 0,
+    "warnings": 43,
+    "tooling": "49/49 PASS",
+    "build": "PASS"
+  },
+  "legal": { "approval": "NOT READY", "skBody": "not_available" },
+  "product": { "approval": "OPEN" },
+  "overallRelease": "NOT READY",
+  "proceedToStaging4F5": false
+}

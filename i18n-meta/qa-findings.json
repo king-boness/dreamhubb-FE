@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "locale": "de",
+  "note": "Open QA findings are NOT primary review statuses (MACHINE_DRAFT/REVIEWED/…). Populated by human-review REJECT / NEEDS_CONTEXT decisions.",
+  "findings": {}
+}

@@ -1,0 +1,39 @@
+{
+  "phase": "4F.4A",
+  "generatedAt": "2026-10-10T19:15:00Z",
+  "commitPushDeploy": false,
+  "baseline": {
+    "fe": {
+      "branch": "release/1.0.0",
+      "head": "1a67b3d870e7a2f405fa6c7a8576d8486f2c246c",
+      "dirtyPorcelain": 336,
+      "staged": 0,
+      "lockfile": "package-lock.json"
+    },
+    "be": {
+      "branch": "main",
+      "head": "448295132c000c88324bf77079d8a6287e149130",
+      "dirtyPorcelain": 45,
+      "staged": 0,
+      "lockfile": "composer.lock"
+    }
+  },
+  "versionedArtifact": "NOT READY",
+  "staging": {
+    "separateEnvironment": "NOT_CONFIGURED",
+    "isolationChecklist": "UNKNOWN",
+    "renderServiceNamed": "dreamhubb-be-php"
+  },
+  "gates": {
+    "technicalCode": "READY_WITH_CONDITIONS",
+    "releaseManifest": "READY",
+    "security": "READY_WITH_CONDITIONS",
+    "versionedArtifact": "NOT READY",
+    "privateStaging": "NOT READY",
+    "publicRelease": "NOT READY"
+  },
+  "legalApproval": "NOT READY",
+  "productApproval": "OPEN",
+  "proceedTo4F5": false,
+  "neverCommit": [".env", ".env.*", "dist/", "test-results/", "playwright-report/"]
+}

@@ -1,0 +1,41 @@
+{
+  "phase": "4F.3",
+  "generatedAt": "2026-10-10T18:30:00Z",
+  "baseline": {
+    "feBranch": "release/1.0.0",
+    "feHead": "1a67b3d870e7a2f405fa6c7a8576d8486f2c246c",
+    "feWorkingTree": "DIRTY",
+    "beBranch": "main",
+    "beHead": "448295132c000c88324bf77079d8a6287e149130",
+    "beWorkingTree": "DIRTY",
+    "productionCommitSha": "UNKNOWN"
+  },
+  "localization": {
+    "uiLanguages": 59,
+    "messagePacks": 58,
+    "referenceKeys": 859,
+    "technicallyComplete": 15,
+    "incomplete": 43,
+    "i18nErrors": 0,
+    "i18nWarnings": 43,
+    "toolingTests": "49/49 PASS",
+    "feBuild": "PASS"
+  },
+  "evidence": {
+    "registrationE2e": "9/9 PASS",
+    "authenticatedFlows": { "run1": "12/12 PASS", "run2": "12/12 PASS", "run3": "12/12 PASS" },
+    "targetedPhpunit": "42/42 PASS",
+    "fullPhpunit": "139 tests; 2 pre-existing failures",
+    "concurrentDonate": "PASS (phpunit + parallel curl 200+400 balance=2)",
+    "databaseQueueMail": "PASS (dreamhubb_e2e jobs drained, no locale leak)",
+    "preferredLocaleMigrationE2e": "Ran; column varchar nullable",
+    "productionMigration": "UNKNOWN"
+  },
+  "postController": {
+    "syntax": "OK",
+    "donateLockForUpdate": "ADDED",
+    "economyChanged": false
+  },
+  "overallRelease": "NOT READY",
+  "blockingCategories": ["LEGAL_DECISION", "UNKNOWN_PRODUCTION_STATE", "DEPLOYMENT_PRECONDITION"]
+}

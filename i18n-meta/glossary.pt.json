@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "pt",
+  "phase": "4E.2",
+  "source": "App locale code is `pt` (APP_LANGUAGES). No pt-PT/pt-BR split in product. Quasar maps pt→pt-BR. Regional norm is PRODUCT_DECISION_REQUIRED.",
+  "regionalVariant": {
+    "appLocaleCode": "pt",
+    "existsInApp": ["pt"],
+    "doesNotExist": ["pt-PT", "pt-BR"],
+    "quasarPack": "pt-BR",
+    "workingConvention": "International Portuguese suitable for both BR and PT readers; prefer forms common across variants; avoid strongly regional slang.",
+    "decision": "PRODUCT_DECISION_REQUIRED",
+    "notes": "Do not invent pt-PT/pt-BR locale codes. Machine drafts are not a regional product choice."
+  },
+  "addressStyle": {
+    "decision": "você (neutral formal/informal singular)",
+    "rationale": "Common in Brazilian UI and understandable in Portugal; PROPOSED for human confirmation. Alternatives: tu (PT-PT informal).",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    { "en": "Dream", "sk": "Sen", "recommendedPt": "Sonho", "decision": "DECIDED_AI" },
+    { "en": "Problem", "sk": "Problém", "recommendedPt": "Problema", "decision": "DECIDED_AI" },
+    { "en": "Idea", "sk": "Nápad", "recommendedPt": "Ideia", "decision": "DECIDED_AI" },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedPt": "Publicação",
+      "decision": "DECIDED_AI_WITH_REVIEW"
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedPt": "Feed",
+      "alternatives": ["Início", "Linha do tempo"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedPt": "Donor",
+      "alternatives": ["Doador", "Ajudante"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedPt": "Donee",
+      "alternatives": ["Beneficiário", "Solicitante"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    { "en": "Help", "sk": "Pomoc", "recommendedPt": "Ajuda", "decision": "DECIDED_AI" },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedPt": "Contribuição / Ato de ajuda",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedPt": "Recarga (tokens) / Apoio",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    { "en": "Token", "sk": "Token", "recommendedPt": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "sk": "Odmena", "recommendedPt": "Recompensa", "decision": "DECIDED_AI" },
+    { "en": "Badge", "sk": "Odznak", "recommendedPt": "Emblema", "alternatives": ["Badge"], "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Review", "sk": "Recenzia", "recommendedPt": "Avaliação", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "sk": "Inšpirácia", "recommendedPt": "Inspiração", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "sk": "Splnené", "recommendedPt": "Concluído", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "sk": "Prebiehajúce", "recommendedPt": "Em andamento", "decision": "DECIDED_AI" }
+  ]
+}

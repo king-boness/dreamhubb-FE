@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "uk",
+  "phase": "4E.6",
+  "source": "Derived from EN; SK for product sense. Standard Ukrainian Cyrillic — NOT Russian. Not human-approved.",
+  "addressStyle": {
+    "decision": "ти (informal singular)",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    {
+      "en": "Dream",
+      "recommendedUk": "Мрія",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Problem",
+      "recommendedUk": "Проблема",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Idea",
+      "recommendedUk": "Ідея",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Post",
+      "recommendedUk": "Допис",
+      "alternatives": [
+        "Публікація"
+      ],
+      "decision": "DECIDED_AI_WITH_REVIEW"
+    },
+    {
+      "en": "Feed",
+      "recommendedUk": "Feed",
+      "alternatives": [
+        "Стрічка"
+      ],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "recommendedUk": "Donor",
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "recommendedUk": "Donee",
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Help",
+      "recommendedUk": "Допомога",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Contribution",
+      "recommendedUk": "Внесок",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donation",
+      "recommendedUk": "Підтримка / Поповнення",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Token",
+      "recommendedUk": "Token",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Reward",
+      "recommendedUk": "Нагорода",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Badge",
+      "recommendedUk": "Значок",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Review",
+      "recommendedUk": "Відгук",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Inspiration",
+      "recommendedUk": "Натхнення",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Accomplished",
+      "recommendedUk": "Здійснено",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Ongoing",
+      "recommendedUk": "Триває",
+      "decision": "DECIDED_AI"
+    }
+  ],
+  "pluralization": {
+    "note": "Ukrainian CLDR via ukrainianPluralRule (src/boot/i18n.ts): one (1,21,101), few (2–4,22–24), many (0,5–19,25,111…); decimals (other) → last/many pipe form. Layouts: feed.resultsCount 4-form zero|one|few|many (UX zero at n=0); 8 other keys 3-form one|few|many (posts.daysAgo/hoursAgo/minutesAgo/weeksAgo/monthsAgo/fundsTokens/rewardLabel, profileUi.tokensMeta).",
+    "status": "VERIFIED_RUNTIME",
+    "rule": "uk: ukrainianPluralRule",
+    "verification": "Phase 4E.6: 3-form rule compared to Intl.PluralRules('uk') for n in {1–5,10–15,19–22,24,25,31,101,102,111,112,121,1000}: 0 mismatches. scripts/i18n-plural-smoke.js UK feed.resultsCount (19 integer counts + 3 decimals): PASS."
+  }
+}

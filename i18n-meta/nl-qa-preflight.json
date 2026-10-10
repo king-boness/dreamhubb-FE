@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "phase": "4E.5",
+  "locale": "nl",
+  "generatedAt": "2026-10-10T18:00:00.000Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. No reviewOverrides APPROVED entries were written. The human-review work package reports 761 MACHINE_DRAFT / 73 EXISTING_UNREVIEWED / 25 NEEDS_REVIEW (tooling-derived classification; none REVIEWED).",
+  "addressStyle": {
+    "decision": "je/jij (informal singular)",
+    "rationale": "Spot-check found consistent je/jouw forms (Kies je kant, Je hebt, Controleer je invoer). No u/uw forms in any nl file. Emphatic 'jij/jouw' appears only in a few natural spots ('Als jij het nodig hebt', 'Al in jouw taal'). Flemish/NL-BE may prefer u — product decision.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "checks": {
+    "missingKeysVsEn": 0,
+    "placeholderMismatches": 0,
+    "pluralPipeCountMismatches": 0,
+    "uFormScan": "No u / uw / uzelf forms found in src/i18n/nl/*.ts.",
+    "postVsContributionDisambiguation": "OK — Post = 'bericht' (Bericht plaatsen, Bericht melden), Contribution = 'bijdrage' (Bijdragen, Privébijdrage), CTA 'BIJDRAGEN'. Caveat: 'bericht' also used for chat message (typeYourMessageForDonee, reviewPlaceholder) — see open findings.",
+    "ctaScan": "Infinitive/imperative CTAs natural (Opslaan, Overslaan, Inloggen, Uitloggen, Account aanmaken, DOE MEE, SLUIT JE AAN BIJ DE BEWEGING). UPPERCASE CTAs preserved from EN.",
+    "pluralRuntime": "Verified with vue-i18n default rule (no custom pluralRules for nl) against Intl.PluralRules('nl') (one: n=1; other: 0,2,5,21,1.5). feed.resultsCount 3-form (zero|one|other), 2-form for daysAgo/hoursAgo/minutesAgo/weeksAgo/monthsAgo/fundsTokens/rewardLabel/tokensMeta. 0→other, 1→one, 2/5/21→other for all.",
+    "hardcodedAmountAgreement": "Fixed — {amount} in donationSuccessful / notifications.topUpTitle cannot be pluralised by vue-i18n here (no choice arg), so wording made number-agnostic to avoid '1 tokens'."
+  },
+  "intentionalIdenticalMarked": 58,
+  "identicalTotal": 58,
+  "identicalNote": "Proper nouns, region/city/state names (Alabama, Chicago, Canada…), language autonyms/names that coincide in Dutch (Hindi, Thai, Urdu, Telugu, Tamil, Swahili, Hausa, Gujarati, Punjabi…), loanwords normal in Dutch UI (Home, Privacy, Continent, deadline, Accounts, Contact, Tracking), and product role names Donor/Donee (PRODUCT_DECISION_REQUIRED).",
+  "sampleSpotCheck": [
+    { "keyPath": "contribute", "nl": "BIJDRAGEN", "en": "CONTRIBUTE" },
+    { "keyPath": "contributions", "nl": "Bijdragen", "en": "Contributions" },
+    { "keyPath": "privateContribution", "nl": "Privébijdrage", "en": "Private Contribution" },
+    { "keyPath": "addPost", "nl": "Bericht toevoegen", "en": "Add Post" },
+    { "keyPath": "reportPost", "nl": "Bericht melden", "en": "Report Post" },
+    {
+      "keyPath": "success.donationSuccessful",
+      "nl": "Steun verzonden! Aantal tokens: {amount}",
+      "en": "Successfully donated {amount} tokens!",
+      "note": "Fixed in 4E.5 (was 'Je hebt succesvol {amount} tokens geschonken!' — '1 tokens' ungrammatical, 'schonken' inconsistent with Steun terminology)."
+    },
+    {
+      "keyPath": "notifications.topUpTitle",
+      "nl": "{name} heeft je bericht gesteund – aantal tokens: {amount}",
+      "en": "{name} topped up your post by {amount} tokens",
+      "note": "Fixed in 4E.5 (was '… met {amount} tokens' — '1 tokens')."
+    },
+    {
+      "keyPath": "onboarding.location.fetchFailed",
+      "nl": "Je locatie kan niet worden opgehaald. Kies je locatie handmatig.",
+      "en": "Failed to get your location. Please select manually.",
+      "note": "Fixed in 4E.5 (was 'Kies hem handmatig' — locatie is a de-word; 'hem' wrong)."
+    },
+    {
+      "keyPath": "userInactive",
+      "nl": "Verifieer je e-mailadres via de link die we je hebben gestuurd.",
+      "en": "Please verify your email address with the link we sent to your email address.",
+      "note": "Fixed in 4E.5 (removed clumsy repetition 'e-mailadres … e-mailadres')."
+    },
+    { "keyPath": "feed.resultsCount", "nl": "Geen resultaten | {n} resultaat | {n} resultaten", "en": "No results | {n} result | {n} results" },
+    { "keyPath": "posts.daysAgo", "nl": "{n} dag geleden | {n} dagen geleden", "en": "{n} day ago | {n} days ago" },
+    { "keyPath": "tokensOnboarding.title", "nl": "Maak kennis met tokens als valuta", "en": "Introducing Currency Tokens" },
+    { "keyPath": "feed.searchPlaceholder", "nl": "Zoek naar alles", "en": "Search anything" }
+  ],
+  "openTerminology": [
+    "Donor",
+    "Donee",
+    "Post (Bericht) vs chat message (bericht) homonymy",
+    "Contribution (Bijdrage) vs Post (Bericht)",
+    "Donation (Steun / Opladen / Schenken)",
+    "Feed (loanword vs Tijdlijn/Overzicht)",
+    "Badge (loanword vs Insigne)",
+    "Regional variant (NL vs BE, je vs u)"
+  ],
+  "confirmedErrorsFixed": 4,
+  "confirmedErrorsFixedDetail": [
+    "success.donationSuccessful — number-agnostic wording ('1 tokens' avoided) and Steun terminology",
+    "notifications.topUpTitle — number-agnostic wording ('1 tokens' avoided)",
+    "onboarding.location.fetchFailed — 'Kies hem handmatig' → 'Kies je locatie handmatig'",
+    "userInactive — removed repeated 'e-mailadres' phrase"
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee — kept as English loanwords; 'donee' is not a Dutch word and may confuse users. Declension handled as invariable plural 'donors'/'donees' and 'de donee' (onboarding, profile, typeYourMessageForDonee). Alternatives: Gever / Ontvanger / Aanvrager."
+    },
+    {
+      "severity": "P2",
+      "note": "Homonymy: 'bericht' = Post (Bericht plaatsen, Berichten laden) but also used for chat/review messages (typeYourMessageForDonee 'Typ je bericht voor een donee...', profileUi.reviewPlaceholder, inspirationNeedTextOrImage 'kort bericht'). Consider 'boodschap'/'tekst' for non-post uses."
+    },
+    {
+      "severity": "P2",
+      "note": "Donation metaphor mixed: edit.donations='Steun', tokensToTopUp='TOKENS OM TE STEUNEN', topUpThePost='STEUN HET BERICHT', byTop='via steun', notifications 'gesteund', but glossary lists 'Opladen / Steun'. Consistent in practice (Steun), glossary row should be finalised by human."
+    },
+    {
+      "severity": "P2",
+      "note": "Feed kept as loanword; 'Tijdlijn'/'Overzicht' alternatives (LINGUISTIC_REVIEW_REQUIRED)."
+    },
+    {
+      "severity": "P2",
+      "note": "'Melding' is used both for notifications (Meldingen) and for abuse reports (Melding verzenden, Melding succesvol verzonden, reportIssue). Context-dependent ambiguity; consider 'Rapportage'/'Rapport' or 'Klacht' for reports."
+    },
+    {
+      "severity": "P3",
+      "note": "settings.privacy.terms 'Algemene voorwaarden' vs termsOfUseLink / legal 'Gebruiksvoorwaarden' — terminology consistency (EN source differs: 'Terms and Conditions')."
+    },
+    {
+      "severity": "P3",
+      "note": "onboarding.tokens.page2Option ('Wij brengen dromers samen met mensen die') is an incomplete sentence mirroring placeholder-like EN copy; page3Title 'Geldstroom' similarly terse."
+    },
+    {
+      "severity": "P3",
+      "note": "Register: 'Time-out van het verzoek' (errors.timeout) is a literal calque; consider 'Het verzoek duurde te lang'. 'Vuist vol/Zak vol/Kist vol' token package names are playful calques; 'Vuist vol' could be 'Vuistvol' — humans to confirm tone."
+    },
+    {
+      "severity": "P3",
+      "note": "Gender-neutral possessives: 'zijn of haar' (legacySideBlurb, tokens.page1Text) vs 'hun' (userBlocked, 'Hun berichten') and 'zijn droom' (explainerTitle4) — inconsistent gender-inclusive style."
+    },
+    {
+      "severity": "P3",
+      "note": "scripts/i18n/nl-4e5-translations-data.mjs was patched to match the 4 fixes (so re-running nl-4e5-fill-and-apply does not regress). Fixes are applied to src/i18n/nl/{auth,common,onboarding}.ts only."
+    },
+    {
+      "severity": "P3",
+      "note": "Placeholder-aware strings that carry a number without plural choice (donationSuccessful, topUpTitle) remain number-agnostic workarounds; proper fix = plural-aware call sites (src/pages/DonorPages/PostDetailPage.vue passes a hard-coded English fallback; NotificationComponent.vue uses t() without plural arg) — FE code change out of scope for 4E.5."
+    },
+    {
+      "severity": "P3",
+      "note": "58 identical-to-EN keys (proper names, language autonyms, loanwords)."
+    }
+  ]
+}

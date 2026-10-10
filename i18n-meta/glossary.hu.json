@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "hu",
+  "phase": "4E.4",
+  "source": "Derived from EN product meanings and existing hu/auth tone (informal te). SK used only for product sense. Not human-approved.",
+  "addressStyle": {
+    "decision": "te (informal singular)",
+    "rationale": "Existing hu/auth already uses informal forms (e.g. « Már a nyelveden van. »). Aligned with CS/SK/DE informal social-app tone. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "antiPatterns": [
+    "Do not translate word-by-word from EN; keep natural Hungarian word order",
+    "Avoid case endings directly on {placeholders} (values are inserted in the nominative; vowel harmony cannot be applied at runtime) — use constructions such as « ...: {name} »",
+    "Do not use charity « adomány » for token top-ups",
+    "Write Hungarian compounds as one word (Fiókbeállítások, Alkalmazásbeállítások) — not as two separate words"
+  ],
+  "terms": [
+    {
+      "en": "Dream",
+      "sk": "Sen",
+      "recommendedHu": "Álom",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Problem",
+      "sk": "Problém",
+      "recommendedHu": "Probléma",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Idea",
+      "sk": "Nápad",
+      "recommendedHu": "Ötlet",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedHu": "Bejegyzés",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "User content unit — not the same as Contribution (Hozzájárulás)."
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedHu": "Feed",
+      "alternatives": [
+        "Hírfolyam",
+        "Főoldal"
+      ],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Loanword « feed » kept pending decision; inflected as « feedhez », « feededből »."
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedHu": "Donor",
+      "alternatives": [
+        "Adományozó",
+        "Támogató"
+      ],
+      "decision": "PRODUCT_DECISION_REQUIRED",
+      "notes": "English role label kept; plural « donorok »."
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedHu": "Donee",
+      "alternatives": [
+        "Kedvezményezett",
+        "Segítségkérő"
+      ],
+      "decision": "PRODUCT_DECISION_REQUIRED",
+      "notes": "English role label kept; plural written « donee-k » (hyphenated suffix)."
+    },
+    {
+      "en": "Help",
+      "sk": "Pomoc",
+      "recommendedHu": "Segítség",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedHu": "Hozzájárulás",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Act of help — do not confuse with Bejegyzés (Post)."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedHu": "Támogatás / Feltöltés",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid charity « adományozás » for token top-ups."
+    },
+    {
+      "en": "Token",
+      "sk": "Token",
+      "recommendedHu": "Token",
+      "decision": "DECIDED_AI",
+      "notes": "Singular after numerals: « 5 token »; plural « tokenek »."
+    },
+    {
+      "en": "Reward",
+      "sk": "Odmena",
+      "recommendedHu": "Jutalom",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Badge",
+      "sk": "Odznak",
+      "recommendedHu": "Jelvény",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Review",
+      "sk": "Recenzia",
+      "recommendedHu": "Értékelés",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Inspiration",
+      "sk": "Inšpirácia",
+      "recommendedHu": "Inspiráció",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Accomplished",
+      "sk": "Splnené",
+      "recommendedHu": "Megvalósult",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Ongoing",
+      "sk": "Prebiehajúce",
+      "recommendedHu": "Folyamatban",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Settings (compound)",
+      "sk": "Nastavenia",
+      "recommendedHu": "Beállítások / Fiókbeállítások",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Claimed (task status)",
+      "sk": "",
+      "recommendedHu": "Teljesítve",
+      "decision": "DECIDED_AI",
+      "notes": "EN source value is 'Completed'."
+    },
+    {
+      "en": "Earn Tokens by helping",
+      "sk": "",
+      "recommendedHu": "Szerezz Tokeneket segítségnyújtással",
+      "decision": "DECIDED_AI"
+    }
+  ],
+  "pluralization": {
+    "note": "Hungarian uses singular after numerals; EN pipe count is preserved (2-form: « {n} napja | {n} napja », 3-form feed.resultsCount: zero|one|other). No custom pluralRules registered in boot/i18n.ts; default vue-i18n rule verified at runtime for n=0,1,2,5,21.",
+    "status": "VERIFIED_RUNTIME",
+    "rule": "hu: default vue-i18n (no custom rule)"
+  },
+  "notes": "Token capitalization (Token/Tokenek in FAQ/explainer vs token/tokenek in UI) is inconsistent — pending human review."
+}

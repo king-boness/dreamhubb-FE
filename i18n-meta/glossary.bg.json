@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "bg",
+  "phase": "4E.6",
+  "source": "Derived from EN; SK for product sense. Standard Bulgarian Cyrillic — not Russian/Ukrainian calques. Not human-approved.",
+  "addressStyle": {
+    "decision": "ти (informal singular)",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    { "en": "Dream", "recommendedBg": "Мечта", "decision": "DECIDED_AI" },
+    { "en": "Problem", "recommendedBg": "Проблем", "decision": "DECIDED_AI" },
+    { "en": "Idea", "recommendedBg": "Идея", "decision": "DECIDED_AI" },
+    { "en": "Post", "recommendedBg": "Публикация", "decision": "DECIDED_AI_WITH_REVIEW" },
+    { "en": "Feed", "recommendedBg": "Feed", "alternatives": ["Емисия", "Лента"], "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Donor", "recommendedBg": "Donor", "decision": "PRODUCT_DECISION_REQUIRED" },
+    { "en": "Donee", "recommendedBg": "Donee", "decision": "PRODUCT_DECISION_REQUIRED" },
+    { "en": "Help", "recommendedBg": "Помощ", "decision": "DECIDED_AI" },
+    { "en": "Contribution", "recommendedBg": "Принос", "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Donation", "recommendedBg": "Подкрепа / Зареждане", "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Token", "recommendedBg": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "recommendedBg": "Награда", "decision": "DECIDED_AI" },
+    { "en": "Badge", "recommendedBg": "Значка", "decision": "DECIDED_AI" },
+    { "en": "Review", "recommendedBg": "Отзив", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "recommendedBg": "Вдъхновение", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "recommendedBg": "Постигнато", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "recommendedBg": "В процес", "decision": "DECIDED_AI" }
+  ],
+  "pluralization": {
+    "note": "Bulgarian CLDR one/other. EN-compatible 3-form zero|one|other. No custom pluralRules needed: vue-i18n default rule matches Intl.PluralRules('bg') for n in {0,1,2,5,11,21,22,101}; all 9 plural-pipe keys render correctly (phase 4E.6).",
+    "status": "VERIFIED_RUNTIME"
+  }
+}

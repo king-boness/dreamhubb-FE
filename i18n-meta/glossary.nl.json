@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "nl",
+  "phase": "4E.5",
+  "source": "Derived from EN product meanings; SK for product sense only. Not human-approved. International Dutch (NL); Flemish variants noted as open.",
+  "addressStyle": {
+    "decision": "je/jij (informal singular)",
+    "rationale": "Matches social-app tone used in SK/DE/CS. PROPOSED — not product-approved. Flemish/NL-BE may prefer u in some contexts.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "regionalNote": {
+    "decision": "PRODUCT_DECISION_REQUIRED",
+    "note": "Single locale code `nl`. Do not introduce nl-NL/nl-BE without product decision. Prefer Netherlands Dutch vocabulary; note Flemish alternatives in review."
+  },
+  "terms": [
+    { "en": "Dream", "recommendedNl": "Droom", "decision": "DECIDED_AI" },
+    { "en": "Problem", "recommendedNl": "Probleem", "decision": "DECIDED_AI" },
+    { "en": "Idea", "recommendedNl": "Idee", "decision": "DECIDED_AI" },
+    {
+      "en": "Post",
+      "recommendedNl": "Bericht",
+      "alternatives": ["Post"],
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "User content unit — not the same as Contribution."
+    },
+    {
+      "en": "Feed",
+      "recommendedNl": "Feed",
+      "alternatives": ["Tijdlijn", "Overzicht"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "recommendedNl": "Donor",
+      "alternatives": ["Gever", "Helper"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "recommendedNl": "Donee",
+      "alternatives": ["Ontvanger", "Aanvrager"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    { "en": "Help", "recommendedNl": "Hulp", "decision": "DECIDED_AI" },
+    {
+      "en": "Contribution",
+      "recommendedNl": "Bijdrage",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Act of help — distinct from Bericht (Post)."
+    },
+    {
+      "en": "Donation",
+      "recommendedNl": "Steun",
+      "alternatives": ["Opladen", "Schenken"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid charity-only Donatie for token top-ups where context is wallet."
+    },
+    { "en": "Token", "recommendedNl": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "recommendedNl": "Beloning", "decision": "DECIDED_AI" },
+    { "en": "Badge", "recommendedNl": "Badge", "alternatives": ["Insigne"], "decision": "DECIDED_AI_WITH_REVIEW" },
+    { "en": "Review", "recommendedNl": "Beoordeling", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "recommendedNl": "Inspiratie", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "recommendedNl": "Voltooid", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "recommendedNl": "Lopend", "decision": "DECIDED_AI" }
+  ],
+  "pluralization": {
+    "note": "Dutch CLDR: one (n===1), other (everything else including 0 and decimals). EN pipe count is preserved (2-form: « {n} dag geleden | {n} dagen geleden », 3-form feed.resultsCount: zero|one|other). No custom pluralRules registered in boot/i18n.ts; default vue-i18n rule verified at runtime against Intl.PluralRules('nl') for n=0,1,2,5,21.",
+    "status": "VERIFIED_RUNTIME",
+    "rule": "nl: default vue-i18n (no custom rule)",
+    "source": "https://unicode.org/cldr/charts/49/supplemental/language_plural_rules.html"
+  }
+}

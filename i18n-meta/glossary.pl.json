@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "pl",
+  "phase": "4E.1",
+  "source": "Derived from EN/SK product meanings. Not human-approved. Polish must not be a mechanical SK calque.",
+  "addressStyle": {
+    "decision": "ty (informal singular)",
+    "rationale": "Aligned with DE informal du and ES tú for social app tone. Existing pl/auth should be checked; prefer ty if already present. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    {
+      "en": "Dream",
+      "sk": "Sen",
+      "recommendedPl": "Marzenie",
+      "decision": "DECIDED_AI",
+      "notes": "Product post type; not sen (sleep dream) — marzenie matches aspiration sense."
+    },
+    {
+      "en": "Problem",
+      "sk": "Problém",
+      "recommendedPl": "Problem",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Idea",
+      "sk": "Nápad",
+      "recommendedPl": "Pomysł",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedPl": "Wpis",
+      "alternatives": ["Publikacja"],
+      "decision": "DECIDED_AI_WITH_REVIEW"
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedPl": "Feed",
+      "alternatives": ["Tablica", "Strumień"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedPl": "Donor",
+      "alternatives": ["Darczyńca", "Pomagający"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedPl": "Donee",
+      "alternatives": ["Beneficjent", "Osoba prosząca o pomoc"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Help",
+      "sk": "Pomoc",
+      "recommendedPl": "Pomoc",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedPl": "Wsparcie / Wkład",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Act of help — not the same as Wpis (Post)."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedPl": "Doładowanie (tokens) / Wsparcie",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid charity Darowizna for token top-ups."
+    },
+    {
+      "en": "Token",
+      "sk": "Token",
+      "recommendedPl": "Token",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Reward",
+      "sk": "Odmena",
+      "recommendedPl": "Nagroda",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Badge",
+      "sk": "Odznak",
+      "recommendedPl": "Odznaka",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Review",
+      "sk": "Recenzia",
+      "recommendedPl": "Opinia",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Inspiration",
+      "sk": "Inšpirácia",
+      "recommendedPl": "Inspiracja",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Accomplished",
+      "sk": "Splnené",
+      "recommendedPl": "Zrealizowane",
+      "decision": "DECIDED_AI"
+    },
+    {
+      "en": "Ongoing",
+      "sk": "Prebiehajúce",
+      "recommendedPl": "W trakcie",
+      "decision": "DECIDED_AI"
+    }
+  ],
+  "pluralization": {
+    "note": "Polish needs custom vue-i18n pluralRules if pipe forms use SK-style 4 forms. Verify runtime for 0,1,2,3,4,5,11,12,14,21,22,24,25,101,102,111,112.",
+    "status": "MUST_VERIFY_RUNTIME"
+  }
+}

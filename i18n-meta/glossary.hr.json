@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "hr",
+  "phase": "4E.6",
+  "source": "Derived from EN product meanings; SK for product sense only. Standard Croatian — not Serbian/Bosnian. Not human-approved.",
+  "addressStyle": {
+    "decision": "ti (informal singular)",
+    "rationale": "Social-app tone. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "terms": [
+    { "en": "Dream", "recommendedHr": "San", "decision": "DECIDED_AI" },
+    { "en": "Problem", "recommendedHr": "Problem", "decision": "DECIDED_AI" },
+    { "en": "Idea", "recommendedHr": "Ideja", "decision": "DECIDED_AI" },
+    { "en": "Post", "recommendedHr": "Objava", "decision": "DECIDED_AI_WITH_REVIEW", "notes": "Content unit ≠ Contribution." },
+    { "en": "Feed", "recommendedHr": "Feed", "alternatives": ["Sažetak", "Vremenska crta"], "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Donor", "recommendedHr": "Donor", "decision": "PRODUCT_DECISION_REQUIRED" },
+    { "en": "Donee", "recommendedHr": "Donee", "decision": "PRODUCT_DECISION_REQUIRED" },
+    { "en": "Help", "recommendedHr": "Pomoć", "decision": "DECIDED_AI" },
+    { "en": "Contribution", "recommendedHr": "Doprinos", "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Donation", "recommendedHr": "Nadopuna / Podrška", "decision": "LINGUISTIC_REVIEW_REQUIRED" },
+    { "en": "Token", "recommendedHr": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "recommendedHr": "Nagrada", "decision": "DECIDED_AI" },
+    { "en": "Badge", "recommendedHr": "Značka", "decision": "DECIDED_AI" },
+    { "en": "Review", "recommendedHr": "Recenzija", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "recommendedHr": "Inspiracija", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "recommendedHr": "Ostvareno", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "recommendedHr": "U tijeku", "decision": "DECIDED_AI" }
+  ],
+  "pluralization": {
+    "note": "Croatian CLDR via croatianPluralRule: one includes 21/101; few includes 22–24; other includes 0/5–19/25. NOT SK/CS. resultsCount prefer 4-form zero|one|few|other.",
+    "status": "VERIFIED_RUNTIME",
+    "rule": "hr: croatianPluralRule",
+    "verifiedIn": "phase 4E.6 AI preflight — croatianPluralRule (src/boot/i18n.ts) checked against Intl.PluralRules('hr') for 2/3/4-form pipes (0–1000 incl. 11–14, 21–24, 101, 111–112); scripts/i18n-plural-smoke.js hr feed.resultsCount PASS; 9 plural keys structurally checked (1×4-form, 8×3-form)."
+  }
+}

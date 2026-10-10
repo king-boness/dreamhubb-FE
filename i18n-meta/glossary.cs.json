@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "product": "dreamhubb",
+  "locale": "cs",
+  "phase": "4E.4",
+  "source": "Derived from EN product meanings; SK used only for product sense — avoid Slovakisms. Not human-approved.",
+  "addressStyle": {
+    "decision": "ty (informal singular)",
+    "rationale": "Aligned with SK/DE informal social-app tone. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "antiPatterns": [
+    "Avoid Slovakisms (e.g. prefer Czech vocabulary over SK calques)",
+    "Do not copy SK wording mechanically",
+    "Primary source remains EN"
+  ],
+  "terms": [
+    { "en": "Dream", "sk": "Sen", "recommendedCs": "Sen", "decision": "DECIDED_AI", "notes": "Aspiration sense; same lemma as SK but Czech forms differ elsewhere." },
+    { "en": "Problem", "sk": "Problém", "recommendedCs": "Problém", "decision": "DECIDED_AI" },
+    { "en": "Idea", "sk": "Nápad", "recommendedCs": "Nápad", "decision": "DECIDED_AI" },
+    {
+      "en": "Post",
+      "sk": "Príspevok",
+      "recommendedCs": "Příspěvek",
+      "decision": "DECIDED_AI_WITH_REVIEW",
+      "notes": "User content unit — not the same as Contribution."
+    },
+    {
+      "en": "Feed",
+      "sk": "Feed",
+      "recommendedCs": "Feed",
+      "alternatives": ["Nástěnka", "Přehled"],
+      "decision": "LINGUISTIC_REVIEW_REQUIRED"
+    },
+    {
+      "en": "Donor",
+      "sk": "Darca",
+      "recommendedCs": "Donor",
+      "alternatives": ["Dárce", "Pomáhající"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    {
+      "en": "Donee",
+      "sk": "Príjemca",
+      "recommendedCs": "Donee",
+      "alternatives": ["Příjemce", "Žadatel"],
+      "decision": "PRODUCT_DECISION_REQUIRED"
+    },
+    { "en": "Help", "sk": "Pomoc", "recommendedCs": "Pomoc", "decision": "DECIDED_AI" },
+    {
+      "en": "Contribution",
+      "sk": "Prispenie",
+      "recommendedCs": "Příspěvek pomoci / Akt pomoci",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Act of help — do not confuse with Příspěvek (Post)."
+    },
+    {
+      "en": "Donation",
+      "sk": "OPEN",
+      "recommendedCs": "Dobití (tokenů) / Podpora",
+      "decision": "LINGUISTIC_REVIEW_REQUIRED",
+      "notes": "Avoid charity Darování for token top-ups."
+    },
+    { "en": "Token", "sk": "Token", "recommendedCs": "Token", "decision": "DECIDED_AI" },
+    { "en": "Reward", "sk": "Odmena", "recommendedCs": "Odměna", "decision": "DECIDED_AI" },
+    { "en": "Badge", "sk": "Odznak", "recommendedCs": "Odznak", "decision": "DECIDED_AI" },
+    { "en": "Review", "sk": "Recenzia", "recommendedCs": "Recenze", "decision": "DECIDED_AI" },
+    { "en": "Inspiration", "sk": "Inšpirácia", "recommendedCs": "Inspirace", "decision": "DECIDED_AI" },
+    { "en": "Accomplished", "sk": "Splnené", "recommendedCs": "Splněno", "decision": "DECIDED_AI" },
+    { "en": "Ongoing", "sk": "Prebiehajúce", "recommendedCs": "Probíhá", "decision": "DECIDED_AI" }
+  ],
+  "pluralization": {
+    "note": "Czech CLDR via czechPluralRule in boot/i18n.ts (NOT Polish). one=n===1; few=n===2|3|4 only; many=decimals; other=0,5+,21,22–24,101…. 22→other (výsledků). Polish few includes 22–24 — do not share rules. feed.resultsCount: 4 forms zero|one|few|other. Decimals map to other pipe (no many form). UI counts are integers.",
+    "status": "VERIFIED_RUNTIME_4E4R",
+    "rule": "cs: czechPluralRule",
+    "source": "https://unicode.org/cldr/charts/49/supplemental/language_plural_rules.html"
+  }
+}

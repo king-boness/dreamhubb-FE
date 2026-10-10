@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "phase": "4E.2",
+  "locale": "pt",
+  "generatedAt": "2026-10-10T13:53:23.619Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED. Regional variant PRODUCT_DECISION_REQUIRED (pt vs pt-PT/pt-BR).",
+  "regionalVariant": {
+    "appLocaleCode": "pt",
+    "existsInApp": [
+      "pt"
+    ],
+    "doesNotExist": [
+      "pt-PT",
+      "pt-BR"
+    ],
+    "quasarPack": "pt-BR",
+    "workingConvention": "International Portuguese suitable for both BR and PT readers; prefer forms common across variants; avoid strongly regional slang.",
+    "decision": "PRODUCT_DECISION_REQUIRED",
+    "notes": "Do not invent pt-PT/pt-BR locale codes. Machine drafts are not a regional product choice."
+  },
+  "addressStyle": {
+    "decision": "você (neutral formal/informal singular)",
+    "rationale": "Common in Brazilian UI and understandable in Portugal; PROPOSED for human confirmation. Alternatives: tu (PT-PT informal).",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "intentionalIdenticalMarked": 39,
+  "identicalTotal": 39,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "signIn",
+      "pt": "Entrar",
+      "en": "Sign In"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "pt": "Pesquisar tudo",
+      "en": "Search anything"
+    },
+    {
+      "keyPath": "contributions",
+      "pt": "Contribuições",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "aboutDonee",
+      "pt": "Sobre o Donee",
+      "en": "About Donee"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "pt": "Você apoiou com {amount} tokens com sucesso!",
+      "en": "Successfully donated {amount} tokens!"
+    }
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED regional pt-PT vs pt-BR"
+    },
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee"
+    },
+    {
+      "severity": "P2",
+      "note": "PT/BR lexical mix (Utilizador vs senha/Salvar) — human regional pass needed"
+    }
+  ]
+}

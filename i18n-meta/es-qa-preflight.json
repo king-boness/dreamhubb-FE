@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "phase": "4E.1",
+  "locale": "es",
+  "generatedAt": "2026-10-10T13:15:45.327Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED.",
+  "addressStyle": {
+    "decision": "tú (informal singular)",
+    "rationale": "Existing es/auth already uses tú/te/tu forms (e.g. informal CTAs). Keep consistency across new MACHINE_DRAFT strings. International Spanish, not ES/LATAM regional variants.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "intentionalIdenticalMarked": 44,
+  "identicalTotal": 44,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "contribute",
+      "es": "CONTRIBUIR",
+      "en": "CONTRIBUTE"
+    },
+    {
+      "keyPath": "contributions",
+      "es": "Contribuciones",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "privateContribution",
+      "es": "Contribución privada",
+      "en": "Private Contribution"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "es": "¡Has apoyado con {amount} tokens correctamente!",
+      "en": "Successfully donated {amount} tokens!"
+    },
+    {
+      "keyPath": "posts.edit.donations",
+      "es": "Apoyos",
+      "en": "Donations"
+    },
+    {
+      "keyPath": "aboutDonee",
+      "es": "Acerca del Donee",
+      "en": "About Donee"
+    },
+    {
+      "keyPath": "signIn",
+      "es": "Iniciar sesión",
+      "en": "Sign In"
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "es": "Ningún resultado | {n} resultado | {n} resultados",
+      "en": "No results | {n} result | {n} results"
+    },
+    {
+      "keyPath": "tokensOnboarding.title",
+      "es": "Presentamos los Tokens de moneda",
+      "en": "Introducing Currency Tokens"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "es": "Buscar todo",
+      "en": "Search anything"
+    }
+  ],
+  "openTerminology": [
+    "Donor",
+    "Donee",
+    "Contribution",
+    "Donation",
+    "Feed",
+    "Publicación vs Post"
+  ],
+  "confirmedErrorsFixed": 0,
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee"
+    },
+    {
+      "severity": "P2",
+      "note": "Feed loanword vs Inicio"
+    },
+    {
+      "severity": "P3",
+      "note": "44 identical-to-EN (mostly nativeNames/roles)"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "phase": "4E.2",
+  "locale": "it",
+  "generatedAt": "2026-10-10T13:46:16.415Z",
+  "keysChecked": 859,
+  "note": "AI preflight only — NOT human REVIEWED/APPROVED.",
+  "addressStyle": {
+    "decision": "tu (informal singular)",
+    "rationale": "Aligned with ES tú / DE du for social app tone. PROPOSED — not product-approved.",
+    "status": "PROPOSED_FOR_HUMAN_CONFIRMATION"
+  },
+  "intentionalIdenticalMarked": 50,
+  "identicalTotal": 50,
+  "sampleSpotCheck": [
+    {
+      "keyPath": "signIn",
+      "it": "Accedi",
+      "en": "Sign In"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "it": "Cerca tutto",
+      "en": "Search anything"
+    },
+    {
+      "keyPath": "contributions",
+      "it": "Contributi",
+      "en": "Contributions"
+    },
+    {
+      "keyPath": "aboutDonee",
+      "it": "Informazioni sul Donee",
+      "en": "About Donee"
+    },
+    {
+      "keyPath": "success.donationSuccessful",
+      "it": "Hai sostenuto con {amount} token con successo!",
+      "en": "Successfully donated {amount} tokens!"
+    }
+  ],
+  "openQaFindings": [
+    {
+      "severity": "P1",
+      "note": "PRODUCT_DECISION_REQUIRED Donor/Donee"
+    },
+    {
+      "severity": "P2",
+      "note": "Feed loanword"
+    },
+    {
+      "severity": "P3",
+      "note": "legal.englishOnlyNotice still mentions Slovak version"
+    }
+  ]
+}

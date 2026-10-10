@@ -1,0 +1,143 @@
+{
+  "phase": "4F.2",
+  "title": "EN/SK Release Blockers Remediation",
+  "generatedAt": "2026-10-10T20:05:00.000Z",
+  "scope": {
+    "officialSupportedLocales": ["en-US", "sk"],
+    "alias": { "en-GB": "en-US messages" },
+    "noMassTranslations": true,
+    "noDeployment": true
+  },
+  "baselineUnchanged": {
+    "uiLanguages": 59,
+    "messagePacks": 58,
+    "referenceKeys": 859,
+    "technicallyCompletePacks": 15,
+    "incompletePacks": 43,
+    "i18nErrors": 0,
+    "i18nWarnings": 43
+  },
+  "blockerCategoriesFrom4F1": {
+    "RC-P0-DEPLOY-UNKNOWN": {
+      "category": "DEPLOYMENT PRECONDITION",
+      "status": "OPEN",
+      "releaseBlocking": true,
+      "note": "Production preferred_locale migration state still UNKNOWN — not a code bug"
+    },
+    "RC-P0-LEGAL-SK": {
+      "category": "LEGAL APPROVAL",
+      "status": "OPEN",
+      "releaseBlocking": true,
+      "note": "SK legal body not_available; EN body + notice unchanged; counsel required"
+    },
+    "RC-P1-BE-HARDCODED": {
+      "category": "CONFIRMED DEFECT",
+      "status": "FIXED",
+      "releaseBlocking": false,
+      "note": "P0/P1 user-facing auth, tokens, contributions, notifications, moderation, password change localized via lang/en|sk"
+    },
+    "RC-P1-NOTIFICATIONS-EN": {
+      "category": "CONFIRMED DEFECT",
+      "status": "FIXED",
+      "releaseBlocking": false,
+      "note": "NotificationLocalizer: store recipient locale title; re-localize on API read by type + actor; UGC body unchanged; no DB migration"
+    },
+    "RC-P1-E2E-JWT-FLAKES": {
+      "category": "MISSING TEST EVIDENCE → FIXED EVIDENCE",
+      "status": "FIXED",
+      "releaseBlocking": false,
+      "note": "3 consecutive 40/40 PASS with fresh fixtures each run"
+    },
+    "RC-P2-59-LANG-DISCLOSURE": {
+      "category": "PRODUCT DECISION",
+      "status": "OPEN",
+      "releaseBlocking": false
+    },
+    "RC-P2-SK-HUMAN-REVIEW": {
+      "category": "PRODUCT DECISION",
+      "status": "OPEN",
+      "releaseBlocking": false
+    },
+    "RC-P3-VERIFYEMAIL-SK-ONLY": {
+      "category": "CONFIRMED DEFECT",
+      "status": "FIXED",
+      "releaseBlocking": false,
+      "note": "verifyEmail uses preferred_locale → system en|sk + __()"
+    },
+    "RC-P3-INCOMPLETE-PACKS": {
+      "category": "NOT AN EN/SK BLOCKER",
+      "status": "OPEN",
+      "releaseBlocking": false
+    }
+  },
+  "backendLocalization": {
+    "approach": "Laravel __() + lang/en + lang/sk; no second i18n system; API shape unchanged",
+    "filesTouched": [
+      "lang/en/auth.php",
+      "lang/sk/auth.php",
+      "lang/en/messages.php",
+      "lang/sk/messages.php",
+      "app/Http/Controllers/AuthController.php",
+      "app/Http/Controllers/ContributionController.php",
+      "app/Http/Controllers/NotificationController.php",
+      "app/Http/Controllers/PostController.php",
+      "app/Http/Controllers/UserController.php",
+      "app/Exceptions/Handler.php",
+      "app/Support/ContentModeration.php",
+      "app/Support/NotificationLocalizer.php",
+      "app/Providers/AuthServiceProvider.php"
+    ],
+    "remainingEnOnly": "Lower-priority controller strings (profile picture, payments, share/inspiration, some Post CRUD success) — P2; not full API surface",
+    "tests": {
+      "EnSkApiMessagesTest": "PASS",
+      "AsyncMailLocaleIsolationTest": "PASS",
+      "suiteFilter33": "33/33 PASS, 118 assertions"
+    }
+  },
+  "notifications": {
+    "architecture": "Stored title/body; type enum; no params JSON column",
+    "fix": "type-based title localization on write (recipient preferred_locale) and on read (Accept-Language)",
+    "historical": "EN stored titles re-localized via type + actor name extraction",
+    "ugcBody": "unchanged",
+    "dbMigration": "none"
+  },
+  "asyncEmails": {
+    "queueConnectionLocal": "sync",
+    "fix": "AuthServiceProvider builds mail with explicit locale arg — no App::setLocale mutation",
+    "test": "AsyncMailLocaleIsolationTest A→B→C and B→A→B sequences PASS with Notification::fake()",
+    "liveWorkerSmtp": "NOT RUN (isolated fake; no production SMTP)",
+    "leakagePrevention": "READY WITH CONDITIONS"
+  },
+  "e2eStability": {
+    "environment": { "fe": "127.0.0.1:9001", "be": "127.0.0.1:8002", "db": "dreamhubb_e2e", "workers": 1 },
+    "runs": {
+      "run1": "40/40 PASS",
+      "run2": "40/40 PASS",
+      "run3": "40/40 PASS"
+    },
+    "suites": [
+      "authenticated-flows.spec.ts",
+      "i18n-acceptance.spec.ts",
+      "i18n-locale.spec.ts",
+      "sk-feed-authenticated.spec.ts"
+    ],
+    "jwtRemintEachRun": true
+  },
+  "verdicts": {
+    "frontendReadiness": "READY WITH CONDITIONS",
+    "backendLocalization": "READY WITH CONDITIONS",
+    "notificationReadiness": "READY WITH CONDITIONS",
+    "emailQueueReadiness": "READY WITH CONDITIONS",
+    "localePersistence": "READY WITH CONDITIONS",
+    "functionalE2e": "READY WITH CONDITIONS",
+    "legalReadiness": "NOT READY",
+    "deploymentReadiness": "NOT READY",
+    "overallReleaseReadiness": "NOT READY"
+  },
+  "canProceedToIntegrationReleasePhase": true,
+  "integrationPreconditions": [
+    "Confirm preferred_locale migration on target environment",
+    "Legal decision on EN-only body + SK notice for first release",
+    "Product decision on 59-language disclosure"
+  ]
+}

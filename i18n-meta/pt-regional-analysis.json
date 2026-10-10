@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "phase": "4E.3",
+  "locale": "pt",
+  "status": "PRODUCT_DECISION_REQUIRED",
+  "doNotAutoExecute": true,
+  "currentState": {
+    "appLocaleCode": "pt",
+    "appLanguagesEntry": "pt (no pt-PT / pt-BR in APP_LANGUAGES)",
+    "quasarPack": "pt-BR via src/utils/quasarLang.ts",
+    "htmlLang": "pt (syncDocumentHtmlLang restores UI preference after Quasar Lang.set)",
+    "preferredLocaleStorage": "dreamhubb_language / users.preferred_locale = pt",
+    "acceptLanguage": "pt (FE→BE header)",
+    "workingDraftNorm": "International Portuguese, você",
+    "knownLexicalMix": [
+      "Utilizador / Introduza / partilhar (PT-PT-leaning)",
+      "senha / Salvar / Configurações / aplicativo (BR-leaning in existing auth)"
+    ]
+  },
+  "variants": {
+    "A_pt_BR": {
+      "label": "Brazilian Portuguese",
+      "advantages": ["Aligns Quasar chrome", "Large audience", "Matches você"],
+      "disadvantages": ["Requires cleaning PT-PT forms", "May need html lang=pt-BR decision"],
+      "impacts": {
+        "existingTranslations": "Edit MACHINE_DRAFT + EXISTING_UNREVIEWED toward BR",
+        "quasar": "Keep current mapping",
+        "htmlLang": "Possibly pt-BR",
+        "preferred_locale": "Keep pt OR migrate to pt-BR (migration + APP_LANGUAGES)",
+        "localStorage": "Key values may need rewrite if code changes",
+        "acceptLanguage": "pt or pt-BR",
+        "existingAccounts": "If code changes → DB migration of preferred_locale",
+        "fallback": "en-US unchanged",
+        "uiLanguageCount": "59 unchanged if keeping code pt; +1 complexity if adding pt-BR"
+      }
+    },
+    "B_pt_PT": {
+      "label": "European Portuguese",
+      "advantages": ["Matches some existing Utilizador forms"],
+      "disadvantages": ["Quasar lacks dedicated pt-PT pack", "Conflicts with pt→pt-BR"],
+      "impacts": {
+        "existingTranslations": "Rewrite BR-leaning auth strings",
+        "quasar": "Mismatch or custom pack",
+        "htmlLang": "pt-PT",
+        "preferred_locale": "New code needs migration",
+        "uiLanguageCount": "Would change language list"
+      }
+    },
+    "C_pt_shared": {
+      "label": "Single `pt` code + documented working norm",
+      "advantages": ["No migration", "No UI list change", "Lowest risk"],
+      "disadvantages": ["Mix remains until human regional pass", "Quasar chrome stays BR"],
+      "impacts": {
+        "existingTranslations": "Human review enforces one norm under pt",
+        "quasar": "Keep pt→pt-BR as framework chrome",
+        "htmlLang": "lang=pt",
+        "preferred_locale": "Unchanged",
+        "existingAccounts": "None",
+        "uiLanguageCount": "59 unchanged"
+      }
+    }
+  },
+  "recommendation": "VARIANT C for near-term release process; do not invent pt-PT/pt-BR locale codes in 4E.3.",
+  "explicitNonActions": [
+    "Do not create new locale codes",
+    "Do not rewrite Portuguese catalog in this phase",
+    "Do not change Quasar mapping without confirmed bug",
+    "Do not run DB migration"
+  ]
+}
