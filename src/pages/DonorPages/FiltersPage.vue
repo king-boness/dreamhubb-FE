@@ -902,6 +902,92 @@ body:not(.body--light) .filters-footer {
   }
 }
 
+/*
+ * Desktop (>=1200): stage + in-flow footer.
+ * Mobile/tablet keep fixed 390px footer — unchanged below this query.
+ * (Scoped so these beat the mobile rules above.)
+ */
+@media (min-width: 1200px) {
+  .filters-page {
+    max-width: min(52rem, calc(100% - 2 * var(--dh-content-gutter, 2rem)));
+    width: 100%;
+  }
+
+  .filters-page--wheelSteps .filters-header {
+    margin-top: 0;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+    transform: none;
+  }
+
+  .filters-page--wheelSteps .filters-title {
+    transform: none;
+  }
+
+  .filters-progress {
+    top: calc(env(safe-area-inset-top, 0px) + 1.75rem);
+    width: min(16rem, calc(100% - 8rem));
+  }
+
+  .filters-pickerMount {
+    max-width: min(28rem, 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /*
+   * Keep CTAs viewport-anchored (reachable at ~800px height) but on a
+   * centered ~28rem axis — not the old 390px phone strip.
+   * Desktop footer sits on the app canvas (no phone-strip rectangle).
+   */
+  .filters-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: min(28rem, calc(100% - 2 * var(--dh-content-gutter, 2rem)));
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 200;
+    box-sizing: border-box;
+    background: transparent !important;
+  }
+
+  .filters-content,
+  .filters-content--compact {
+    padding-bottom: calc(1.25rem + 48px + 48px + 2.5rem);
+  }
+
+  /*
+   * Step 3 footer = Search 48 + gap + Clear 40 (+ margin) + safe-area.
+   * Reserve the real stack so selects can scroll fully above the fixed CTAs.
+   */
+  .filters-content--step3 {
+    padding-bottom: calc(
+      48px + 0.62rem + 0.35rem + 40px + max(0.65rem, env(safe-area-inset-bottom, 0px)) + 1.5rem
+    );
+  }
+
+  .filters-swapCategoryToo-anchor {
+    max-width: min(28rem, 100%);
+  }
+}
+
+/* Short desktop viewports: slightly smaller Step 3 map so selects + CTAs fit with less scroll. */
+@media (min-width: 1200px) and (max-height: 850px) {
+  .filters-content--step3 :deep(.whereAreYou.whereAreYou--filter-mode .location-map) {
+    max-height: 11rem;
+    overflow: hidden;
+
+    img {
+      max-height: 11rem;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+  }
+}
+
 </style>
 
 <style lang="scss">
@@ -986,5 +1072,23 @@ body:not(.body--light) .filters-page.filters-page--swapPosts .filters-title.filt
 
 .body--light .filters-page .filters-footerHint {
   color: rgba(26, 26, 26, 0.55) !important;
+}
+
+/* Light: Clear filters must stay readable on the page canvas (underline preserved). */
+.body--light .filters-page .filters-clearBtn {
+  color: var(--dh-text-muted) !important;
+
+  &:hover {
+    color: var(--dh-search-text) !important;
+  }
+}
+
+/* Desktop >=1200: beat dark/light footer strip backgrounds (mobile strip unchanged). */
+@media (min-width: 1200px) {
+  body:not(.body--light) .filters-footer,
+  .body--light .filters-footer,
+  .filters-page .filters-footer {
+    background: transparent !important;
+  }
 }
 </style>

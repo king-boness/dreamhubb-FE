@@ -784,14 +784,93 @@ $dh-bp-desktop: 1200px;
 }
 
 @media (min-width: $dh-bp-desktop) {
-  .filters-page {
-    max-width: min(32rem, 100%) !important;
+  /*
+   * Tokens (FUNDS / STATS / EARN): 52rem column must be centered in the
+   * content area beside the left rail. TokensPage has no .q-page wrapper,
+   * so the shared .q-page centering does not apply — center the shell itself.
+   */
+  .stats-filter--tokens {
+    width: 100%;
+    max-width: min(52rem, calc(100% - 2 * var(--dh-content-gutter)));
+    margin-left: auto;
+    margin-right: auto;
     padding-left: var(--dh-content-gutter);
     padding-right: var(--dh-content-gutter);
+    box-sizing: border-box;
   }
 
+  .stats-filter--tokens .statsFilter {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stats-filter--tokens .panel,
+  .stats-filter--tokens .q-tab-panels,
+  .stats-filter--tokens .q-tab-panel {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /*
+   * Filters: desktop stage (~52rem), not a 390px / 32rem phone mockup.
+   * Footer fixed+390px is overridden in FiltersPage.vue (>=1200 only).
+   */
+  .filters-page {
+    max-width: min(52rem, calc(100% - 2 * var(--dh-content-gutter))) !important;
+    width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: var(--dh-content-gutter);
+    padding-right: var(--dh-content-gutter);
+    box-sizing: border-box;
+  }
+
+  /*
+   * Keep "Swap category too" on the same ~28rem CTA axis as SEARCH /
+   * Clear filters (not full 52rem stage width).
+   */
   .filters-swapCategoryToo-anchor {
+    max-width: min(28rem, 100%);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    box-sizing: border-box;
+  }
+
+  /* Compact roller stays phone-scale; outer stage carries desktop width */
+  .filters-page .filters-pickerMount {
+    max-width: min(28rem, 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /*
+   * Filter-mode location (Step 3 only — onboarding WhereAreYou unchanged).
+   * Larger map + form column, still compact and centered.
+   */
+  .filters-page .whereAreYou.whereAreYou--filter-mode {
+    max-width: min(34rem, 100%);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .filters-page .whereAreYou.whereAreYou--filter-mode .location-map {
+    max-width: min(34rem, 100%);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .filters-page .whereAreYou.whereAreYou--filter-mode .location-form,
+  .filters-page .whereAreYou.whereAreYou--filter-mode .location-form--embed {
     max-width: min(32rem, 100%);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
