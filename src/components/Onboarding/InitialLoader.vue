@@ -7,13 +7,16 @@
         class="initial-loader__logo"
       />
       <q-spinner color="white" size="40px" />
-      <p class="initial-loader__text">Loading your dream experience…</p>
+      <p class="initial-loader__text">{{ t("onboarding.loadingExperience") }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // Simple presentational loader used as initial splash
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

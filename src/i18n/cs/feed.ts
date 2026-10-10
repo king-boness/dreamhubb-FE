@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Přidat klíčová slova",
+    applyFilters: "Použít filtry",
+    chooseCountry: "Vyber svou zemi",
+    clearFilters: "Vymazat filtry",
+    failedLoadInspirations: "Nepodařilo se načíst inspirace.",
+    filterAlsoCategory: "vyber i kategorii",
+    filterAlsoPlace: "změň i místo",
+    filterSearchCta: "hledat",
+    filterStepCategory: "vybrat kategorii",
+    filterStepPlace: "vybrat místo",
+    filterStepPosts: "vybrat příspěvky",
+    firstPostHint: "Vytvoř svůj první sen, problém nebo nápad a sdílej ho se světem.",
+    firstPostTitle: "Začni svou cestu!",
+    myDreamsTitle: "Moje sny",
+    noResults: "Žádné výsledky",
+    postImageAlt: "Obrázek příspěvku",
+    postType: {
+      dream: "sen",
+      idea: "nápad",
+      problem: "problém"
+    },
+    quote1: "„Když nesníš, neumřeš — ale bez snů také nebudeš opravdu žít.“",
+    quote2: "„Problémy nemůžeme řešit stejným způsobem myšlení, kterým jsme je vytvořili.“",
+    quote3: "„Uč se, jako bys měl žít věčně; žij, jako bys měl zítra zemřít.“",
+    quote4: "„Nikdy jsem nesnil o úspěchu. Pracoval jsem na něm.“",
+    quoteOfTheDay: "Citát dne",
+    resultsCount: "Žádné výsledky | {n} výsledek | {n} výsledky | {n} výsledků",
+    searchEmpty: "Žádné příspěvky neodpovídají tvému hledání.",
+    searchEmptyMine: "Žádné sny neodpovídají tvému hledání.",
+    searchEmptyMineNone: "Zatím žádné sny.",
+    searchHint: "Zadej klíčové slovo pro hledání příspěvků.",
+    searchMyDreams: "Hledat mé sny",
+    searchPlaceholder: "Hledat cokoli",
+    sortNewest: "Nejnovější",
+    sortOldest: "Nejstarší",
+    unknownUser: "Neznámý uživatel",
+    untitled: "Bez názvu",
+    userBadge: "Uživatel"
+  }
+};

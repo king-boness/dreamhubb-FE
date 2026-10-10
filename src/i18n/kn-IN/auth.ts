@@ -73,7 +73,7 @@ export default {
   logOut: "ಲಾಗ್ ಔಟ್ ಮಾಡಿ",
   home: "ಹೋಮ್",
   inspirations: "ಪ್ರೇರಣೆಗಳು",
-  notifications: "ಅಧಿಸೂಚನೆಗಳು",
+  notificationsLabel: "ಅಧಿಸೂಚನೆಗಳು",
   profile: "ಪ್ರೊಫೈಲ್",
   settings: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
   addPost: "ಪೋಸ್ಟ್ ಸೇರಿಸಿ",

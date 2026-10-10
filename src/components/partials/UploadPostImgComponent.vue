@@ -18,7 +18,7 @@
       >
         <img src="/icons/uploadImg-icon.svg" alt="" class="uploadImg-icon" />
         <p class="mainMessage">
-          {{ uploadMsg ? uploadMsg : "Add image" }}
+          {{ uploadMsg ? uploadMsg : t("posts.upload.addImage") }}
         </p>
       </button>
 
@@ -197,8 +197,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useUpload, type UploadedImage } from "src/composables/useUpload";
 import { useImagePickMenu } from "src/composables/useImagePickMenu";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   max?: number;
@@ -253,12 +256,12 @@ const drop = async (e: DragEvent) => {
     });
     if (status === true) {
       if (props.max && files.length + uploadedImages.value.length > props.max) {
-        error.value = props.maxError || `Maximum files is ${props.max}`;
+        error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
       } else {
         await handleUpload(files);
       }
     } else {
-      error.value = props.fileError || "Unsupported file type";
+      error.value = props.fileError || t("common.errors.uploadInvalidType");
     }
   }
   dropped.value = 0;
@@ -266,7 +269,7 @@ const drop = async (e: DragEvent) => {
 
 const handleUpload = async (files: File[]) => {
   if (props.max && uploadedImages.value.length + files.length > props.max) {
-    error.value = props.maxError || `Maximum files is ${props.max}`;
+    error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
     return;
   }
 
@@ -299,7 +302,7 @@ const previewImgs = async (event: Event) => {
   const files = Array.from(target.files || []);
 
   if (props.max && files.length + uploadedImages.value.length > props.max) {
-    error.value = props.maxError || `Maximum files is ${props.max}`;
+    error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
     return;
   }
 

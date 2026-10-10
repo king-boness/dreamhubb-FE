@@ -1,9 +1,9 @@
 <template>
   <div class="report-page">
     <div class="report-header">
-      <span class="report-title">Report a post</span>
+      <span class="report-title">{{ t("reportPost") }}</span>
       <span class="report-description">
-        Help us keep dreamhubb safe. Select a reason and describe the issue. Our team will review your report.
+        {{ t("settingsPages.report.description") }}
       </span>
     </div>
 
@@ -18,7 +18,7 @@
         class="radioButton-report"
         @click="category = false; subCategory = false"
       />
-      <span class="reportName">Inappropriate Content</span>
+      <span class="reportName">{{ t("settingsPages.report.inappropriateContent") }}</span>
     </div>
     <div class="Hate-report report-container" @click="handleRadioClick('hate')">
       <q-radio
@@ -31,7 +31,7 @@
         class="radioButton-report"
         @click="category = false; subCategory = false"
       />
-      <span class="reportName">Hate speech or Racism</span>
+      <span class="reportName">{{ t("settingsPages.report.hateSpeech") }}</span>
     </div>
     <div class="WrongCategory-report report-container" @click="handleRadioClick('wrongCategory')">
       <q-radio
@@ -44,7 +44,7 @@
         class="radioButton-report"
         @click="category = true; subCategory = false"
       />
-      <span class="reportName">Wrong Category</span>
+      <span class="reportName">{{ t("settingsPages.report.wrongCategory") }}</span>
     </div>
     <div class="WrongSubCategory-report report-container" @click="handleRadioClick('wrongSubCategory')">
       <q-radio
@@ -57,7 +57,7 @@
         class="radioButton-report"
         @click="category = false; subCategory = true"
       />
-      <span class="reportName">Wrong Subcategory</span>
+      <span class="reportName">{{ t("settingsPages.report.wrongSubcategory") }}</span>
     </div>
     <div class="reportPage-InputsContainer">
       <q-input
@@ -66,7 +66,7 @@
         hide-bottom-space
         bottom-slots
         v-model="helpMessage"
-        label="Tell us more about the problem..."
+        :label="t('settingsPages.report.tellUsMore')"
         class="registerDatas registerSecrete reportInput"
         type="textarea"
       />
@@ -77,8 +77,10 @@
         dark
         class="registerDatas CategorySelect"
         v-model="CategorySelect"
-        :options="['Dream', 'Idea', 'Problem']"
-        label="Select the Correct Category"
+        :options="categoryOptions"
+        emit-value
+        map-options
+        :label="t('settingsPages.report.selectCategory')"
         behavior="menu"
       />
     </div>
@@ -89,7 +91,9 @@
         class="registerDatas subCategorySelect"
         v-model="subCategorySelect"
         :options="subCategoryOptions"
-        label="Select the Correct Subcategory"
+        emit-value
+        map-options
+        :label="t('settingsPages.report.selectSubcategory')"
         behavior="menu"
       />
     </div>
@@ -100,7 +104,7 @@
         :loading="submitting"
         @click="handleSendReport"
       >
-        <span>Send Report</span>
+        <span>{{ t("settingsPages.report.sendReport") }}</span>
       </q-btn>
     </div>
   </div>
@@ -109,6 +113,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { api } from "boot/axios";
 import { notifySuccess, notifyError } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
@@ -116,6 +121,7 @@ import { goBackOrFallback } from "src/utils/navigation";
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const shape = ref("");
 const helpMessage = ref("");
@@ -125,16 +131,23 @@ const category = ref(false);
 const subCategory = ref(false);
 const submitting = ref(false);
 
-const subCategoryOptions = [
-  "Traveling",
-  "Health",
-  "Possessions",
-  "Relationships",
-  "Learning",
-  "Events",
-  "Profession",
-  "Other"
-];
+// Values stay English (sent to the backend as-is); only labels are localized.
+const categoryOptions = computed(() => [
+  { value: "Dream", label: t("onboardingInfo.goal.dream.title") },
+  { value: "Idea", label: t("onboardingInfo.goal.idea.title") },
+  { value: "Problem", label: t("onboardingInfo.goal.problem.title") }
+]);
+
+const subCategoryOptions = computed(() => [
+  { value: "Traveling", label: t("traveling") },
+  { value: "Health", label: t("health") },
+  { value: "Possessions", label: t("possessions") },
+  { value: "Relationships", label: t("relationships") },
+  { value: "Learning", label: t("learning") },
+  { value: "Events", label: t("events") },
+  { value: "Profession", label: t("profession") },
+  { value: "Other", label: t("other") }
+]);
 
 const handleRadioClick = (value: string) => {
   shape.value = value;
@@ -166,7 +179,7 @@ const handleSendReport = async () => {
       {
         kind: "validation",
         messageKey: "common.errors.validation",
-        fallbackMessage: "Post ID is missing. Open report from a post detail screen.",
+        fallbackMessage: t("settingsPages.report.missingPostId"),
         retryable: false
       },
       { position: "top" }

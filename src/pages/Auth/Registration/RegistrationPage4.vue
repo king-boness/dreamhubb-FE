@@ -8,7 +8,7 @@
           <div class="q-gutter-md row">
             <q-select
               borderless
-              label="Choose your country"
+              :label="$t('chooseCountry')"
               label-color="grey-6"
               class="registerLocation"
               v-model="data.state"
@@ -24,7 +24,7 @@
               <template v-slot:no-option>
                 <q-item>
                   <q-item-section class="text-grey">
-                    No results
+                    {{ $t("noResults") }}
                   </q-item-section>
                 </q-item>
               </template>
@@ -35,7 +35,7 @@
           <div class="q-gutter-md row">
             <q-select
               borderless
-              label="Choose your state"
+              :label="$t('chooseState')"
               label-color="grey-6"
               class="registerLocation"
               v-model="data.country"
@@ -51,7 +51,7 @@
               <template v-slot:no-option>
                 <q-item>
                   <q-item-section class="text-grey">
-                    No results
+                    {{ $t("noResults") }}
                   </q-item-section>
                 </q-item>
               </template>
@@ -63,7 +63,7 @@
             <q-select
               borderless
               class="registerLocation"
-              label="Choose your city"
+              :label="$t('chooseCity')"
               label-color="grey-6"
               v-model="data.city"
               use-input
@@ -78,7 +78,7 @@
               <template v-slot:no-option>
                 <q-item>
                   <q-item-section class="text-grey">
-                    No results
+                    {{ $t("noResults") }}
                   </q-item-section>
                 </q-item>
               </template>
@@ -91,7 +91,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { watch, defineProps, reactive, PropType, ref } from "vue";
+import { watch, defineProps, reactive, PropType, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface Props {
   changeCountry: (state: string, country: string, city: string) => void;
@@ -104,6 +105,8 @@ const props: Props = defineProps({
   }
 });
 
+const { t } = useI18n();
+
 const data = reactive({
   state: "",
   country: "",
@@ -114,9 +117,25 @@ watch(data, () => {
   props.changeCountry(data.state, data.country, data.city);
 });
 
-const countries = ["USA", "Canada", "Mexico"];
-const states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California"];
-const cities = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix"];
+const countries = computed(() => [
+  t("onboarding.registerDemo.countries.usa"),
+  t("onboarding.registerDemo.countries.canada"),
+  t("onboarding.registerDemo.countries.mexico")
+]);
+const states = computed(() => [
+  t("onboarding.registerDemo.states.alabama"),
+  t("onboarding.registerDemo.states.alaska"),
+  t("onboarding.registerDemo.states.arizona"),
+  t("onboarding.registerDemo.states.arkansas"),
+  t("onboarding.registerDemo.states.california")
+]);
+const cities = computed(() => [
+  t("onboarding.registerDemo.cities.newYork"),
+  t("onboarding.registerDemo.cities.losAngeles"),
+  t("onboarding.registerDemo.cities.chicago"),
+  t("onboarding.registerDemo.cities.houston"),
+  t("onboarding.registerDemo.cities.phoenix")
+]);
 const filteredData = ref([""]);
 
 const filterFn = (

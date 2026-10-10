@@ -35,7 +35,7 @@
         </div>
         <div v-else class="joinButtonContainer" style="width: 100%">
           <q-btn
-            label="Join the movement"
+            :label="$t('joinTheMovement')"
             color="primary"
             class="button"
             @click="$router.push('/register/form')"

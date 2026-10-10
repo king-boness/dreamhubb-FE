@@ -12,7 +12,9 @@ export default {
     uploadInvalidType: "Unsupported file type. Please upload an image.",
     uploadTooLarge: "File too large. Maximum size is 5 MB.",
     shareFailed: "Failed to share. Please try again.",
-    server: "Something went wrong. Please try again."
+    server: "Something went wrong. Please try again.",
+    feedLoad: "Unable to load feed.",
+    purchaseFailed: "Purchase failed. Please try again."
   },
   success: {
     postCreated: "Post created successfully!",
@@ -28,7 +30,9 @@ export default {
     donationSuccessful: "Successfully donated {amount} tokens!",
     reportSubmitted: "Report submitted successfully",
     badgeSaved: "Badge saved successfully",
-    purchaseComplete: "Purchase complete. Your tokens have been added."
+    purchaseComplete: "Purchase complete. Your tokens have been added.",
+    userBlocked: "User blocked. Their posts were removed from your feed.",
+    checkoutPrepared: "Checkout prepared. Payment will open shortly."
   },
   actions: {
     retry: "Retry"
@@ -39,7 +43,8 @@ export default {
     replyNotAllowed: "Reply not allowed",
     profilePhotoNotSet: "Profile photo is not set yet.",
     locationAutoFilled: "Location filled automatically. You can still edit it if needed.",
-    paymentCancelled: "Payment was cancelled. You were not charged."
+    paymentCancelled: "Payment was cancelled. You were not charged.",
+    opening: "Opening..."
   },
   tokenPackages: {
     tokens_10: "Fistful of Tokens",
@@ -55,6 +60,20 @@ export default {
     choosePaymentMethod: "Choose payment method",
     continue: "CONTINUE",
     completePurchase: "Complete your purchase…",
-    purchase: "Purchase"
+    purchase: "Purchase",
+    iosPaymentsUnavailable:
+      "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
+    paymentMethodUnavailable: "This payment method is not available yet."
+  },
+  tokensOnboarding: {
+    title: "Introducing Currency Tokens",
+    description:
+      "We connect dreamers with those who are willing to support their goals, creating a community of support and motivation. Start fulfilling your own dreams or help someone else fulfill theirs today with Tokens.",
+    howItWorks: "How does it work?"
+  },
+  accomplishedDream: {
+    title: "Congratulations!",
+    description: "Your dream was accomplished by",
+    reviewCta: "Say thanks in review!"
   }
 };

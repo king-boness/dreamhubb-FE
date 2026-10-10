@@ -1,17 +1,19 @@
 <template>
   <div class="openSharePage">
     <q-spinner-dots color="primary" size="48px" />
-    <p class="openSharePage-text">Opening...</p>
-  </div>
+    <p class="openSharePage-text">{{ t("common.info.opening") }}</p>
+</div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { recordShareVisit } from "src/services/shareTrackingService";
 import { markShareVisitRecorded } from "src/utils/shareVisitCapture";
 import type { ShareableType } from "src/types/shareTracking";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 

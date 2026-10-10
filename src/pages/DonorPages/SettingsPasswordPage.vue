@@ -1,7 +1,7 @@
 <template>
   <div class="SettingsPasswordPage">
     <div class="passwordPage-header">
-      <span class="passwordPage-heading">Change Password</span>
+      <span class="passwordPage-heading">{{ t("changePassword") }}</span>
 
       <q-input
         borderless
@@ -10,12 +10,12 @@
         :type="!isPwd ? 'password' : 'text'"
         bottom-slots
         v-model="oldPassword"
-        label="Old Password"
+        :label="t('settingsPages.password.oldPassword')"
         class="registerDatas registerSecrete passwordPage-input"
       >
       </q-input>
       <a class="passwordPage-forgotPasswordLink"
-        >I don’t remember my password</a
+        >{{ t("settingsPages.password.forgotOldPassword") }}</a
       >
       <q-input
         borderless
@@ -24,7 +24,7 @@
         :type="!isPwd ? 'password' : 'text'"
         bottom-slots
         v-model="newPassword"
-        label="New Password"
+        :label="t('newPassword')"
         class="registerDatas registerSecrete passwordPage-input"
       >
       </q-input>
@@ -35,7 +35,7 @@
         :type="!isPwd ? 'password' : 'text'"
         bottom-slots
         v-model="reNewPassword"
-        label="Repeat New Password"
+        :label="t('settingsPages.password.repeatNewPassword')"
         class="registerDatas registerSecrete passwordPage-input"
       >
       </q-input>
@@ -45,16 +45,19 @@
         class="resetPasswordButton"
         @click="$router.push('password/confirmation')"
       >
-        Request reset
+        {{ t("settingsPages.password.requestReset") }}
       </q-btn>
     </div>
     <div class="pageFooter-div">
-      <q-btn class="cancelButton" @click="$router.go(-1)"> Cancel </q-btn>
+      <q-btn class="cancelButton" @click="$router.go(-1)"> {{ t("cancel") }} </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 const isPwd = ref(false);
 const oldPassword = ref("");
 const reNewPassword = ref("");

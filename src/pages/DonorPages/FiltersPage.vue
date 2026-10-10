@@ -74,14 +74,14 @@
     <footer class="filters-footer">
       <!-- STEP 1 & 2: hint above SEARCH (same copy as onboarding, not under the wheel) -->
       <template v-if="currentStep === 1 || currentStep === 2">
-        <p class="filters-footerHint">choose by swiping up or down</p>
-        <button class="filters-searchBtn" @click="handleSearch">SEARCH</button>
+        <p class="filters-footerHint">{{ swipeHint }}</p>
+        <button class="filters-searchBtn" @click="handleSearch">{{ searchLabel }}</button>
         <button
           class="filters-clearBtn"
           type="button"
           @click="handleClearFilters"
         >
-          Clear filters
+          {{ clearFiltersLabel }}
         </button>
         <div
           v-if="currentStep === 1"
@@ -113,7 +113,7 @@
           type="button"
           @click="handleClearFilters"
         >
-          Clear filters
+          {{ clearFiltersLabel }}
         </button>
       </template>
 
@@ -136,6 +136,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { notifyError } from "src/utils/notify";
 import { usePostsStore } from "src/stores/posts";
 import { usePreferencesStore } from "src/stores/preferences";
@@ -146,6 +147,7 @@ import WhatKindOfDream from "src/components/Onboarding/WhatKindOfDream.vue";
 import WhereAreYou from "src/components/Onboarding/WhereAreYou.vue";
 // getCategoryId už nie je potrebné - používame priamo fe_category
 
+const { t } = useI18n();
 const router = useRouter();
 const postsStore = usePostsStore();
 const preferencesStore = usePreferencesStore();
@@ -185,18 +187,22 @@ const filterCityId = ref<number | null>(null); // Changed from filterCity (strin
 
 // getCategoryId je importovaný z categoryMapping.ts
 
+const swipeHint = computed(() => t("onboarding.swipeInstruction"));
+const searchLabel = computed(() => t("search"));
+const clearFiltersLabel = computed(() => t("feed.clearFilters"));
+
 // Computed properties for dynamic titles and labels
 const currentTitle = computed(() => {
-  if (currentStep.value === 1) return "swap posts";
-  if (currentStep.value === 2) return "swap category";
-  if (currentStep.value === 3) return "choose a place";
+  if (currentStep.value === 1) return t("feed.filterStepPosts");
+  if (currentStep.value === 2) return t("feed.filterStepCategory");
+  if (currentStep.value === 3) return t("feed.filterStepPlace");
   return "";
 });
 
 const currentNextLabel = computed(() => {
-  if (currentStep.value === 1) return "swap category too";
-  if (currentStep.value === 2) return "change a place too";
-  if (currentStep.value === 3) return "search";
+  if (currentStep.value === 1) return t("feed.filterAlsoCategory");
+  if (currentStep.value === 2) return t("feed.filterAlsoPlace");
+  if (currentStep.value === 3) return t("feed.filterSearchCta");
   return "";
 });
 

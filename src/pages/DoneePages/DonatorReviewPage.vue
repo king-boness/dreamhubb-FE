@@ -55,7 +55,7 @@
       <span class="donatorReview-profileName">{{ profile.user.userName }}</span>
     </div>
     <div class="donatorReview-userInputSection">
-      <span class="donatorReview-inputSectionTitle">Leave a Review!</span>
+      <span class="donatorReview-inputSectionTitle">{{ reviewTitle }}</span>
 
       <q-input
         borderless
@@ -63,7 +63,7 @@
         hide-bottom-space
         bottom-slots
         v-model="reviewMessage"
-        label="Type your message for a Donor..."
+        :label="reviewPlaceholder"
         class="registerDatas registerSecrete reviewInput"
         type="textarea"
       >
@@ -75,7 +75,7 @@
         ></UploadImgComponent>
       </div>
       <div class="donatorReview-donorRating">
-        <span class="donatorReview-ratingTitle">Rate your Donor</span>
+        <span class="donatorReview-ratingTitle">{{ rateDonorLabel }}</span>
         <CustomThumb
           :user-karma="100"
           :max-value="100"
@@ -85,7 +85,7 @@
       <q-btn
         class="donatorReview-reviewButton"
         @click="$router.push({ name: 'donee-posts' })"
-        >Leave a review</q-btn
+        >{{ leaveReviewLabel }}</q-btn
       >
     </div>
   </div>
@@ -214,10 +214,17 @@
 }
 </style>
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { UserProfile } from "src/components/models";
 import UploadImgComponent from "src/components/partials/UploadImgComponent.vue";
 import CustomThumb from "src/components/partials/CustomThumb.vue";
+
+const { t } = useI18n();
+const reviewTitle = computed(() => t("profileUi.reviewTitle"));
+const reviewPlaceholder = computed(() => t("profileUi.reviewPlaceholder"));
+const rateDonorLabel = computed(() => t("profileUi.rateDonor"));
+const leaveReviewLabel = computed(() => t("profileUi.leaveReview"));
 
 const reviewMessage = ref("");
 const profile = ref({

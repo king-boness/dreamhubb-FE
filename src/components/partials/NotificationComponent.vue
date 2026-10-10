@@ -6,7 +6,7 @@
     >
       <UserAvatar
         :image-url="actorAvatar || null"
-        :name="actorName || 'Unknown'"
+        :name="actorName || unknownActorLabel"
         size="48px"
       />
     </div>
@@ -37,16 +37,16 @@
         </q-card-section>
         <q-card-section class="notification-actionsSheetContent">
           <button class="notification-actionsSheetBtn" type="button" @click="handleAction('delete')">
-            Delete this notification
+            {{ deleteLabel }}
           </button>
           <button class="notification-actionsSheetBtn" type="button" @click="handleAction('turnOff')">
-            Turn off these notifications
+            {{ turnOffLabel }}
           </button>
           <button class="notification-actionsSheetBtn" type="button" @click="handleAction('report')">
-            Report issue to notifications team
+            {{ reportLabel }}
           </button>
           <button class="notification-actionsSheetBtn secondary" type="button" @click="isActionsOpen = false">
-            Cancel
+            {{ cancelLabel }}
           </button>
         </q-card-section>
       </q-card>
@@ -69,6 +69,12 @@ const props = defineProps<Props>();
 const router = useRouter();
 const { t } = useI18n();
 const isActionsOpen = ref(false);
+
+const deleteLabel = computed(() => t("notificationsPage.deleteThis"));
+const turnOffLabel = computed(() => t("notificationsPage.turnOff"));
+const reportLabel = computed(() => t("notificationsPage.reportIssue"));
+const cancelLabel = computed(() => t("cancel"));
+const unknownActorLabel = computed(() => t("notificationsPage.unknownActor"));
 
 // Bottom sheet: drag down on handle to close
 const sheetDragOffset = ref(0);
@@ -128,22 +134,35 @@ const actorAvatar = computed(() => {
   return props.notification.comment_author_avatar;
 });
 
-// Display title based on notification type
+// Display title based on notification type (localized templates; body stays UGC)
 const displayTitle = computed(() => {
-  if (props.notification.type === "top_up") {
-    const actor = actorName.value || "Someone";
+  const actor = actorName.value || t("notificationsPage.someone");
+  const type = props.notification.type;
+
+  if (type === "top_up") {
     const amount = props.notification.amount || 0;
     return t("notifications.topUpTitle", { name: actor, amount });
   }
+  if (type === "comment_help" || type === "comment_accomplish") {
+    return t("notificationsPage.commentTitle", { name: actor });
+  }
+  if (type === "comment_reply") {
+    return t("notificationsPage.replyTitle", { name: actor });
+  }
+  // Unknown type — fall back to BE title
   return props.notification.title || "";
 });
 
 // Display text based on notification type
 const displayText = computed(() => {
   if (props.notification.type === "top_up") {
-    const postTitle = props.notification.post?.title || props.notification.post_title || "your post";
+    const postTitle =
+      props.notification.post?.title ||
+      props.notification.post_title ||
+      t("notificationsPage.yourPost");
     return t("notifications.topUpText", { postTitle });
   }
+  // Comment/reply body is UGC — keep as-is
   return props.notification.body || "";
 });
 
@@ -165,7 +184,7 @@ const goToUserProfile = (userId: number | null | undefined) => {
   router.push({ name: "donor-user-profile", params: { userId: String(numericUserId) } });
 };
 
-// Calculate "time ago" from created_at
+// Calculate "time ago" from created_at (reuse posts.* relative keys)
 const timeAgo = computed(() => {
   if (!props.notification.created_at) return "";
 
@@ -174,31 +193,33 @@ const timeAgo = computed(() => {
   const diffInSeconds = Math.floor((now.getTime() - created.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return "Just now";
+    return t("posts.justNow");
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} ${diffInMinutes === 1 ? "minute" : "minutes"} ago`;
+    return t("posts.minutesAgo", diffInMinutes, { n: diffInMinutes });
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours} ${diffInHours === 1 ? "hour" : "hours"} ago`;
+    return t("posts.hoursAgo", diffInHours, { n: diffInHours });
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
-    return `${diffInDays} ${diffInDays === 1 ? "day" : "days"} ago`;
+    return t("posts.daysAgo", diffInDays, { n: diffInDays });
   }
 
   const diffInWeeks = Math.floor(diffInDays / 7);
   if (diffInWeeks < 4) {
-    return `${diffInWeeks} ${diffInWeeks === 1 ? "week" : "weeks"} ago`;
+    return t("posts.weeksAgo", diffInWeeks, { n: diffInWeeks });
   }
 
   const diffInMonths = Math.floor(diffInDays / 30);
-  return `${diffInMonths} ${diffInMonths === 1 ? "month" : "months"} ago`;
+  return t("posts.monthsAgo", Math.max(1, diffInMonths), {
+    n: Math.max(1, diffInMonths)
+  });
 });
 
 function handleAction(kind: "delete" | "turnOff" | "report") {

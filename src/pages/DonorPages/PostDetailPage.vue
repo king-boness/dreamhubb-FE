@@ -7,14 +7,14 @@
   <!-- Error state -->
   <div v-else-if="error" class="postDetail-error" data-testid="dh-post-detail-error">
     <div class="postDetail-errorContent">
-      <h2>Unable to load this post</h2>
+      <h2>{{ t("posts.loadError") }}</h2>
       <p>{{ error }}</p>
       <div class="postDetail-errorActions">
         <button class="primaryCtaBtn" @click="handleRetry" data-testid="dh-post-detail-retry">
-          Try Again
+          {{ t("posts.tryAgain") }}
         </button>
         <button class="secondaryBtn" @click="handleClose">
-          Back to Feed
+          {{ t("posts.backToFeed") }}
         </button>
       </div>
     </div>
@@ -23,10 +23,10 @@
   <!-- Empty state (post not found) -->
   <div v-else-if="!post" class="postDetail-empty">
     <div class="postDetail-errorContent">
-      <h2>Post not found</h2>
-      <p>This post may have been deleted or doesn't exist.</p>
+      <h2>{{ t("posts.postNotFound") }}</h2>
+      <p>{{ t("posts.postNotFoundHint") }}</p>
       <button class="primaryCtaBtn" @click="handleClose">
-        Back to Feed
+        {{ t("posts.backToFeed") }}
       </button>
     </div>
   </div>
@@ -128,10 +128,10 @@
         <div class="postDetail-rewardRow">
           <img
             src="/post_icons/stars.svg"
-            alt="Reward"
+            :alt="t('posts.rewardAlt')"
             class="postDetail-rewardIcon"
           />
-          <span class="postDetail-rewardLabel">REWARD: {{ displayTokens }} tokens</span>
+          <span class="postDetail-rewardLabel">{{ t("posts.rewardLabel", displayTokens, { n: displayTokens }) }}</span>
         </div>
 
         <!-- Comments Section -->
@@ -248,7 +248,7 @@
                 @click="handleBlockAuthor"
               >
                 <q-icon name="block" size="18px" class="postDetail-reportIcon" />
-                <span>Block user</span>
+                <span>{{ t("posts.blockUser") }}</span>
               </button>
             </div>
           </div>
@@ -275,13 +275,13 @@
               @mousedown="onContributeMouseDown"
             >
               <div class="contributeSheet-handle"></div>
-              <h2 class="contributeSheet-title">How do you want to contribute?</h2>
+              <h2 class="contributeSheet-title">{{ t("posts.contributeHowTitle") }}</h2>
 
               <button class="contributeSheet-btn primary" @click="onContributeOption('accomplish')">
-                ACCOMPLISH DREAM
+                {{ t("helpAccomplish") }}
               </button>
               <button class="contributeSheet-btn secondary" @click="onContributeOption('help')">
-                HELP TO FULFILL
+                {{ t("helpToFulfill") }}
               </button>
               <button
                 class="contributeSheet-btn tertiary"
@@ -370,7 +370,7 @@
 
             <div class="topUpModal-info">
               <span class="topUpModal-balance">
-                {{ t("funds") }}: {{ remainingTokens }} tokens
+                {{ t("posts.fundsTokens", remainingTokens, { n: remainingTokens }) }}
               </span>
             </div>
           </div>
@@ -428,6 +428,7 @@ import { api } from "boot/axios";
 import { useBlockUser } from "src/composables/useBlockUser";
 import { translateEntity, type TranslationResponseData } from "src/services/translationService";
 import { resolveTargetLanguage } from "src/utils/resolveTargetLanguage";
+import { formatLocaleDate } from "src/utils/formatLocaleDate";
 
 const { t, locale } = useI18n();
 const LANGUAGE_STORAGE_KEY = "dreamhubb_language";
@@ -614,8 +615,8 @@ const authorId = computed(() => {
 // Computed property to get author location for "About Author" section
 const displayAuthorLocation = computed(() => {
   const p = post.value;
-  if (!p) return "Unknown";
-  return getLocationLabel(p, locale.value as string) || "Unknown";
+  if (!p) return t("unknown");
+  return getLocationLabel(p, locale.value as string) || t("unknown");
 });
 
 const authorInitials = computed(() => getUserInitials(displayAuthorName.value));
@@ -947,19 +948,13 @@ const openLightbox = (imageIndex?: number) => {
 
 const formattedDate = computed(() => {
   if (!post.value?.date_created) return "";
-  const d = new Date(post.value.date_created);
-  if (Number.isNaN(d.getTime())) return post.value.date_created;
-  // Format as DD/MM/YYYY
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return formatLocaleDate(post.value.date_created, locale.value as string);
 });
 
 const locationLabel = computed(() => {
   const p = post.value;
-  if (!p) return "Unknown";
-  return getLocationLabel(p, locale.value as string) || "Unknown";
+  if (!p) return t("unknown");
+  return getLocationLabel(p, locale.value as string) || t("unknown");
 });
 
 const viewsCount = computed(() => {
@@ -1040,11 +1035,11 @@ const currentPostUrl = computed(() => {
 
 // Share post computed properties
 const sharePostTitle = computed(() => {
-  return post.value?.title || "Check out this post on dreamhubb";
+  return post.value?.title || t("posts.sharePostFallback");
 });
 
 const sharePostText = computed(() => {
-  return post.value?.description || "Check out this post on dreamhubb";
+  return post.value?.description || t("posts.sharePostFallback");
 });
 
 const handleShare = () => {

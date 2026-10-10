@@ -45,7 +45,7 @@
         class="shareProfileSheet-btn shareProfileSheet-btn--native"
         @click="shareNative"
       >
-        Share via Device
+        {{ t("posts.shareViaDevice") }}
       </button>
     </div>
   </div>
@@ -53,6 +53,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
 import { notifyError } from "src/utils/notify";
 import {
   createTrackedShare,
@@ -70,15 +71,24 @@ interface Props {
   shareableId?: string | number | null;
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<Props>(), {
   modelValue: false,
   profileUrl: "",
-  profileTitle: "Check out this profile on dreamhubb",
-  profileText: "Check out this profile on dreamhubb",
+  profileTitle: undefined,
+  profileText: undefined,
   postType: null,
   shareableType: undefined,
   shareableId: null
 });
+
+const resolvedProfileTitle = computed(
+  () => props.profileTitle || t("posts.shareProfileFallback")
+);
+const resolvedProfileText = computed(
+  () => props.profileText || t("posts.shareProfileFallback")
+);
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
@@ -131,13 +141,13 @@ const hasNativeShare = computed(() => {
 // Dynamic title based on post type or default to "Share Profile"
 const shareTitle = computed(() => {
   if (props.postType === "dream") {
-    return "share dream";
+    return t("posts.shareDream");
   } else if (props.postType === "problem") {
-    return "share problem";
+    return t("posts.shareProblem");
   } else if (props.postType === "idea") {
-    return "share idea";
+    return t("posts.shareIdea");
   }
-  return "Share Profile";
+  return t("posts.shareProfile");
 });
 
 const closeSheet = () => {
@@ -414,7 +424,7 @@ const shareOnPlatform = async (platform: {
   try {
     const channel = platformToChannel(platform.name);
     const { url: trackedUrl } = await resolveTrackedShare(channel);
-    const shareUrl = platform.url(trackedUrl, props.profileTitle, props.profileText);
+    const shareUrl = platform.url(trackedUrl, resolvedProfileTitle.value, resolvedProfileText.value);
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   } catch (error) {
     notifyError({
@@ -432,8 +442,8 @@ const shareNative = async () => {
 
   try {
     await navigator.share({
-      title: props.profileTitle,
-      text: props.profileText,
+      title: resolvedProfileTitle.value,
+      text: resolvedProfileText.value,
       url
     });
 

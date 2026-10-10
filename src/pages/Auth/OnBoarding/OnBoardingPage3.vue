@@ -1,7 +1,7 @@
 <template>
   <div class="onBoarding-page3">
     <div class="onBoarding-body">
-      <span class="onBoarding-title">Cash flow</span>
+      <span class="onBoarding-title">{{ $t("onboarding.tokens.page3Title") }}</span>
       <div class="onBoarding-imgContainer"></div>
     </div>
   </div>

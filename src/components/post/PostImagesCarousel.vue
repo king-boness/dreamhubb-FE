@@ -25,7 +25,7 @@
         :key="currentImage"
         class="postCarousel-image"
         :src="currentImage"
-        :alt="alt || 'Post image'"
+        :alt="resolvedAlt"
         loading="lazy"
         @click="handleImageClick"
         @touchstart.passive="onTouchStart"
@@ -41,7 +41,7 @@
       <button
         type="button"
         class="postCarousel-arrow postCarousel-arrow--left"
-        aria-label="Previous image"
+        :aria-label="t('posts.carousel.previousImage')"
         @click="handleManualPrev"
       >
         <span class="postCarousel-arrowIcon" aria-hidden="true">‹</span>
@@ -49,7 +49,7 @@
       <button
         type="button"
         class="postCarousel-arrow postCarousel-arrow--right"
-        aria-label="Next image"
+        :aria-label="t('posts.carousel.nextImage')"
         @click="handleManualNext"
       >
         <span class="postCarousel-arrowIcon" aria-hidden="true">›</span>
@@ -71,6 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface Props {
   images: string[] | null | undefined;
@@ -85,16 +86,20 @@ interface Props {
   progressContext?: "feed" | "detail";
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<Props>(), {
   initialIndex: 0,
   autoSlide: true,
   showProgress: true,
   showArrows: true,
   showDots: true,
-  alt: "Post image",
+  alt: "",
   imageStyle: () => ({}),
   progressContext: "feed"
 });
+
+const resolvedAlt = computed(() => props.alt || t("feed.postImageAlt"));
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{

@@ -73,7 +73,7 @@ export default {
   logOut: "登出",
   home: "首页",
   inspirations: "灵感",
-  notifications: "通知",
+  notificationsLabel: "通知",
   profile: "个人资料",
   settings: "设置",
   addPost: "添加帖子",

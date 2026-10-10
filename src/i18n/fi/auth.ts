@@ -23,7 +23,7 @@ export default {
   aboutApp: "Tietoja sovelluksesta",
   banList: "Estolista",
   comingSoon: "Tulossa pian",
-  notifications: "Ilmoitukset",
+  notificationsLabel: "Ilmoitukset",
   sources: "Lähteet",
   screenMode: "Näyttötila",
   appearance: "Ulkoasu",

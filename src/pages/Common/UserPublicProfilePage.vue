@@ -2,13 +2,13 @@
   <q-page class="publicProfile">
     <div v-if="loading" class="publicProfile__state">
       <q-spinner color="primary" size="32px" />
-      <div class="state-label">Loading profile...</div>
+      <div class="state-label">{{ loadingLabel }}</div>
     </div>
 
     <div v-else-if="error" class="publicProfile__state">
       <div class="state-label">{{ error }}</div>
       <div class="publicProfile__actions">
-        <q-btn flat color="primary" @click="goBack">Go back</q-btn>
+        <q-btn flat color="primary" @click="goBack">{{ goBackLabel }}</q-btn>
         <q-btn
           unelevated
           no-caps
@@ -64,6 +64,8 @@ const { t } = useI18n();
 const loading = ref(true);
 const error = ref<string | null>(null);
 const userData = ref<PublicUser | null>(null);
+const loadingLabel = computed(() => t("profileUi.loadingProfile"));
+const goBackLabel = computed(() => t("profileUi.goBack"));
 const retryLabel = computed(() => {
   const label = t("common.actions.retry");
   return label === "common.actions.retry" ? "Retry" : label;

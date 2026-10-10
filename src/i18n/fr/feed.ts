@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Ajouter des mots-clés",
+    applyFilters: "Appliquer les filtres",
+    chooseCountry: "Choisissez votre pays",
+    clearFilters: "Effacer les filtres",
+    failedLoadInspirations: "Impossible de charger les inspirations.",
+    filterAlsoCategory: "choisir aussi une catégorie",
+    filterAlsoPlace: "changer aussi de lieu",
+    filterSearchCta: "rechercher",
+    filterStepCategory: "choisir une catégorie",
+    filterStepPlace: "choisir un lieu",
+    filterStepPosts: "choisir les publications",
+    firstPostHint: "Créez votre premier rêve, problème ou idée et partagez-le avec le monde.",
+    firstPostTitle: "Commencez votre aventure !",
+    myDreamsTitle: "Mes rêves",
+    noResults: "Aucun résultat",
+    postImageAlt: "Image de la publication",
+    postType: {
+      dream: "rêve",
+      idea: "idée",
+      problem: "problème"
+    },
+    quote1: "« Si vous ne rêvez pas, vous ne mourrez pas, mais sans rêves vous ne serez pas vraiment vivant. »",
+    quote2: "« Nous ne pouvons pas résoudre les problèmes avec le même type de pensée qui les a créés. »",
+    quote3: "« Apprenez comme si vous alliez vivre éternellement, vivez comme si vous alliez mourir demain. »",
+    quote4: "« Je n'ai jamais rêvé du succès. J'ai travaillé pour l'obtenir. »",
+    quoteOfTheDay: "Citation du jour",
+    resultsCount: "Aucun résultat | {n} résultat | {n} résultats",
+    searchEmpty: "Aucune publication ne correspond à votre recherche.",
+    searchEmptyMine: "Aucun rêve ne correspond à votre recherche.",
+    searchEmptyMineNone: "Pas encore de rêves.",
+    searchHint: "Saisissez un mot-clé pour rechercher des publications.",
+    searchMyDreams: "Rechercher mes rêves",
+    searchPlaceholder: "Tout rechercher",
+    sortNewest: "Plus récents",
+    sortOldest: "Plus anciens",
+    unknownUser: "Utilisateur inconnu",
+    untitled: "Sans titre",
+    userBadge: "Utilisateur"
+  }
+};

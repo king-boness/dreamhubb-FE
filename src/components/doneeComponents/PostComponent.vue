@@ -20,7 +20,7 @@
           :show-progress="true"
           :show-arrows="false"
           :show-dots="false"
-          alt="Post image"
+          :alt="postImageAlt"
         />
       </div>
       <div class="postComponent-valueContainer">
@@ -163,6 +163,7 @@
 <script setup lang="ts">
 import { defineProps, PropType, ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { Post } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import PostCover from "src/components/post/PostCover.vue";
@@ -178,7 +179,9 @@ const props: Props = defineProps({
   }
 });
 
+const { t } = useI18n();
 const router = useRouter();
+const postImageAlt = computed(() => t("feed.postImageAlt"));
 
 /** Tablet Donee wall: vertical stack inside each Dreams/Problems/Ideas column. */
 const isTabletColumn = ref(false);

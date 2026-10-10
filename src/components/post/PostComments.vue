@@ -15,10 +15,10 @@
             <div class="post-comments-tab-content">
               <img
                 :src="localActiveTab === 'help' ? '/other_icons/help_s.svg' : '/other_icons/help_ns.svg'"
-                alt="help"
+                :alt="t('posts.commentsTabHelp')"
                 class="post-comments-tab-icon"
               />
-              <span>help</span>
+              <span>{{ t("posts.commentsTabHelp") }}</span>
             </div>
           </template>
         </q-tab>
@@ -27,10 +27,10 @@
             <div class="post-comments-tab-content">
               <img
                 :src="localActiveTab === 'accomplish' ? '/other_icons/accomplish_s.svg' : '/other_icons/accomplish_ns.svg'"
-                alt="accomplish"
+                :alt="t('posts.commentsTabAccomplish')"
                 class="post-comments-tab-icon"
               />
-              <span>accomplish</span>
+              <span>{{ t("posts.commentsTabAccomplish") }}</span>
             </div>
           </template>
         </q-tab>
@@ -45,7 +45,7 @@
     <!-- Comments List -->
     <div v-else class="post-comments-list">
       <div v-if="filteredComments.length === 0" class="post-comments-empty">
-        <p>No comments yet.</p>
+        <p>{{ t("posts.commentsEmpty") }}</p>
       </div>
       <div v-else class="post-comments-items">
         <div
@@ -89,7 +89,7 @@
           <div
             v-if="comment.images && comment.images.length > 0"
             class="post-comments-item-images"
-            aria-label="Comment images"
+            :aria-label="t('posts.commentImagesAlt')"
           >
             <button
               v-for="(url, idx) in comment.images"
@@ -160,7 +160,7 @@
                   size="24px"
                 />
                 <div class="post-comments-reply-info">
-                  <span class="post-comments-reply-name">Reply from {{ reply.user_name }}</span>
+                  <span class="post-comments-reply-name">{{ t("posts.replyFrom", { name: reply.user_name }) }}</span>
                   <span class="post-comments-reply-time">{{ timeAgo(reply.created_at) }}</span>
                 </div>
               </div>
@@ -198,6 +198,7 @@ import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { notifyInfo, notifyError } from "src/utils/notify";
+import { formatLocaleDate } from "src/utils/formatLocaleDate";
 import { useCommentsStore, type Reply } from "src/stores/comments";
 import { useAuthStore } from "src/stores/auth";
 import UserAvatar from "src/components/common/UserAvatar.vue";
@@ -221,7 +222,7 @@ const emit = defineEmits<{
 
 const router = useRouter();
 const route = useRoute();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const commentsStore = useCommentsStore();
 const authStore = useAuthStore();
 
@@ -288,34 +289,26 @@ const loading = computed(() => {
 });
 
 const formatDate = (iso: string) => {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) {
-    return iso;
-  }
-  // Format as DD/MM/YYYY
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return formatLocaleDate(iso, locale.value as string);
 };
 
-// Calculate "time ago" for replies
+// Calculate "time ago" for replies (i18n plural keys)
 const timeAgo = (iso: string) => {
   if (!iso) return "";
   const now = new Date();
   const created = new Date(iso);
   const diffInSeconds = Math.floor((now.getTime() - created.getTime()) / 1000);
-  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 60) return t("posts.justNow");
   const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes} ${diffInMinutes === 1 ? "minute" : "minutes"} ago`;
+  if (diffInMinutes < 60) return t("posts.minutesAgo", diffInMinutes, { n: diffInMinutes });
   const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} ${diffInHours === 1 ? "hour" : "hours"} ago`;
+  if (diffInHours < 24) return t("posts.hoursAgo", diffInHours, { n: diffInHours });
   const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays} ${diffInDays === 1 ? "day" : "days"} ago`;
+  if (diffInDays < 7) return t("posts.daysAgo", diffInDays, { n: diffInDays });
   const diffInWeeks = Math.floor(diffInDays / 7);
-  if (diffInWeeks < 4) return `${diffInWeeks} ${diffInWeeks === 1 ? "week" : "weeks"} ago`;
-  const diffInMonths = Math.floor(diffInDays / 30);
-  return `${diffInMonths} ${diffInMonths === 1 ? "month" : "months"} ago`;
+  if (diffInWeeks < 4) return t("posts.weeksAgo", diffInWeeks, { n: diffInWeeks });
+  const diffInMonths = Math.max(1, Math.floor(diffInDays / 30));
+  return t("posts.monthsAgo", diffInMonths, { n: diffInMonths });
 };
 
 // Toggle reply input

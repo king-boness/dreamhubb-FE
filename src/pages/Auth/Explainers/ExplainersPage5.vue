@@ -1,7 +1,7 @@
 <template>
   <ExplainerComponent
     :title="$t('explainerTitle5')"
-    :text="$t('explainerText5')"
+    :text="$t('onboarding.help.slide5Text')"
     image="/images/Auth/handsGrip-image.svg"
   />
 </template>

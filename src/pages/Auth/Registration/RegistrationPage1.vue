@@ -4,7 +4,7 @@
       {{ $t("registerTitle1") }}
     </p>
     <p v-else class="explainTitle registrationTitle">
-      Who is {{ props.registrationInfo.side }}?
+      {{ $t("onboarding.whoIsSide", { side: sideLabel }) }}
     </p>
     <div class="col-12">
       <SwiperComponent
@@ -33,13 +33,13 @@
       v-if="props.registrationInfo.side == 'Donor' && horiz"
       class="registerText horizText"
     >
-      {{ donor.text }}
+      {{ $t("onboarding.legacySideBlurb") }}
     </p>
     <p
       v-if="props.registrationInfo.side == 'Donee' && horiz"
       class="registerText horizText"
     >
-      {{ donee.text }}
+      {{ $t("onboarding.legacySideBlurb") }}
     </p>
   </div>
 </template>
@@ -85,13 +85,11 @@
 </style>
 <script setup lang="ts">
 import SwiperComponent from "src/components/partials/SwiperComponent.vue";
-import {
-  RegistrationOptions,
-  donorDescription,
-  doneeDescription
-} from "src/components/models";
-import { PropType, ref, defineEmits } from "vue";
+import { RegistrationOptions } from "src/components/models";
+import { PropType, ref, computed, defineEmits } from "vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const emit = defineEmits(["changedHoriz"]);
 
 const horiz = ref(false);
@@ -116,12 +114,12 @@ const props = defineProps({
   }
 });
 
-const donee = ref({
-  text: "Any person that can give or provide anything or any service that someone else might be interested in and find valuable. There is a variety of ways in which the mentor can help donees. He or she can either help in a full or just partially or anything in between depending on his or her skills, means, and abilities."
-} as doneeDescription);
-const donor = ref({
-  text: "Any person that can give or provide anything or any service that someone else might be interested in and find valuable. There is a variety of ways in which the mentor can help donees. He or she can either help in a full or just partially or anything in between depending on his or her skills, means, and abilities."
-} as donorDescription);
+const sideLabel = computed(() => {
+  const side = (props.registrationInfo as { side?: string }).side;
+  if (side === "Donor") return t("onboarding.sideDonor");
+  if (side === "Donee") return t("onboarding.sideDonee");
+  return side ?? "";
+});
 
 const options: RegistrationOptions[] = [
   {

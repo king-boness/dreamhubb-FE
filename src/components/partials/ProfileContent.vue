@@ -28,15 +28,15 @@
         <h2 class="myProfile-username">{{ displayUsername }}</h2>
         <p v-if="displayLocation" class="myProfile-location">{{ displayLocation }}</p>
         <div class="myProfile-tokens">
-          <span class="myProfile-tokensLabel">Tokens:</span>
+          <span class="myProfile-tokensLabel">{{ tokensLabel }}</span>
           <span class="myProfile-tokensValue">{{ displayTokens }}</span>
         </div>
         <div class="myProfile-role">
-          <span class="myProfile-roleLabel">Role:</span>
+          <span class="myProfile-roleLabel">{{ roleLabel }}</span>
           <span class="myProfile-roleValue">{{ currentRole }}</span>
         </div>
         <div v-if="displayBio" class="myProfile-bioSection">
-          <PageTitle :title="`About ${displayUsername}`" />
+          <PageTitle :title="aboutTitle" />
           <p class="myProfile-bio">{{ displayBio }}</p>
         </div>
       </div>
@@ -110,7 +110,7 @@
           @mousedown="onBadgeMouseDown"
         >
           <div class="badgeSelector-handle"></div>
-          <p class="badgeSelector-pullHint">Pull up to see all badges</p>
+          <p class="badgeSelector-pullHint">{{ pullBadgesLabel }}</p>
           <h3 class="badgeSelector-title">{{ t("selectBadgeToDisplay") }}</h3>
         </q-card-section>
         <q-card-section
@@ -155,6 +155,11 @@ import { notifyError, notifyInfo, notifySuccess } from "src/utils/notify";
 import { resolveProfileImageSrc } from "src/utils/avatar";
 
 const { t, locale } = useI18n();
+
+const tokensLabel = computed(() => t("profileUi.tokensLabel"));
+const roleLabel = computed(() => t("profileUi.roleLabel"));
+const pullBadgesLabel = computed(() => t("profileUi.pullBadges"));
+const userFallback = computed(() => t("profileUi.userFallback"));
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -360,11 +365,13 @@ const profileShareUrl = computed(() => {
 });
 
 const shareProfileTitle = computed(() => {
-  return `${authStore.user?.username || "User"}'s Profile`;
+  const name = authStore.user?.username || userFallback.value;
+  return t("profileUi.shareProfileTitle", { name });
 });
 
 const shareProfileText = computed(() => {
-  return `Check out ${authStore.user?.username || "this user"}'s profile on dreamhubb`;
+  const name = authStore.user?.username || userFallback.value;
+  return t("profileUi.shareProfileText", { name });
 });
 
 // Get current role from route name
@@ -386,8 +393,12 @@ const userInitials = computed(() => {
 
 // Display username
 const displayUsername = computed(() => {
-  return authStore.user?.username || "User";
+  return authStore.user?.username || userFallback.value;
 });
+
+const aboutTitle = computed(() =>
+  t("profileUi.aboutUser", { name: displayUsername.value })
+);
 
 // Display tokens - must match tokenBalance in DonorMainLayout / DoneeMainLayout
 const displayTokens = computed(() => {

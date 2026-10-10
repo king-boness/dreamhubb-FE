@@ -63,7 +63,7 @@
             <div class="userPostsByType-itemMeta">
               <span class="userPostsByType-itemMetaText">{{ formatDate(p.date_created) }}</span>
               <span class="userPostsByType-itemMetaDot">•</span>
-              <span class="userPostsByType-itemMetaText">{{ p.tokens }} tokens</span>
+              <span class="userPostsByType-itemMetaText">{{ tokensMeta(p.tokens) }}</span>
             </div>
           </q-item-section>
           <q-item-section side>
@@ -84,8 +84,9 @@ import { api } from "boot/axios";
 import { normalizePost, type NormalizedPost, type RawPostFromAPI } from "src/utils/normalizePost";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
+import { formatLocaleDate } from "src/utils/formatLocaleDate";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -159,21 +160,12 @@ const handleCompletedClick = () => {
   notifyInfo("common.info.comingSoon", t("completedComingSoon") || "Coming soon", { timeout: 2500 });
 };
 
-// Format date as DD/MM/YYYY (same behavior as donor feed)
-const formatDate = (dateString: string): string => {
-  const d = new Date(dateString);
-  if (Number.isNaN(d.getTime())) {
-    const dateParts = dateString.split("/");
-    if (dateParts.length === 3) {
-      const [month, day, year] = dateParts;
-      return `${day}/${month}/${year}`;
-    }
-    return dateString;
-  }
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+const formatDate = (dateString: string): string =>
+  formatLocaleDate(dateString, locale.value as string);
+
+const tokensMeta = (n: number | null | undefined) => {
+  const count = typeof n === "number" && !Number.isNaN(n) ? n : 0;
+  return t("profileUi.tokensMeta", count, { n: count });
 };
 </script>
 

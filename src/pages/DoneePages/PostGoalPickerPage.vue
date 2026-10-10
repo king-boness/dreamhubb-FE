@@ -5,8 +5,6 @@
     :progress="30"
     :center-offset-y="-17"
     :roller-axis-offset-y="-19"
-    title="the post will be about"
-    next-button-label="NEXT STEP"
     @next="handleNext"
     @back="handleBack"
   />

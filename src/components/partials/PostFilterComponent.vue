@@ -10,7 +10,7 @@
         v-model="tab"
         active-class="activeTab"
       >
-        <q-tab name="onGoing" label="Ongoing" class="postFilter onGoingTab"
+        <q-tab name="onGoing" :label="ongoingLabel" class="postFilter onGoingTab"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -103,7 +103,7 @@
               stroke-linejoin="round"
             /></svg
         ></q-tab>
-        <q-tab name="accomplished" label="Accomplished" class="postFilter"
+        <q-tab name="accomplished" :label="accomplishedLabel" class="postFilter"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -137,8 +137,13 @@
 
 <script setup lang="ts">
 import { ref, defineProps, PropType, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { UserProfile } from "src/components/models";
 import DreamsComponent from "./DreamsComponent.vue";
+
+const { t } = useI18n();
+const ongoingLabel = computed(() => t("ongoing"));
+const accomplishedLabel = computed(() => t("accomplished"));
 
 const tab = ref("onGoing");
 

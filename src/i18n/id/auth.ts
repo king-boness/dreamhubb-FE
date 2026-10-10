@@ -23,7 +23,7 @@ export default {
   aboutApp: "Tentang aplikasi",
   banList: "Daftar blokir",
   comingSoon: "Segera hadir",
-  notifications: "Notifikasi",
+  notificationsLabel: "Notifikasi",
   sources: "Sumber",
   screenMode: "Mode layar",
   appearance: "Tampilan",

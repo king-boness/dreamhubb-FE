@@ -1,22 +1,23 @@
 <template>
   <LegalPageShell>
-    <h1>Privacy Policy</h1>
-      <p class="legal-page__updated">Last updated: October 7, 2026</p>
+    <h1>{{ t("legal.privacy.title") }}</h1>
+      <p class="legal-page__updated">{{ t("legal.lastUpdated", { date: lastUpdatedDisplay }) }}</p>
+      <p v-if="showEnglishOnlyNotice" class="legal-page__notice">{{ t("legal.englishOnlyNotice") }}</p>
 
-      <nav class="legal-page__anchors" aria-label="Privacy sections">
-        <a href="#" @click.prevent="scrollToSection('who-we-are')">Who We Are</a>
-        <a href="#" @click.prevent="scrollToSection('data-we-collect')">Data We Collect</a>
-        <a href="#" @click.prevent="scrollToSection('how-we-use-data')">How We Use Data</a>
-        <a href="#" @click.prevent="scrollToSection('legal-bases')">Legal Bases</a>
-        <a href="#" @click.prevent="scrollToSection('ai-assisted-translation')">AI Translation</a>
-        <a href="#" @click.prevent="scrollToSection('in-app-purchases')">Purchases &amp; Payments</a>
-        <a href="#" @click.prevent="scrollToSection('how-we-share-data')">How We Share Data</a>
-        <a href="#" @click.prevent="scrollToSection('international-transfers')">International Transfers</a>
-        <a href="#" @click.prevent="scrollToSection('tracking-and-advertising')">Tracking</a>
-        <a href="#" @click.prevent="scrollToSection('data-retention')">Data Retention</a>
-        <a href="#" @click.prevent="scrollToSection('your-rights')">Your Rights</a>
-        <a href="#" @click.prevent="scrollToSection('children')">Children</a>
-        <a href="#" @click.prevent="scrollToSection('contact')">Contact</a>
+      <nav class="legal-page__anchors" :aria-label="t('legal.privacy.navAria')">
+        <a href="#" @click.prevent="scrollToSection('who-we-are')">{{ t("legal.privacy.anchors.whoWeAre") }}</a>
+        <a href="#" @click.prevent="scrollToSection('data-we-collect')">{{ t("legal.privacy.anchors.dataWeCollect") }}</a>
+        <a href="#" @click.prevent="scrollToSection('how-we-use-data')">{{ t("legal.privacy.anchors.howWeUseData") }}</a>
+        <a href="#" @click.prevent="scrollToSection('legal-bases')">{{ t("legal.privacy.anchors.legalBases") }}</a>
+        <a href="#" @click.prevent="scrollToSection('ai-assisted-translation')">{{ t("legal.privacy.anchors.aiTranslation") }}</a>
+        <a href="#" @click.prevent="scrollToSection('in-app-purchases')">{{ t("legal.privacy.anchors.purchases") }}</a>
+        <a href="#" @click.prevent="scrollToSection('how-we-share-data')">{{ t("legal.privacy.anchors.howWeShareData") }}</a>
+        <a href="#" @click.prevent="scrollToSection('international-transfers')">{{ t("legal.privacy.anchors.internationalTransfers") }}</a>
+        <a href="#" @click.prevent="scrollToSection('tracking-and-advertising')">{{ t("legal.privacy.anchors.tracking") }}</a>
+        <a href="#" @click.prevent="scrollToSection('data-retention')">{{ t("legal.privacy.anchors.dataRetention") }}</a>
+        <a href="#" @click.prevent="scrollToSection('your-rights')">{{ t("legal.privacy.anchors.yourRights") }}</a>
+        <a href="#" @click.prevent="scrollToSection('children')">{{ t("legal.privacy.anchors.children") }}</a>
+        <a href="#" @click.prevent="scrollToSection('contact')">{{ t("legal.privacy.anchors.contact") }}</a>
       </nav>
 
       <section id="who-we-are">
@@ -282,7 +283,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import LegalPageShell from "src/components/Public/LegalPageShell.vue";
+import {
+  hasApprovedSkLegalBody,
+  legalLastUpdatedDisplay
+} from "src/config/legalDocuments";
+
+const { t, locale } = useI18n();
+const lastUpdatedDisplay = legalLastUpdatedDisplay("privacy");
+const showEnglishOnlyNotice = computed(() => {
+  if (hasApprovedSkLegalBody("privacy")) return false;
+  const code = String(locale.value || "");
+  return code !== "en-US" && code !== "en-GB";
+});
 
 function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -312,7 +327,22 @@ code {
   font-size: 0.95em;
 }
 
+.legal-page__notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 31, 116, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .body--light .legal-page__anchors a {
   color: #bd0043;
+}
+
+.body--light .legal-page__notice {
+  background: rgba(189, 0, 67, 0.08);
+  color: rgba(17, 18, 24, 0.85);
 }
 </style>

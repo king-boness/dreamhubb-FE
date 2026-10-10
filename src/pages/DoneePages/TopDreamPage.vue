@@ -67,10 +67,10 @@
     >
       <img
             src="/icons/addImg-icon.svg"
-            alt="Add image"
+            :alt="t('posts.edit.addImage')"
             class="post-edit-hero-placeholder-icon"
           />
-          <span class="post-edit-hero-placeholder-text">Add image</span>
+          <span class="post-edit-hero-placeholder-text">{{ t("posts.edit.addImage") }}</span>
         </div>
         <!-- Category badge and title overlay (EXACT same as PostHeader) -->
         <div class="post-edit-hero-placeholder-infoOverlay">
@@ -121,7 +121,7 @@
         <div class="edit-rollup_card" :class="{ 'edit-rollup_card--open': isEditRollupOpen }">
           <!-- HLAVIČKA / NEODKLIKNUTÝ STAV -->
           <button type="button" class="edit-rollup_header" @click="isEditRollupOpen = !isEditRollupOpen">
-            <span class="edit-rollup_header-eyebrow">I WANT TO EDIT...</span>
+            <span class="edit-rollup_header-eyebrow">{{ t("posts.edit.iWantToEdit") }}</span>
             <div class="edit-rollup_header-right">
               <!-- vtáčik vpravo -->
               <img src="/icons/birdy.png" alt="" class="edit-rollup_header-bird" />
@@ -136,12 +136,12 @@
           <!-- OBSAH / ODKLIKNUTÝ STAV -->
           <q-slide-transition>
             <div v-show="isEditRollupOpen" class="edit-rollup_body">
-              <p class="edit-rollup_eyebrow">ABOUT YOUR {{ postTypeLabel.toUpperCase() }}</p>
+              <p class="edit-rollup_eyebrow">{{ aboutYourLabel }}</p>
               <p class="edit-rollup_title">
-                Let everyone know about your {{ postTypeLabelLower }}
+                {{ letEveryoneKnowLabel }}
               </p>
               <p class="edit-rollup_text">
-                Any person that can give or provide anything or any service that someone else might be.
+                {{ t("posts.edit.letEveryoneKnowBody") }}
               </p>
               <ul class="edit-rollup_list">
                 <li
@@ -169,16 +169,16 @@
             <div class="topup-row-left">
               <img
                 src="/other_icons/gift.svg"
-                alt="Gift"
+                :alt="t('posts.giftAlt')"
                 class="topup-row-icon"
               />
               <div class="topup-row-labels">
-                <div class="topup-row-overline">AVAILABLE FROM</div>
-                <div class="topup-row-title">Donations</div>
+                <div class="topup-row-overline">{{ t("posts.edit.availableFrom") }}</div>
+                <div class="topup-row-title">{{ t("posts.edit.donations") }}</div>
           </div>
     </div>
             <div class="topup-row-value with-icon">
-              <img src="/other_icons/star.svg" alt="Tokens" class="topup-value-icon" />
+              <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" class="topup-value-icon" />
               <span>{{ availableFromDonations }}</span>
             </div>
           </div>
@@ -188,16 +188,16 @@
             <div class="topup-row-left">
               <img
                 src="/other_icons/star.svg"
-                alt="Tokens"
+                :alt="t('posts.tokensAlt')"
                 class="topup-row-icon"
               />
               <div class="topup-row-labels">
-                <div class="topup-row-overline">YOUR FULL BALANCE</div>
-                <div class="topup-row-title">Tokens</div>
+                <div class="topup-row-overline">{{ t("posts.edit.yourFullBalance") }}</div>
+                <div class="topup-row-title">{{ t("posts.edit.tokens") }}</div>
           </div>
         </div>
             <div class="topup-row-value with-icon">
-              <img src="/other_icons/star.svg" alt="Tokens" class="topup-value-icon" />
+              <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" class="topup-value-icon" />
               <span>{{ fullBalance }}</span>
       </div>
     </div>
@@ -206,7 +206,7 @@
         <!-- Tokens to top up -->
         <div class="tokens-section q-mt-lg">
           <div class="tokens-header">
-            <span class="tokens-label">TOKENS TO TOP UP</span>
+            <span class="tokens-label">{{ t("posts.edit.tokensToTopUp") }}</span>
             <q-icon name="help_outline" size="16px" />
     </div>
           <!-- manuálny input -->
@@ -222,7 +222,7 @@
             @update:model-value="onTokensInputChange"
           >
             <template #append>
-              <img src="/other_icons/star.svg" alt="Tokens" />
+              <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" />
             </template>
           </q-input>
           <!-- slider naviazaný na rovnakú hodnotu -->
@@ -239,16 +239,16 @@
             @update:model-value="onTokensSliderChange"
           />
           <div class="tokens-funds q-mt-xs q-mb-lg">
-            Funds: {{ remainingTokens }} tokens
+            {{ t("posts.fundsTokens", remainingTokens, { n: remainingTokens }) }}
       </div>
     </div>
       </section>
 
       <!-- CTA "Save Changes" - sticky na spodku -->
       <BottomCtaButton
-        label="SAVE CHANGES"
+        :label="t('posts.edit.saveChanges')"
         :loading="isSaving"
-        loading-label="SAVING..."
+        :loading-label="t('posts.edit.saving')"
         :disabled="!hasChanges"
         @click="onSaveChanges"
       />
@@ -260,13 +260,13 @@
     <q-dialog v-model="dialogs.headline">
       <q-card class="edit-category-dialog">
         <q-card-section class="flex justify-center items-center q-pa-md">
-          <div class="edit-dialog-title">Edit headline</div>
+          <div class="edit-dialog-title">{{ t("posts.edit.editHeadline") }}</div>
         </q-card-section>
         <q-card-section class="q-pa-md">
           <q-input
             ref="headlineInputRef"
             v-model="editForm.headline"
-            label="Headline"
+            :label="t('posts.edit.headline')"
             outlined
             dark
             autofocus
@@ -282,7 +282,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="CANCEL"
+            :label="cancelLabel"
             @click="dialogs.headline = false"
           />
           <q-btn
@@ -291,7 +291,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="SAVE"
+            :label="saveLabel"
             @click="applyHeadlineChange"
           />
         </q-card-actions>
@@ -302,7 +302,7 @@
     <q-dialog v-model="dialogs.category">
       <q-card class="edit-category-dialog">
         <q-card-section class="flex justify-center items-center q-pa-md relative-position">
-          <div class="edit-dialog-title">Edit category</div>
+          <div class="edit-dialog-title">{{ t("posts.edit.editCategory") }}</div>
         </q-card-section>
         <q-card-section class="q-pa-md edit-category-picker-section">
           <div ref="categoryPickerContainer" class="category-picker-container">
@@ -319,7 +319,7 @@
                 :alt="option.name"
                 class="category-picker-icon"
               />
-              <span class="category-picker-text">{{ option.name.toLowerCase() }}</span>
+              <span class="category-picker-text">{{ t(`feed.postType.${option.name.toLowerCase()}`) }}</span>
   </div>
           </div>
         </q-card-section>
@@ -330,7 +330,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="CANCEL"
+            :label="cancelLabel"
             @click="closeCategoryPicker"
           />
           <q-btn
@@ -339,7 +339,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="SAVE"
+            :label="saveLabel"
             @click="applyCategoryChange"
           />
         </q-card-actions>
@@ -350,7 +350,7 @@
     <q-dialog v-model="dialogs.subcategory">
       <q-card class="edit-category-dialog">
         <q-card-section class="flex justify-center items-center q-pa-md relative-position">
-          <div class="edit-dialog-title">Edit subcategory</div>
+          <div class="edit-dialog-title">{{ t("posts.edit.editSubcategory") }}</div>
         </q-card-section>
         <q-card-section class="q-pa-md edit-category-picker-section">
           <div ref="subcategoryPickerContainer" class="category-picker-container">
@@ -367,7 +367,7 @@
                 :alt="option.name"
                 class="category-picker-icon"
               />
-              <span class="category-picker-text">{{ option.name.toLowerCase() }}</span>
+              <span class="category-picker-text">{{ subcategoryLabel(option.name) }}</span>
           </div>
         </div>
         </q-card-section>
@@ -378,7 +378,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="CANCEL"
+            :label="cancelLabel"
             @click="dialogs.subcategory = false"
           />
           <q-btn
@@ -387,7 +387,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="SAVE"
+            :label="saveLabel"
             @click="applySubcategoryChange"
           />
         </q-card-actions>
@@ -398,7 +398,7 @@
     <q-dialog v-model="dialogs.deadline">
       <q-card class="edit-category-dialog">
         <q-card-section class="flex justify-center items-center q-pa-md">
-          <div class="edit-dialog-title">Edit deadline</div>
+          <div class="edit-dialog-title">{{ t("posts.edit.editDeadline") }}</div>
         </q-card-section>
         <q-card-section>
           <q-date
@@ -414,7 +414,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="CANCEL"
+            :label="cancelLabel"
             @click="dialogs.deadline = false"
           />
           <q-btn
@@ -423,7 +423,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="SAVE"
+            :label="saveLabel"
             @click="applyDeadlineChange"
           />
         </q-card-actions>
@@ -434,7 +434,7 @@
     <q-dialog v-model="dialogs.photos" @hide="onPhotosDialogHide">
       <q-card class="edit-photos-dialog">
         <q-card-section class="flex justify-center items-center q-pa-md">
-          <div class="edit-photos-title">Edit photos</div>
+          <div class="edit-photos-title">{{ t("posts.edit.editPhotos") }}</div>
         </q-card-section>
         <q-card-section class="q-pa-md edit-photos-content">
           <div class="edit-photos-grid">
@@ -472,7 +472,7 @@
               >
                 <img
                   src="/icons/addImg-icon.svg"
-                  alt="Add photo"
+                  :alt="t('posts.edit.addPhoto')"
                   class="edit-photo-add-icon"
                 />
               </button>
@@ -494,7 +494,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="CANCEL"
+            :label="cancelLabel"
             @click="cancelPhotosEdit"
           />
           <q-btn
@@ -503,7 +503,7 @@
             unelevated
             no-caps
             padding="14px 24px"
-            label="SAVE"
+            :label="saveLabel"
             @click="applyPhotosChange"
           />
         </q-card-actions>
@@ -1805,12 +1805,16 @@ import { useImagePickMenu } from "src/composables/useImagePickMenu";
 import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifyNegative, notifySuccess } from "src/utils/notify";
+import { formatLocaleDate } from "src/utils/formatLocaleDate";
 
 const route = useRoute();
 const router = useRouter();
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const { t, locale } = useI18n();
+
+const cancelLabel = computed(() => t("cancel").toUpperCase());
+const saveLabel = computed(() => t("save").toUpperCase());
 const useNativePhotoPicker = Capacitor?.isNativePlatform?.() === true;
 const DEBUG_PHOTO_PICKER = import.meta.env.DEV;
 const { openImagePickMenu } = useImagePickMenu();
@@ -2185,23 +2189,28 @@ onBeforeUnmount(() => {
   cleanupSubcategoryPickerScroll();
 });
 
-// Post type label for display
-const postTypeLabel = computed(() => {
-  if (!postsStore.currentPost) return "dream";
-  if (postsStore.currentPost.type === "problem") return "problem";
-  if (postsStore.currentPost.type === "idea") return "idea";
+const postTypeSlug = computed(() => {
+  const type = postsStore.currentPost?.type;
+  if (type === "problem" || type === "idea") return type;
   return "dream";
 });
 
-// Typ postu pre text (dream / problem / idea)
-const postType = computed(() => postsStore.currentPost?.type || "problem");
+const postTypeLabel = computed(() => t(`feed.postType.${postTypeSlug.value}`));
+const postTypeLabelLower = computed(() => postTypeLabel.value);
 
-// Post type label lowercase
-const postTypeLabelLower = computed(() => {
-  if (postType.value === "dream") return "dream";
-  if (postType.value === "idea") return "idea";
-  return "problem";
-});
+const aboutYourLabel = computed(() =>
+  t("posts.edit.aboutYour", { type: postTypeLabel.value.toUpperCase() })
+);
+const letEveryoneKnowLabel = computed(() =>
+  t("posts.edit.letEveryoneKnow", { type: postTypeLabelLower.value })
+);
+
+const subcategoryLabel = (name: string) => {
+  const slug = name.toLowerCase();
+  const key = `subcategories.${slug}`;
+  const translated = t(key);
+  return translated !== key ? translated : slug;
+};
 
 // Category and subcategory options (reuse from SubmitLayout)
 // Categories from SubmitLayout.vue
@@ -3124,7 +3133,7 @@ async function appendPickedFile(file: File): Promise<void> {
 /** iOS: bottom sheet (pod CTA); web: file input. Gallery editor keeps existing Camera paths. */
 async function pickImage(): Promise<void> {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
+    notifyNegative(t("posts.maxPhotos", { n: MAX_PHOTOS }), { position: "top", timeout: 2000 });
     return;
   }
 
@@ -3142,7 +3151,7 @@ async function pickImage(): Promise<void> {
 
 const onAddPhotoClick = () => {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
+    notifyNegative(t("posts.maxPhotos", { n: MAX_PHOTOS }), { position: "top", timeout: 2000 });
     return;
   }
   if (DEBUG_PHOTO_PICKER) console.debug("[TopDreamPage] + Add photo CLICK, useNative:", useNativePhotoPicker);
@@ -3152,7 +3161,7 @@ const onAddPhotoClick = () => {
 /** iOS: touchstart fires pred scroll – v QDialog touchend môže byť "ukradnutý" scrollom */
 const onAddPhotoTouchStart = (e: TouchEvent) => {
   if (editForm.photos.length >= MAX_PHOTOS) {
-    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
+    notifyNegative(t("posts.maxPhotos", { n: MAX_PHOTOS }), { position: "top", timeout: 2000 });
     return;
   }
   if (useNativePhotoPicker) {
@@ -3170,7 +3179,7 @@ const onPhotosSelected = async (event: Event) => {
 
   const remaining = MAX_PHOTOS - editForm.photos.length;
   if (remaining <= 0) {
-    notifyNegative(`Maximálne ${MAX_PHOTOS} fotiek.`, { position: "top", timeout: 2000 });
+    notifyNegative(t("posts.maxPhotos", { n: MAX_PHOTOS }), { position: "top", timeout: 2000 });
     if (target) target.value = "";
     return;
   }
@@ -3333,13 +3342,13 @@ const markDirty = () => {
 };
 
 // Edit actions array
-const editActions = [
-  { key: "photos", label: "photos", onClick: openPhotosEditor },
-  { key: "category", label: "category", onClick: openCategoryPicker },
-  { key: "subcategory", label: "subcategory", onClick: openSubcategoryPicker },
-  { key: "headline", label: "headline", onClick: openHeadlineEditor },
-  { key: "deadline", label: "deadline", onClick: openDeadlinePicker }
-];
+const editActions = computed(() => [
+  { key: "photos", label: t("posts.edit.photos"), onClick: openPhotosEditor },
+  { key: "category", label: t("posts.edit.category"), onClick: openCategoryPicker },
+  { key: "subcategory", label: t("posts.edit.subcategory"), onClick: openSubcategoryPicker },
+  { key: "headline", label: t("posts.edit.headlineAction"), onClick: openHeadlineEditor },
+  { key: "deadline", label: t("posts.edit.deadline"), onClick: openDeadlinePicker }
+]);
 
 // Use real post data if in edit mode, otherwise use default
 const postDetail = computed(() => {
@@ -3350,7 +3359,7 @@ const postDetail = computed(() => {
     const images = Array.isArray(p.images) ? p.images : [];
 
     return {
-      name: p.title || "Untitled",
+      name: p.title || t("feed.untitled"),
       goalImage: getPostTypeIcon(typeof p.type === "string" ? p.type : "dream"),
       images,
       date: p.date_created || "",
@@ -3394,8 +3403,7 @@ const postDetail = computed(() => {
 const displayTitle = computed(() => postsStore.currentPost?.title || "");
 const displayDate = computed(() => {
   if (!postsStore.currentPost?.date_created) return "";
-  const date = new Date(postsStore.currentPost.date_created);
-  return date.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" });
+  return formatLocaleDate(postsStore.currentPost.date_created, locale.value as string);
 });
 // Use unified getLocationLabel helper for consistent location display
 const displayLocation = computed(() => {

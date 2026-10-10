@@ -73,7 +73,7 @@ export default {
   logOut: "வெளியேறு",
   home: "வீடு",
   inspirations: "உத்வேகங்கள்",
-  notifications: "அறிவிப்புகள்",
+  notificationsLabel: "அறிவிப்புகள்",
   profile: "சுயவிவரம்",
   settings: "அமைப்புகள்",
   addPost: "இடுகையை சேர்க்கவும்",

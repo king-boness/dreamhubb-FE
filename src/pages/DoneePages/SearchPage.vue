@@ -10,7 +10,7 @@
         dark
         class="inputSearch"
         borderless
-        placeholder="Search my dreams"
+        :placeholder="searchPlaceholder"
         dense
         clearable
         @keydown.enter.prevent="focusFirstResult"
@@ -24,17 +24,21 @@
       </q-btn>
     </div>
     <div class="searchPage-sortingContainer">
-      <span class="searchPage-sortingTitle">My Dreams</span>
+      <span class="searchPage-sortingTitle">{{ myDreamsTitle }}</span>
       <q-select
         borderless
         dense
         class="registerDatas searchPage-sortingComponent text-primary"
         v-model="sorting"
-        :options="['Newest', 'Oldest']"
+        :options="sortOptions"
+        option-value="value"
+        option-label="label"
+        emit-value
+        map-options
         behavior="menu"
       />
     </div>
-    <div v-if="postsStore.myDreamsLoading" class="searchPage-empty">Loading...</div>
+    <div v-if="postsStore.myDreamsLoading" class="searchPage-empty">{{ loadingLabel }}</div>
     <div v-else-if="postsStore.myDreamsError" class="searchPage-empty searchPage-empty--error">
       {{ postsStore.myDreamsError }}
       <q-btn
@@ -42,40 +46,63 @@
         dense
         no-caps
         class="searchPage-retry"
-        label="Retry"
+        :label="retryLabel"
         @click="reloadDreams"
       />
     </div>
     <div v-else-if="filteredPosts.length === 0" class="searchPage-empty">
-      {{ search ? "No dreams match your search." : "No dreams yet." }}
+      {{ emptyMessage }}
     </div>
-    <ul v-else class="searchPage-resultsList">
-      <li
-        v-for="(post, i) in filteredPosts"
-        :key="String(getPostId(post) ?? i)"
-        class="searchPage-resultItem"
-        role="button"
-        tabindex="0"
-        @click="openPost(post)"
-        @keydown.enter.prevent="openPost(post)"
-      >
-        <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
-        <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
-      </li>
-    </ul>
+    <div v-else class="searchPage-resultsWrap">
+      <p class="searchPage-resultsCount" aria-live="polite">
+        {{ t("feed.resultsCount", filteredPosts.length, { n: filteredPosts.length }) }}
+      </p>
+      <ul class="searchPage-resultsList">
+        <li
+          v-for="(post, i) in filteredPosts"
+          :key="String(getPostId(post) ?? i)"
+          class="searchPage-resultItem"
+          role="button"
+          tabindex="0"
+          @click="openPost(post)"
+          @keydown.enter.prevent="openPost(post)"
+        >
+          <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
+          <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { usePostsStore } from "src/stores/posts";
 
+const { t } = useI18n();
 const router = useRouter();
 const postsStore = usePostsStore();
 
 const search = ref("");
-const sorting = ref("Newest");
+const sorting = ref<"newest" | "oldest">("newest");
+
+const searchPlaceholder = computed(() => t("feed.searchMyDreams"));
+const myDreamsTitle = computed(() => t("feed.myDreamsTitle"));
+const loadingLabel = computed(() => t("loading"));
+const retryLabel = computed(() => t("common.actions.retry"));
+const untitledLabel = computed(() => t("feed.untitled"));
+const emptyMessage = computed(() =>
+  search.value.trim()
+    ? t("feed.searchEmptyMine")
+    : t("feed.searchEmptyMineNone")
+);
+
+const sortOptions = computed(() => [
+  { label: t("feed.sortNewest"), value: "newest" as const },
+  { label: t("feed.sortOldest"), value: "oldest" as const }
+]);
 
 function getPostId(p: Record<string, unknown>): string | number | null {
   const id = p.post_id ?? p.id;
@@ -84,8 +111,8 @@ function getPostId(p: Record<string, unknown>): string | number | null {
 }
 
 function getPostTitle(p: Record<string, unknown>): string {
-  const t = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
-  return t || "Untitled";
+  const title = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
+  return title || untitledLabel.value;
 }
 
 function getPostSnippet(p: Record<string, unknown>): string {
@@ -106,7 +133,7 @@ const filteredPosts = computed(() => {
       return goalName.includes(term) || description.includes(term) || title.includes(term);
     });
   const sorted = [...filtered];
-  const order = sorting.value === "Oldest" ? 1 : -1;
+  const order = sorting.value === "oldest" ? 1 : -1;
   sorted.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
     const dateA = new Date((a.created_at ?? a.createdAt ?? 0) as string | number).getTime();
     const dateB = new Date((b.created_at ?? b.createdAt ?? 0) as string | number).getTime();
@@ -226,6 +253,13 @@ function handleCloseIconClick() {
   .searchPage-retry {
     color: #fff;
     text-decoration: underline;
+  }
+  .searchPage-resultsCount {
+    margin: 0;
+    padding: 0 1.3rem 0.5rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.85rem;
+    font-family: inter, sans-serif;
   }
   .searchPage-resultsList {
     list-style: none;

@@ -1,7 +1,7 @@
 <template>
   <div class="legal-page">
     <div class="legal-page__inner">
-      <button class="legal-page__back" type="button" aria-label="Back" @click="goBack">
+      <button class="legal-page__back" type="button" :aria-label="t('legal.backAria')" @click="goBack">
         <q-icon name="chevron_left" />
       </button>
       <main class="legal-page__card">
@@ -12,8 +12,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import { useLegalPageBack } from "src/composables/useLegalPageBack";
 
+const { t } = useI18n();
 const { goBack } = useLegalPageBack();
 </script>
 

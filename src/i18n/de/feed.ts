@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Stichwörter hinzufügen",
+    applyFilters: "Filter anwenden",
+    chooseCountry: "Land wählen",
+    clearFilters: "Filter löschen",
+    failedLoadInspirations: "Inspirationen konnten nicht geladen werden.",
+    filterAlsoCategory: "auch Kategorie wählen",
+    filterAlsoPlace: "auch Ort ändern",
+    filterSearchCta: "suchen",
+    filterStepCategory: "Kategorie wählen",
+    filterStepPlace: "Ort wählen",
+    filterStepPosts: "Beiträge wählen",
+    firstPostHint: "Erstelle deinen ersten Traum, dein erstes Problem oder deine erste Idee und teile sie mit der Welt.",
+    firstPostTitle: "Starte deine Reise!",
+    myDreamsTitle: "Meine Träume",
+    noResults: "Keine Ergebnisse",
+    postImageAlt: "Beitragsbild",
+    postType: {
+      dream: "traum",
+      idea: "idee",
+      problem: "problem"
+    },
+    quote1: "„Wenn du nicht träumst, stirbst du nicht, aber ohne Träume bist auch du nicht lebendig.“",
+    quote2: "„Wir können Probleme nicht mit derselben Denkweise lösen, mit der wir sie geschaffen haben.“",
+    quote3: "„Lerne, als würdest du ewig leben, lebe, als würdest du morgen sterben.“",
+    quote4: "„Ich habe nie vom Erfolg geträumt. Ich habe daran gearbeitet.“",
+    quoteOfTheDay: "Zitat des Tages",
+    resultsCount: "Keine Ergebnisse | {n} Ergebnis | {n} Ergebnisse",
+    searchEmpty: "Keine Beiträge entsprechen deiner Suche.",
+    searchEmptyMine: "Keine Träume entsprechen deiner Suche.",
+    searchEmptyMineNone: "Noch keine Träume.",
+    searchHint: "Gib ein Stichwort ein, um Beiträge zu suchen.",
+    searchMyDreams: "Meine Träume suchen",
+    searchPlaceholder: "Alles durchsuchen",
+    sortNewest: "Neueste",
+    sortOldest: "Älteste",
+    unknownUser: "Unbekannter Nutzer",
+    untitled: "Ohne Titel",
+    userBadge: "Nutzer"
+  }
+};

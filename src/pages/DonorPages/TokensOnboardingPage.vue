@@ -2,13 +2,10 @@
   <div class="TokensOnboarding-page" v-touch-swipe.mouse.right="goBack">
     <img src="/images/Auth/WhiteHands-Show.svg" alt="" />
     <div class="onboarding-text">
-      <h5>Introducing Currency Tokens</h5>
+      <h5>{{ t("common.tokensOnboarding.title") }}</h5>
       <div>
         <span class="onBoarding-description">
-          We connect dreamers with those who are willing to support their goals,
-          creating a community of support and motivation. Start fulfilling your
-          own dreams or help someone else fulfill theirs today with
-          Tokens.</span
+          {{ t("common.tokensOnboarding.description") }}</span
         >
       </div>
     </div>
@@ -17,10 +14,10 @@
         v-if="!iosPurchaseBlocked"
         class="buy-btn"
         @click="$router.push('tokenshop')"
-        >Buy tokens</q-btn
+        >{{ t("buyTokens") }}</q-btn
       >
       <q-btn class="tutorial-btn" @click="$router.push('onBoarding/1')"
-        >How DOES IT work?</q-btn
+        >{{ t("common.tokensOnboarding.howItWorks") }}</q-btn
       >
     </div>
   </div>
@@ -28,10 +25,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { goBackOrFallback, resolveBackFallback } from "src/utils/navigation";
 import { usePurchasePlatform } from "src/composables/usePurchasePlatform";
 import { isIosTokenPurchaseBlocked } from "src/services/appleIapService";
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { purchaseProvider } = usePurchasePlatform();

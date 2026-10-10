@@ -23,7 +23,7 @@ export default {
   aboutApp: "Om appen",
   banList: "Blokkeringsliste",
   comingSoon: "Kommer snart",
-  notifications: "Varsler",
+  notificationsLabel: "Varsler",
   sources: "Kilder",
   screenMode: "Skjermmodus",
   appearance: "Utseende",

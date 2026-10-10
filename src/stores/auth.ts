@@ -12,6 +12,7 @@ interface User {
   date_birth?: string;
   gender?: string;
   bio?: string | null;
+  preferred_locale?: string | null;
   location_country_id?: number;
   location_continent_id?: number;
   location_city_id?: number;
@@ -96,6 +97,13 @@ export const useAuthStore = defineStore("auth", {
             // ignore
           }
 
+          try {
+            const { syncLocaleFromUser } = await import("src/utils/applyLocale");
+            await syncLocaleFromUser(this.user?.preferred_locale);
+          } catch {
+            // ignore locale sync failures
+          }
+
           this.loading = false;
           return data;
         } else {
@@ -127,6 +135,12 @@ export const useAuthStore = defineStore("auth", {
               location_country: this.user?.location_country,
               location_continent: this.user?.location_continent
             });
+          }
+          try {
+            const { syncLocaleFromUser } = await import("src/utils/applyLocale");
+            await syncLocaleFromUser(this.user?.preferred_locale);
+          } catch {
+            // ignore
           }
         } else {
           this.user = data || null;

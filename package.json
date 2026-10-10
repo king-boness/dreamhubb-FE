@@ -31,7 +31,16 @@
     "release:gate": "node scripts/release-gate.js",
     "ios:release-sanity": "node scripts/ios-release-sanity.js",
     "ios:sync-version": "node scripts/ios-sync-version.js",
-    "icons:generate": "capacitor-assets generate --assetPath resources"
+    "icons:generate": "capacitor-assets generate --assetPath resources",
+    "i18n:check": "node scripts/i18n-check.js",
+    "i18n:inventory": "node scripts/i18n/inventory.js",
+    "i18n:export": "node scripts/i18n/export.js",
+    "i18n:validate": "node scripts/i18n/validate.js",
+    "i18n:import": "node scripts/i18n/import.js",
+    "i18n:human-review-export": "node scripts/i18n/human-review-export.js",
+    "i18n:human-review-import": "node scripts/i18n/human-review-import.js",
+    "i18n:release-readiness": "node scripts/i18n/release-readiness.js",
+    "i18n:tooling-test": "node --test scripts/i18n/tooling.test.js"
   },
   "dependencies": {
     "@capacitor/android": "5.7.8",

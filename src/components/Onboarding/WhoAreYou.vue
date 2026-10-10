@@ -11,7 +11,7 @@
     </div>
 
     <div class="who-content">
-      <h1 class="who-title">Who are you?</h1>
+      <h1 class="who-title">{{ t("whoAreYou") }}</h1>
 
       <!-- Profile picture upload -->
       <div class="who-avatar">
@@ -19,7 +19,7 @@
           <img
             v-if="avatarPreview"
             :src="avatarPreview"
-            alt="Profile"
+            :alt="t('profile')"
             class="who-avatarImage"
           />
           <q-icon v-else name="image" size="48px" class="who-avatarIcon" />
@@ -40,7 +40,7 @@
       <div class="who-form">
         <q-input
           v-model="localUsername"
-          label="Username"
+          :label="t('username')"
           dark
           outlined
           class="who-input"
@@ -56,7 +56,7 @@
             @keydown.enter.prevent="toggleDatePicker"
             @keydown.space.prevent="toggleDatePicker"
           >
-            <span class="who-input--date-trigger__label">Date of birth</span>
+            <span class="who-input--date-trigger__label">{{ t("dateOfBirth") }}</span>
             <span class="who-input--date-trigger__value">{{ dateOfBirthDisplay }}</span>
             <q-icon name="event" class="who-input--date-trigger__icon" />
           </div>
@@ -88,7 +88,7 @@
 
         <!-- Gender dropdown -->
         <div class="who-genderWrapper">
-          <label class="who-genderLabel">Gender</label>
+          <label class="who-genderLabel">{{ t("gender") }}</label>
           <div
             class="who-genderSelect"
             :class="{ 'who-genderSelect--open': isGenderDropdownOpen }"
@@ -96,7 +96,7 @@
             tabindex="0"
           >
             <span class="who-genderValue" :class="{ 'who-genderValue--placeholder': !localGender }">
-              {{ localGender || "Select gender" }}
+              {{ localGenderLabel || t("selectGender") }}
             </span>
             <q-icon
               name="keyboard_arrow_down"
@@ -109,12 +109,12 @@
             >
               <button
                 v-for="option in genderOptions"
-                :key="option"
+                :key="option.value"
                 class="who-genderOption"
-                :class="{ 'who-genderOption--selected': localGender === option }"
-                @mousedown.prevent="selectGender(option)"
+                :class="{ 'who-genderOption--selected': localGender === option.value }"
+                @mousedown.prevent="selectGender(option.value)"
               >
-                {{ option }}
+                {{ option.label }}
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@
 
         <q-input
           v-model="localEmail"
-          label="Email Address"
+          :label="t('emailAddress')"
           dark
           outlined
           class="who-input"
@@ -139,7 +139,7 @@
         <div class="who-passwordFieldWrapper" ref="passwordFieldRef">
           <q-input
             v-model="localPassword"
-            label="Password"
+            :label="t('password')"
             dark
             outlined
             class="who-input"
@@ -169,24 +169,24 @@
               <button
                 class="who-passwordRulesClose"
                 @click="closePasswordRulesDialog"
-                aria-label="Close"
+                :aria-label="t('close')"
               >
                 ×
               </button>
               <div class="who-passwordRulesContent">
-                <h3 class="who-passwordRulesTitle">Password requirements</h3>
+                <h3 class="who-passwordRulesTitle">{{ t("onboarding.password.requirementsTitle") }}</h3>
                 <ul class="who-passwordRulesList">
                   <li :class="{ 'who-passwordRule--valid': passwordHasMinLength }">
-                    At least 8 characters
+                    {{ t("onboarding.password.minLength") }}
                   </li>
                   <li :class="{ 'who-passwordRule--valid': passwordHasUpper }">
-                    At least one uppercase letter (A–Z)
+                    {{ t("onboarding.password.uppercase") }}
                   </li>
                   <li :class="{ 'who-passwordRule--valid': passwordHasNumber }">
-                    At least one number (0–9)
+                    {{ t("onboarding.password.number") }}
                   </li>
                   <li :class="{ 'who-passwordRule--valid': passwordHasSpecial }">
-                    At least one special character (e.g. ! @ # $ % _ )
+                    {{ t("onboarding.password.special") }}
                   </li>
                 </ul>
               </div>
@@ -201,7 +201,7 @@
         -->
         <q-input
           v-model="localRepeatPassword"
-          label="Repeat Password"
+          :label="t('repeatPassword')"
           dark
           outlined
           class="who-input"
@@ -226,7 +226,7 @@
           <q-select
             v-model="localProfileContinent"
             :options="continentOptions"
-            label="Continent"
+            :label="t('continent')"
             dark
             outlined
             class="who-input"
@@ -243,7 +243,7 @@
           <q-select
             v-model="localProfileCountry"
             :options="profileCountryOptions"
-            label="Country"
+            :label="t('country')"
             dark
             outlined
             class="who-input"
@@ -262,7 +262,7 @@
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
-                  No results
+                  {{ t("noResults") }}
                 </q-item-section>
               </q-item>
             </template>
@@ -274,7 +274,7 @@
             option-value="value"
             emit-value
             map-options
-            label="City"
+            :label="t('city')"
             dark
             outlined
             class="who-input"
@@ -314,7 +314,7 @@
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
-                  No results
+                  {{ t("noResults") }}
                 </q-item-section>
               </q-item>
             </template>
@@ -322,7 +322,7 @@
         </div>
       </div>
 
-      <p class="who-instruction">Fill up your data</p>
+      <p class="who-instruction">{{ t("onboarding.fillUpYourData") }}</p>
 
       <AuthLegalNotice class="who-legal" />
 
@@ -337,7 +337,7 @@
         :class="{ 'who-finishBtn--inactive': !isFormValid }"
         @click="handleNextStep"
       >
-        NEXT STEP
+        {{ t("nextStep") }}
       </button>
     </div>
   </div>
@@ -345,6 +345,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, withDefaults } from "vue";
+import { useI18n } from "vue-i18n";
 import { useOnboardingStore } from "src/stores/onboarding";
 import { notifyError } from "src/utils/notify";
 import { api } from "boot/axios";
@@ -352,6 +353,7 @@ import { continents, getCountriesByContinent, getAllCountries } from "src/data/c
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 import AuthLegalNotice from "src/components/Auth/AuthLegalNotice.vue";
 
+const { t } = useI18n();
 const onboardingStore = useOnboardingStore();
 const onboardingSelectMenuClass = "onboarding-select-menu";
 
@@ -540,7 +542,7 @@ const checkEmailExists = async (email: string) => {
       if (exists) {
         if (!onboardingStore.fieldErrors) onboardingStore.fieldErrors = {};
         onboardingStore.fieldErrors.email =
-          "This email is already registered. Please choose another one or log in.";
+          t("onboarding.validation.emailAlreadyRegistered");
         emailTouched.value = true;
       } else if (onboardingStore.fieldErrors?.email) {
         delete onboardingStore.fieldErrors.email;
@@ -574,7 +576,7 @@ const checkEmailExists = async (email: string) => {
       if (!onboardingStore.fieldErrors) {
         onboardingStore.fieldErrors = {};
       }
-      onboardingStore.fieldErrors.email = "This email is already registered. Please choose another one or log in.";
+      onboardingStore.fieldErrors.email = t("onboarding.validation.emailAlreadyRegistered");
       emailTouched.value = true; // Show error immediately
     } else {
       // Email doesn't exist - clear error if it was set
@@ -714,17 +716,26 @@ const isGenderDropdownOpen = ref(false);
 const emailTouched = ref(false);
 const triedSubmit = ref(false);
 
-const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
+// Values stay English (sent to backend as-is); only labels are localized.
+const genderOptions = computed(() => [
+  { value: "Male", label: t("male") },
+  { value: "Female", label: t("female") },
+  { value: "Other", label: t("genderOther") },
+  { value: "Prefer not to say", label: t("preferNotToSay") }
+]);
+const localGenderLabel = computed(
+  () => genderOptions.value.find((o) => o.value === localGender.value)?.label ?? localGender.value
+);
 
 // Email & password validation
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const emailError = computed(() => {
   const value = (localEmail.value || "").trim();
   if (!value) {
-    return triedSubmit.value ? "Email is required." : null;
+    return triedSubmit.value ? t("emailRequired") : null;
   }
   if (!emailRegex.test(value)) {
-    return emailTouched.value || triedSubmit.value ? "Enter a valid email address." : null;
+    return emailTouched.value || triedSubmit.value ? t("onboarding.validation.enterValidEmail") : null;
   }
   return null;
 });
@@ -778,11 +789,11 @@ const passwordTouched = ref(false);
 const passwordError = computed(() => {
   const value = localPassword.value || "";
   if (!value) {
-    return triedSubmit.value ? "Password is required." : null;
+    return triedSubmit.value ? t("passwordRequired") : null;
   }
 
   if (!passwordHasMinLength.value || !passwordHasUpper.value || !passwordHasNumber.value || !passwordHasSpecial.value) {
-    return "Password does not meet the requirements.";
+    return t("onboarding.validation.passwordRequirementsNotMet");
   }
 
   return null;
@@ -795,10 +806,10 @@ const showPasswordError = computed(
 const repeatPasswordError = computed(() => {
   const value = localRepeatPassword.value || "";
   if (!value) {
-    return triedSubmit.value ? "Repeat password is required." : null;
+    return triedSubmit.value ? t("onboarding.validation.repeatPasswordRequired") : null;
   }
   if (localPassword.value && localPassword.value !== value) {
-    return "Passwords do not match.";
+    return t("passwordsMustMatch");
   }
   return null;
 });
@@ -806,17 +817,17 @@ const repeatPasswordError = computed(() => {
 const showRepeatPasswordError = computed(() => !!repeatPasswordError.value && triedSubmit.value);
 
 const continentError = computed(() =>
-  triedSubmit.value && !String(localProfileContinent.value || "").trim() ? "Continent is required." : ""
+  triedSubmit.value && !String(localProfileContinent.value || "").trim() ? t("onboarding.validation.continentRequired") : ""
 );
 const countryError = computed(() =>
-  triedSubmit.value && !String(localProfileCountry.value || "").trim() ? "Country is required." : ""
+  triedSubmit.value && !String(localProfileCountry.value || "").trim() ? t("onboarding.validation.countryRequired") : ""
 );
 const cityError = computed(() => {
   if (!triedSubmit.value) return "";
   const cityVal = localProfileCity.value;
   const hasCity =
     cityVal !== undefined && cityVal !== null && cityVal !== "" && cityVal !== "__divider__";
-  return hasCity ? "" : "City is required.";
+  return hasCity ? "" : t("onboarding.validation.cityRequired");
 });
 
 // Progress bar

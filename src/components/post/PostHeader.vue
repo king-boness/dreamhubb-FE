@@ -12,7 +12,7 @@
           :show-arrows="showArrows"
           :show-dots="showDots"
           :progress-context="progressContext"
-          alt="Post image"
+          :alt="t('feed.postImageAlt')"
           :image-style="imageStyle"
           @image-click="$emit('image-click', $event)"
         />
@@ -48,7 +48,7 @@
           >
             <img
               :src="isLiked ? '/post_icons/hearth_s.svg' : '/header_icons/hearth_ns.svg'"
-              alt="Like"
+              :alt="t('posts.likeAlt')"
               class="post-header-heartIcon"
             />
           </button>
@@ -102,7 +102,10 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import PostCover from "src/components/post/PostCover.vue";
+
+const { t } = useI18n();
 
 type PostType = "dream" | "problem" | "idea";
 

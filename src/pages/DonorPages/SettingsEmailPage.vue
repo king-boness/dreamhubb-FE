@@ -1,7 +1,7 @@
 <template>
   <div class="settingsEmail-page">
     <div class="changeEmail-div">
-      <span class="changeEmail-title">Change Email Address</span>
+      <span class="changeEmail-title">{{ t("changeEmailAddress") }}</span>
       <q-input
         borderless
         dark
@@ -13,14 +13,14 @@
         disable
       >
       </q-input>
-      <a class="requestLink">Request code →</a>
+      <a class="requestLink">{{ t("settingsPages.email.requestCode") }}</a>
       <q-input
         borderless
         dark
         hide-bottom-space
         bottom-slots
         v-model="resetEmail"
-        label="Enter Confirmation Code"
+        :label="t('settingsPages.email.confirmationCode')"
         type="email"
         class="registerDatas registerSecrete emailPage-input"
       >
@@ -28,11 +28,11 @@
     </div>
     <div class="confirmationButton-div">
       <q-btn class="confirmButton" @click="$router.push('email/confirmation')">
-        Confirm
+        {{ t("confirm") }}
       </q-btn>
     </div>
     <div class="pageFooter-div">
-      <q-btn class="cancelButton" @click="$router.go(-1)"> Cancel </q-btn>
+      <q-btn class="cancelButton" @click="$router.go(-1)"> {{ t("cancel") }} </q-btn>
     </div>
   </div>
 </template>
@@ -40,8 +40,10 @@
 import { ref, computed, onMounted } from "vue";
 import { UserDatas } from "src/components/models";
 import { maskEmail } from "src/components/partials/FunctionsComponent.vue";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const resetEmail = ref("");
 const userEmail = ref("");

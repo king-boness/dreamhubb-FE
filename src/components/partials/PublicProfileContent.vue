@@ -22,7 +22,7 @@
         <h2 class="myProfile-username">{{ displayName }}</h2>
         <p v-if="displayLocation" class="myProfile-location">{{ displayLocation }}</p>
         <div v-if="displayBio" class="myProfile-bioSection">
-          <PageTitle :title="`About ${displayName}`" />
+          <PageTitle :title="aboutTitle" />
           <p class="myProfile-bio">{{ displayBio }}</p>
         </div>
         <button
@@ -31,7 +31,7 @@
           class="publicProfile-blockBtn"
           @click="handleBlockUser"
         >
-          Block user
+          {{ blockUserLabel }}
         </button>
       </div>
     </div>
@@ -72,11 +72,14 @@ import { normalizePost } from "src/utils/normalizePost";
 import { useAuthStore } from "src/stores/auth";
 import { useBlockUser } from "src/composables/useBlockUser";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const { blockUserById } = useBlockUser();
+
+const blockUserLabel = computed(() => t("posts.blockUser"));
+const userFallback = computed(() => t("profileUi.userFallback"));
 
 interface PublicUser {
   id: number;
@@ -105,8 +108,12 @@ const props = defineProps<Props>();
 const profileSide = computed(() => (route.meta?.side === "donee" ? "donee" : "donor"));
 
 const displayName = computed(() => {
-  return props.userData?.name || props.userData?.username || "User";
+  return props.userData?.name || props.userData?.username || userFallback.value;
 });
+
+const aboutTitle = computed(() =>
+  t("profileUi.aboutUser", { name: displayName.value })
+);
 
 const canBlockUser = computed(() => {
   const targetId = props.userData?.id;
@@ -124,19 +131,7 @@ const displayLocation = computed(() => {
   const u = props.userData;
   if (!u) return null;
 
-  // Build location string from user's location (city, country, continent)
-  // Note: We need to get locale from i18n, but this component doesn't use i18n yet
-  // For now, we'll use a simple approach - can be enhanced later
-  const getLocale = () => {
-    try {
-      const savedLang = localStorage.getItem("dreamhubb_language");
-      return savedLang === "sk" ? "sk" : "en-US";
-    } catch {
-      return "en-US";
-    }
-  };
-
-  const currentLocale = getLocale();
+  const currentLocale = String(locale.value || "en-US");
   const parts = [];
   if (u.location_city) {
     const translatedCity = translateCityName(u.location_city, currentLocale);

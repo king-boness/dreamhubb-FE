@@ -6,7 +6,7 @@
       </div>
 
       <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
+        {{ notFoundTitle }}
       </div>
 
       <q-btn
@@ -15,7 +15,7 @@
         text-color="blue"
         unelevated
         to="/"
-        label="Go Home"
+        :label="goHomeLabel"
         no-caps
       />
     </div>
@@ -23,5 +23,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
+const notFoundTitle = computed(() => t("system.notFoundTitle"));
+const goHomeLabel = computed(() => t("system.goHome"));
 </script>

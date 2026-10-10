@@ -7,14 +7,14 @@
   <!-- Error state -->
   <div v-else-if="error" class="help-page-error">
     <div class="help-page-errorContent">
-      <h2>Unable to load post</h2>
+      <h2>{{ t("posts.unableToLoadPost") }}</h2>
       <RetryPanel
         :message="error"
         :on-retry="handleRetry"
         :loading="loading"
         variant="card"
       />
-      <button class="primaryCtaBtn" @click="router.go(-1)" style="margin-top: 1rem;">Go Back</button>
+      <button class="primaryCtaBtn" @click="router.go(-1)" style="margin-top: 1rem;">{{ t("posts.goBack") }}</button>
     </div>
   </div>
 
@@ -65,7 +65,7 @@
           dark
           hide-bottom-space
           bottom-slots
-          placeholder="Type your message for a donee..."
+          :placeholder="t('typeYourMessageForDonee')"
           class="registerDatas registerSecrete donorHelpMessage messageInput"
           type="textarea"
         >
@@ -76,7 +76,7 @@
           ref="imageUploaderRef"
           class="helpPage-imageUploadComponent"
           :max="5"
-          upload-msg="add image"
+          :upload-msg="t('posts.upload.addImage')"
           @imagesUpdated="handleImagesUpdated"
         ></ImageUploader>
       </div>
@@ -130,7 +130,7 @@
             ref="imageUploaderRef"
             class="helpPage-imageUploadComponent"
             :max="5"
-            upload-msg="add image"
+            :upload-msg="t('posts.upload.addImage')"
             @imagesUpdated="handleImagesUpdated"
           ></ImageUploader>
         </div>
@@ -184,6 +184,7 @@ import BottomCtaButton from "src/components/ui/BottomCtaButton.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 import type { UploadedImage } from "src/composables/useUpload";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { formatLocaleDate } from "src/utils/formatLocaleDate";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -302,20 +303,14 @@ const handleImagesUpdated = (imgs: UploadedImage[]) => {
 // Computed properties for post display
 const formattedDate = computed(() => {
   if (!post.value?.date_created) return "";
-  const d = new Date(post.value.date_created);
-  if (Number.isNaN(d.getTime())) return post.value.date_created;
-  // Format as DD/MM/YYYY
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  return formatLocaleDate(post.value.date_created, locale.value as string);
 });
 
 const locationLabel = computed(() => {
   const p = post.value;
-  if (!p) return "Unknown";
+  if (!p) return t("unknown");
   // Use getLocationLabel helper for consistent formatting
-  return getLocationLabel(p, locale.value as string) || "Unknown";
+  return getLocationLabel(p, locale.value as string) || t("unknown");
 });
 
 const viewsCount = computed(() => {
@@ -480,11 +475,11 @@ const sharePostUrl = computed(() => {
 });
 
 const sharePostText = computed(() => {
-  return post.value?.description || "Check out this post on dreamhubb";
+  return post.value?.description || t("posts.sharePostFallback");
 });
 
 const sharePostTitle = computed(() => {
-  return post.value?.title || "Check out this post on dreamhubb";
+  return post.value?.title || t("posts.sharePostFallback");
 });
 
 const handleShare = () => {

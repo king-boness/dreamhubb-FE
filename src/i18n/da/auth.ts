@@ -23,7 +23,7 @@ export default {
   aboutApp: "Om appen",
   banList: "Blokeringsliste",
   comingSoon: "Kommer snart",
-  notifications: "Notifikationer",
+  notificationsLabel: "Notifikationer",
   sources: "Kilder",
   screenMode: "Skærmtilstand",
   appearance: "Udseende",

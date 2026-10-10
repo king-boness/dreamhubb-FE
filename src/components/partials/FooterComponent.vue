@@ -26,7 +26,7 @@
           />
         </g>
       </svg>
-      <span class="footer-pageName footer-marginClass">Home</span>
+      <span class="footer-pageName footer-marginClass">{{ $t("home") }}</span>
     </q-btn>
     <q-btn
       :ripple="false"
@@ -47,7 +47,7 @@
           fill="#FCFCFC"
         />
       </svg>
-      <span class="footer-pageName footer-marginClass">Inspirations</span>
+      <span class="footer-pageName footer-marginClass">{{ $t("inspirations") }}</span>
     </q-btn>
     <q-btn
       :ripple="false"
@@ -91,7 +91,7 @@
           </clipPath>
         </defs>
       </svg>
-      <span class="footer-pageName">Notifications</span>
+      <span class="footer-pageName">{{ $t("notificationsLabel") }}</span>
     </q-btn>
 
     <q-btn
@@ -144,7 +144,7 @@
           />
         </g>
       </svg>
-      <span class="footer-pageName profileName">Profile</span>
+      <span class="footer-pageName profileName">{{ $t("profile") }}</span>
     </q-btn>
   </div>
 </template>

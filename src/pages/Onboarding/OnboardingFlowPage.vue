@@ -63,7 +63,7 @@
       :progress="80"
       :title="t('postsWillBeFrom')"
       :require-terms-acceptance="true"
-      next-button-label="CREATE ACCOUNT"
+      :next-button-label="t('createAccountCta')"
       @next="handleNext"
       @back="handleBack"
     />

@@ -11,7 +11,7 @@ export default {
   appSettings: "Cilësimet e aplikacionit",
   language: "Gjuha",
   comingSoon: "Së shpejti",
-  notifications: "Njoftimet",
+  notificationsLabel: "Njoftimet",
   sources: "Burimet",
   screenMode: "Modaliteti i ekranit",
   appearance: "Pamja",

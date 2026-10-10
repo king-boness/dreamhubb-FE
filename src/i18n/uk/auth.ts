@@ -1,96 +1,443 @@
 import enUS from "../en-US/auth";
 
-// Ukrainian - use en-US as base, all keys available
+// Ukrainian — en-US base via spread; explicit overrides below (MACHINE_DRAFT / existing).
 export default {
   ...enUS,
-  changeLanguage: "\u0417\u043c\u0456\u043d\u0438\u0442\u044c \u043c\u043e\u0432\u0443",
-  saveChanges: "\u0417\u0431\u0435\u0440\u0435\u0433\u0442\u0438 \u0437\u043c\u0456\u043d\u0438",
-  cancel: "\u0421\u043a\u0430\u0441\u0443\u0432\u0430\u0442\u0438",
-  languageSaved: "\u041c\u043e\u0432\u0430 \u0443\u0441\u043f\u0456\u0448\u043d\u043e \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u0430",
-  accountSettings: "\u041d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f \u043e\u0431\u043b\u0456\u043a\u043e\u0432\u043e\u0433\u043e \u0437\u0430\u043f\u0438\u0441\u0443",
-  appSettings: "\u041d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f \u0434\u043e\u0434\u0430\u0442\u043a\u0443",
-  language: "\u041c\u043e\u0432\u0430",
-  nickname: "\u041f\u0440\u0456\u0437\u0432\u0438\u0449\u0435",
-  nameShown: "\u0412\u0456\u0434\u043e\u0431\u0440\u0430\u0436\u0443\u0432\u0430\u043d\u0435 \u0456\u043c'\u044f",
-  realName: "\u0421\u043f\u0440\u0430\u0432\u0436\u043d\u0456\u0439 \u0456\u043c'\u044f",
-  changePassword: "\u0417\u043c\u0456\u043d\u0438\u0442\u0438 \u043f\u0430\u0440\u043e\u043b\u044c",
-  changeEmailAddress: "\u0417\u043c\u0456\u043d\u0438\u0442\u0438 \u0430\u0434\u0440\u0435\u0441\u0443 \u0435\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u043e\u0457 \u043f\u043e\u0448\u0442\u0438",
-  changeBio: "\u0417\u043c\u0456\u043d\u0438\u0442\u0438 \u0431\u0456\u043e\u0433\u0440\u0430\u0444\u0456\u044e",
-  changeLocation: "\u0417\u043c\u0456\u043d\u0438\u0442\u0438 \u043c\u0456\u0441\u0446\u0435 \u0440\u043e\u0437\u0442\u0430\u0448\u0443\u0432\u0430\u043d\u043d\u044f",
-  privacySettings: "\u041d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f \u043a\u043e\u043d\u0444\u0456\u0434\u0435\u043d\u0446\u0456\u0439\u043d\u043e\u0441\u0442\u0456",
-  helpAndSupport: "\u0414\u043e\u043f\u043e\u043c\u043e\u0433\u0430 \u0456 \u043f\u0456\u0434\u0442\u0440\u0438\u043c\u043a\u0430",
-  faq: "\u0427\u0430\u0441\u0442\u043e \u0437\u0430\u0434\u0430\u0432\u0430\u043d\u0456 \u043f\u0438\u0442\u0430\u043d\u043d\u044f",
-  aboutApp: "\u041f\u0440\u043e \u0434\u043e\u0434\u0430\u0442\u043e\u043a",
-  banList: "\u0427\u043e\u0440\u043d\u0438\u0439 \u0441\u043f\u0438\u0441\u043e\u043a",
-  comingSoon: "\u0426\u0435 \u043d\u0435\u0437\u0430\u0431\u0430\u0440\u043e\u043c",
-  notifications: "\u0421\u043f\u043e\u0432\u0456\u0449\u0435\u043d\u043d\u044f",
-  sources: "\u0414\u0436\u0435\u0440\u0435\u043b\u0430",
-  screenMode: "\u0420\u0435\u0436\u0438\u043c \u0435\u043a\u0440\u0430\u043d\u0430",
-  appearance: "\u0417\u043e\u0432\u043d\u0456\u0448\u043d\u0456\u0439 \u0432\u0438\u0433\u043b\u044f\u0434",
-  privacy: "\u041a\u043e\u043d\u0444\u0456\u0434\u0435\u043d\u0446\u0456\u0439\u043d\u0456\u0441\u0442\u044c",
-  logOut: "\u0412\u0438\u0439\u0442\u0438",
+  about: "про",
+  aboutApp: "Про додаток",
+  aboutAppText: "dreamhubb — це мобільна платформа нового покоління, яка поєднує людей через мрії, проблеми та ідеї.\n\nКористувачі можуть ділитися тим, чого хочуть досягти або що хочуть розв'язати, а спільнота може їм допомогти — порадою, досвідом, контактами, навичками чи навіть невеликим проявом підтримки.\n\nНаша довгострокова мета — створити глобальну «екосистему взаємодопомоги», де давати й отримувати підтримку стає природною частиною повсякденного життя, а не чимось рідкісним чи складним.\n\n\n... твоя команда dreamhubb.\n\n(Бо мрії важливі.)",
+  aboutAuthor: "Про автора",
+  aboutDonee: "Про Donee",
+  aboutTheDream: "Про мрію",
+  aboutTheIdea: "Про ідею",
+  aboutThePost: "Про допис",
+  aboutTheProblem: "Про проблему",
+  aboutTheUser: "Про користувача",
+  accomplished: "Здійснено",
+  accountSettings: "Налаштування облікового запису",
+  active: "Активно",
+  addInspirationPost: "Додати допис-натхнення",
+  addPost: "Додати допис",
+  alreadyInYourLanguage: "Уже твоєю мовою",
+  appSettings: "Налаштування додатку",
+  appearance: "Зовнішній вигляд",
+  back: "Назад",
+  backToSignIn: "Назад до входу",
+  badCredentials: "Неправильна електронна адреса або пароль.",
+  banList: "Чорний список",
+  beFirstOrChangeFilters: "Будь першим або змін фільтри.",
+  buyTokens: "Купити Token",
+  byHelp: "за допомогою",
+  byPay: "за оплатою",
+  byTop: "за рейтингом",
+  cancel: "Скасувати",
+  category: "Категорія",
+  changeBio: "Змінити біографію",
+  changeEmailAddress: "Змінити адресу електронної пошти",
+  changeLanguage: "Змінити мову",
+  changeLocation: "Змінити місце розташування",
+  changePassword: "Змінити пароль",
+  chooseBySwiping: "Обери, свайпнувши вгору або вниз",
+  chooseCity: "Обери своє місто",
+  chooseContinent: "Обери свій континент",
+  chooseCountry: "Обери свою країну",
+  chooseState: "Обери свій штат",
+  chooseYourSide: "Обери свою сторону, свайпнувши вгору або вниз",
+  city: "Місто",
+  close: "Закрити",
+  comingSoon: "Це незабаром",
+  completed: "Завершено",
+  completedComingSoon: "Завершено (незабаром)",
+  confirm: "Підтвердити",
+  confirmPassword: "Підтверди пароль",
+  continent: "Континент",
+  contribute: "ЗРОБИТИ ВНЕСОК",
+  contributions: "Внески",
+  country: "Країна",
+  createAccount: "Створити акаунт",
+  createAccountCta: "СТВОРИТИ АКАУНТ",
+  currentLocation: "Поточне місце розташування",
+  dateOfBirth: "Дата народження",
+  describeWhatYouWantInReturn: "Опиши, що хочеш натомість...",
+  description: "Здійснені мрії змінюють світ",
+  dreams: "Мрії",
+  earn: "Заробити",
+  earnMoreBadges: "Заробляй більше значків, виконуючи завдання",
+  editMyPost: "РЕДАГУВАТИ МІЙ ДОПИС",
+  emailAddress: "Електронна адреса",
+  emailRequired: "Електронна адреса обов'язкова",
+  explainerText1: "dreamhubb поєднує людей через мрії, проблеми та ідеї. Поділися тим, чого хочеш досягти, — і знайди тих, хто готовий тебе підтримати.",
+  explainerText2: "Пропонуй пораду, досвід, контакти чи невелику підтримку. Коли знадобиться тобі, спільнота допоможе у відповідь.",
+  explainerText3: "Кожен добрий вчинок приносить Token — визнання доброї волі, яку ти вносиш у dreamhubb і в життя людей, яких підтримуєш.",
+  explainerText4: "Не обов'язково розв'язувати все одразу. Корисна порада, тепле слово чи знайомство можуть суттєво наблизити когось до мети.",
+  explainerText5: "Тепер здійснимо наші мрії разом із",
+  explainerTitle1: "Усе про допомогу",
+  explainerTitle2: "Допомагай іншим і дозволяй допомагати собі",
+  explainerTitle3: "Заробляй Token, допомагаючи",
+  explainerTitle4: "Навіть часткова допомога може наблизити когось до мрії",
+  explainerTitle5: "dreamhubb",
+  faq: "Часто задавані питання",
+  female: "Жінка",
+  fillInYourInfo: "Просто заповни свої дані",
+  filters: "фільтри",
+  forgotPassword: "Не пам'ятаєш пароль",
+  forgotPasswordHint: "Не пам'ятаєш пароль? Скинь його.",
+  forgotPasswordUnavailableText: "Скидання пароля поки недоступне. Звернися до підтримки.",
+  forgotPasswordUnavailableTitle: "Скидання пароля",
+  funds: "Кошти",
+  gender: "Стать",
+  genderOther: "Інша",
+  helpAccomplish: "ДОПОМОГТИ ЗДІЙСНИТИ",
+  helpAndSupport: "Допомога і підтримка",
+  helpToFulfill: "ДОПОМОГТИ ЗДІЙСНИТИ",
+  home: "Головна",
+  howToGetTokens: "Як отримати Token",
+  howYouCanHelp: "Як ти можеш допомогти і що хочеш натомість.",
+  ideas: "Ідеї",
+  illHelpWith: "Я допоможу з",
+  inReturnIWant: "Натомість я хочу",
+  inspirationAddImage: "Додати зображення",
+  inspirationDeleteAction: "Видалити це натхнення",
+  inspirationDeleteConfirmCta: "Видалити",
+  inspirationDeleteConfirmText: "Це натхнення буде видалено з Feed.",
+  inspirationDeleteConfirmTitle: "Видалити натхнення?",
+  inspirationDeleteFailed: "Не вдалося видалити натхнення. Спробуй ще раз.",
+  inspirationDeleted: "Натхнення видалено.",
+  inspirationNeedTextOrImage: "Додай коротке повідомлення або принаймні одне зображення.",
+  inspirationNoLinkedPost: "Це натхнення ще не пов'язане з дописом про мрію. Переглянь головний Feed, щоб відкрити дописи.",
+  inspirationPostPlaceholder: "Напиши про своє натхнення…",
+  inspirationPosted: "Твоє натхнення додано.",
+  inspirationProfileUnavailable: "Профіль для цього натхнення недоступний.",
+  inspirations: "Натхнення",
+  inspirationsEmptyHint: "Додай своє перше натхнення, і воно з'явиться тут.",
+  inspirationsEmptyTitle: "Натхнення поки немає",
+  inspirationsForYou: "Натхнення для тебе",
+  inspirationsYourStory: "Ти",
+  join: "ПРИЄДНАТИСЯ",
+  joinTheMovement: "ПРИЄДНАЙСЯ ДО РУХУ",
+  language: "Мова",
+  languageSaved: "Мова успішно збережена",
+  legalNotice: "Продовжуючи, ти погоджуєшся з документами: {terms} та {privacy}. У dreamhubb діє {zeroTolerance} до неприйнятного вмісту та користувачів, які поводяться недоречно.",
+  loading: "Завантаження...",
+  loadingPosts: "Завантаження дописів...",
+  locationUpdateFailed: "Не вдалося оновити місце розташування. Спробуй ще раз.",
+  locationUpdated: "Місце розташування оновлено",
+  logOut: "Вийти",
+  loginError: "Щось пішло не так. Спробуй пізніше.",
+  loginFillBoth: "Заповни і електронну адресу, і пароль.",
+  loginNetworkError: "Не вдалося підключитися. Спробуй ще раз.",
+  loginServerError: "Щось пішло не так. Спробуй пізніше.",
+  logoAlt: "Логотип dreamhubb",
+  male: "Чоловік",
+  minTokensPublishText: "Ти можеш заробити Token активністю або придбати їх.",
+  minTokensPublishTitle: "Щоб опублікувати допис, потрібно щонайменше 3 Token.",
+  more: "більше",
+  myDreams: "мої мрії",
+  myIdeas: "мої ідеї",
+  myProblems: "мої проблеми",
+  nameShown: "Відображуване ім'я",
+  newPassword: "Новий пароль",
+  nextStep: "НАСТУПНИЙ КРОК",
+  nickname: "Псевдонім",
+  nicknameRequired: "Псевдонім обов'язковий",
+  noBioYet: "Біографії поки немає.",
+  noDreamsYet: "У тебе поки немає мрій.",
+  noGoalsAccomplished: "Здійснених цілей поки немає.",
+  noIdeasYet: "У тебе поки немає ідей.",
+  noPosts: "Дописів поки немає.",
+  noPostsFromThisCityYet: "Дописів із цього міста поки немає.",
+  noPostsMatchFilters: "Жоден допис поки не відповідає твоїм фільтрам.",
+  noPostsWithTheseFilters: "Немає дописів за цими фільтрами.",
+  noProblemsYet: "У тебе поки немає проблем.",
+  noResults: "Немає результатів",
+  noUserPostsYet: "Дописів поки немає.",
+  notifications: {
+    topUpText: "до допису «{postTitle}»",
+    topUpTitle: "{name}: поповнення твого допису на {amount} Token"
+  },
+  notificationsLabel: "Сповіщення",
+  offlineDesktopMessage: "Перевір підключення до мережі в налаштуваннях системи.",
+  offlineMessage: "Зв'язок з інтернетом втрачено. Застосунок працює офлайн. Перевір налаштування мережі.",
+  offlineTitle: "Немає підключення до інтернету",
+  ongoing: "Триває",
+  openSettings: "Відкрити налаштування",
+  password: "Пароль",
+  passwordChanged: "Пароль змінено.",
+  passwordMin8: "Пароль має містити щонайменше 8 символів",
+  passwordRequired: "Пароль обов'язковий",
+  passwordsMustMatch: "Паролі мають збігатися",
+  pickYourSide: "Обери свою сторону",
+  pleaseEnterValueBetween: "Введи значення від {min} до {max}.",
+  postCreationTitle1: "Яка твоя ціль?",
+  postCreationTitle2: "Яка в тебе мрія?",
+  postInspiration: "Опублікувати натхнення",
+  postsWillBeFrom: "дописи будуть із",
+  preferNotToSay: "Волію не казати",
+  privacy: "Конфіденційність",
+  privacyPolicyLink: "Політика конфіденційності",
+  privacySettings: "Налаштування конфіденційності",
+  privateContribution: "Приватний внесок",
+  problems: "Проблеми",
+  processing: "ОБРОБКА...",
+  profile: "профіль",
+  realName: "Справжнє ім'я",
+  recentlyAccomplished: "нещодавно здійснені",
+  registerText1: "Обери свою сторону, свайпнувши вгору або вниз",
+  registerText2: "Обери, свайпнувши вгору або вниз",
+  registerText3: "Обери, свайпнувши вгору або вниз",
+  registerText4: "Яке твоє місце розташування",
+  registerText5: "Просто заповни свої дані",
+  registerTitle1: "Обери свою сторону",
+  registerTitle2: "Яка твоя ціль?",
+  registerTitle3: "Яка в тебе мрія?",
+  registerTitle4: "Де ти?",
+  registerTitle5: "Хто ти?",
+  registrationError: "Щось пішло не так. Спробуй пізніше.",
+  registrationSuccess: "Реєстрацію завершено! Перевір електронну пошту для підтвердження.",
+  registrationUsernameExists: "Таке ім'я користувача вже існує.",
+  remember: "Запам'ятати мій акаунт і не виходити із системи",
+  repeatPassword: "Повтори пароль",
+  reply: "Відповісти",
+  replyNotAllowed: "Відповідати можуть лише автор допису та автор початкового коментаря.",
+  replyPlaceholder: "Напиши відповідь...",
+  replyToUser: "Відповідь для {name}...",
+  reportPost: "Поскаржитися на допис",
+  resetFilters: "Скинути фільтри",
+  resetLinkInvalidOrExpired: "Це посилання для скидання недійсне або прострочене.",
+  resetLinkSentGeneric: "Якщо акаунт існує, ми надіслали тобі листа з інструкціями.",
+  resetPasswordCta: "Скинути пароль",
+  resetPasswordSetTitle: "Встанови новий пароль",
+  resetPasswordSubtitle: "Введи свою електронну адресу, і ми надішлемо тобі посилання для скидання.",
+  resetPasswordTitle: "Скидання пароля",
+  reviews: "Відгуки",
+  save: "Зберегти",
+  saveBadge: "Зберегти значок",
+  saveChanges: "Зберегти зміни",
+  screenMode: "Режим екрана",
+  search: "ПОШУК",
+  selectBadgeToDisplay: "Обери значок для показу",
+  selectGender: "Обери стать",
+  sendResetLink: "Надіслати посилання для скидання",
+  settings: "Налаштування",
+  showOriginal: "Показати оригінал",
+  signIn: "Увійти",
+  skip: "Пропустити",
+  sources: "Джерела",
+  stats: "статистика",
+  subCategory: "Підкатегорія",
+  termsAgree: "Я погоджуюся з документами: {terms} та {privacy}.",
+  termsOfUseLink: "Умови використання",
+  tokensToAdd: "Token для додавання",
+  topUpTheDream: "ПОПОВНИТИ ДОПИС",
+  topUpThePost: "ПОПОВНИТИ ДОПИС",
+  translate: "Перекласти",
+  translateFailed: "Переклад недоступний. Показано оригінал.",
+  typeYourMessageForDonee: "Напиши повідомлення для Donee...",
+  userInactive: "Підтверди свою електронну адресу за посиланням, яке ми надіслали на неї.",
+  username: "Ім'я користувача",
+  welcomeCreateAccount: "СТВОРИТИ АКАУНТ",
+  welcomeSignIn: "УВІЙТИ",
+  welcomeTagline: "Бо мрії важливі.",
+  whatIsYourGoal: "Яка твоя ціль?",
+  whatIsYourLocation: "Яке твоє місце розташування?",
+  whatKindOfDream: "Яка в тебе мрія?",
+  whereAreYou: "Де ти?",
+  whoAreYou: "Хто ти?",
+  worldMap: "Карта світу",
+  youDontHaveEnoughTokens: "У тебе недостатньо Token.",
+  zeroTolerance: "нульова толерантність",
+  zeroToleranceNotice: "У dreamhubb діє {zeroTolerance} до неприйнятного вмісту та користувачів, які поводяться недоречно.",
   languages: {
     ...enUS.languages,
-    // Override with Ukrainian translations for all languages
-    "en-US": { name: "\u0410\u043d\u0433\u043b\u0456\u0439\u0441\u044c\u043a\u0430 (\u0421\u0428\u0410)" }, // Англійська (США)
-    "en-GB": { name: "\u0410\u043d\u0433\u043b\u0456\u0439\u0441\u044c\u043a\u0430 (\u0412\u0435\u043b\u0438\u043a\u043e\u0431\u0440\u0438\u0442\u0430\u043d\u0456\u044f)" }, // Англійська (Великобританія)
-    sk: { name: "\u0421\u043b\u043e\u0432\u0430\u0446\u044c\u043a\u0430" }, // Словацька
-    cs: { name: "\u0427\u0435\u0441\u044c\u043a\u0430" }, // Чеська
-    de: { name: "\u041d\u0456\u043c\u0435\u0446\u044c\u043a\u0430" }, // Німецька
-    fr: { name: "\u0424\u0440\u0430\u043d\u0446\u0443\u0437\u044c\u043a\u0430" }, // Французька
-    es: { name: "\u0406\u0441\u043f\u0430\u043d\u0441\u044c\u043a\u0430" }, // Іспанська
-    it: { name: "\u0406\u0442\u0430\u043b\u0456\u0439\u0441\u044c\u043a\u0430" }, // Італійська
-    pl: { name: "\u041f\u043e\u043b\u044c\u0441\u044c\u043a\u0430" }, // Польська
-    hu: { name: "\u0423\u0433\u043e\u0440\u0441\u044c\u043a\u0430" }, // Угорська
-    ro: { name: "\u0420\u0443\u043c\u0443\u043d\u0441\u044c\u043a\u0430" }, // Румунська
-    ru: { name: "\u0420\u043e\u0441\u0456\u0439\u0441\u044c\u043a\u0430" }, // Російська
-    uk: { name: "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430" }, // Українська
-    zh: { name: "\u041a\u0438\u0442\u0430\u0439\u0441\u044c\u043a\u0430" }, // Китайська
-    hi: { name: "\u0425\u0456\u043d\u0434\u0456" }, // Хінді
-    ar: { name: "\u0410\u0440\u0430\u0431\u0441\u044c\u043a\u0430" }, // Арабська
-    ja: { name: "\u042f\u043f\u043e\u043d\u0441\u044c\u043a\u0430" }, // Японська
-    ko: { name: "\u041a\u043e\u0440\u0435\u0439\u0441\u044c\u043a\u0430" }, // Корейська
-    sq: { name: "\u0410\u043b\u0431\u0430\u043d\u0441\u044c\u043a\u0430" }, // Албанська
-    hy: { name: "\u0412\u0456\u0440\u043c\u0435\u043d\u0441\u044c\u043a\u0430" }, // Вірменська
-    az: { name: "\u0410\u0437\u0435\u0440\u0431\u0430\u0439\u0434\u0436\u0430\u043d\u0441\u044c\u043a\u0430" }, // Азербайджанська
-    bn: { name: "\u0411\u0435\u043d\u0433\u0430\u043b\u044c\u0441\u044c\u043a\u0430" }, // Бенгальська
-    bg: { name: "\u0411\u043e\u043b\u0433\u0430\u0440\u0441\u044c\u043a\u0430" }, // Болгарська
-    hr: { name: "\u0425\u043e\u0440\u0432\u0430\u0442\u0441\u044c\u043a\u0430" }, // Хорватська
-    da: { name: "\u0414\u0430\u0442\u0441\u044c\u043a\u0430" }, // Данська
-    et: { name: "\u0415\u0441\u0442\u043e\u043d\u0441\u044c\u043a\u0430" }, // Естонська
-    fi: { name: "\u0424\u0456\u043d\u0441\u044c\u043a\u0430" }, // Фінська
-    ka: { name: "\u0413\u0440\u0443\u0437\u0438\u043d\u0441\u044c\u043a\u0430" }, // Грузинська
-    el: { name: "\u0413\u0440\u0435\u0446\u044c\u043a\u0430" }, // Грецька
-    he: { name: "\u042d\u0432\u0440\u0435\u0439\u0441\u044c\u043a\u0430" }, // Єврейська
-    id: { name: "\u0406\u043d\u0434\u043e\u043d\u0435\u0437\u0456\u0439\u0441\u044c\u043a\u0430" }, // Індонезійська
-    kk: { name: "\u041a\u0430\u0437\u0430\u0445\u0441\u044c\u043a\u0430" }, // Казахська
-    lo: { name: "\u041b\u0430\u043e\u0441\u044c\u043a\u0430" }, // Лаоська
-    lv: { name: "\u041b\u0430\u0442\u0432\u0456\u0439\u0441\u044c\u043a\u0430" }, // Латвійська
-    lt: { name: "\u041b\u0438\u0442\u043e\u0432\u0441\u044c\u043a\u0430" }, // Литовська
-    mk: { name: "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u044c\u043a\u0430" }, // Македонська
-    ne: { name: "\u041d\u0435\u043f\u0430\u043b\u044c\u0441\u044c\u043a\u0430" }, // Непальська
-    no: { name: "\u041d\u043e\u0440\u0432\u0435\u0436\u0441\u044c\u043a\u0430" }, // Норвезька
-    fa: { name: "\u041f\u0435\u0440\u0441\u044c\u043a\u0430" }, // Перська
-    pt: { name: "\u041f\u043e\u0440\u0442\u0443\u0433\u0430\u043b\u044c\u0441\u044c\u043a\u0430" }, // Португальська
-    sr: { name: "\u0421\u0435\u0440\u0431\u0441\u044c\u043a\u0430" }, // Сербська
-    sv: { name: "\u0428\u0432\u0435\u0434\u0441\u044c\u043a\u0430" }, // Шведська
-    th: { name: "\u0422\u0430\u0439\u0441\u044c\u043a\u0430" }, // Тайська
-    tr: { name: "\u0422\u0443\u0440\u0435\u0446\u044c\u043a\u0430" }, // Турецька
-    ur: { name: "\u0423\u0440\u0434\u0443" }, // Урду
-    nl: { name: "\u0413\u043e\u043b\u043b\u0430\u043d\u0434\u0441\u044c\u043a\u0430" }, // Голландська
-    // New languages - exonymá (Ukrainian names)
-    "pa-PK": { name: "\u041f\u0430\u043d\u0434\u0436\u0430\u0431\u0441\u044c\u043a\u0430", nativeName: "\u067e\u0646\u062c\u0627\u0628\u06cc" },
-    "mr-IN": { name: "\u041c\u0430\u0440\u0430\u0442\u0445\u0456 (\u0406\u043d\u0434\u0456\u044f)", nativeName: "\u092e\u0930\u093e\u0920\u0940" },
-    "te-IN": { name: "\u0422\u0435\u043b\u0443\u0433\u0443 (\u0406\u043d\u0434\u0456\u044f)", nativeName: "\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41" },
-    "ta-IN": { name: "\u0422\u0430\u043c\u0456\u043b\u044c\u0441\u044c\u043a\u0430 (\u0406\u043d\u0434\u0456\u044f)", nativeName: "\u0ba4\u0bae\u0bbf\u0bb4\u0bcd" },
-    "vi-VN": { name: "\u0412'\u0457\u0442\u043d\u0430\u043c\u0441\u044c\u043a\u0430", nativeName: "Ti\u1ebfng Vi\u1ec7t" },
-    "fil-PH": { name: "\u0424\u0456\u043b\u0456\u043f\u043f\u0456\u043d\u0441\u044c\u043a\u0430", nativeName: "Filipino" },
-    "sw-TZ": { name: "\u0421\u0443\u0430\u0445\u0456\u043b\u0456", nativeName: "Kiswahili" },
-    "ha-NE": { name: "\u0425\u0430\u0443\u0441\u0430", nativeName: "Hausa" },
-    "yue-HK": { name: "\u041a\u0438\u0442\u0430\u0439\u0441\u044c\u043a\u0430 (\u041a\u0430\u043d\u0442\u043e\u043d\u0441\u044c\u043a\u0430) (\u0413\u043e\u043d\u043a\u043e\u043d\u0433)", nativeName: "\u7cb5\u8a9e" },
-    "wuu-CN": { name: "\u041a\u0438\u0442\u0430\u0439\u0441\u044c\u043a\u0430 (\u0423)", nativeName: "\u5434\u8bed" },
-    "jv-ID": { name: "\u042f\u0432\u0430\u043d\u0441\u044c\u043a\u0430", nativeName: "Basa Jawa" },
-    "gu-IN": { name: "\u0413\u0443\u0434\u0436\u0430\u0440\u0430\u0442\u0456 (\u0406\u043d\u0434\u0456\u044f)", nativeName: "\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4\u0ac0" },
-    "kn-IN": { name: "\u041a\u0430\u043d\u043d\u0430\u0434\u0430 (\u0406\u043d\u0434\u0456\u044f)", nativeName: "\u0c95\u0ca8\u0ccd\u0ca8\u0ca1" }
+    ar: {
+      name: "Арабська"
+    },
+    az: {
+      name: "Азербайджанська"
+    },
+    bg: {
+      name: "Болгарська"
+    },
+    bn: {
+      name: "Бенгальська"
+    },
+    cs: {
+      name: "Чеська"
+    },
+    da: {
+      name: "Датська"
+    },
+    de: {
+      name: "Німецька"
+    },
+    el: {
+      name: "Грецька"
+    },
+    "en-GB": {
+      name: "Англійська (Великобританія)"
+    },
+    "en-US": {
+      name: "Англійська (США)"
+    },
+    es: {
+      name: "Іспанська"
+    },
+    et: {
+      name: "Естонська"
+    },
+    fa: {
+      name: "Перська"
+    },
+    fi: {
+      name: "Фінська"
+    },
+    "fil-PH": {
+      name: "Філіппінська",
+      nativeName: "Filipino"
+    },
+    fr: {
+      name: "Французька"
+    },
+    "gu-IN": {
+      name: "Гуджараті (Індія)",
+      nativeName: "ગુજરાતી"
+    },
+    "ha-NE": {
+      name: "Хауса",
+      nativeName: "Hausa"
+    },
+    he: {
+      name: "Єврейська"
+    },
+    hi: {
+      name: "Хінді"
+    },
+    hr: {
+      name: "Хорватська"
+    },
+    hu: {
+      name: "Угорська"
+    },
+    hy: {
+      name: "Вірменська"
+    },
+    id: {
+      name: "Індонезійська"
+    },
+    it: {
+      name: "Італійська"
+    },
+    ja: {
+      name: "Японська"
+    },
+    "jv-ID": {
+      name: "Яванська",
+      nativeName: "Basa Jawa"
+    },
+    ka: {
+      name: "Грузинська"
+    },
+    kk: {
+      name: "Казахська"
+    },
+    "kn-IN": {
+      name: "Каннада (Індія)",
+      nativeName: "ಕನ್ನಡ"
+    },
+    ko: {
+      name: "Корейська"
+    },
+    lo: {
+      name: "Лаоська"
+    },
+    lt: {
+      name: "Литовська"
+    },
+    lv: {
+      name: "Латвійська"
+    },
+    mk: {
+      name: "Македонська"
+    },
+    "mr-IN": {
+      name: "Маратхі (Індія)",
+      nativeName: "मराठी"
+    },
+    ne: {
+      name: "Непальська"
+    },
+    nl: {
+      name: "Голландська"
+    },
+    no: {
+      name: "Норвежська"
+    },
+    "pa-PK": {
+      name: "Панджабська",
+      nativeName: "پنجابی"
+    },
+    pl: {
+      name: "Польська"
+    },
+    pt: {
+      name: "Португальська"
+    },
+    ro: {
+      name: "Румунська"
+    },
+    ru: {
+      name: "Російська"
+    },
+    sk: {
+      name: "Словацька"
+    },
+    sq: {
+      name: "Албанська"
+    },
+    sr: {
+      name: "Сербська"
+    },
+    sv: {
+      name: "Шведська"
+    },
+    "sw-TZ": {
+      name: "Суахілі",
+      nativeName: "Kiswahili"
+    },
+    "ta-IN": {
+      name: "Тамільська (Індія)",
+      nativeName: "தமிழ்"
+    },
+    "te-IN": {
+      name: "Телугу (Індія)",
+      nativeName: "తెలుగు"
+    },
+    th: {
+      name: "Тайська"
+    },
+    tr: {
+      name: "Турецька"
+    },
+    uk: {
+      name: "Українська"
+    },
+    ur: {
+      name: "Урду"
+    },
+    "vi-VN": {
+      name: "В'єтнамська",
+      nativeName: "Tiếng Việt"
+    },
+    "wuu-CN": {
+      name: "Китайська (У)",
+      nativeName: "吴语"
+    },
+    "yue-HK": {
+      name: "Китайська (Кантонська) (Гонконг)",
+      nativeName: "粵語"
+    },
+    zh: {
+      name: "Китайська"
+    }
   }
 };

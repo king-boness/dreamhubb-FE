@@ -8,7 +8,7 @@
       :show-progress="showProgress"
       :show-arrows="showArrows"
       :show-dots="showDots"
-      :alt="alt"
+      :alt="resolvedAlt"
       :progress-context="progressContext"
       :image-style="imageStyle"
       @image-click="$emit('image-click', $event)"
@@ -26,6 +26,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import PostImagesCarousel from "src/components/post/PostImagesCarousel.vue";
 
 type PostType = "dream" | "problem" | "idea";
@@ -47,7 +48,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   images: () => [],
-  alt: "Post image",
+  alt: "",
   postType: null,
   iconUrl: null,
   iconPlacement: "corner",
@@ -64,7 +65,11 @@ defineEmits<{
   "image-click": [index: number];
 }>();
 
+const { t } = useI18n();
+
 const hasCoverImage = computed(() => Array.isArray(props.images) && props.images.length > 0);
+
+const resolvedAlt = computed(() => props.alt || t("feed.postImageAlt"));
 
 const normalizedType = computed<PostType | null>(() => {
   const raw = typeof props.postType === "string" ? props.postType.toLowerCase().trim() : "";
@@ -73,8 +78,9 @@ const normalizedType = computed<PostType | null>(() => {
 });
 
 const watermarkLabel = computed(() => {
-  const t = normalizedType.value;
-  return t || "";
+  const type = normalizedType.value;
+  if (!type) return "";
+  return t(`feed.postType.${type}`);
 });
 
 const rootClasses = computed(() => {

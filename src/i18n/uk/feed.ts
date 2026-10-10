@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Додай ключові слова",
+    applyFilters: "Застосувати фільтри",
+    chooseCountry: "Обери свою країну",
+    clearFilters: "Очистити фільтри",
+    failedLoadInspirations: "Не вдалося завантажити натхнення.",
+    filterAlsoCategory: "змінити також категорію",
+    filterAlsoPlace: "змінити також місце",
+    filterSearchCta: "шукати",
+    filterStepCategory: "змінити категорію",
+    filterStepPlace: "обрати місце",
+    filterStepPosts: "змінити дописи",
+    firstPostHint: "Створи свою першу мрію, проблему чи ідею та поділися нею зі світом.",
+    firstPostTitle: "Почни свою подорож!",
+    myDreamsTitle: "Мої мрії",
+    noResults: "Немає результатів",
+    postImageAlt: "Зображення допису",
+    postType: {
+      dream: "мрія",
+      idea: "ідея",
+      problem: "проблема"
+    },
+    quote1: "«Якщо ти не мрієш, ти не помреш, але без мрій ти навіть не будеш по-справжньому живим.»",
+    quote2: "«Ми не можемо розв'язувати проблеми тим самим мисленням, яке їх створило.»",
+    quote3: "«Учись так, ніби житимеш вічно; живи так, ніби помреш завтра.»",
+    quote4: "«Я ніколи не мріяв про успіх. Я працював заради нього.»",
+    quoteOfTheDay: "Цитата дня",
+    resultsCount: "Немає результатів | {n} результат | {n} результати | {n} результатів",
+    searchEmpty: "Жоден допис не відповідає твоєму пошуку.",
+    searchEmptyMine: "Жодна мрія не відповідає твоєму пошуку.",
+    searchEmptyMineNone: "Мрій поки немає.",
+    searchHint: "Введи ключове слово, щоб шукати дописи.",
+    searchMyDreams: "Шукати серед моїх мрій",
+    searchPlaceholder: "Шукай що завгодно",
+    sortNewest: "Найновіші",
+    sortOldest: "Найстаріші",
+    unknownUser: "Невідомий користувач",
+    untitled: "Без назви",
+    userBadge: "Користувач"
+  }
+};

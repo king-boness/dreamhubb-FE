@@ -7,7 +7,7 @@
     <div class="auth-map-wrapper">
       <img
         :src="mapImage"
-        alt="World map"
+        :alt="t('worldMap')"
         class="auth-map"
         @error="handleMapError"
       />
@@ -26,7 +26,7 @@
       <img
         :key="currentSlide.key"
         :src="currentSlide.image"
-        :alt="currentSlide.title || currentSlide.titleLines?.join(' ') || 'Illustration'"
+        :alt="currentSlide.title || currentSlide.titleLines?.join(' ') || t('onboarding.illustrationAlt')"
         class="auth-help-illustration-img"
         @error="handleImageError"
         @load="handleImageLoad"
@@ -86,7 +86,7 @@
           class="auth-help-cta-full"
           @click="handleFinalCta"
         >
-          JOIN THE MOVEMENT
+          {{ t("joinTheMovement") }}
         </button>
       </div>
 
@@ -103,8 +103,10 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const { t } = useI18n();
 
 // Map image (shared with AuthWelcomePage)
 import mapImage from "src/assets/Auth/map-image.svg";
@@ -117,55 +119,55 @@ import helpIllustration4 from "src/assets/onboarding/help_4_star.svg";
 import helpIllustration5 from "src/assets/onboarding/help_5_flower.svg";
 
 // Slides data
-const slides = [
+const slides = computed(() => [
   {
     key: "help-1",
-    title: "It's all about help",
-    text: "dreamhubb connects people through dreams, problems, and ideas. Share what you want to achieve — and find others ready to lift you up.",
+    title: t("onboarding.help.slide1Title"),
+    text: t("onboarding.help.slide1Text"),
     image: helpIllustration1,
     isFinal: false
   },
   {
     key: "help-2",
-    title: "Help others, let others help you",
-    text: "Offer advice, experience, contacts, or a small act of support. When you need it, the community is here to give back.",
+    title: t("onboarding.help.slide2Title"),
+    text: t("onboarding.help.slide2Text"),
     image: helpIllustration2,
     isFinal: false
   },
   {
     key: "help-3",
-    title: "Earn Tokens by helping",
-    text: "Every kind action earns Tokens — recognition for the goodwill you bring to dreamhubb and the people you support.",
+    title: t("onboarding.help.slide3Title"),
+    text: t("onboarding.help.slide3Text"),
     image: helpIllustration3,
     isFinal: false
   },
   {
     key: "help-4",
-    title: "Even partial help can push someone towards his dream",
-    text: "You do not have to solve everything at once. A useful tip, a warm word, or an introduction can move someone meaningfully closer.",
+    title: t("onboarding.help.slide4Title"),
+    text: t("onboarding.help.slide4Text"),
     image: helpIllustration4,
     isFinal: false
   },
   {
     key: "help-5",
-    titleLines: ["Now let's accomplish our", "dreams with"],
-    text: "Join a community where giving and receiving support becomes a natural part of everyday life.",
+    titleLines: [t("onboarding.help.slide5Line1"), t("onboarding.help.slide5Line2")],
+    text: t("onboarding.help.slide5Text"),
     image: helpIllustration5,
     isFinal: true,
-    ctaLabel: "JOIN THE MOVEMENT"
+    ctaLabel: t("joinTheMovement")
   }
-];
+]);
 
 // Current slide index
 const currentSlideIndex = ref(0);
 const slideTransition = ref("slide-next");
 
 // Computed
-const currentSlide = computed(() => slides[currentSlideIndex.value]);
+const currentSlide = computed(() => slides.value[currentSlideIndex.value]);
 
 // Functions
 function goNext() {
-  if (currentSlideIndex.value < slides.length - 1) {
+  if (currentSlideIndex.value < slides.value.length - 1) {
     slideTransition.value = "slide-next";
     currentSlideIndex.value++;
   }

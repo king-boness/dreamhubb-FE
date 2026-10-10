@@ -1,32 +1,43 @@
 <template>
   <div class="settingsSupport-page">
     <div class="settingsSupport-header">
-      <span class="settingsSupport-heading">Help &amp; Support</span>
+      <span class="settingsSupport-heading">{{ t("helpAndSupport") }}</span>
     </div>
     <div class="settingsSupport-questions">
       <p class="questionsText">
-        Need help with your account, a post, or reporting inappropriate content? Contact our support team and we will respond as soon as possible.
+        {{ t("settingsPages.support.intro") }}
       </p>
       <p class="questionsText">
-        Email:
-        <a class="settingsSupport-link" href="mailto:matej.kostun@gmail.com">matej.kostun@gmail.com</a>
+        {{ t("settingsPages.support.emailLabel") }}
+        <a class="settingsSupport-link" :href="`mailto:${SUPPORT_EMAIL}`">{{ SUPPORT_EMAIL }}</a>
       </p>
       <p class="questionsText">
-        You can also review our
-        <a class="settingsSupport-link" href="#" @click.prevent="openPrivacy">Privacy Policy</a>
-        and
-        <a class="settingsSupport-link" href="#" @click.prevent="openTerms">Terms of Use</a>.
+        <i18n-t keypath="settingsPages.support.reviewPolicies" scope="global" tag="span">
+          <template #privacy>
+            <a class="settingsSupport-link" href="#" @click.prevent="openPrivacy">{{ t("settingsPages.support.privacyLink") }}</a>
+          </template>
+          <template #terms>
+            <a class="settingsSupport-link" href="#" @click.prevent="openTerms">{{ t("settingsPages.support.termsLink") }}</a>
+          </template>
+        </i18n-t>
       </p>
       <p class="questionsText">
-        To report a post, open any post and tap <strong>Report a post</strong> at the bottom of the detail screen.
+        <i18n-t keypath="settingsPages.support.reportHint" scope="global" tag="span">
+          <template #report>
+            <strong>{{ t("reportPost") }}</strong>
+          </template>
+        </i18n-t>
       </p>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const { t } = useI18n();
+const SUPPORT_EMAIL = "matej.kostun@gmail.com";
 
 const openPrivacy = () => {
   void router.push({ name: "privacy-policy" });

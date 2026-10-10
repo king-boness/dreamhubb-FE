@@ -1,7 +1,7 @@
 <template>
   <div class="introSlides">
     <!-- Skip button -->
-    <button class="intro-skip" @click="emit('skip')">Skip</button>
+    <button class="intro-skip" @click="emit('skip')">{{ t("skip") }}</button>
 
     <!-- Slide content -->
     <div class="intro-content">
@@ -35,12 +35,15 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface Slide {
   title: string;
   subtitle: string;
   image: string;
 }
+
+const { t } = useI18n();
 
 const props = defineProps<{
   currentSlide: number;
@@ -51,35 +54,35 @@ const emit = defineEmits<{
   skip: [];
 }>();
 
-const slides: Slide[] = [
+const slides = computed<Slide[]>(() => [
   {
-    title: "It's all about help",
-    subtitle: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
+    title: t("onboarding.help.slide1Title"),
+    subtitle: t("onboarding.help.slide1Text"),
     image: "/images/onboarding/slide-1.png"
   },
   {
-    title: "Help others, let others help you",
-    subtitle: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
+    title: t("onboarding.help.slide2Title"),
+    subtitle: t("onboarding.help.slide2Text"),
     image: "/images/onboarding/slide-2.png"
   },
   {
-    title: "Earn Tokens by helping",
-    subtitle: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor. A vitae hendrerit diam a. Tortor. A vitae hendrerit diam a.",
+    title: t("onboarding.help.slide3Title"),
+    subtitle: t("onboarding.help.slide3Text"),
     image: "/images/onboarding/slide-3.png"
   },
   {
-    title: "Even partial help can push someone towards his dream",
-    subtitle: "Tellus dictum cursus elementum quisque. Sapien faucibus sit non urna. Id viverra ultricies non tortor.",
+    title: t("onboarding.help.slide4Title"),
+    subtitle: t("onboarding.help.slide4Text"),
     image: "/images/onboarding/slide-4.png"
   },
   {
-    title: "Now let's accomplish our dreams with",
-    subtitle: "dreamhubb",
+    title: t("explainerTitle5"),
+    subtitle: t("onboarding.help.slide5Text"),
     image: "/images/onboarding/slide-5.png"
   }
-];
+]);
 
-const currentSlideData = computed(() => slides[props.currentSlide]);
+const currentSlideData = computed(() => slides.value[props.currentSlide]);
 </script>
 
 <style lang="scss" scoped>

@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Adaugă cuvinte-cheie",
+    applyFilters: "Aplică filtrele",
+    chooseCountry: "Alege țara ta",
+    clearFilters: "Șterge filtrele",
+    failedLoadInspirations: "Nu s-au putut încărca inspirațiile.",
+    filterAlsoCategory: "schimbă și categoria",
+    filterAlsoPlace: "schimbă și locul",
+    filterSearchCta: "caută",
+    filterStepCategory: "schimbă categoria",
+    filterStepPlace: "alege un loc",
+    filterStepPosts: "schimbă postările",
+    firstPostHint: "Creează primul tău vis, prima problemă sau idee și împărtășește-o cu lumea.",
+    firstPostTitle: "Începe-ți călătoria!",
+    myDreamsTitle: "Visele mele",
+    noResults: "Niciun rezultat",
+    postImageAlt: "Imaginea postării",
+    postType: {
+      dream: "vis",
+      idea: "idee",
+      problem: "problemă"
+    },
+    quote1: "„Dacă nu visezi, nu vei muri, dar nici nu vei fi cu adevărat viu fără vise.”",
+    quote2: "„Nu putem rezolva problemele cu același fel de gândire cu care le-am creat.”",
+    quote3: "„Învață ca și cum ai trăi veșnic, trăiește ca și cum ai muri mâine.”",
+    quote4: "„Nu am visat niciodată la succes. Am muncit pentru el.”",
+    quoteOfTheDay: "Citatul zilei",
+    resultsCount: "Niciun rezultat | {n} rezultat | {n} rezultate | {n} de rezultate",
+    searchEmpty: "Nicio postare nu se potrivește căutării tale.",
+    searchEmptyMine: "Niciun vis nu se potrivește căutării tale.",
+    searchEmptyMineNone: "Încă niciun vis.",
+    searchHint: "Introdu un cuvânt-cheie pentru a căuta postări.",
+    searchMyDreams: "Caută în visele mele",
+    searchPlaceholder: "Caută orice",
+    sortNewest: "Cele mai noi",
+    sortOldest: "Cele mai vechi",
+    unknownUser: "Utilizator necunoscut",
+    untitled: "Fără titlu",
+    userBadge: "Utilizator"
+  }
+};

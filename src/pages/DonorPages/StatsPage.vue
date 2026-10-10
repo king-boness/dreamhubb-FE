@@ -19,13 +19,12 @@
         class="statsPage-historicalNote"
         data-testid="dh-token-stats-historical-note"
       >
-        Stats are tracked from the latest update onward. Older token history may not be
-        available.
+        {{ historicalNote }}
       </p>
 
       <div class="overwiev-stats">
         <div class="overwievTitleDiv">
-          <span class="overwievTitle">Overview</span>
+          <span class="overwievTitle">{{ overviewLabel }}</span>
         </div>
         <div class="karmaUsed"></div>
         <div v-for="(card, i) in cards" :key="i" class="cardContainer">
@@ -64,10 +63,10 @@
 
       <div class="detailed-stats">
         <div class="DetailedStats-div">
-          <span class="DetailedStats-Title">Detailed Stats</span>
+          <span class="DetailedStats-Title">{{ detailedStatsLabel }}</span>
         </div>
         <div class="usedOnStats">
-          <div class="usedOnStats-title"><span>Used Tokens on</span></div>
+          <div class="usedOnStats-title"><span>{{ usedTokensOnLabel }}</span></div>
           <div class="usedOnStats-categories">
             <div class="usedOn-buttonsDiv">
               <q-btn
@@ -96,15 +95,13 @@
           </div>
         </div>
         <div class="usedOnStats-categoryContainer">
-          <span class="usedOnStats-categoryTitle"
-            >Category specific spending</span
-          >
+          <span class="usedOnStats-categoryTitle">{{ categorySpecificLabel }}</span>
           <p
             v-if="!hasSubcategorySpending"
             class="statsPage-emptySubcategory"
             data-testid="dh-token-stats-subcategory-empty"
           >
-            No subcategory spending yet.
+            {{ emptySubcategoryLabel }}
           </p>
           <div v-else class="usedOnStats-spendingContainer">
             <q-select
@@ -152,6 +149,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onActivated } from "vue";
+import { useI18n } from "vue-i18n";
 import { Stats, specificSpending } from "src/components/models";
 import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import { fetchTokenStats } from "src/services/tokenStatsService";
@@ -162,11 +160,20 @@ import type {
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 
-const DEFAULT_CATEGORY_BUCKETS: TokenStatsCategorySpend[] = [
-  { key: "dreams", label: "Dreams", tokens: 0 },
-  { key: "problems", label: "Problems", tokens: 0 },
-  { key: "ideas", label: "Ideas", tokens: 0 }
-];
+const { t } = useI18n();
+
+const overviewLabel = computed(() => t("statsUi.overview"));
+const detailedStatsLabel = computed(() => t("statsUi.detailedStats"));
+const usedTokensOnLabel = computed(() => t("statsUi.usedTokensOn"));
+const categorySpecificLabel = computed(() => t("statsUi.categorySpecific"));
+const emptySubcategoryLabel = computed(() => t("statsUi.emptySubcategory"));
+const historicalNote = computed(() => t("statsUi.historicalNote"));
+
+const DEFAULT_CATEGORY_BUCKETS = computed<TokenStatsCategorySpend[]>(() => [
+  { key: "dreams", label: t("dreams"), tokens: 0 },
+  { key: "problems", label: t("problems"), tokens: 0 },
+  { key: "ideas", label: t("ideas"), tokens: 0 }
+]);
 
 const CATEGORY_KEY_TO_MODEL: Record<string, "onDream" | "onProblem" | "onIdea"> = {
   dreams: "onDream",
@@ -195,11 +202,12 @@ const showHistoricalNote = computed(
 );
 
 const categoryBuckets = computed(() => {
+  const defaults = DEFAULT_CATEGORY_BUCKETS.value;
   const fromApi = tokenStats.value?.spent?.by_category ?? [];
   if (fromApi.length === 0) {
-    return DEFAULT_CATEGORY_BUCKETS;
+    return defaults;
   }
-  const merged = DEFAULT_CATEGORY_BUCKETS.map((bucket) => {
+  const merged = defaults.map((bucket) => {
     const match = fromApi.find((row) => row.key === bucket.key);
     return match ?? bucket;
   });
@@ -265,31 +273,31 @@ const cards = computed(
     [
       {
         overview: {
-          title: "Received",
-          comesFrom: "Support Received",
+          title: t("statsUi.received"),
+          comesFrom: t("statsUi.supportReceived"),
           comesFromImg: "/icons/giftIcon-red.svg",
           comesFromValue: tokensGainedFromSupport.value
         }
       },
       {
         overview: {
-          title: "Purchased",
-          comesFrom: "Purchased Tokens",
+          title: t("statsUi.purchased"),
+          comesFrom: t("statsUi.purchasedTokens"),
           comesFromImg: "/icons/giftIcon-red.svg",
           comesFromValue: tokensGainedFromPurchases.value
         }
       },
       {
         overview: {
-          title: "Earned",
-          comesFrom: "Earn Tasks",
+          title: t("statsUi.earned"),
+          comesFrom: t("statsUi.earnTasks"),
           comesFromImg: "/icons/giftIcon-red.svg",
           comesFromValue: tokensGainedFromEarn.value
         }
       },
       {
         overview: {
-          title: "Remaining Tokens",
+          title: t("statsUi.remainingTokens"),
           comesFrom: "",
           comesFromImg: "",
           comesFromValue: remainingTokens.value

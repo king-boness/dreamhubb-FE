@@ -1,13 +1,13 @@
 <template>
   <div class="accomplishedDream-page">
-    <span class="accomplishedDream-title">Congratulations!</span>
+    <span class="accomplishedDream-title">{{ t("common.accomplishedDream.title") }}</span>
     <img
       src="/icons/accomplishedDream-image.png"
       alt=""
       class="accomplishedDream-mainImage"
     />
     <span class="accomplishedDream-description"
-      >Your dream was accomplished by</span
+      >{{ t("common.accomplishedDream.description") }}</span
     >
     <div class="accomplishedDReam-donatorContainer">
       <img
@@ -22,7 +22,7 @@
     <q-btn
       class="accomplishedDream-reviewButton"
       @click="$router.push({ name: 'donee-post-details-review' })"
-      >Say thanks in review!</q-btn
+      >{{ t("common.accomplishedDream.reviewCta") }}</q-btn
     >
   </div>
 </template>
@@ -82,7 +82,10 @@
 </style>
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { UserProfile } from "src/components/models";
+
+const { t } = useI18n();
 
 const profile = ref({
   user: {

@@ -7,7 +7,7 @@
     <div class="auth-map-wrapper">
       <img
         :src="mapImage"
-        alt="World map"
+        :alt="$t('worldMap')"
         class="auth-map"
         @error="handleMapError"
       />
@@ -30,7 +30,7 @@
             <img :src="card.avatarUrl" alt="" class="auth-card_avatar" />
             <div class="auth-card_user-text">
               <div class="auth-card_user-name">{{ card.userName }}</div>
-              <div class="auth-card_title">{{ card.title }}</div>
+              <div class="auth-card_title">{{ card.dreamTitle }}</div>
             </div>
           </div>
         </div>
@@ -43,19 +43,19 @@
       <div class="authWelcome-brand">
         <img
           :src="logoImage"
-          alt="dreamhubb logo"
+          :alt="$t('logoAlt')"
           class="authWelcome-logo"
         />
-        <p class="authWelcome-tagline">&apos;Cause dreams matter.</p>
+        <p class="authWelcome-tagline">{{ $t("welcomeTagline") }}</p>
       </div>
 
       <!-- CTA buttons -->
       <div class="authWelcome-actions">
         <button class="authWelcome-btn auth-cta-primary" @click="handleSignIn">
-          SIGN IN
+          {{ $t("welcomeSignIn") }}
         </button>
         <button class="authWelcome-btn auth-cta-secondary" @click="handleCreateAccount">
-          CREATE AN ACCOUNT
+          {{ $t("welcomeCreateAccount") }}
         </button>
 
         <!-- Help button -->

@@ -42,16 +42,23 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
 import { useQuasar } from "quasar";
-import { notifySuccess } from "src/utils/notify";
+import { notifyError, notifySuccess } from "src/utils/notify";
+import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { APP_LANGUAGES } from "src/config/languages";
+import { api } from "boot/axios";
+import { useAuthStore } from "src/stores/auth";
+import {
+  LANGUAGE_STORAGE_KEY,
+  applyUiLocale
+} from "src/utils/applyLocale";
 
 const $q = useQuasar();
 const router = useRouter();
 const { locale, t } = useI18n();
-
-const LANGUAGE_STORAGE_KEY = "dreamhubb_language";
+const authStore = useAuthStore();
+const saving = ref(false);
 
 interface Language {
   code: string;
@@ -125,89 +132,48 @@ const selectLanguage = (lang: Language) => {
 
 // Removed onLanguageChange - no immediate locale switching
 
-const saveLanguage = () => {
-  if (pendingLanguageCode.value) {
-    // Map language codes to i18n locale codes
-    // If locale exists, use it; otherwise fallback to en-US
-    const localeMap: Record<string, string> = {
-      sk: "sk",
-      "en-US": "en-US",
-      "en-GB": "en-US", // Use en-US as fallback for en-GB
-      es: "es",
-      cs: "cs",
-      da: "da",
-      zh: "zh",
-      ar: "ar",
-      hi: "hi",
-      ru: "ru",
-      ro: "ro",
-      uk: "uk",
-      de: "de",
-      fr: "fr",
-      it: "it",
-      pl: "pl",
-      hu: "hu",
-      ja: "ja",
-      ko: "ko",
-      sq: "sq",
-      hy: "hy",
-      az: "az",
-      bn: "bn",
-      bg: "bg",
-      hr: "hr",
-      et: "et",
-      fi: "fi",
-      ka: "ka",
-      el: "el",
-      he: "he",
-      id: "id",
-      kk: "kk",
-      lo: "lo",
-      lv: "lv",
-      lt: "lt",
-      mk: "mk",
-      ne: "ne",
-      no: "no",
-      fa: "fa",
-      pt: "pt",
-      sr: "sr",
-      sv: "sv",
-      th: "th",
-      tr: "tr",
-      ur: "ur",
-      nl: "nl",
-      // New languages - now using their own i18n files
-      "pa-PK": "pa-PK",
-      "mr-IN": "mr-IN",
-      "te-IN": "te-IN",
-      "ta-IN": "ta-IN",
-      "vi-VN": "vi-VN",
-      "fil-PH": "fil-PH",
-      "sw-TZ": "sw-TZ",
-      "ha-NE": "ha-NE",
-      "yue-HK": "yue-HK",
-      "wuu-CN": "wuu-CN",
-      "jv-ID": "jv-ID",
-      "gu-IN": "gu-IN",
-      "kn-IN": "kn-IN"
-    };
+const saveLanguage = async () => {
+  if (!pendingLanguageCode.value || saving.value) {
+    return;
+  }
 
-    const i18nLocale = localeMap[pendingLanguageCode.value] || pendingLanguageCode.value;
+  const previousStored =
+    localStorage.getItem(LANGUAGE_STORAGE_KEY) || String(locale.value || "en-US");
+  const nextCode = pendingLanguageCode.value;
 
-    // Save to localStorage
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, pendingLanguageCode.value);
-    // Update i18n locale - THIS is when the UI actually changes
-    locale.value = i18nLocale;
+  saving.value = true;
+  try {
+    // Authenticated users persist preference on the account (source of truth).
+    if (authStore.isAuthenticated) {
+      const { data } = await api.put("/user/update", {
+        preferred_locale: nextCode
+      });
+      if (!data || data.status !== "success") {
+        throw new Error(data?.message || "Failed to save language");
+      }
+      if (authStore.user) {
+        authStore.user.preferred_locale = nextCode;
+      }
+    }
 
-    // Wait for Vue to update the UI (including CTA button text)
-    nextTick(() => {
-      notifySuccess("common.success.languageSaved", t("languageSaved") || "Language saved successfully", { position: "top", timeout: 2000 });
+    await applyUiLocale(nextCode, locale);
 
-      // Navigate back after a short delay to allow user to see the updated CTA text
-      setTimeout(() => {
-        handleBack();
-      }, 1000);
-    });
+    await nextTick();
+    notifySuccess(
+      "common.success.languageSaved",
+      t("languageSaved") || "Language saved successfully",
+      { position: "top", timeout: 2000 }
+    );
+    setTimeout(() => {
+      handleBack();
+    }, 1000);
+  } catch (error) {
+    // Keep UI/localStorage on the previous language when API save fails.
+    selectedLanguageCode.value = previousStored;
+    pendingLanguageCode.value = previousStored;
+    notifyError(mapAxiosErrorToDhError(error));
+  } finally {
+    saving.value = false;
   }
 };
 

@@ -44,6 +44,8 @@ const props = defineProps<{
   description: string;
   ctaLabel: string;
   icon?: string;
+  /** Non-translatable icon file key; falls back to stylizedText (legacy callers). */
+  iconKey?: string;
 }>();
 
 const emit = defineEmits<{
@@ -61,7 +63,7 @@ const displayTitle = computed(() => (props.title || "").toLowerCase());
 // Map stylizedText to SVG icon path
 const iconPath = computed(() => {
   const basePath = "/icons/CategoryIcons/";
-  const text = props.stylizedText.toLowerCase();
+  const text = (props.iconKey || props.stylizedText).toLowerCase();
 
   // Map text to icon file names
   const iconMap: Record<string, string> = {

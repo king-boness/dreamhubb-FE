@@ -83,7 +83,7 @@ const headerImage = computed(() => {
 });
 
 const authorName = computed(() => {
-  return normalizedPost.value.author_name || "Unknown User";
+  return normalizedPost.value.author_name || t("feed.unknownUser");
 });
 
 const authorPicture = computed(() => {

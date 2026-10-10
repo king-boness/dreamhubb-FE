@@ -8,6 +8,7 @@ import {
 } from "src/services/inspirationsFeedSource";
 import { useAuthStore } from "src/stores/auth";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 const DEFAULT_AVATAR = "/images/Auth/profilePicture.jpeg";
 
@@ -42,7 +43,9 @@ export const useInspirationsFeedStore = defineStore("inspirationsFeed", {
         this.myStory = payload.myStory;
         this.stories = payload.stories;
       } catch (e) {
-        this.error = mapAxiosErrorToDhError(e).fallbackMessage || "Failed to load inspirations.";
+        this.error =
+          mapAxiosErrorToDhError(e).fallbackMessage ||
+          tGlobal("feed.failedLoadInspirations", "Failed to load inspirations.");
       } finally {
         this.loading = false;
       }

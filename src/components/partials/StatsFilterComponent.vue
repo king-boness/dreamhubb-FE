@@ -9,7 +9,7 @@
       v-model="tab"
       active-class="activeTab"
     >
-      <q-tab name="funds" label="Funds" style="" class="statsTab"
+      <q-tab name="funds" :label="fundsLabel" style="" class="statsTab"
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -25,7 +25,7 @@
           /></svg
       ></q-tab>
 
-      <q-tab name="stats" label="Stats" style="" class="statsTab"
+      <q-tab name="stats" :label="statsLabel" style="" class="statsTab"
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           width="15"
@@ -39,7 +39,7 @@
           /></svg
       ></q-tab>
 
-      <q-tab name="earn" label="Earn" style="" class="statsTab"
+      <q-tab name="earn" :label="earnLabel" style="" class="statsTab"
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -74,10 +74,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import StatsPage from "src/pages/DonorPages/StatsPage.vue";
 import EarnPage from "src/pages/DonorPages/EarnPage.vue";
 import TokenShopPage from "src/pages/DonorPages/TokenShopPage.vue";
+
+const { t } = useI18n();
+const fundsLabel = computed(() => t("funds"));
+const statsLabel = computed(() => t("stats"));
+const earnLabel = computed(() => t("earn"));
 
 const tab = ref("funds");
 const statsPageRef = ref<InstanceType<typeof StatsPage> | null>(null);

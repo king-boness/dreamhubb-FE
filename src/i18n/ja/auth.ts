@@ -23,7 +23,7 @@ export default {
   aboutApp: "\u30a2\u30d7\u30ea\u306b\u3064\u3044\u3066",
   banList: "\u30d0\u30f3\u30ea\u30b9\u30c8",
   comingSoon: "\u3059\u3050\u306b\u5165\u308a\u307e\u3059",
-  notifications: "\u901a\u77e5",
+  notificationsLabel: "\u901a\u77e5",
   sources: "\u30bd\u30fc\u30b9",
   screenMode: "\u30b9\u30af\u30ea\u30fc\u30f3\u30e2\u30fc\u30c9",
   appearance: "\u5916\u89b3",

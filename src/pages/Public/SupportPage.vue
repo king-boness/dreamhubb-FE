@@ -1,48 +1,42 @@
 <template>
   <LegalPageShell>
-    <h1>Help &amp; Support</h1>
-    <p class="legal-page__updated">dreamhubb user support</p>
+    <h1>{{ t("legal.support.title") }}</h1>
+    <p class="legal-page__updated">{{ t("legal.support.subtitle") }}</p>
 
     <section>
-      <h2>Contact us</h2>
+      <h2>{{ t("legal.support.contactTitle") }}</h2>
       <p>
-        For account help, reporting inappropriate content, blocking abusive users, or App Store review
-        questions, contact:
+        {{ t("legal.support.contactIntro") }}
         <a href="mailto:matej.kostun@gmail.com">matej.kostun@gmail.com</a>
       </p>
-      <p>We aim to review safety reports within 24 hours on business days.</p>
+      <p>{{ t("legal.support.contactSla") }}</p>
     </section>
 
     <section>
-      <h2>Report objectionable content</h2>
-      <p>
-        Open any post in the app, scroll to the bottom of the post detail screen, and tap
-        <strong>Report a post</strong>. Choose a reason and submit details.
-      </p>
+      <h2>{{ t("legal.support.reportTitle") }}</h2>
+      <p>{{ t("legal.support.reportBody") }}</p>
     </section>
 
     <section>
-      <h2>Block abusive users</h2>
-      <p>
-        On a post detail screen or a user profile, tap <strong>Block user</strong>. Blocked users are
-        removed from your feed immediately and cannot interact with you through the app.
-      </p>
-      <p>
-        Manage blocked accounts in the app under Settings → Blocked users.
-      </p>
+      <h2>{{ t("legal.support.blockTitle") }}</h2>
+      <p>{{ t("legal.support.blockBody") }}</p>
+      <p>{{ t("legal.support.blockManage") }}</p>
     </section>
 
     <section>
-      <h2>Policies</h2>
+      <h2>{{ t("legal.support.policiesTitle") }}</h2>
       <p>
-        <router-link :to="{ name: 'terms-of-use' }">Terms of Use</router-link>
+        <router-link :to="{ name: 'terms-of-use' }">{{ t("legal.support.termsLink") }}</router-link>
         ·
-        <router-link :to="{ name: 'privacy-policy' }">Privacy Policy</router-link>
+        <router-link :to="{ name: 'privacy-policy' }">{{ t("legal.support.privacyLink") }}</router-link>
       </p>
     </section>
   </LegalPageShell>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import LegalPageShell from "src/components/Public/LegalPageShell.vue";
+
+const { t } = useI18n();
 </script>

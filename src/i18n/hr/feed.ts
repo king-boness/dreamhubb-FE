@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Dodaj ključne riječi",
+    applyFilters: "Primijeni filtre",
+    chooseCountry: "Odaberi svoju zemlju",
+    clearFilters: "Očisti filtre",
+    failedLoadInspirations: "Učitavanje inspiracija nije uspjelo.",
+    filterAlsoCategory: "promijeni i kategoriju",
+    filterAlsoPlace: "promijeni i mjesto",
+    filterSearchCta: "traži",
+    filterStepCategory: "promijeni kategoriju",
+    filterStepPlace: "odaberi mjesto",
+    filterStepPosts: "promijeni objave",
+    firstPostHint: "Stvori svoj prvi san, problem ili ideju i podijeli ih sa svijetom.",
+    firstPostTitle: "Započni svoje putovanje!",
+    myDreamsTitle: "Moji snovi",
+    noResults: "Nema rezultata",
+    postImageAlt: "Slika objave",
+    postType: {
+      dream: "san",
+      idea: "ideja",
+      problem: "problem"
+    },
+    quote1: "„Ako ne sanjaš, nećeš umrijeti, ali bez snova nećeš ni biti istinski živ.”",
+    quote2: "„Probleme ne možemo rješavati istim načinom razmišljanja kojim smo ih stvorili.”",
+    quote3: "„Uči kao da ćeš živjeti vječno, živi kao da ćeš sutra umrijeti.”",
+    quote4: "„Nikad nisam sanjao o uspjehu. Radio sam za njega.”",
+    quoteOfTheDay: "Citat dana",
+    resultsCount: "Nema rezultata | {n} rezultat | {n} rezultata | {n} rezultata",
+    searchEmpty: "Nijedna objava ne odgovara tvojoj pretrazi.",
+    searchEmptyMine: "Nijedan san ne odgovara tvojoj pretrazi.",
+    searchEmptyMineNone: "Još nema snova.",
+    searchHint: "Unesi ključnu riječ za pretragu objava.",
+    searchMyDreams: "Pretraži moje snove",
+    searchPlaceholder: "Pretraži bilo što",
+    sortNewest: "Najnovije",
+    sortOldest: "Najstarije",
+    unknownUser: "Nepoznati korisnik",
+    untitled: "Bez naslova",
+    userBadge: "Korisnik"
+  }
+};

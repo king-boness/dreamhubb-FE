@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Kulcsszavak hozzáadása",
+    applyFilters: "Szűrők alkalmazása",
+    chooseCountry: "Válaszd ki az országodat",
+    clearFilters: "Szűrők törlése",
+    failedLoadInspirations: "Az inspirációk betöltése nem sikerült.",
+    filterAlsoCategory: "kategória váltása is",
+    filterAlsoPlace: "hely módosítása is",
+    filterSearchCta: "keresés",
+    filterStepCategory: "kategória váltása",
+    filterStepPlace: "válassz helyet",
+    filterStepPosts: "bejegyzések váltása",
+    firstPostHint: "Hozd létre az első álmodat, problémádat vagy ötletedet, és oszd meg a világgal.",
+    firstPostTitle: "Kezdd el az utazásodat!",
+    myDreamsTitle: "Álmaim",
+    noResults: "Nincs találat",
+    postImageAlt: "Bejegyzés képe",
+    postType: {
+      dream: "álom",
+      idea: "ötlet",
+      problem: "probléma"
+    },
+    quote1: "„Ha nem álmodsz, nem halsz meg, de álmok nélkül élni sem fogsz.”",
+    quote2: "„A problémákat nem oldhatjuk meg ugyanazzal a gondolkodásmóddal, amellyel létrehoztuk őket.”",
+    quote3: "„Tanulj úgy, mintha örökké élnél; élj úgy, mintha holnap meghalnál.”",
+    quote4: "„Soha nem álmodtam a sikerről. Dolgoztam érte.”",
+    quoteOfTheDay: "A nap idézete",
+    resultsCount: "Nincs találat | {n} találat | {n} találat",
+    searchEmpty: "Egyetlen bejegyzés sem felel meg a keresésnek.",
+    searchEmptyMine: "Egyetlen álmod sem felel meg a keresésnek.",
+    searchEmptyMineNone: "Még nincsenek álmaid.",
+    searchHint: "Adj meg egy kulcsszót a bejegyzések kereséséhez.",
+    searchMyDreams: "Álmaim keresése",
+    searchPlaceholder: "Keress bármire",
+    sortNewest: "Legújabb",
+    sortOldest: "Legrégebbi",
+    unknownUser: "Ismeretlen felhasználó",
+    untitled: "Cím nélkül",
+    userBadge: "Felhasználó"
+  }
+};

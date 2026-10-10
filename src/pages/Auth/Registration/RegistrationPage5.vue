@@ -42,7 +42,7 @@
             borderless
             dark
             v-model="data.username"
-            label="Username"
+            :label="$t('username')"
             class="registerDatas"
           ></q-input>
           <q-input
@@ -51,10 +51,10 @@
             v-model="data.birthDate"
             type="date"
             :rules="[
-              () => validateDate(data.birthDate) || 'Must be a valid date.'
+              () => validateDate(data.birthDate) || $t('onboarding.validation.validDate')
             ]"
             class="registerDatas"
-            label="Date of birth"
+            :label="$t('dateOfBirth')"
           />
           <q-select
             borderless
@@ -62,7 +62,7 @@
             class="registerDatas"
             v-model="data.gender"
             :options="[$t('male'), $t('female'), $t('preferNotToSay')]"
-            label="Gender"
+            :label="$t('gender')"
             behavior="menu"
           />
           <q-input
@@ -70,7 +70,7 @@
             dark
             hide-bottom-space
             v-model="data.email"
-            :rules="[(val) => validateEmail(val) || 'Must be a valid email.']"
+            :rules="[(val) => validateEmail(val) || $t('onboarding.validation.validEmail')]"
             :label="$t('emailAddress')"
             class="registerDatas"
             style="margin-top: 1.5rem !important"
@@ -83,11 +83,11 @@
             :rules="[
               (val) =>
                 (val && val.length >= 8) ||
-                'Password must be at least 8 characters.'
+                $t('passwordMin8')
             ]"
             bottom-slots
             v-model="data.password"
-            label="Password"
+            :label="$t('password')"
             class="registerDatas"
           >
             <!-- <template v-slot:hint> Field hint </template> -->
@@ -108,9 +108,9 @@
             :type="!isPwdConfirm ? 'password' : 'text'"
             bottom-slots
             v-model="data.passwordConfirm"
-            label="Repeat Password"
+            :label="$t('repeatPassword')"
             :rules="[
-              (val) => (val && val === data.password) || 'Must match password.'
+              (val) => (val && val === data.password) || $t('passwordsMustMatch')
             ]"
             class="registerDatas"
             style="margin-bottom: 2rem !important"

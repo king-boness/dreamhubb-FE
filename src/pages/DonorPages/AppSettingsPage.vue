@@ -214,7 +214,7 @@
       >
         <div class="appSetting-description">
           <img src="/icons/deleteImg-icon.svg" alt="" class="appSettings-img" />
-          <span class="appSettings-name">Delete Account</span>
+          <span class="appSettings-name">{{ t("settingsPages.deleteAccount.title") }}</span>
         </div>
         <q-btn class="arrowBtn"
           ><svg
@@ -253,12 +253,11 @@
   >
     <q-card class="appSettings-deleteDialog">
       <q-card-section>
-        <div class="appSettings-deleteDialog-title">Delete Account</div>
+        <div class="appSettings-deleteDialog-title">{{ t("settingsPages.deleteAccount.title") }}</div>
       </q-card-section>
       <q-card-section class="q-pt-none">
         <p class="appSettings-deleteDialog-body">
-          This action permanently deletes your account and hides your posts. To
-          continue, type:
+          {{ t("settingsPages.deleteAccount.body") }}
         </p>
         <p class="appSettings-deleteDialog-phrase">
           &quot;{{ requiredDeletePhrase }}&quot;
@@ -271,21 +270,21 @@
           outlined
           dense
           :dark="!lightMode"
-          aria-label="Confirm account deletion"
+          :aria-label="t('settingsPages.deleteAccount.inputAria')"
         />
       </q-card-section>
       <q-card-actions align="right" class="appSettings-deleteDialog-actions">
         <q-btn
           flat
           no-caps
-          label="Cancel"
+          :label="t('cancel')"
           class="appSettings-deleteDialog-cancel"
           @click="closeDeleteAccountDialog"
         />
         <q-btn
           flat
           no-caps
-          label="Delete Account"
+          :label="t('settingsPages.deleteAccount.title')"
           class="appSettings-deleteDialog-confirm"
           :disable="!isDeleteConfirmValid"
           :loading="deleteAccountLoading"
@@ -498,7 +497,7 @@ const deleteAccountUsername = computed(
 );
 
 const requiredDeletePhrase = computed(
-  () => `I want to delete my account: ${deleteAccountUsername.value}`
+  () => t("settingsPages.deleteAccount.phrase", { username: deleteAccountUsername.value })
 );
 
 const isDeleteConfirmValid = computed(
@@ -527,7 +526,7 @@ const submitDeleteAccount = async () => {
   try {
     await auth.deleteAccount();
     closeDeleteAccountDialog();
-    notifySuccess("common.success.saved", "Your account has been deleted.", {
+    notifySuccess("settingsPages.deleteAccount.deleted", "Your account has been deleted.", {
       position: "top"
     });
     router.push({ name: "auth-welcome-page" });

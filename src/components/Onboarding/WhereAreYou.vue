@@ -15,7 +15,7 @@
 
         <!-- World map illustration -->
         <div class="location-map">
-          <img src="/images/Auth/map-image.svg" alt="World Map" />
+          <img src="/images/Auth/map-image.svg" :alt="t('worldMap')" />
         </div>
 
         <!-- Dropdowns -->
@@ -23,7 +23,7 @@
           <q-select
             v-model="localContinent"
             :options="continentOptions"
-            label="Choose your continent"
+            :label="t('chooseContinent')"
             :dark="!isEmbedMode"
             outlined
             class="location-select"
@@ -37,7 +37,7 @@
           <q-select
             v-model="localCountry"
             :options="countryOptions"
-            label="Choose your country"
+            :label="t('chooseCountry')"
             :dark="!isEmbedMode"
             outlined
             class="location-select"
@@ -54,7 +54,7 @@
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
-                  No results
+                  {{ t("noResults") }}
                 </q-item-section>
               </q-item>
             </template>
@@ -65,7 +65,7 @@
             v-model="cityModel"
             :options="filteredCityOptions"
             option-label="label"
-            label="Choose your city"
+            :label="t('chooseCity')"
             :dark="!isEmbedMode"
             outlined
             class="location-select"
@@ -104,7 +104,7 @@
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
-                  No results
+                  {{ t("noResults") }}
                 </q-item-section>
               </q-item>
             </template>
@@ -120,7 +120,7 @@
             map-options
             :display-value="localCity ? cityDisplayValue : undefined"
             :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
-            label="Choose your city"
+            :label="t('chooseCity')"
             :dark="!isEmbedMode"
             outlined
             class="location-select"
@@ -158,7 +158,7 @@
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
-                  No results
+                  {{ t("noResults") }}
                 </q-item-section>
               </q-item>
             </template>
@@ -170,7 +170,7 @@
       <div class="location-content">
         <!-- World map illustration -->
       <div class="location-map">
-        <img src="/images/Auth/map-image.svg" alt="World Map" />
+        <img src="/images/Auth/map-image.svg" :alt="t('worldMap')" />
       </div>
 
       <!-- Dropdowns -->
@@ -178,7 +178,7 @@
         <q-select
           v-model="localContinent"
           :options="continentOptions"
-          label="Choose your continent"
+          :label="t('chooseContinent')"
           :dark="!isEmbedMode"
           outlined
           class="location-select"
@@ -190,7 +190,7 @@
         <q-select
           v-model="localCountry"
           :options="countryOptions"
-          label="Choose your country"
+          :label="t('chooseCountry')"
           :dark="!isEmbedMode"
           outlined
           class="location-select"
@@ -205,7 +205,7 @@
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
-                No results
+                {{ t("noResults") }}
               </q-item-section>
             </q-item>
           </template>
@@ -216,7 +216,7 @@
           v-model="cityModel"
           :options="filteredCityOptions"
           option-label="label"
-          label="Choose your city"
+          :label="t('chooseCity')"
           :dark="!isEmbedMode"
           outlined
           class="location-select"
@@ -253,7 +253,7 @@
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
-                No results
+                {{ t("noResults") }}
               </q-item-section>
             </q-item>
           </template>
@@ -269,7 +269,7 @@
           map-options
           :display-value="localCity ? cityDisplayValue : undefined"
           :loading="!!(emitCityId && localCountry && cityOptionsLoading)"
-          label="Choose your city"
+          :label="t('chooseCity')"
           :dark="!isEmbedMode"
           outlined
           class="location-select"
@@ -305,7 +305,7 @@
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
-                No results
+                {{ t("noResults") }}
               </q-item-section>
             </q-item>
           </template>
@@ -318,15 +318,23 @@
       <div class="location-terms-row">
         <q-checkbox v-model="localAcceptedTerms" dark dense class="location-terms-checkbox" />
         <span class="location-terms-label">
-          I agree to the
-          <router-link :to="{ name: 'terms-of-use' }" @click.stop>Terms of Use</router-link>
-          and
-          <router-link :to="{ name: 'privacy-policy' }" @click.stop>Privacy Policy</router-link>.
+          <i18n-t keypath="termsAgree" scope="global" tag="span">
+            <template #terms>
+              <router-link :to="{ name: 'terms-of-use' }" @click.stop>{{ t("termsOfUseLink") }}</router-link>
+            </template>
+            <template #privacy>
+              <router-link :to="{ name: 'privacy-policy' }" @click.stop>{{ t("privacyPolicyLink") }}</router-link>
+            </template>
+          </i18n-t>
         </span>
       </div>
       <p v-if="termsError" class="location-termsError auth-fieldError" role="alert">{{ termsError }}</p>
       <p class="location-zeroTolerance">
-        dreamhubb has <strong>zero tolerance</strong> for objectionable content and abusive users.
+        <i18n-t keypath="zeroToleranceNotice" scope="global" tag="span">
+          <template #zeroTolerance>
+            <strong>{{ t("zeroTolerance") }}</strong>
+          </template>
+        </i18n-t>
       </p>
     </div>
 
@@ -351,16 +359,16 @@
     >
       <q-card class="geolocation-dialog">
         <q-card-section>
-          <div class="text-h6">Enable Location Services</div>
+          <div class="text-h6">{{ t("onboarding.location.dialogTitle") }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <p>Would you like to automatically fill in your location based on your current position?</p>
+          <p>{{ t("onboarding.location.dialogBody") }}</p>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="No, thanks" color="primary" @click="handleGeolocationDeny" />
-          <q-btn flat label="Allow" color="primary" @click="handleGeolocationAllow" />
+          <q-btn flat :label="t('onboarding.location.noThanks')" color="primary" @click="handleGeolocationDeny" />
+          <q-btn flat :label="t('onboarding.location.allow')" color="primary" @click="handleGeolocationAllow" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -369,12 +377,15 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, withDefaults, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { api } from "boot/axios";
 import { continents, getCountriesByContinent, getAllCountries } from "src/data/countriesData";
 import { getCitiesByCountryCode, buildCityOptionsForCountry, CityOption, CityFromBackend } from "src/data/citiesData";
 import { useGeolocation } from "src/composables/useGeolocation";
 import { useAuthStore } from "src/stores/auth";
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
   continent?: string;
@@ -479,8 +490,8 @@ const progressWidth = computed(() => {
   return `${props.progress ?? 80}%`;
 });
 
-const title = computed(() => props.title ?? "you live in");
-const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
+const title = computed(() => props.title ?? t("onboarding.youLiveIn"));
+const nextButtonLabel = computed(() => props.nextButtonLabel ?? t("nextStep"));
 const enableGeolocation = computed(() => props.enableGeolocation ?? true);
 
 // Geolocation
@@ -515,15 +526,15 @@ const cityIsValid = computed(() => {
 });
 
 const continentError = computed(() =>
-  triedSubmit.value && !String(localContinent.value || "").trim() ? "Continent is required." : ""
+  triedSubmit.value && !String(localContinent.value || "").trim() ? t("onboarding.validation.continentRequired") : ""
 );
 const countryError = computed(() =>
-  triedSubmit.value && !String(localCountry.value || "").trim() ? "Country is required." : ""
+  triedSubmit.value && !String(localCountry.value || "").trim() ? t("onboarding.validation.countryRequired") : ""
 );
-const cityError = computed(() => (triedSubmit.value && !cityIsValid.value ? "City is required." : ""));
+const cityError = computed(() => (triedSubmit.value && !cityIsValid.value ? t("onboarding.validation.cityRequired") : ""));
 const termsError = computed(() =>
   props.requireTermsAcceptance && triedSubmit.value && !localAcceptedTerms.value
-    ? "You must accept the Terms of Use and Privacy Policy to continue."
+    ? t("onboarding.validation.termsRequired")
     : ""
 );
 
@@ -584,7 +595,7 @@ const cityDisplayValue = computed(() => {
 
   // Value mode: Ensure we never show raw ID (e.g., "6") while options are loading.
   if (!localCity.value) return "";
-  return cityLabel.value || "Choose your city";
+  return cityLabel.value || t("chooseCity");
 });
 
 // Get country code from country name
@@ -882,13 +893,13 @@ const handleGeolocationAllow = async () => {
         }
       }
 
-      notifySuccess("common.success.locationAutoFilled", "Location filled automatically. You can still edit it if needed.", { position: "top" });
+      notifySuccess("common.info.locationAutoFilled", "Location filled automatically. You can still edit it if needed.", { position: "top" });
     }
   } catch (error) {
     notifyError({
       kind: "server",
       messageKey: "common.errors.server",
-      fallbackMessage: "Failed to get your location. Please select manually.",
+      fallbackMessage: t("onboarding.location.fetchFailed"),
       retryable: true
     }, { position: "top" });
   }

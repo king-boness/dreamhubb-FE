@@ -170,10 +170,7 @@ watch(showPurchaseSheet, (open) => {
 function openPurchaseSheet(pkg: TokenPackage) {
   if (storePurchaseBlocked.value) return;
   if (applePluginUnavailable.value) {
-    notifyNegative(
-      "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
-      { timeout: 5000 }
-    );
+    notifyNegative(t("common.tokenShop.iosPaymentsUnavailable"), { timeout: 5000 });
     return;
   }
   selectedPackage.value = pkg;
@@ -228,7 +225,7 @@ async function onWebContinue(pkg: TokenPackage, method: WebPaymentMethodId) {
     console.debug("[token-shop] onWebContinue: result", result);
   }
   if (result.status === "coming_soon") {
-    notifyNegative("This payment method is not available yet.", { timeout: 4000 });
+    notifyNegative(t("common.tokenShop.paymentMethodUnavailable"), { timeout: 4000 });
   } else if (result.status === "stripe_ready" || result.status === "paypal_ready") {
     showPurchaseSheet.value = false;
     if (result.checkoutUrl) {
@@ -241,10 +238,14 @@ async function onWebContinue(pkg: TokenPackage, method: WebPaymentMethodId) {
       }
       window.location.href = result.checkoutUrl;
     } else {
-      notifySuccess("common.success.checkoutPrepared", "Checkout prepared. Payment will open shortly.", { timeout: 3000 });
+      notifySuccess(
+        "common.success.checkoutPrepared",
+        t("common.success.checkoutPrepared"),
+        { timeout: 3000 }
+      );
     }
   } else if (result.status === "failed") {
-    notifyNegative(result.errorMessage ?? "Something went wrong. Please try again.", { timeout: 4000 });
+    notifyNegative(result.errorMessage ?? t("common.errors.server"), { timeout: 4000 });
   }
 }
 
@@ -252,10 +253,7 @@ async function onStorePurchase(pkg: TokenPackage) {
   if (storePurchaseBlocked.value) return;
   if (purchaseProvider.value === "apple_iap") {
     if (applePluginUnavailable.value) {
-      notifyNegative(
-        "iOS payments are not available in this build yet. Rebuild iOS after cap sync/pod install.",
-        { timeout: 5000 }
-      );
+      notifyNegative(t("common.tokenShop.iosPaymentsUnavailable"), { timeout: 5000 });
       return;
     }
     isStorePurchaseInProgress.value = true;
@@ -268,13 +266,16 @@ async function onStorePurchase(pkg: TokenPackage) {
         }
         notifySuccess(
           "common.success.purchaseComplete",
-          "Purchase complete. Your tokens have been added.",
+          t("common.success.purchaseComplete"),
           {}
         );
       } else if (result.status === "cancelled") {
         showPurchaseSheet.value = false;
       } else if (result.status === "failed" || result.status === "unavailable") {
-        notifyNegative(result.errorMessage ?? "Purchase failed. Please try again.", { timeout: 4000 });
+        notifyNegative(
+          result.errorMessage ?? t("common.errors.purchaseFailed"),
+          { timeout: 4000 }
+        );
       }
     } finally {
       isStorePurchaseInProgress.value = false;
@@ -290,13 +291,16 @@ async function onStorePurchase(pkg: TokenPackage) {
         }
         notifySuccess(
           "common.success.purchaseComplete",
-          "Purchase complete. Your tokens have been added.",
+          t("common.success.purchaseComplete"),
           {}
         );
       } else if (result.status === "cancelled") {
         showPurchaseSheet.value = false;
       } else if (result.status === "failed" || result.status === "unavailable") {
-        notifyNegative(result.errorMessage ?? "Purchase failed. Please try again.", { timeout: 4000 });
+        notifyNegative(
+          result.errorMessage ?? t("common.errors.purchaseFailed"),
+          { timeout: 4000 }
+        );
       }
     } finally {
       isStorePurchaseInProgress.value = false;

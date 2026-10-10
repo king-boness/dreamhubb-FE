@@ -6,8 +6,8 @@
       class="postPage-firstPostHint"
     >
       <HintBubble
-        title="Start your journey!"
-        text="Create your first dream, problem or idea and share it with the world."
+        :title="firstPostTitle"
+        :text="firstPostHint"
         arrow="down"
         :show-close="true"
         @close="dismissFirstPostHint"
@@ -176,32 +176,38 @@ const postsStore = usePostsStore();
 const slide = ref("1");
 const navPos = ref<"top" | "right" | "bottom" | "left" | undefined>("top");
 
-const carousels = ref([
-  {
-    value: "1",
-    title: "Quote of the day",
-    text: "“If you don't dream, you won't die, but even you won't be alive without them.”",
-    img: "/icons/carousel-bg.svg"
-  },
-  {
-    value: "2",
-    title: "Quote of the day",
-    text: "“We cannot solve problems with the kind of thinking we employed when we came up with them.”",
-    img: "/icons/carousel-bg.svg"
-  },
-  {
-    value: "3",
-    title: "Quote of the day",
-    text: "“Learn as if you will live forever, live like you will die tomorrow.”",
-    img: "/icons/carousel-bg.svg"
-  },
-  {
-    value: "4",
-    title: "Quote of the day",
-    text: "“I never dreamed about success. I worked for it.”",
-    img: "/icons/carousel-bg.svg"
-  }
-] as CarouselPost[]);
+const firstPostTitle = computed(() => t("feed.firstPostTitle"));
+const firstPostHint = computed(() => t("feed.firstPostHint"));
+
+const carousels = computed(
+  () =>
+    [
+      {
+        value: "1",
+        title: t("feed.quoteOfTheDay"),
+        text: t("feed.quote1"),
+        img: "/icons/carousel-bg.svg"
+      },
+      {
+        value: "2",
+        title: t("feed.quoteOfTheDay"),
+        text: t("feed.quote2"),
+        img: "/icons/carousel-bg.svg"
+      },
+      {
+        value: "3",
+        title: t("feed.quoteOfTheDay"),
+        text: t("feed.quote3"),
+        img: "/icons/carousel-bg.svg"
+      },
+      {
+        value: "4",
+        title: t("feed.quoteOfTheDay"),
+        text: t("feed.quote4"),
+        img: "/icons/carousel-bg.svg"
+      }
+    ] as CarouselPost[]
+);
 
 type DoneePostsView = "ongoing" | "accomplished";
 const DONEE_POSTS_VIEW_LS_KEY = "donee_posts_view";
@@ -297,7 +303,7 @@ const mapPostToComponentFormat = (post: Record<string, unknown>, postType: "drea
 
   return {
     post_id: (post.post_id || null) as number | undefined,
-    goalName: (post.title || "Untitled") as string,
+    goalName: (post.title || t("feed.untitled")) as string,
     goalImage: getCategoryIcon((post.fe_category || post.category_name || null) as string | null),
     postType,
     karma: (post.tokens || 0) as number,
@@ -305,13 +311,13 @@ const mapPostToComponentFormat = (post: Record<string, unknown>, postType: "drea
     images: images.length > 0 ? images : null,
     description: (post.description || "") as string,
     user: {
-      userName: (post.author_name || "Unknown") as string,
+      userName: (post.author_name || t("common.unknown")) as string,
       userPicture: "",
       badge: "verified"
     },
     postInfo: {
       dateCreated: (post.date_created || "") as string,
-      location: getLocationLabel(post, locale.value as string) || "Unknown",
+      location: getLocationLabel(post, locale.value as string) || t("common.unknown"),
       viewed: (post.views || 0) as number
     }
   };

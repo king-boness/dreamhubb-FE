@@ -1,25 +1,26 @@
 <template>
   <LegalPageShell>
-    <h1>Terms of Use</h1>
-    <p class="legal-page__updated">Last updated: October 7, 2026</p>
+    <h1>{{ t("legal.terms.title") }}</h1>
+    <p class="legal-page__updated">{{ t("legal.lastUpdated", { date: lastUpdatedDisplay }) }}</p>
+    <p v-if="showEnglishOnlyNotice" class="legal-page__notice">{{ t("legal.englishOnlyNotice") }}</p>
 
-    <nav class="legal-page__anchors" aria-label="Terms sections">
-      <a href="#" @click.prevent="scrollToSection('overview')">Overview</a>
-      <a href="#" @click.prevent="scrollToSection('who-we-are')">Who We Are</a>
-      <a href="#" @click.prevent="scrollToSection('eligibility-and-accounts')">Accounts</a>
-      <a href="#" @click.prevent="scrollToSection('user-generated-content')">User Content</a>
-      <a href="#" @click.prevent="scrollToSection('acceptable-use')">Acceptable Use</a>
-      <a href="#" @click.prevent="scrollToSection('community-help')">Community Help</a>
-      <a href="#" @click.prevent="scrollToSection('virtual-tokens')">Tokens</a>
-      <a href="#" @click.prevent="scrollToSection('purchases-and-payments')">Purchases</a>
-      <a href="#" @click.prevent="scrollToSection('ai-assisted-translation')">AI Translation</a>
-      <a href="#" @click.prevent="scrollToSection('intellectual-property')">IP</a>
-      <a href="#" @click.prevent="scrollToSection('service-availability')">Service</a>
-      <a href="#" @click.prevent="scrollToSection('disclaimers-and-liability')">Liability</a>
-      <a href="#" @click.prevent="scrollToSection('privacy')">Privacy</a>
-      <a href="#" @click.prevent="scrollToSection('governing-law')">Governing Law</a>
-      <a href="#" @click.prevent="scrollToSection('changes')">Changes</a>
-      <a href="#" @click.prevent="scrollToSection('contact')">Contact</a>
+    <nav class="legal-page__anchors" :aria-label="t('legal.terms.navAria')">
+      <a href="#" @click.prevent="scrollToSection('overview')">{{ t("legal.terms.anchors.overview") }}</a>
+      <a href="#" @click.prevent="scrollToSection('who-we-are')">{{ t("legal.terms.anchors.whoWeAre") }}</a>
+      <a href="#" @click.prevent="scrollToSection('eligibility-and-accounts')">{{ t("legal.terms.anchors.accounts") }}</a>
+      <a href="#" @click.prevent="scrollToSection('user-generated-content')">{{ t("legal.terms.anchors.userContent") }}</a>
+      <a href="#" @click.prevent="scrollToSection('acceptable-use')">{{ t("legal.terms.anchors.acceptableUse") }}</a>
+      <a href="#" @click.prevent="scrollToSection('community-help')">{{ t("legal.terms.anchors.communityHelp") }}</a>
+      <a href="#" @click.prevent="scrollToSection('virtual-tokens')">{{ t("legal.terms.anchors.tokens") }}</a>
+      <a href="#" @click.prevent="scrollToSection('purchases-and-payments')">{{ t("legal.terms.anchors.purchases") }}</a>
+      <a href="#" @click.prevent="scrollToSection('ai-assisted-translation')">{{ t("legal.terms.anchors.aiTranslation") }}</a>
+      <a href="#" @click.prevent="scrollToSection('intellectual-property')">{{ t("legal.terms.anchors.ip") }}</a>
+      <a href="#" @click.prevent="scrollToSection('service-availability')">{{ t("legal.terms.anchors.service") }}</a>
+      <a href="#" @click.prevent="scrollToSection('disclaimers-and-liability')">{{ t("legal.terms.anchors.liability") }}</a>
+      <a href="#" @click.prevent="scrollToSection('privacy')">{{ t("legal.terms.anchors.privacy") }}</a>
+      <a href="#" @click.prevent="scrollToSection('governing-law')">{{ t("legal.terms.anchors.governingLaw") }}</a>
+      <a href="#" @click.prevent="scrollToSection('changes')">{{ t("legal.terms.anchors.changes") }}</a>
+      <a href="#" @click.prevent="scrollToSection('contact')">{{ t("legal.terms.anchors.contact") }}</a>
     </nav>
 
     <section id="overview">
@@ -283,7 +284,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import LegalPageShell from "src/components/Public/LegalPageShell.vue";
+import {
+  hasApprovedSkLegalBody,
+  legalLastUpdatedDisplay
+} from "src/config/legalDocuments";
+
+const { t, locale } = useI18n();
+const lastUpdatedDisplay = legalLastUpdatedDisplay("terms");
+const showEnglishOnlyNotice = computed(() => {
+  if (hasApprovedSkLegalBody("terms")) return false;
+  const code = String(locale.value || "");
+  return code !== "en-US" && code !== "en-GB";
+});
 
 function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -309,7 +324,22 @@ ul {
   margin: 0;
 }
 
+.legal-page__notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 31, 116, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .body--light .legal-page__anchors a {
   color: #bd0043;
+}
+
+.body--light .legal-page__notice {
+  background: rgba(189, 0, 67, 0.08);
+  color: rgba(17, 18, 24, 0.85);
 }
 </style>

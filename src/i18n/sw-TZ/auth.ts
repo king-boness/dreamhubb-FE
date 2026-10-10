@@ -73,7 +73,7 @@ export default {
   logOut: "Toka",
   home: "Nyumbani",
   inspirations: "Maono",
-  notifications: "Arifa",
+  notificationsLabel: "Arifa",
   profile: "wasifu",
   settings: "Mipangilio",
   addPost: "Ongeza Chapisho",

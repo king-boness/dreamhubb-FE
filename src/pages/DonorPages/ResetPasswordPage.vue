@@ -2,8 +2,7 @@
   <div class="resetPasswordPage">
     <div class="resetPassword-header">
       <span class="resetPassword-heading"
-        >We sent you your reset code on Email Address
-        {{ maskEmail(profile.email) }}</span
+        >{{ t("settingsPages.password.resetCodeSent", { email: maskEmail(profile.email) }) }}</span
       >
       <q-input
         borderless
@@ -11,27 +10,29 @@
         hide-bottom-space
         bottom-slots
         v-model="resetCode"
-        label="Reset Code"
+        :label="t('settingsPages.password.resetCode')"
         class="registerDatas registerSecrete passwordPage-input"
       >
       </q-input>
-      <a href="#" class="resendLink">Resend code →</a>
+      <a href="#" class="resendLink">{{ t("settingsPages.password.resendCode") }}</a>
     </div>
     <div class="confirmButton-div">
       <q-btn class="confirmButton" @click="$router.go(-2)">
-        Confirm code
+        {{ t("settingsPages.password.confirmCode") }}
       </q-btn>
     </div>
     <div class="pageFooter-div">
-      <q-btn class="cancelButton" @click="$router.go(-2)"> Cancel </q-btn>
+      <q-btn class="cancelButton" @click="$router.go(-2)"> {{ t("cancel") }} </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { UserDatas } from "src/components/models";
 import { maskEmail } from "src/components/partials/FunctionsComponent.vue";
 
+const { t } = useI18n();
 const resetCode = ref("");
 const profile = ref({
   email: "perdochjakub@gmail.com"

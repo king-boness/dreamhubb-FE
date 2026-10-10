@@ -12,7 +12,7 @@ export default {
   appSettings: "Lietotnes iestatījumi",
   language: "Valoda",
   comingSoon: "Drīzumā",
-  notifications: "Paziņojumi",
+  notificationsLabel: "Paziņojumi",
   sources: "Avoti",
   screenMode: "Ekrāna režīms",
   appearance: "Izskats",

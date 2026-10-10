@@ -10,7 +10,7 @@
         v-model="tab"
         active-class="activeTab"
       >
-        <q-tab name="Help" label="Help" class="statsTab postFilter"
+        <q-tab name="Help" :label="t('posts.commentsTabHelp')" class="statsTab postFilter"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -23,7 +23,7 @@
               fill="#FCFCFC"
             /></svg
         ></q-tab>
-        <q-tab name="Contribution" label="Contribution" class="postFilter"
+        <q-tab name="Contribution" :label="t('posts.commentsTabContribution')" class="postFilter"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -57,9 +57,11 @@
 
 <script setup lang="ts">
 import { ref, defineProps, PropType } from "vue";
+import { useI18n } from "vue-i18n";
 import { UserProfile } from "src/components/models";
 import CommentComponent from "./CommentComponent.vue";
 
+const { t } = useI18n();
 const tab = ref("Help");
 
 defineProps({

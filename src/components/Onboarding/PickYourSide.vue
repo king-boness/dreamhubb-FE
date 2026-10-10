@@ -10,7 +10,7 @@
     </div>
 
     <div class="pick-content">
-      <h1 class="pick-title">choose your side</h1>
+      <h1 class="pick-title">{{ t("onboarding.chooseYourSideTitle") }}</h1>
 
       <div ref="carouselZoneRef" class="pick-carousel-zone">
         <div class="pick-carousel-wrapper">
@@ -42,7 +42,7 @@
                     <div class="pick-icon" :class="`pick-icon--${option.value}`">
                       <img
                         :src="`/icons/CategoryIcons/${option.value === 'donee' ? 'donees' : 'donors'}.svg`"
-                        :alt="option.value"
+                        :alt="t(`onboardingInfo.side.${option.value}.title`)"
                         class="pick-icon-img"
                       />
                     </div>
@@ -62,7 +62,7 @@
     </div>
 
     <div class="pick-bottom">
-      <p class="pick-instruction">choose by swiping up or down</p>
+      <p class="pick-instruction">{{ t("onboarding.swipeInstruction") }}</p>
       <div class="pick-nextBtn-slot" aria-hidden="true" />
     </div>
     <div class="pick-nextBtn-anchor">
@@ -72,7 +72,7 @@
         @click="handleNext"
         :disabled="!localValue"
       >
-        NEXT STEP
+        {{ t("nextStep") }}
       </button>
     </div>
 
@@ -83,6 +83,7 @@
       :description="infoModalDescription"
       :cta-label="infoModalCta"
       :icon="infoModalIcon"
+      :icon-key="infoModalIconKey"
       @cta="handleInfoCta"
     />
   </div>
@@ -91,6 +92,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Mousewheel } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
@@ -99,6 +101,7 @@ import InfoModal from "./InfoModal.vue";
 import { sideInfo } from "src/config/onboardingInfo";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: "donor" | "donee" | null;
@@ -154,11 +157,12 @@ const currentInfo = computed(() => {
   return sideInfo[key];
 });
 
-const infoModalTitle = computed(() => currentInfo.value?.title || "");
-const infoModalText = computed(() => currentInfo.value?.highlight || "");
-const infoModalDescription = computed(() => currentInfo.value?.description || "");
-const infoModalCta = computed(() => currentInfo.value?.ctaLabel || "");
+const infoModalTitle = computed(() => (currentInfo.value ? t(currentInfo.value.titleKey) : ""));
+const infoModalText = computed(() => (currentInfo.value ? t(currentInfo.value.highlightKey) : ""));
+const infoModalDescription = computed(() => (currentInfo.value ? t(currentInfo.value.descriptionKey) : ""));
+const infoModalCta = computed(() => (currentInfo.value ? t(currentInfo.value.ctaLabelKey) : ""));
 const infoModalIcon = computed(() => currentInfo.value?.icon || "");
+const infoModalIconKey = computed(() => currentInfo.value?.iconKey || "");
 
 const handleInfoClick = () => {
   showInfoModal.value = true;

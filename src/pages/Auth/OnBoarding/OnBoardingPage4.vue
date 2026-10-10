@@ -1,7 +1,7 @@
 <template>
   <div class="onBoarding-page4">
     <div class="onBoarding-body">
-      <span class="onBoarding-title">And now you are good to go!</span>
+      <span class="onBoarding-title">{{ $t("onboarding.tokens.page4Title") }}</span>
       <div class="onBoarding-infoContainer">
         <img
           src="/icons/onBoarding-img.svg"
@@ -9,10 +9,7 @@
           class="onBoarding-karmaIcon"
         />
         <div class="onBoarding-textContainer">
-          <span class="text">
-            Start fulfilling your own dreams or help someone else fulfill theirs
-            today with Tokens.
-          </span>
+          <span class="text">{{ $t("onboarding.tokens.page4Text") }}</span>
         </div>
       </div>
     </div>

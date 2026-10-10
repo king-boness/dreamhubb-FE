@@ -12,7 +12,7 @@ export default {
   appSettings: "Programos nustatymai",
   language: "Kalba",
   comingSoon: "Netrukus",
-  notifications: "Pranešimai",
+  notificationsLabel: "Pranešimai",
   sources: "Šaltiniai",
   screenMode: "Ekrano režimas",
   appearance: "Išvaizda",

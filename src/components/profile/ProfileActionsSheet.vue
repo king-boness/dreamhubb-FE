@@ -19,19 +19,19 @@
           @touchstart.passive="onTouchStart"
           @mousedown="onMouseDown"
         ></div>
-        <h2 class="profileActionsSheet-title">Profile Actions</h2>
+        <h2 class="profileActionsSheet-title">{{ sheetTitle }}</h2>
 
         <button class="profileActionsSheet-btn primary" @click="handleViewPhoto">
-          VIEW PROFILE PHOTO
+          {{ viewPhotoLabel }}
         </button>
         <button class="profileActionsSheet-btn secondary" @click="handleChangePhoto">
-          CHANGE PROFILE PHOTO
+          {{ changePhotoLabel }}
         </button>
         <button class="profileActionsSheet-btn tertiary" @click="handleSelectBadge">
-          SELECT BADGE
+          {{ selectBadgeLabel }}
         </button>
         <button class="profileActionsSheet-btn quaternary" @click="handleShareProfile">
-          SHARE PROFILE
+          {{ shareProfileLabel }}
         </button>
       </div>
     </div>
@@ -39,7 +39,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from "vue";
+import { computed, ref, watch, onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface Props {
   modelValue: boolean;
@@ -54,6 +55,13 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: false,
   user: null
 });
+
+const { t } = useI18n();
+const sheetTitle = computed(() => t("profileUi.profileActions"));
+const viewPhotoLabel = computed(() => t("profileUi.viewProfilePhoto"));
+const changePhotoLabel = computed(() => t("profileUi.changeProfilePhoto"));
+const selectBadgeLabel = computed(() => t("profileUi.selectBadge"));
+const shareProfileLabel = computed(() => t("profileUi.shareProfile"));
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{

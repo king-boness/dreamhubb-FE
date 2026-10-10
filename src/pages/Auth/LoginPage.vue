@@ -38,12 +38,12 @@
     <div class="LoginPage-rememberContainer">
       <q-checkbox
         v-model="remember"
-        label="Remember my account and keep me logged in"
+        :label="t('remember')"
         class="LoginPage-rememberInput"
       />
     </div>
     <q-btn
-      label="Sign In"
+      :label="t('signIn')"
       @click="onSubmit"
       color="primary"
       text-color="white"

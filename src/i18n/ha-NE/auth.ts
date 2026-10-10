@@ -73,7 +73,7 @@ export default {
   logOut: "Fita",
   home: "Gida",
   inspirations: "Ƙarfafawa",
-  notifications: "Sanarwar",
+  notificationsLabel: "Sanarwar",
   profile: "bayanin mutum",
   settings: "Saituna",
   addPost: "Ƙara Post",

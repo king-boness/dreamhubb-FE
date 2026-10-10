@@ -73,7 +73,7 @@ export default {
   logOut: "Đăng xuất",
   home: "Trang chủ",
   inspirations: "Cảm hứng",
-  notifications: "Thông báo",
+  notificationsLabel: "Thông báo",
   profile: "hồ sơ",
   settings: "Cài đặt",
   addPost: "Thêm bài viết",

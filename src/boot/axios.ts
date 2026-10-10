@@ -10,6 +10,7 @@ import {
   IS_NATIVE_RUNTIME,
   isLocalhostUrl
 } from "src/config/apiBase";
+import { resolveAcceptLanguageHeader } from "src/utils/apiLanguage";
 
 declare module "axios" {
   interface InternalAxiosRequestConfig {
@@ -239,6 +240,10 @@ const attachInterceptor = (instance: AxiosInstance) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // Prefer explicit app language over browser language for BE system texts.
+      // Resolved per request so Settings language changes apply immediately.
+      config.headers["Accept-Language"] = resolveAcceptLanguageHeader();
 
       const rel = String(config.url || "");
       const method = String(config.method || "get").toLowerCase();

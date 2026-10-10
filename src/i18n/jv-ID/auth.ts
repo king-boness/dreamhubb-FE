@@ -73,7 +73,7 @@ export default {
   logOut: "Log Out",
   home: "Omah",
   inspirations: "Inspirasi",
-  notifications: "Notifikasi",
+  notificationsLabel: "Notifikasi",
   profile: "profil",
   settings: "Setelan",
   addPost: "Tambah Post",

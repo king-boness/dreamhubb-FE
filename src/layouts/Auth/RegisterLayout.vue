@@ -39,7 +39,7 @@
         </div>
         <q-btn
           v-if="registrationIndex == 1 && horiz"
-          :label="'Pick ' + registrationInfo.side"
+          :label="t('onboarding.pickSide', { side: registrationSideLabel })"
           :disabled="nextDisabled"
           color="primary"
           class="button"
@@ -47,7 +47,7 @@
         />
         <q-btn
           v-if="registrationIndex !== 3 && !horiz"
-          label="NEXT STEP"
+          :label="t('nextStep')"
           :disabled="nextDisabled"
           color="primary"
           class="button"
@@ -55,7 +55,7 @@
         />
         <q-btn
           v-else-if="registrationIndex !== 1 && !horiz"
-          label="JOIN"
+          :label="t('join')"
           :disabled="nextDisabled || !acceptedTerms"
           color="primary"
           class="button"
@@ -64,10 +64,14 @@
         <div v-if="registrationIndex !== 1 && !horiz" class="registerLegal">
           <q-checkbox v-model="acceptedTerms" dark dense class="registerLegal-checkbox">
             <span class="registerLegal-label">
-              I agree to the
-              <router-link :to="{ name: 'terms-of-use' }" @click.stop>Terms of Use</router-link>
-              and
-              <router-link :to="{ name: 'privacy-policy' }" @click.stop>Privacy Policy</router-link>.
+              <i18n-t keypath="termsAgree" scope="global" tag="span">
+                <template #terms>
+                  <router-link :to="{ name: 'terms-of-use' }" @click.stop>{{ t("termsOfUseLink") }}</router-link>
+                </template>
+                <template #privacy>
+                  <router-link :to="{ name: 'privacy-policy' }" @click.stop>{{ t("privacyPolicyLink") }}</router-link>
+                </template>
+              </i18n-t>
             </span>
           </q-checkbox>
           <AuthLegalNotice />
@@ -77,7 +81,7 @@
   </q-layout>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, watch, onMounted } from "vue";
+import { computed, reactive, ref, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -112,6 +116,11 @@ const registrationInfo = reactive({
   password: "",
   passwordConfirm: "",
   image: new Blob()
+});
+const registrationSideLabel = computed(() => {
+  if (registrationInfo.side === "Donor") return t("onboarding.sideDonor");
+  if (registrationInfo.side === "Donee") return t("onboarding.sideDonee");
+  return registrationInfo.side;
 });
 const changeSide: (side: string) => void = (side: string) => {
   registrationInfo.side = side;

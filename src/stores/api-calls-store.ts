@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { api } from "boot/axios";
+import { tGlobal } from "src/utils/i18nGlobal";
 
 /* --------------------------------------------
    FE typ pre zjednodušený POST (Feed)
@@ -141,7 +142,7 @@ export const useApiCallStore = defineStore("apiCall", {
 
         return this.feedPosts;
       } catch (err) {
-        this.feedError = "Nepodarilo sa načítať feed.";
+        this.feedError = tGlobal("common.errors.feedLoad", "Unable to load feed.");
         throw err;
       } finally {
         this.feedLoading = false;

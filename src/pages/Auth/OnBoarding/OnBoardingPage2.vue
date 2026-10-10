@@ -1,7 +1,7 @@
 <template>
   <div class="onBoarding-page2">
     <div class="onBoarding-body">
-      <span class="onBoarding-title">What you can do with your tokens</span>
+      <span class="onBoarding-title">{{ t("onboarding.tokens.page2Title") }}</span>
       <div
         class="onBoarding-textContainer"
         v-for="(option, i) in options"
@@ -49,25 +49,17 @@
 }
 </style>
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { tokensOption } from "src/components/models";
 
-const options = ref([
-  {
-    img: "/icons/KarmaIcon.png",
-    text: "We connect dreamers with those"
-  },
-  {
-    img: "/icons/KarmaIcon.png",
-    text: "We connect dreamers with those"
-  },
-  {
-    img: "/icons/KarmaIcon.png",
-    text: "We connect dreamers with those"
-  },
-  {
-    img: "/icons/KarmaIcon.png",
-    text: "We connect dreamers with those"
-  }
-] as tokensOption[]);
+const { t } = useI18n();
+
+const options = computed(
+  () =>
+    Array.from({ length: 4 }, () => ({
+      img: "/icons/KarmaIcon.png",
+      text: t("onboarding.tokens.page2Option")
+    })) as tokensOption[]
+);
 </script>

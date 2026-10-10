@@ -43,7 +43,7 @@
                     <div class="goal-icon" :class="`goal-icon--${option.value}`">
                       <img
                         :src="`/icons/CategoryIcons/${option.value}.svg`"
-                        :alt="option.value"
+                        :alt="t(`onboardingInfo.goal.${option.value}.title`)"
                         class="goal-icon-img"
                       />
                     </div>
@@ -58,7 +58,7 @@
         </div>
 
         <p v-if="hideFooter" class="goal-instruction goal-instruction--inline">
-          choose by swiping up or down
+          {{ t("onboarding.swipeInstruction") }}
         </p>
       </div>
     </template>
@@ -93,7 +93,7 @@
                     <div class="goal-icon" :class="`goal-icon--${option.value}`">
                       <img
                         :src="`/icons/CategoryIcons/${option.value}.svg`"
-                        :alt="option.value"
+                        :alt="t(`onboardingInfo.goal.${option.value}.title`)"
                         class="goal-icon-img"
                       />
                     </div>
@@ -111,9 +111,9 @@
 
     <!-- Instruction + CTA: margin-top auto on .goal-bottom pins this above safe-area -->
     <div v-if="!hideFooter" class="goal-bottom">
-      <p class="goal-instruction">choose by swiping up or down</p>
+      <p class="goal-instruction">{{ t("onboarding.swipeInstruction") }}</p>
       <div class="goal-actions" v-if="showSearchButton">
-        <button class="goal-searchBtn" @click="handleSearch">SEARCH</button>
+        <button class="goal-searchBtn" @click="handleSearch">{{ t("search") }}</button>
         <button class="goal-nextBtn" @click="handleNext">{{ nextButtonLabel }}</button>
       </div>
       <button v-else class="goal-nextBtn goal-nextBtn-single" @click="handleNext">{{ nextButtonLabel }}</button>
@@ -127,6 +127,7 @@
       :description="infoModalDescription"
       :cta-label="infoModalCta"
       :icon="infoModalIcon"
+      :icon-key="infoModalIconKey"
       @cta="handleInfoCta"
     />
   </div>
@@ -134,6 +135,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Mousewheel } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
@@ -152,6 +154,8 @@ const props = defineProps<{
   centerOffsetY?: number; // Vertical shift of the whole roller block (px)
   rollerAxisOffsetY?: number; // Vertical shift of wheel axis only (px), keeps ? fixed
 }>();
+
+const { t } = useI18n();
 
 const POST_CREATION_CENTER_OFFSET_Y = -17;
 const POST_CREATION_ROLLER_AXIS_OFFSET_Y = -19;
@@ -173,8 +177,8 @@ const progressWidth = computed(() => {
   return `${props.progress ?? 40}%`;
 });
 
-const title = computed(() => props.title ?? "the post will be about");
-const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
+const title = computed(() => props.title ?? t("onboarding.postWillBeAbout"));
+const nextButtonLabel = computed(() => props.nextButtonLabel ?? t("nextStep"));
 const goalCarouselWrapperStyle = computed(() => ({
   transform: `translateY(${props.centerOffsetY ?? POST_CREATION_CENTER_OFFSET_Y}px)`
 }));
@@ -226,11 +230,12 @@ const currentInfo = computed(() => {
   return goalInfo[localValue.value] || goalInfo.dream;
 });
 
-const infoModalTitle = computed(() => currentInfo.value?.title || "");
-const infoModalText = computed(() => currentInfo.value?.highlight || "");
-const infoModalDescription = computed(() => currentInfo.value?.description || "");
-const infoModalCta = computed(() => currentInfo.value?.ctaLabel || "");
+const infoModalTitle = computed(() => (currentInfo.value ? t(currentInfo.value.titleKey) : ""));
+const infoModalText = computed(() => (currentInfo.value ? t(currentInfo.value.highlightKey) : ""));
+const infoModalDescription = computed(() => (currentInfo.value ? t(currentInfo.value.descriptionKey) : ""));
+const infoModalCta = computed(() => (currentInfo.value ? t(currentInfo.value.ctaLabelKey) : ""));
 const infoModalIcon = computed(() => currentInfo.value?.icon || "");
+const infoModalIconKey = computed(() => currentInfo.value?.iconKey || "");
 
 const handleInfoClick = () => {
   showInfoModal.value = true;

@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Добави ключови думи",
+    applyFilters: "Приложи филтрите",
+    chooseCountry: "Избери своята държава",
+    clearFilters: "Изчисти филтрите",
+    failedLoadInspirations: "Неуспешно зареждане на вдъхновенията.",
+    filterAlsoCategory: "смени и категорията",
+    filterAlsoPlace: "смени и мястото",
+    filterSearchCta: "търси",
+    filterStepCategory: "смени категорията",
+    filterStepPlace: "избери място",
+    filterStepPosts: "смени публикациите",
+    firstPostHint: "Създай първата си мечта, проблем или идея и я сподели със света.",
+    firstPostTitle: "Започни своето пътешествие!",
+    myDreamsTitle: "Моите мечти",
+    noResults: "Няма резултати",
+    postImageAlt: "Изображение към публикацията",
+    postType: {
+      dream: "мечта",
+      idea: "идея",
+      problem: "проблем"
+    },
+    quote1: "„Ако не мечтаеш, няма да умреш, но без мечти няма и да бъдеш истински жив.“",
+    quote2: "„Не можем да решаваме проблемите с онзи начин на мислене, с който сме ги създали.“",
+    quote3: "„Учи, сякаш ще живееш вечно, живей, сякаш ще умреш утре.“",
+    quote4: "„Никога не съм мечтал за успех. Работих за него.“",
+    quoteOfTheDay: "Цитат на деня",
+    resultsCount: "Няма резултати | {n} резултат | {n} резултата",
+    searchEmpty: "Няма публикации, които отговарят на търсенето ти.",
+    searchEmptyMine: "Няма мечти, които отговарят на търсенето ти.",
+    searchEmptyMineNone: "Все още няма мечти.",
+    searchHint: "Въведи ключова дума, за да потърсиш публикации.",
+    searchMyDreams: "Търси в моите мечти",
+    searchPlaceholder: "Търси каквото и да е",
+    sortNewest: "Най-нови",
+    sortOldest: "Най-стари",
+    unknownUser: "Неизвестен потребител",
+    untitled: "Без заглавие",
+    userBadge: "Потребител"
+  }
+};

@@ -23,7 +23,7 @@ export default {
   aboutApp: "Rakenduse kohta",
   banList: "Blokeerimisnimekiri",
   comingSoon: "Varsti tulemas",
-  notifications: "Teavitused",
+  notificationsLabel: "Teavitused",
   sources: "Allikad",
   screenMode: "Ekraanirežiim",
   appearance: "Välimus",

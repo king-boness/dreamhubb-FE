@@ -1,10 +1,10 @@
 <template>
   <div class="settingsPrivacy-page">
     <div class="settingsPrivacy-main">
-      <span class="settingsPrivacy-title">Privacy Settings</span>
+      <span class="settingsPrivacy-title">{{ t("privacySettings") }}</span>
       <div class="settingsPrivacy-options">
         <div class="settingsPrivacy-marketing settingsPrivacy">
-          <span class="marketingTitle Title">Receive Email Marketing</span>
+          <span class="marketingTitle Title">{{ t("settingsPages.privacy.receiveEmailMarketing") }}</span>
           <q-toggle
             size="lg"
             v-model="value"
@@ -15,7 +15,7 @@
           />
         </div>
         <div class="settingsPrivacy-tracking settingsPrivacy">
-          <span class="trackingTitle Title">Receive Email Marketing</span>
+          <span class="trackingTitle Title">{{ t("settingsPages.privacy.receiveEmailMarketingSecondary") }}</span>
           <q-toggle
             size="lg"
             v-model="value2"
@@ -26,7 +26,7 @@
           />
         </div>
         <div class="settingsPrivacy-tracking settingsPrivacy">
-          <span class="trackingTitle Title">Receive Email Marketing</span>
+          <span class="trackingTitle Title">{{ t("settingsPages.privacy.trackingPreferences") }}</span>
           <q-btn class="arrowBtn"
             ><svg
               xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +51,7 @@
             @click="openTerms"
             @keyup.enter="openTerms"
           >
-            <span class="trackingTitle Title">Terms and Conditions</span>
+            <span class="trackingTitle Title">{{ t("settingsPages.privacy.terms") }}</span>
             <q-btn class="arrowBtn" flat tabindex="-1"
               ><svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -75,7 +75,7 @@
             @click="openPrivacyPolicy"
             @keyup.enter="openPrivacyPolicy"
           >
-            <span class="trackingTitle Title">Privacy Policy</span>
+            <span class="trackingTitle Title">{{ t("settingsPages.privacy.policy") }}</span>
             <q-btn class="arrowBtn" flat tabindex="-1"
               ><svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -96,7 +96,7 @@
       </div>
       <div class="pageFooter-div">
         <q-btn class="cancelButton" :loading="saving" :disable="!hasChanges || saving" @click="handleSave">
-          Save
+          {{ t("save") }}
         </q-btn>
       </div>
     </div>
@@ -105,10 +105,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
 import { notifySuccess } from "src/utils/notify";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const PRIVACY_STORAGE_KEY = "dh_privacy_settings";
 
@@ -170,7 +172,7 @@ const handleSave = async () => {
 
     initialValue.value = value.value;
     initialValue2.value = value2.value;
-    notifySuccess("common.success.saved", "Privacy settings saved", { position: "top" });
+    notifySuccess("settingsPages.privacy.saved", "Privacy settings saved", { position: "top" });
   } finally {
     saving.value = false;
   }

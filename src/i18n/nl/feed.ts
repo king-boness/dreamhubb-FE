@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Trefwoorden toevoegen",
+    applyFilters: "Filters toepassen",
+    chooseCountry: "Kies je land",
+    clearFilters: "Filters wissen",
+    failedLoadInspirations: "Inspiraties laden is mislukt.",
+    filterAlsoCategory: "ook categorie wisselen",
+    filterAlsoPlace: "ook een plaats wijzigen",
+    filterSearchCta: "zoeken",
+    filterStepCategory: "categorie wisselen",
+    filterStepPlace: "kies een plaats",
+    filterStepPosts: "berichten wisselen",
+    firstPostHint: "Maak je eerste droom, probleem of idee en deel het met de wereld.",
+    firstPostTitle: "Begin je reis!",
+    myDreamsTitle: "Mijn dromen",
+    noResults: "Geen resultaten",
+    postImageAlt: "Afbeelding bij bericht",
+    postType: {
+      dream: "droom",
+      idea: "idee",
+      problem: "probleem"
+    },
+    quote1: "“Als je niet droomt, ga je niet dood, maar zonder dromen leef je ook niet echt.”",
+    quote2: "“We kunnen problemen niet oplossen met dezelfde denkwijze waarmee we ze hebben veroorzaakt.”",
+    quote3: "“Leer alsof je eeuwig leeft, leef alsof je morgen sterft.”",
+    quote4: "“Ik heb nooit over succes gedroomd. Ik heb ervoor gewerkt.”",
+    quoteOfTheDay: "Citaat van de dag",
+    resultsCount: "Geen resultaten | {n} resultaat | {n} resultaten",
+    searchEmpty: "Geen berichten gevonden voor je zoekopdracht.",
+    searchEmptyMine: "Geen dromen gevonden voor je zoekopdracht.",
+    searchEmptyMineNone: "Nog geen dromen.",
+    searchHint: "Voer een zoekwoord in om berichten te zoeken.",
+    searchMyDreams: "Zoek in mijn dromen",
+    searchPlaceholder: "Zoek naar alles",
+    sortNewest: "Nieuwste",
+    sortOldest: "Oudste",
+    unknownUser: "Onbekende gebruiker",
+    untitled: "Zonder titel",
+    userBadge: "Gebruiker"
+  }
+};

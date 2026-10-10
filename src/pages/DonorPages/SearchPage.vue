@@ -10,7 +10,7 @@
         dark
         class="inputSearch"
         borderless
-        placeholder="Search anything"
+        :placeholder="searchPlaceholder"
         dense
         clearable
         @keydown.enter.prevent="focusFirstResult"
@@ -23,7 +23,7 @@
         <img src="/icons/closeIcon.svg" alt="" />
       </q-btn>
     </div>
-    <div v-if="postsStore.loading" class="searchPage-empty">Loading...</div>
+    <div v-if="postsStore.loading" class="searchPage-empty">{{ loadingLabel }}</div>
     <div v-else-if="postsStore.error" class="searchPage-empty searchPage-empty--error">
       {{ postsStore.error }}
       <q-btn
@@ -31,42 +31,56 @@
         dense
         no-caps
         class="searchPage-retry"
-        label="Retry"
+        :label="retryLabel"
         @click="reloadFeed"
       />
     </div>
     <div v-else-if="search.trim() === ''" class="searchPage-empty">
-      Enter a keyword to search posts.
+      {{ searchHint }}
     </div>
     <div v-else-if="filteredPosts.length === 0" class="searchPage-empty">
-      No posts match your search.
+      {{ searchEmpty }}
     </div>
-    <ul v-else class="searchPage-resultsList">
-      <li
-        v-for="(post, i) in filteredPosts"
-        :key="String(getPostId(post) ?? i)"
-        class="searchPage-resultItem"
-        role="button"
-        tabindex="0"
-        @click="openPost(post)"
-        @keydown.enter.prevent="openPost(post)"
-      >
-        <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
-        <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
-      </li>
-    </ul>
+    <div v-else class="searchPage-resultsWrap">
+      <p class="searchPage-resultsCount" aria-live="polite">
+        {{ t("feed.resultsCount", filteredPosts.length, { n: filteredPosts.length }) }}
+      </p>
+      <ul class="searchPage-resultsList">
+        <li
+          v-for="(post, i) in filteredPosts"
+          :key="String(getPostId(post) ?? i)"
+          class="searchPage-resultItem"
+          role="button"
+          tabindex="0"
+          @click="openPost(post)"
+          @keydown.enter.prevent="openPost(post)"
+        >
+          <span class="searchPage-resultTitle">{{ getPostTitle(post) }}</span>
+          <span class="searchPage-resultSnippet">{{ getPostSnippet(post) }}</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { usePostsStore } from "src/stores/posts";
 
+const { t } = useI18n();
 const router = useRouter();
 const postsStore = usePostsStore();
 
 const search = ref("");
+
+const searchPlaceholder = computed(() => t("feed.searchPlaceholder"));
+const loadingLabel = computed(() => t("loading"));
+const retryLabel = computed(() => t("common.actions.retry"));
+const searchHint = computed(() => t("feed.searchHint"));
+const searchEmpty = computed(() => t("feed.searchEmpty"));
+const untitledLabel = computed(() => t("feed.untitled"));
 
 function getPostId(p: Record<string, unknown>): string | number | null {
   const id = p.post_id ?? p.id;
@@ -75,8 +89,8 @@ function getPostId(p: Record<string, unknown>): string | number | null {
 }
 
 function getPostTitle(p: Record<string, unknown>): string {
-  const t = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
-  return t || "Untitled";
+  const title = String(p.goal_name ?? p.goalName ?? p.title ?? "").trim();
+  return title || untitledLabel.value;
 }
 
 function getPostSnippet(p: Record<string, unknown>): string {
@@ -197,6 +211,14 @@ function handleCloseIconClick() {
   .searchPage-retry {
     color: #fff;
     text-decoration: underline;
+  }
+
+  .searchPage-resultsCount {
+    margin: 0;
+    padding: 0 1.3rem 0.5rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.85rem;
+    font-family: inter, sans-serif;
   }
 
   .searchPage-resultsList {

@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Dodaj słowa kluczowe",
+    applyFilters: "Zastosuj filtry",
+    chooseCountry: "Wybierz swój kraj",
+    clearFilters: "Wyczyść filtry",
+    failedLoadInspirations: "Nie udało się wczytać inspiracji.",
+    filterAlsoCategory: "wybierz też kategorię",
+    filterAlsoPlace: "zmień też miejsce",
+    filterSearchCta: "szukaj",
+    filterStepCategory: "wybierz kategorię",
+    filterStepPlace: "wybierz miejsce",
+    filterStepPosts: "wybierz wpisy",
+    firstPostHint: "Utwórz swoje pierwsze marzenie, problem lub pomysł i podziel się nim ze światem.",
+    firstPostTitle: "Zacznij swoją podróż!",
+    myDreamsTitle: "Moje marzenia",
+    noResults: "Brak wyników",
+    postImageAlt: "Zdjęcie wpisu",
+    postType: {
+      dream: "marzenie",
+      idea: "pomysł",
+      problem: "problem"
+    },
+    quote1: "„Jeśli nie marzysz, nie umrzesz — ale bez marzeń też nie będziesz żywy.”",
+    quote2: "„Nie możemy rozwiązywać problemów tym samym sposobem myślenia, który je stworzył.”",
+    quote3: "„Ucz się, jakbyś miał żyć wiecznie; żyj, jakbyś miał umrzeć jutro.”",
+    quote4: "„Nigdy nie marzyłem o sukcesie. Pracowałem na niego.”",
+    quoteOfTheDay: "Cytat dnia",
+    resultsCount: "Brak wyników | {n} wynik | {n} wyniki | {n} wyników",
+    searchEmpty: "Żaden wpis nie pasuje do Twojego wyszukiwania.",
+    searchEmptyMine: "Żadne marzenie nie pasuje do Twojego wyszukiwania.",
+    searchEmptyMineNone: "Nie masz jeszcze marzeń.",
+    searchHint: "Wpisz słowo kluczowe, aby wyszukać wpisy.",
+    searchMyDreams: "Szukaj moich marzeń",
+    searchPlaceholder: "Szukaj wszystkiego",
+    sortNewest: "Najnowsze",
+    sortOldest: "Najstarsze",
+    unknownUser: "Nieznany użytkownik",
+    untitled: "Bez tytułu",
+    userBadge: "Użytkownik"
+  }
+};

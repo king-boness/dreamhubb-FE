@@ -16,9 +16,9 @@
     <template v-else>
       <div v-if="showVerifyBanner && verifyEmailTask" class="verifyContent-earn">
         <div class="verifyContent-left">
-          <span class="verifyContent-heading">Here's Your Free Tokens</span>
+          <span class="verifyContent-heading">{{ freeTokensHeading }}</span>
           <span class="verifyContent-description">
-            As a new user, we are giving you some tokens for verifying your account.
+            {{ freeTokensDescription }}
           </span>
           <q-btn
             class="verifyContent-button"
@@ -41,14 +41,14 @@
 
       <div class="onGoingTasks">
         <div class="onGoingTasks-header">
-          <span class="onGoingTasks-heading">Ongoing Tasks</span>
+          <span class="onGoingTasks-heading">{{ ongoingTasksLabel }}</span>
           <a href="#" class="helpButton" @click.prevent>
             <img src="/icons/helpIcon.svg" alt=""
           /></a>
         </div>
 
         <p v-if="activeTasks.length === 0" class="earnPage-empty">
-          No active tasks right now.
+          {{ noActiveTasksLabel }}
         </p>
 
         <div
@@ -60,6 +60,7 @@
             <img src="/icons/taskTrophy.svg" alt="" class="taskTrophyImg" />
           </div>
           <div class="task-main">
+            <!-- Task title/description from BE stay EN until BE i18n -->
             <span class="taskTitle">{{ task.title }}</span>
             <span class="taskDescription">{{ task.description }}</span>
             <span class="taskMeta">
@@ -69,7 +70,7 @@
           </div>
           <div class="task-side">
             <div class="taskReward">
-              <span class="taskReward-bold">Reward:</span>
+              <span class="taskReward-bold">{{ rewardLabel }}</span>
               <img src="/icons/KarmaIcon.png" alt="" />
               <span class="taskRewars-amount">{{ task.reward_tokens }}</span>
             </div>
@@ -84,7 +85,7 @@
               :disable="claimingTaskKey !== null && claimingTaskKey !== task.key"
               @click="handleClaim(task.key)"
             >
-              Claim
+              {{ claimLabel }}
             </q-btn>
           </div>
         </div>
@@ -92,14 +93,14 @@
 
       <div class="onGoingTasks finishedTasksContainer">
         <div class="onGoingTasks-header">
-          <span class="onGoingTasks-heading">Completed Tasks</span>
+          <span class="onGoingTasks-heading">{{ completedTasksLabel }}</span>
           <a href="#" class="helpButton" @click.prevent>
             <img src="/icons/helpIcon.svg" alt=""
           /></a>
         </div>
 
         <p v-if="completedTasks.length === 0" class="earnPage-empty">
-          No completed tasks yet.
+          {{ noCompletedTasksLabel }}
         </p>
 
         <div
@@ -111,12 +112,13 @@
             <img src="/icons/complitedTask.svg" alt="" class="taskTrophyImg" />
           </div>
           <div class="task-main">
+            <!-- Task title/description from BE stay EN until BE i18n -->
             <span class="taskTitle">{{ task.title }}</span>
             <span class="taskDescription">{{ task.description }}</span>
             <span class="taskMeta">{{ statusLabel(task.status) }}</span>
           </div>
           <div class="FinishedtaskReward">
-            <span class="taskReward-bold">Got:</span>
+            <span class="taskReward-bold">{{ gotLabel }}</span>
             <img src="/icons/KarmaIcon.png" alt="" />
             <span class="taskRewars-amount">{{ task.reward_tokens }}</span>
           </div>
@@ -127,6 +129,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onActivated } from "vue";
+import { useI18n } from "vue-i18n";
 import { isAxiosError } from "axios";
 import RetryPanel from "src/components/common/RetryPanel.vue";
 import { fetchEarnTasks, claimEarnTask } from "src/services/earnTasksService";
@@ -135,7 +138,18 @@ import type { EarnTask, EarnTaskStatus } from "src/types/earnTasks";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifyNegative, notifySuccess } from "src/utils/notify";
 
+const { t } = useI18n();
 const authStore = useAuthStore();
+
+const freeTokensHeading = computed(() => t("earnUi.freeTokensHeading"));
+const freeTokensDescription = computed(() => t("earnUi.freeTokensDescription"));
+const ongoingTasksLabel = computed(() => t("earnUi.ongoingTasks"));
+const completedTasksLabel = computed(() => t("earnUi.completedTasks"));
+const noActiveTasksLabel = computed(() => t("earnUi.noActiveTasks"));
+const noCompletedTasksLabel = computed(() => t("earnUi.noCompletedTasks"));
+const rewardLabel = computed(() => t("earnUi.reward"));
+const gotLabel = computed(() => t("earnUi.got"));
+const claimLabel = computed(() => t("earnUi.claim"));
 
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -165,15 +179,12 @@ const completedTasks = computed(() =>
 const verifyBannerButtonLabel = computed(() => {
   const task = verifyEmailTask.value;
   if (!task) {
-    return "Verify and claim 1";
-  }
-  if (task.status === "claimable") {
-    return `Verify and claim ${task.reward_tokens}`;
+    return t("earnUi.verifyAndClaim", { n: 1 });
   }
   if (task.status === "in_progress") {
-    return "Verify email first";
+    return t("earnUi.verifyEmailFirst");
   }
-  return `Verify and claim ${task.reward_tokens}`;
+  return t("earnUi.verifyAndClaim", { n: task.reward_tokens });
 });
 
 const isVerifyBannerDisabled = computed(() => {
@@ -190,13 +201,13 @@ const isVerifyBannerDisabled = computed(() => {
 function statusLabel(status: EarnTaskStatus): string {
   switch (status) {
     case "in_progress":
-      return "In progress";
+      return t("earnUi.statusInProgress");
     case "claimable":
-      return "Ready to claim";
+      return t("earnUi.statusClaimable");
     case "claimed":
-      return "Completed";
+      return t("earnUi.statusClaimed");
     case "locked":
-      return "Locked";
+      return t("earnUi.statusLocked");
     default:
       return status;
   }

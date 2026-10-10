@@ -42,7 +42,7 @@
                     <div class="dream-icon">
                       <img
                         :src="`/icons/CategoryIcons/${category.iconFile}.svg`"
-                        :alt="category.label"
+                        :alt="t(category.id)"
                         class="dream-icon-img"
                       />
                     </div>
@@ -57,7 +57,7 @@
         </div>
 
         <p v-if="hideFooter" class="dream-instruction dream-instruction--inline">
-          choose by swiping up or down
+          {{ t("onboarding.swipeInstruction") }}
         </p>
       </div>
     </template>
@@ -92,7 +92,7 @@
                     <div class="dream-icon">
                       <img
                         :src="`/icons/CategoryIcons/${category.iconFile}.svg`"
-                        :alt="category.label"
+                        :alt="t(category.id)"
                         class="dream-icon-img"
                       />
                     </div>
@@ -109,9 +109,9 @@
     </template>
 
     <div v-if="!hideFooter" class="dream-bottom">
-      <p class="dream-instruction">choose by swiping up or down</p>
+      <p class="dream-instruction">{{ t("onboarding.swipeInstruction") }}</p>
       <div class="dream-actions" v-if="showSearchButton">
-        <button class="dream-searchBtn" @click="handleSearch">SEARCH</button>
+        <button class="dream-searchBtn" @click="handleSearch">{{ t("search") }}</button>
         <button class="dream-nextBtn" @click="handleNext">{{ nextButtonLabel }}</button>
       </div>
       <button v-else class="dream-nextBtn dream-nextBtn-single" @click="handleNext">{{ nextButtonLabel }}</button>
@@ -125,6 +125,7 @@
       :description="infoModalDescription"
       :cta-label="infoModalCta"
       :icon="infoModalIcon"
+      :icon-key="infoModalIconKey"
       @cta="handleInfoCta"
     />
   </div>
@@ -132,6 +133,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Mousewheel } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
@@ -157,6 +159,8 @@ const props = defineProps<{
   centerOffsetY?: number; // Vertical shift of the whole roller block (px)
   rollerAxisOffsetY?: number; // Vertical shift of wheel axis only (px), keeps ? fixed
 }>();
+
+const { t } = useI18n();
 
 const POST_CREATION_CENTER_OFFSET_Y = -17;
 const POST_CREATION_ROLLER_AXIS_OFFSET_Y = -19;
@@ -190,8 +194,8 @@ const progressWidth = computed(() => {
   return `${props.progress ?? 60}%`;
 });
 
-const title = computed(() => props.title ?? "from category");
-const nextButtonLabel = computed(() => props.nextButtonLabel ?? "NEXT STEP");
+const title = computed(() => props.title ?? t("onboarding.fromCategory"));
+const nextButtonLabel = computed(() => props.nextButtonLabel ?? t("nextStep"));
 const dreamCarouselWrapperStyle = computed(() => ({
   transform: `translateY(${props.centerOffsetY ?? POST_CREATION_CENTER_OFFSET_Y}px)`
 }));
@@ -209,11 +213,12 @@ const currentInfo = computed(() => {
   return categoryInfo[configKey] || categoryInfo.traveling;
 });
 
-const infoModalTitle = computed(() => currentInfo.value?.title || "");
-const infoModalText = computed(() => currentInfo.value?.highlight || "");
-const infoModalDescription = computed(() => currentInfo.value?.description || "");
-const infoModalCta = computed(() => currentInfo.value?.ctaLabel || "");
+const infoModalTitle = computed(() => (currentInfo.value ? t(currentInfo.value.titleKey) : ""));
+const infoModalText = computed(() => (currentInfo.value ? t(currentInfo.value.highlightKey) : ""));
+const infoModalDescription = computed(() => (currentInfo.value ? t(currentInfo.value.descriptionKey) : ""));
+const infoModalCta = computed(() => (currentInfo.value ? t(currentInfo.value.ctaLabelKey) : ""));
 const infoModalIcon = computed(() => currentInfo.value?.icon || "");
+const infoModalIconKey = computed(() => currentInfo.value?.iconKey || "");
 
 const handleSwiperChanged = (swiper: SwiperClass) => {
   const selectedCategory = categories[swiper.realIndex] ?? categories[0];

@@ -105,12 +105,12 @@
             dark
             label-color="grey-6"
             v-model="state.keyWord"
-            label="Add keywords"
+            :label="addKeywordsLabel"
             class="registerDatas"
           />
           <q-select
             borderless
-            label="Choose your country"
+            :label="chooseCountryLabel"
             label-color="grey-6"
             class="registerDatas"
             v-model="state.country"
@@ -124,14 +124,14 @@
           >
             <template v-slot:no-option>
               <q-item>
-                <q-item-section class="text-grey"> No results </q-item-section>
+                <q-item-section class="text-grey">{{ noResultsLabel }}</q-item-section>
               </q-item>
             </template>
           </q-select>
         </div>
         <div class="applyBtnDiv">
           <q-btn text-color="white" class="applyFilterButton">
-            Apply filters
+            {{ applyFiltersLabel }}
           </q-btn>
         </div>
       </div>
@@ -139,12 +139,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SwiperComponent from "./SwiperComponent.vue";
 import { RegistrationOptions } from "src/components/models";
 
 const { t } = useI18n();
+const addKeywordsLabel = computed(() => t("feed.addKeywords"));
+const chooseCountryLabel = computed(() => t("feed.chooseCountry"));
+const noResultsLabel = computed(() => t("feed.noResults"));
+const applyFiltersLabel = computed(() => t("feed.applyFilters"));
 const tab = ref("byHelp");
 const isFilter = ref(false);
 

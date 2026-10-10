@@ -1,12 +1,24 @@
 <template>
   <p class="authLegalNotice">
-    By continuing, you agree to our
-    <router-link class="authLegalNotice-link" :to="{ name: 'terms-of-use' }">Terms of Use</router-link>
-    and
-    <router-link class="authLegalNotice-link" :to="{ name: 'privacy-policy' }">Privacy Policy</router-link>.
-    dreamhubb has <strong>zero tolerance</strong> for objectionable content and abusive users.
+    <i18n-t keypath="legalNotice" scope="global" tag="span">
+      <template #terms>
+        <router-link class="authLegalNotice-link" :to="{ name: 'terms-of-use' }">{{ t("termsOfUseLink") }}</router-link>
+      </template>
+      <template #privacy>
+        <router-link class="authLegalNotice-link" :to="{ name: 'privacy-policy' }">{{ t("privacyPolicyLink") }}</router-link>
+      </template>
+      <template #zeroTolerance>
+        <strong>{{ t("zeroTolerance") }}</strong>
+      </template>
+    </i18n-t>
   </p>
 </template>
+
+<script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+</script>
 
 <style scoped lang="scss">
 .authLegalNotice {

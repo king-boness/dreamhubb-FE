@@ -37,7 +37,7 @@
                   :src="button.image"
                   :alt="button.title"
                   class="badgeIconImg badgeGuard"
-                  v-if="button.title == 'Guard'"
+                  v-if="button.key === 'guard'"
                 />
                 <img
                   v-else
@@ -72,7 +72,7 @@
                 :src="button.image"
                 :alt="button.title"
                 class="badgeIconImg badgeGuard"
-                v-if="button.title == 'Guard'"
+                v-if="button.key === 'guard'"
               />
               <img
                 v-else
@@ -91,7 +91,8 @@
 <script setup>
 import { Pagination, Navigation, Grid, Mousewheel, FreeMode } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -104,6 +105,8 @@ defineProps({
   }
 });
 
+const { t } = useI18n();
+
 const handleHSwiperReady = () => {
   // no logs
 };
@@ -112,48 +115,46 @@ const handleHSwiperSlideChange = (swiper) => {
   void swiper;
 };
 
-const badges = [
-  [
-    { image: "/icons/patronBadge-icon.svg", title: "Patron" },
-    { image: "/icons/guardBadge-icon.svg", title: "Guard" },
-    { image: "/icons/dreamerBadge-icon.svg", title: "Dreamer" },
-    { image: "/icons/diamondBadge-icon.svg", title: "Badge" },
-    { image: "/icons/emeraldBadge-icon.svg", title: "Badge" },
-    { image: "/icons/crownBadge-icon.svg", title: "Badge" }
-  ],
-  [
-    { image: "/icons/patronBadge-icon.svg", title: "Patron" },
-    { image: "/icons/guardBadge-icon.svg", title: "Guard" },
-    { image: "/icons/dreamerBadge-icon.svg", title: "Dreamer" },
-    { image: "/icons/diamondBadge-icon.svg", title: "Badge" },
-    { image: "/icons/emeraldBadge-icon.svg", title: "Badge" },
-    { image: "/icons/crownBadge-icon.svg", title: "Badge" }
-  ],
-  [
-    { image: "/icons/patronBadge-icon.svg", title: "Patron" },
-    { image: "/icons/guardBadge-icon.svg", title: "Guard" },
-    { image: "/icons/dreamerBadge-icon.svg", title: "Dreamer" },
-    { image: "/icons/diamondBadge-icon.svg", title: "Badge" },
-    { image: "/icons/emeraldBadge-icon.svg", title: "Badge" },
-    { image: "/icons/crownBadge-icon.svg", title: "Badge" }
-  ],
-  [
-    { image: "/icons/patronBadge-icon.svg", title: "Patron" },
-    { image: "/icons/guardBadge-icon.svg", title: "Guard" },
-    { image: "/icons/dreamerBadge-icon.svg", title: "Dreamer" },
-    { image: "/icons/diamondBadge-icon.svg", title: "Badge" },
-    { image: "/icons/emeraldBadge-icon.svg", title: "Badge" },
-    { image: "/icons/crownBadge-icon.svg", title: "Badge" }
-  ],
-  [
-    { image: "/icons/patronBadge-icon.svg", title: "Patron" },
-    { image: "/icons/guardBadge-icon.svg", title: "Guard" },
-    { image: "/icons/dreamerBadge-icon.svg", title: "Dreamer" },
-    { image: "/icons/diamondBadge-icon.svg", title: "Badge" },
-    { image: "/icons/emeraldBadge-icon.svg", title: "Badge" },
-    { image: "/icons/crownBadge-icon.svg", title: "Badge" }
-  ]
+const BADGE_SLIDE_KEYS = [
+  ["patron", "guard", "dreamer", "badge", "badge", "badge"],
+  ["patron", "guard", "dreamer", "badge", "badge", "badge"],
+  ["patron", "guard", "dreamer", "badge", "badge", "badge"],
+  ["patron", "guard", "dreamer", "badge", "badge", "badge"],
+  ["patron", "guard", "dreamer", "badge", "badge", "badge"]
 ];
+
+const BADGE_IMAGES = {
+  patron: "/icons/patronBadge-icon.svg",
+  guard: "/icons/guardBadge-icon.svg",
+  dreamer: "/icons/dreamerBadge-icon.svg",
+  badge: [
+    "/icons/diamondBadge-icon.svg",
+    "/icons/emeraldBadge-icon.svg",
+    "/icons/crownBadge-icon.svg"
+  ]
+};
+
+function imageForKey(key, slotIndex) {
+  if (key === "badge") {
+    return BADGE_IMAGES.badge[slotIndex % BADGE_IMAGES.badge.length];
+  }
+  return BADGE_IMAGES[key];
+}
+
+const badges = computed(() =>
+  BADGE_SLIDE_KEYS.map((slide) => {
+    let badgeSlot = 0;
+    return slide.map((key) => {
+      const image = imageForKey(key, badgeSlot);
+      if (key === "badge") badgeSlot += 1;
+      return {
+        key,
+        image,
+        title: t(`badges.${key}`)
+      };
+    });
+  })
+);
 
 const emit = defineEmits(["badge-selected"]);
 
@@ -161,10 +162,10 @@ const activeButton = ref(null);
 
 const activateButton = (array) => {
   activeButton.value = array;
-  // Find the selected badge and emit it
   const [arrayIndex, index] = array;
-  if (badges[arrayIndex] && badges[arrayIndex][index]) {
-    emit("badge-selected", badges[arrayIndex][index]);
+  const slide = badges.value[arrayIndex];
+  if (slide && slide[index]) {
+    emit("badge-selected", { image: slide[index].image, title: slide[index].title });
   }
 };
 const modules = [Grid, Pagination, Navigation, Mousewheel, FreeMode];

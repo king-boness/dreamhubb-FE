@@ -1,20 +1,27 @@
 <template>
   <div class="settingsBan-page">
     <div class="settingsBan-header">
-      <button type="button" class="settingsBan-backBtn" aria-label="Back" @click="handleBack">
+      <button type="button" class="settingsBan-backBtn" :aria-label="t('back')" @click="handleBack">
         <q-icon name="chevron_left" />
       </button>
-      <span class="settingsBan-heading">Blocked users</span>
+      <span class="settingsBan-heading">{{ t("settingsPages.ban.heading") }}</span>
     </div>
     <div class="settingsBan-rules">
       <p class="rulesText">
-        Blocked users cannot appear in your feed. Their posts are removed immediately when you block them.
+        {{ t("settingsPages.ban.rules1") }}
       </p>
       <p class="rulesText">
-        To report harmful content, open a post and use <strong>Report a post</strong>. For urgent issues, visit
-        <router-link class="settingsBan-link" :to="{ name: 'support' }">Support</router-link>
-        or email
-        <a class="settingsBan-link" href="mailto:matej.kostun@gmail.com">matej.kostun@gmail.com</a>.
+        <i18n-t keypath="settingsPages.ban.rules2" scope="global" tag="span">
+          <template #report>
+            <strong>{{ t("reportPost") }}</strong>
+          </template>
+          <template #support>
+            <router-link class="settingsBan-link" :to="{ name: 'support' }">{{ t("settingsPages.ban.supportLink") }}</router-link>
+          </template>
+          <template #email>
+            <a class="settingsBan-link" :href="`mailto:${SUPPORT_EMAIL}`">{{ SUPPORT_EMAIL }}</a>
+          </template>
+        </i18n-t>
       </p>
     </div>
 
@@ -23,18 +30,18 @@
     </div>
 
     <p v-else-if="!blockedUsers.length" class="rulesText rulesText--muted">
-      You have not blocked anyone yet.
+      {{ t("settingsPages.ban.empty") }}
     </p>
 
     <ul v-else class="settingsBan-list">
       <li v-for="user in blockedUsers" :key="user.id" class="settingsBan-item">
-        <span class="settingsBan-name">{{ user.username || `User #${user.id}` }}</span>
+        <span class="settingsBan-name">{{ user.username || t("settingsPages.ban.userFallback", { id: user.id }) }}</span>
         <q-btn
           flat
           dense
           no-caps
           color="primary"
-          label="Unblock"
+          :label="t('settingsPages.ban.unblock')"
           :loading="unblockingId === user.id"
           @click="handleUnblock(user.id)"
         />
@@ -46,6 +53,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useBlocksStore } from "src/stores/blocks";
 import { goBackOrFallback } from "src/utils/navigation";
 import { notifyError, notifySuccess } from "src/utils/notify";
@@ -53,6 +61,8 @@ import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
+const SUPPORT_EMAIL = "matej.kostun@gmail.com";
 const blocksStore = useBlocksStore();
 const loading = ref(true);
 
@@ -80,7 +90,7 @@ async function handleUnblock(userId: number) {
   try {
     await blocksStore.unblockUser(userId);
     blockedUsers.value = [...blocksStore.blockedUsers];
-    notifySuccess("common.success.saved", "User unblocked.", { timeout: 2500 });
+    notifySuccess("settingsPages.ban.unblocked", "User unblocked.", { timeout: 2500 });
   } catch (error) {
     notifyError(mapAxiosErrorToDhError(error), { timeout: 4000 });
   } finally {

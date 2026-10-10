@@ -10,13 +10,8 @@
     <div class="onBoarding-body">
       <img src="/icons/KarmaIcon.svg" alt="" class="onBoarding-icon" />
       <div class="onBoarding-textContainer">
-        <span class="onBoarding-title">Headline of how it works</span>
-        <span class="onBoarding-text"
-          >We connect dreamers with those who are willing to support their
-          goals, creating a community of support and motivation. Start
-          fulfilling your own dreams or help someone else fulfill theirs today
-          with Tokens.</span
-        >
+        <span class="onBoarding-title">{{ t("onboarding.tokens.page1Title") }}</span>
+        <span class="onBoarding-text">{{ t("onboarding.tokens.page1Text") }}</span>
       </div>
     </div>
   </div>
@@ -24,8 +19,10 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const handleBack = () => {
   router.push({ name: "donee-token" });

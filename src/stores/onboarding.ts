@@ -181,7 +181,7 @@ export const useOnboardingStore = defineStore("onboarding", {
             this.profileCityId = resolvedCityId;
 
             if (!this.profileCityId) {
-              throw new Error("City is required. Please select a valid city.");
+              throw new Error(tGlobal("onboarding.validation.cityRequiredSelect", "City is required. Please select a valid city."));
             }
 
             if (import.meta.env.DEV) {
@@ -305,7 +305,7 @@ export const useOnboardingStore = defineStore("onboarding", {
     // Register - volá POST /api/register na BE
     async register() {
       if (!this.isReadyForRegister) {
-        this.error = "Please fill in all required fields.";
+        this.error = tGlobal("onboarding.validation.fillAllRequired", "Please fill in all required fields.");
         return;
       }
 
@@ -366,7 +366,7 @@ export const useOnboardingStore = defineStore("onboarding", {
           // If already in YYYY-MM-DD format, use as is
         }
 
-        const payload = {
+        const payload: Record<string, unknown> = {
           username: this.name,
           email: this.email,
           password: this.password,
@@ -378,6 +378,16 @@ export const useOnboardingStore = defineStore("onboarding", {
           location_city_id: locationIds.cityId,
           accepted_terms: this.acceptedTerms
         };
+
+        // Persist guest language choice onto the new account when available.
+        try {
+          const guestLocale = localStorage.getItem("dreamhubb_language");
+          if (guestLocale) {
+            payload.preferred_locale = guestLocale;
+          }
+        } catch {
+          // ignore
+        }
 
         if (import.meta.env.DEV) {
           console.debug("NEXT STEP (register) location payload:", {
@@ -423,7 +433,9 @@ export const useOnboardingStore = defineStore("onboarding", {
 
           return data;
         } else {
-          throw new Error(data?.message || "Registration failed");
+          throw new Error(
+            data?.message || tGlobal("registrationError", "Something went wrong. Please try again later.")
+          );
         }
       } catch (error: unknown) {
         if (import.meta.env.DEV) {
@@ -434,7 +446,10 @@ export const useOnboardingStore = defineStore("onboarding", {
         if (error instanceof Error) {
           const errorMessage = error.message.toLowerCase();
           if (errorMessage.includes("location") || errorMessage.includes("failed to get location")) {
-            this.error = "Failed to process your location. Please make sure you selected a valid continent, country, and city (if applicable).";
+            this.error = tGlobal(
+              "onboarding.validation.locationProcessFailed",
+              "Failed to process your location. Please make sure you selected a valid continent, country, and city (if applicable)."
+            );
             this.loading = false;
             return;
           }
@@ -462,10 +477,15 @@ export const useOnboardingStore = defineStore("onboarding", {
           Object.keys(errors).forEach((key) => {
             const value = errors[key];
             const raw =
-              Array.isArray(value) && value.length > 0 ? String(value[0]) : "Validation error";
+              Array.isArray(value) && value.length > 0
+                ? String(value[0])
+                : tGlobal("onboarding.validation.validationError", "Validation error");
             // Friendlier message for already registered email
             if (key === "email" && /already been taken/i.test(raw)) {
-              fieldErrors.email = "This email is already registered. Please choose another one or log in.";
+              fieldErrors.email = tGlobal(
+                "onboarding.validation.emailAlreadyRegistered",
+                "This email is already registered. Please choose another one or log in."
+              );
             } else {
               fieldErrors[key] = raw;
             }
@@ -474,7 +494,9 @@ export const useOnboardingStore = defineStore("onboarding", {
           // do not log field errors (can contain sensitive validation data)
           // Also show first error as global message for visibility
           const firstKey = Object.keys(fieldErrors)[0];
-          this.error = firstKey ? fieldErrors[firstKey] : "Validation error";
+          this.error = firstKey
+            ? fieldErrors[firstKey]
+            : tGlobal("onboarding.validation.validationError", "Validation error");
         } else {
           const mapped = mapAxiosErrorToDhError(error);
           this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);

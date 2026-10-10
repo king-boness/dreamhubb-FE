@@ -1,0 +1,42 @@
+export default {
+  feed: {
+    addKeywords: "Adicionar palavras-chave",
+    applyFilters: "Aplicar filtros",
+    chooseCountry: "Escolha o seu país",
+    clearFilters: "Limpar filtros",
+    failedLoadInspirations: "Não foi possível carregar as inspirações.",
+    filterAlsoCategory: "escolha também uma categoria",
+    filterAlsoPlace: "mude também o local",
+    filterSearchCta: "pesquisar",
+    filterStepCategory: "escolher categoria",
+    filterStepPlace: "escolher um local",
+    filterStepPosts: "escolher publicações",
+    firstPostHint: "Crie o seu primeiro sonho, problema ou ideia e partilhe com o mundo.",
+    firstPostTitle: "Comece a sua jornada!",
+    myDreamsTitle: "Os meus sonhos",
+    noResults: "Sem resultados",
+    postImageAlt: "Imagem da publicação",
+    postType: {
+      dream: "sonho",
+      idea: "ideia",
+      problem: "problema"
+    },
+    quote1: "«Se não sonhar, não morre — mas sem sonhos também não estará vivo.»",
+    quote2: "«Não podemos resolver problemas com o mesmo tipo de pensamento que os criou.»",
+    quote3: "«Aprenda como se fosse viver para sempre; viva como se fosse morrer amanhã.»",
+    quote4: "«Nunca sonhei com o sucesso. Trabalhei por ele.»",
+    quoteOfTheDay: "Citação do dia",
+    resultsCount: "Nenhum resultado | {n} resultado | {n} resultados",
+    searchEmpty: "Nenhuma publicação corresponde à sua pesquisa.",
+    searchEmptyMine: "Nenhum sonho corresponde à sua pesquisa.",
+    searchEmptyMineNone: "Ainda não há sonhos.",
+    searchHint: "Introduza uma palavra-chave para pesquisar publicações.",
+    searchMyDreams: "Pesquisar os meus sonhos",
+    searchPlaceholder: "Pesquisar tudo",
+    sortNewest: "Mais recentes",
+    sortOldest: "Mais antigos",
+    unknownUser: "Utilizador desconhecido",
+    untitled: "Sem título",
+    userBadge: "Utilizador"
+  }
+};

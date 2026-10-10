@@ -1,14 +1,14 @@
 <template>
   <div class="resetEmail-page">
     <div class="resetEmail-main">
-      <span class="changeEmail-title">Change Email Address</span>
+      <span class="changeEmail-title">{{ t("changeEmailAddress") }}</span>
       <q-input
         borderless
         dark
         hide-bottom-space
         bottom-slots
         v-model="resetEmail"
-        label="New Email Address"
+        :label="t('settingsPages.email.newEmail')"
         class="registerDatas registerSecrete emailPage-input"
       >
       </q-input>
@@ -18,24 +18,26 @@
         hide-bottom-space
         bottom-slots
         v-model="repeatResetEmail"
-        label="Repeat New Email Address"
+        :label="t('settingsPages.email.repeatNewEmail')"
         class="registerDatas registerSecrete emailPage-input"
       >
       </q-input>
     </div>
     <div class="confirmationButton-div">
       <q-btn class="confirmButton" @click="$router.go(-2)">
-        Change email
+        {{ t("settingsPages.email.changeEmailCta") }}
       </q-btn>
     </div>
     <div class="pageFooter-div">
-      <q-btn class="cancelButton" @click="$router.go(-2)"> Cancel </q-btn>
+      <q-btn class="cancelButton" @click="$router.go(-2)"> {{ t("cancel") }} </q-btn>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const resetEmail = ref("");
 const repeatResetEmail = ref("");
 </script>

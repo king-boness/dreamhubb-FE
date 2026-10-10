@@ -23,7 +23,7 @@ export default {
   aboutApp: "Uygulama hakkında",
   banList: "Yasaklılar listesi",
   comingSoon: "Yakında",
-  notifications: "Bildirimler",
+  notificationsLabel: "Bildirimler",
   sources: "Kaynaklar",
   screenMode: "Ekran modu",
   appearance: "Görünüm",

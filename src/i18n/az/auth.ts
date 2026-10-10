@@ -12,7 +12,7 @@ export default {
   appSettings: "Tətbiq parametrləri",
   language: "Dil",
   comingSoon: "Tezliklə",
-  notifications: "Bildirişlər",
+  notificationsLabel: "Bildirişlər",
   sources: "Mənbələr",
   screenMode: "Ekran rejimi",
   appearance: "Görünüş",

@@ -134,6 +134,7 @@ import { getPostTypeIcon } from "src/utils/postIcons";
 import { getUserAvatarUrl } from "src/utils/avatar";
 import { normalizePost } from "src/utils/normalizePost";
 import { formatSubcategoryLabel } from "src/utils/formatSubcategoryLabel";
+import { formatLocaleDate } from "src/utils/formatLocaleDate";
 import UserAvatar from "src/components/common/UserAvatar.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import RetryPanel from "src/components/common/RetryPanel.vue";
@@ -298,7 +299,7 @@ const mapPostData = (post: Record<string, unknown>): DonorPost => {
   // Normalize post to ensure category and subcategory objects exist
   const normalized = normalizePost(post as Parameters<typeof normalizePost>[0]);
 
-  const authorName = normalized.author_name || "Unknown";
+  const authorName = normalized.author_name || t("common.unknown");
   // Use unified avatar utility function - check multiple possible fields from BE
   const authorPicture = getUserAvatarUrl(
     normalized.user,
@@ -320,7 +321,7 @@ const mapPostData = (post: Record<string, unknown>): DonorPost => {
 
   // Get subcategory label using i18n
   const subcategorySlug = normalized.subcategory?.slug;
-  let categoryLabel = t("common.unknown") || "Unknown";
+  let categoryLabel = t("common.unknown");
   if (subcategorySlug) {
     const i18nKey = `subcategories.${subcategorySlug}`;
     const translated = t(i18nKey);
@@ -338,12 +339,12 @@ const mapPostData = (post: Record<string, unknown>): DonorPost => {
     authorName,
     // Use real avatar URL if available, otherwise empty string (template will show initials)
     authorAvatarUrl: authorPicture || "",
-    authorBadgeLabel: "User", // TODO: Get from normalized post if available
-    dreamTitle: normalized.title || "Untitled",
+    authorBadgeLabel: t("feed.userBadge"), // TODO: Get from normalized post if available
+    dreamTitle: normalized.title || t("feed.untitled"),
     categoryLabel,
     tokenReward: normalized.tokens || 0,
     previewText: normalized.description || "",
-    location: getLocationLabel(normalized, locale.value as string) || "Unknown",
+    location: getLocationLabel(normalized, locale.value as string) || t("common.unknown"),
     createdAt: normalized.date_created || new Date().toISOString(),
     // Use real cover image from BE, fallback to default if not available
     imageUrl: firstImage || "/images/Auth/postBackground.png",
@@ -400,24 +401,8 @@ const handleOpenFilters = () => {
   router.push({ name: "donor-filters" });
 };
 
-// Format date as DD/MM/YYYY
-const formatDate = (dateString: string): string => {
-  const d = new Date(dateString);
-  if (Number.isNaN(d.getTime())) {
-    // Fallback: if it's already in MM/DD/YYYY format, convert to DD/MM/YYYY
-    const dateParts = dateString.split("/");
-    if (dateParts.length === 3) {
-      const [month, day, year] = dateParts;
-      return `${day}/${month}/${year}`;
-    }
-    return dateString;
-  }
-  // Format as DD/MM/YYYY
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-};
+const formatDate = (dateString: string): string =>
+  formatLocaleDate(dateString, locale.value as string);
 
 const emitOpenPost = (post: DonorPost) => {
   // Use backendPostId to navigate to existing BE post

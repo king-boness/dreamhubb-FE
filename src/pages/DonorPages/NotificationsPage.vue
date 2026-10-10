@@ -1,7 +1,7 @@
 <template>
   <q-page class="notification-Page" :padding="false">
     <div class="notifications-shell">
-      <PageTitle title="Notifications" />
+      <PageTitle :title="pageTitle" />
       <!-- Iba do konca prvého fetchu; potom PTR (vlastný indikátor pri ťahu). -->
       <div v-if="!initialFetchDone" class="notifications-loading">
         <q-spinner color="primary" size="2rem" />
@@ -21,7 +21,7 @@
           class="notifications-empty"
           data-testid="dh-notifications-empty"
         >
-          <p>No notifications yet.</p>
+          <p>{{ emptyLabel }}</p>
         </div>
         <div v-else class="notifications-list" data-testid="dh-notifications-list">
           <NotificationComponent
@@ -48,9 +48,11 @@ import { useI18n } from "vue-i18n";
 const router = useRouter();
 const notificationsStore = useNotificationsStore();
 const { items, error } = storeToRefs(notificationsStore);
-useI18n();
+const { t } = useI18n();
 
 const notifications = computed(() => items.value);
+const pageTitle = computed(() => t("notificationsPage.title"));
+const emptyLabel = computed(() => t("notificationsPage.empty"));
 
 const initialFetchDone = ref(false);
 

@@ -23,7 +23,7 @@ export default {
   aboutApp: "\uc571 \uc815\ubcf4",
   banList: "\ucc28\ub2e8 \ubaa9\ub85d",
   comingSoon: "\uadfc\uac00 \ub4e4\uc5b4\uc654\uc2b5\ub2c8\ub2e4",
-  notifications: "\uc54c\ub9bc",
+  notificationsLabel: "\uc54c\ub9bc",
   sources: "\uc18c\uc2a4",
   screenMode: "\ud2b8\ub9ac\ub9c8 \ubaa8\ub4dc",
   appearance: "\uc678\uad00",

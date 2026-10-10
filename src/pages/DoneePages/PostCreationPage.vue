@@ -6,7 +6,7 @@
         flat
         dense
         class="postCreation-stepBackBtn"
-        aria-label="Back"
+        :aria-label="t('back')"
         @click="handleStepBack"
       >
         <q-icon name="chevron_left" size="24px" class="postCreation-stepBackIcon" />
@@ -37,7 +37,7 @@
               class="postCreation-deleteImgIcon"
               src="/icons/deleteImg-icon.svg"
               alt=""
-            />Remove Image</q-btn
+            />{{ t("posts.create.removeImage") }}</q-btn
           >
           <q-btn
             ref="postCreationAddImgAnchorRef"
@@ -81,7 +81,7 @@
             <q-btn
               class="postCreation-changeTypeButton"
               @click="$router.push({ name: 'donee-postCreation-goal' })"
-              >Change Post Type</q-btn
+              >{{ t("posts.create.changePostType") }}</q-btn
             >
           </div>
           <q-input
@@ -119,7 +119,7 @@
           <q-btn
             class="postCreation-changeTypeButton"
             @click="$router.push({ name: 'donee-postCreation-goal' })"
-            >Change Post Type</q-btn
+            >{{ t("posts.create.changePostType") }}</q-btn
           >
         </div>
         <q-input
@@ -142,7 +142,7 @@
             alt=""
             class="postCreation-featureIcon"
           />
-          Add Info</q-btn
+          {{ t("posts.create.addInfo") }}</q-btn
         >
         <q-separator vertical inset class="postCreation-separator" />
         <q-btn class="postCreation-addInfoButton"
@@ -151,13 +151,13 @@
             alt=""
             class="postCreation-featureIcon"
           />
-          Add Info</q-btn
+          {{ t("posts.create.addInfo") }}</q-btn
         >
         <q-separator vertical inset class="postCreation-separator" />
-        <q-btn class="postCreation-addFeatureButton">+ Add Feature</q-btn>
+        <q-btn class="postCreation-addFeatureButton">{{ t("posts.create.addFeature") }}</q-btn>
       </div>
       <div class="postCreation-aboutDreamContainer">
-        <span class="postCreation-dreamTitle">{{ "About " + selectedGoalLabel }}</span>
+        <span class="postCreation-dreamTitle">{{ aboutSectionTitle }}</span>
         <q-input
           borderless
           dark
@@ -171,7 +171,7 @@
         >
         </q-input>
         <div class="postCreation-rewardContainer">
-          <span class="postCreation-rewardTitle">Initial Reward</span>
+          <span class="postCreation-rewardTitle">{{ t("posts.create.initialReward") }}</span>
           <div class="postCreation-tokenInputWrapper">
             <q-input
               v-model.number="rewardUi"
@@ -206,7 +206,7 @@
             />
           </div>
           <div class="postCreation-tokenBalance">
-            {{ t("funds") }}: {{ remainingFunds }} tokens
+            {{ t("posts.fundsTokens", remainingFunds, { n: remainingFunds }) }}
           </div>
         </div>
       </div>
@@ -254,8 +254,8 @@
             :aria-disabled="isMinTokensBlocked ? 'true' : undefined"
             data-testid="dh-post-creation-submit"
           >
-            <span v-if="postCreationStore.loading">Creating post...</span>
-            <span v-else>Submit Post</span>
+            <span v-if="postCreationStore.loading">{{ t("posts.create.creatingPost") }}</span>
+            <span v-else>{{ t("posts.create.submitPost") }}</span>
           </q-btn>
         </div>
       </div>
@@ -411,27 +411,33 @@ const handleSliderChange = (value: number | null) => {
 // Get selected goal from localStorage
 const selectedGoal = ref<string | null>(null);
 
-// Get label for selected goal
-const selectedGoalLabel = computed(() => {
-  if (!selectedGoal.value || typeof selectedGoal.value !== "string") return "Dream";
-  const goalMap: Record<string, string> = {
-    problem: "Problem",
-    dream: "Dream",
-    idea: "Idea"
-  };
+// Get slug for selected goal (dream / problem / idea)
+const selectedGoalSlug = computed(() => {
+  if (!selectedGoal.value || typeof selectedGoal.value !== "string") return "dream";
   const goalLower = selectedGoal.value.toLowerCase();
-  return goalMap[goalLower] || "Dream";
+  if (goalLower === "problem" || goalLower === "idea") return goalLower;
+  return "dream";
 });
+
+const selectedGoalLabel = computed(() => t(`feed.postType.${selectedGoalSlug.value}`));
+
+const aboutSectionTitle = computed(() =>
+  t("posts.create.aboutPrefix", { type: selectedGoalLabel.value })
+);
 
 // Computed properties for labels to avoid template literal issues
 const postTitleLabel = computed(() => {
-  const label = selectedGoalLabel.value || "Dream";
-  return label + " Title";
+  const slug = selectedGoalSlug.value;
+  if (slug === "problem") return t("posts.create.problemTitle");
+  if (slug === "idea") return t("posts.create.ideaTitle");
+  return t("posts.create.dreamTitle");
 });
 
 const postDescriptionLabel = computed(() => {
-  const label = selectedGoalLabel.value || "Dream";
-  return label + " Description";
+  const slug = selectedGoalSlug.value;
+  if (slug === "problem") return t("posts.create.problemDescription");
+  if (slug === "idea") return t("posts.create.ideaDescription");
+  return t("posts.create.dreamDescription");
 });
 
 // Map goal names to icon file names (use original CategoryIcons)
@@ -761,7 +767,7 @@ const handleFileChange = async (event: Event) => {
     notifyError({
       kind: "validation",
       messageKey: "common.errors.validation",
-      fallbackMessage: `Maximum ${maxImages} images allowed.`,
+      fallbackMessage: t("posts.maxPhotos", { n: maxImages }),
       retryable: false
     }, { position: "top" });
     return;

@@ -25,6 +25,13 @@ export default boot(({ router }) => {
       const response = await api.get("/user");
 
       if (response.data?.status === "success" && response.data?.user) {
+        authStore.user = response.data.user;
+        try {
+          const { syncLocaleFromUser } = await import("src/utils/applyLocale");
+          await syncLocaleFromUser(response.data.user?.preferred_locale);
+        } catch {
+          // ignore
+        }
         if (import.meta.env.DEV) {
           console.debug("[boot/auth] Token valid:", response.data.user?.username);
         }

@@ -1,14 +1,14 @@
 <template>
   <div class="settingsBio-page">
     <div class="settingsBio-main">
-      <span class="settingsBio-title">Change Bio</span>
+      <span class="settingsBio-title">{{ t("changeBio") }}</span>
       <q-input
         borderless
         dark
         hide-bottom-space
         bottom-slots
         v-model="bio"
-        label="Tell something about yourself..."
+        :label="t('settingsPages.bio.placeholder')"
         class="registerDatas registerSecrete bioPage-input"
         type="textarea"
       >
@@ -16,12 +16,12 @@
     </div>
     <div class="confirmationButton-div">
       <q-btn class="confirmButton" :loading="saving" @click="handleSave">
-        Save changes
+        {{ t("saveChanges") }}
       </q-btn>
     </div>
     <div class="pageFooter-div">
       <q-btn class="cancelButton" :disable="saving" @click="handleCancel">
-        Cancel
+        {{ t("cancel") }}
       </q-btn>
     </div>
   </div>
@@ -29,11 +29,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "src/stores/auth";
 import { notifyError, notifySuccess } from "src/utils/notify";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 
 const router = useRouter();
+const { t } = useI18n();
 const authStore = useAuthStore();
 
 const bio = ref(authStore.user?.bio || "");

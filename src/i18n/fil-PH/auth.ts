@@ -73,7 +73,7 @@ export default {
   logOut: "Mag-log out",
   home: "Home",
   inspirations: "Mga Inspirasyon",
-  notifications: "Mga Notification",
+  notificationsLabel: "Mga Notification",
   profile: "profile",
   settings: "Mga Setting",
   addPost: "Magdagdag ng Post",
