@@ -25,6 +25,8 @@ declare module "axios" {
     _diagnosticsStart?: number;
     _diagnosticsUrl?: string;
     _diagnosticsMethod?: string;
+    /** Set by 401 refresh path before re-issuing the request. */
+    _retry?: boolean;
     /** Session identity captured when the request was sent (AUTH-RACE-003). */
     _authSession?: AuthSessionSnapshot;
   }
@@ -198,10 +200,9 @@ const refreshTokenSingleFlight = async (
           updateTargets.api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
           updateTargets.axiosInstance.defaults.headers.common.Authorization = `Bearer ${newToken}`;
         } else {
-          // Only reachable when store was unavailable and session changed during await.
-          const live =
-            typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
-          return typeof live === "string" && live.length > 0 ? live : null;
+          // Session changed during the rare store-unavailable await — never hand the
+          // caller a live token from a different session (could be user B).
+          return null;
         }
       }
       if (import.meta.env.DEV) {
@@ -371,14 +372,29 @@ const attachInterceptor = (instance: AxiosInstance) => {
 
   instance.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      // GATE 3C.1P: Authorization and _authSession must bind to the same session.
+      // Auth retries keep the identity set by the 401 refresh path and must not be
+      // rebound to a newer login that completed before the retry is sent.
+      if (config._retry && config._authSession) {
+        const live = await captureAuthSessionSnapshot();
+        if (!canHandleAuthFailureForSession(config._authSession, live.generation)) {
+          return Promise.reject(
+            Object.assign(new Error("Auth session changed before retry"), {
+              config,
+              code: "ERR_AUTH_SESSION_CHANGED"
+            })
+          );
+        }
+        // Keep Authorization + _authSession from the refresh/retry owner.
+      } else {
+        const snapshot = await captureAuthSessionSnapshot();
+        config._authSession = snapshot;
+        if (snapshot.token) {
+          config.headers.Authorization = `Bearer ${snapshot.token}`;
+        }
       }
 
-      // Capture session ownership for stale 401/403 handling (AUTH-RACE-003).
-      config._authSession = await captureAuthSessionSnapshot();
+      const token = config._authSession?.token ?? null;
 
       // Prefer explicit app language over browser language for BE system texts.
       // Resolved per request so Settings language changes apply immediately.

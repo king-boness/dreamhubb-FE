@@ -10,29 +10,56 @@ export type AuthSessionSnapshot = {
   generation: number;
 };
 
-export async function captureAuthSessionSnapshot(): Promise<AuthSessionSnapshot> {
+/**
+ * Read token + generation with no await between them (GATE 3C.1P).
+ * Call only after any async store prep has finished.
+ */
+export function readAuthSessionSnapshotSync(
+  getGeneration: () => number
+): AuthSessionSnapshot {
   const token =
     typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
   let generation = 0;
   try {
+    generation = getGeneration();
+  } catch {
+    generation = 0;
+  }
+  return { token, generation };
+}
+
+export async function captureAuthSessionSnapshot(): Promise<AuthSessionSnapshot> {
+  // Resolve store module first. Dynamic import yields a microtask even when cached,
+  // so token/generation must be read only AFTER this await — together, synchronously.
+  let getGeneration = (): number => 0;
+  try {
     const { useAuthStore } = await import("src/stores/auth");
-    generation = useAuthStore().sessionGeneration;
+    getGeneration = () => useAuthStore().sessionGeneration;
   } catch {
     // Pinia/store may not be ready during very early boot.
   }
-  return { token, generation };
+  return readAuthSessionSnapshotSync(getGeneration);
 }
 
 export function readCurrentAuthSessionSnapshot(
   getGeneration?: () => number
 ): AuthSessionSnapshot {
-  const token =
-    typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
-  let generation = 0;
-  if (getGeneration) {
-    generation = getGeneration();
+  return readAuthSessionSnapshotSync(getGeneration ?? (() => 0));
+}
+
+/** True when Authorization bearer matches the bound session token. */
+export function authorizationMatchesSession(
+  authorizationHeader: unknown,
+  snapshot: AuthSessionSnapshot
+): boolean {
+  if (snapshot.token == null || snapshot.token.length === 0) {
+    return authorizationHeader == null || authorizationHeader === "";
   }
-  return { token, generation };
+  if (typeof authorizationHeader !== "string") {
+    return false;
+  }
+  const expected = `Bearer ${snapshot.token}`;
+  return authorizationHeader === expected;
 }
 
 /**

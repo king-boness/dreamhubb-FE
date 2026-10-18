@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it, beforeEach } from "node:test";
 import {
+  authorizationMatchesSession,
   canApplyRefreshedToken,
   canHandleAuthFailureForSession,
   canSafeLogoutSession,
+  readAuthSessionSnapshotSync,
   type AuthSessionSnapshot
 } from "./authSessionOwnership.ts";
 
@@ -87,12 +89,56 @@ describe("AUTH-RACE-003 refresh apply matrix", () => {
 
   it("post-write generation mismatch must not claim stale refresh success", () => {
     // Mirrors axios path: after sync write, if a later generation read diverges
-    // (store unavailable + await), return live token instead of stale newToken.
+    // (store unavailable + await), return null — never hand back token-B.
     const liveAfterAwait = "token-B";
     const genAfterAwait = 2;
-    const claimed =
-      genAfterAwait === snapA.generation ? "token-A2" : liveAfterAwait;
-    assert.equal(claimed, "token-B");
+    const claimed = genAfterAwait === snapA.generation ? "token-A2" : null;
+    assert.equal(claimed, null);
     assert.equal(canApplyRefreshedToken(snapA, liveAfterAwait, genAfterAwait), false);
+  });
+});
+
+describe("GATE 3C.1P request identity consistency", () => {
+  beforeEach(() => {
+    const map = new Map<string, string>();
+    (globalThis as { localStorage?: Storage }).localStorage = {
+      getItem: (k: string) => (map.has(k) ? map.get(k)! : null),
+      setItem: (k: string, v: string) => {
+        map.set(k, String(v));
+      },
+      removeItem: (k: string) => {
+        map.delete(k);
+      },
+      clear: () => map.clear(),
+      key: () => null,
+      length: 0
+    } as Storage;
+  });
+
+  it("sync snapshot reads token and generation without split await", () => {
+    localStorage.setItem("token", "token-A");
+    let generation = 1;
+    // Simulate login B completing before the sync read window.
+    localStorage.setItem("token", "token-B");
+    generation = 2;
+    const snap = readAuthSessionSnapshotSync(() => generation);
+    assert.equal(snap.token, "token-B");
+    assert.equal(snap.generation, 2);
+    assert.equal(authorizationMatchesSession(`Bearer ${snap.token}`, snap), true);
+  });
+
+  it("inconsistent Authorization vs snapshot is detectable", () => {
+    const snap = { token: "token-A", generation: 2 };
+    assert.equal(authorizationMatchesSession("Bearer token-A", snap), true);
+    assert.equal(authorizationMatchesSession("Bearer token-B", snap), false);
+  });
+
+  it("inconsistent generation matching live B must not authorize failure handling for A token alone", () => {
+    // After fix, capture never produces {token-A, gen-B}. If it did, peer refresh
+    // could return token-B — prove ownership predicates still need matching generation
+    // against the *request* generation for stale A (gen 1).
+    const snapA = { token: "token-A", generation: 1 };
+    assert.equal(canHandleAuthFailureForSession(snapA, 2), false);
+    assert.equal(canSafeLogoutSession(snapA, "token-B", 2), false);
   });
 });
