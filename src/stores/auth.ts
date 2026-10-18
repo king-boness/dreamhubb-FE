@@ -31,7 +31,9 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: (localStorage.getItem(TOKEN_KEY) || null) as string | null,
     user: null as User | null,
-    loading: false
+    loading: false,
+    /** Bumped on login/logout so late /user responses cannot mutate a newer session. */
+    sessionGeneration: 0
   }),
 
   getters: {
@@ -46,6 +48,11 @@ export const useAuthStore = defineStore("auth", {
       if (!("response" in error)) return false;
       const anyErr = error as { response?: { status?: number } };
       return anyErr.response?.status === status;
+    },
+
+    bumpSessionGeneration(): number {
+      this.sessionGeneration += 1;
+      return this.sessionGeneration;
     },
 
     async login(payload: { email: string; password: string }) {
@@ -69,6 +76,8 @@ export const useAuthStore = defineStore("auth", {
         }
 
         if (data && data.status === "success") {
+          // Invalidate any in-flight cold-start /user from a previous session.
+          this.bumpSessionGeneration();
           this.user = data.user || null;
           this.token = data.authorization?.token || null;
 
@@ -120,10 +129,18 @@ export const useAuthStore = defineStore("auth", {
         return;
       }
 
+      const generation = this.sessionGeneration;
+      const tokenAtStart = this.token;
       this.loading = true;
 
       try {
         const { data } = await api.get("/user");
+
+        // Stale response from an older session/token — ignore.
+        if (generation !== this.sessionGeneration || this.token !== tokenAtStart) {
+          this.loading = false;
+          return;
+        }
 
         if (data && data.status === "success") {
           this.user = data.user || null;
@@ -149,6 +166,10 @@ export const useAuthStore = defineStore("auth", {
         this.loading = false;
       } catch (error) {
         this.loading = false;
+        // Stale failure must not log out a newer session.
+        if (generation !== this.sessionGeneration || this.token !== tokenAtStart) {
+          return;
+        }
         // If token is invalid/expired, do local-only logout (avoid /logout spam + loops)
         if (this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403)) {
           await this.logout({ remote: false, silent: true });
@@ -162,6 +183,9 @@ export const useAuthStore = defineStore("auth", {
     async logout(opts?: { remote?: boolean; silent?: boolean }) {
       const remote = opts?.remote ?? true;
       const silent = opts?.silent ?? false;
+
+      // Invalidate in-flight /user before clearing credentials.
+      this.bumpSessionGeneration();
 
       try {
         if (remote) {

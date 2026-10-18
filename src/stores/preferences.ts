@@ -1,8 +1,16 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "./auth";
+import {
+  LEGACY_PREFERENCES_KEY,
+  canAdoptLegacyPreferences,
+  loadPreferencesRecordForUser
+} from "src/utils/legacyPreferencesAdoption";
 
 export type Side = "donor" | "donee";
 export type PostType = "dream" | "problem" | "idea";
+
+// Re-export for existing call sites / tests
+export { LEGACY_PREFERENCES_KEY, canAdoptLegacyPreferences };
 
 interface FeedLocation {
   continentId: number | null;
@@ -31,31 +39,7 @@ const getSeededDonorFiltersFlagKey = (userId: number | null | undefined): string
 };
 
 const loadFromStorage = (userId: number | null | undefined) => {
-  const storageKey = getStorageKey(userId);
-  const raw = localStorage.getItem(storageKey);
-  if (!raw) {
-    // Backwards compatibility: try old key if user-specific key doesn't exist
-    if (userId) {
-      const oldRaw = localStorage.getItem("preferences_store");
-      if (oldRaw) {
-        try {
-          const oldData = JSON.parse(oldRaw);
-          // Migrate old data to user-specific key
-          localStorage.setItem(storageKey, oldRaw);
-          localStorage.removeItem("preferences_store");
-          return oldData;
-        } catch {
-          // ignore
-        }
-      }
-    }
-    return null;
-  }
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return loadPreferencesRecordForUser(userId);
 };
 
 export const usePreferencesStore = defineStore("preferences", {
@@ -98,32 +82,11 @@ export const usePreferencesStore = defineStore("preferences", {
     hydrateFromStorage() {
       const authStore = useAuthStore();
       const userId = authStore.user?.id;
-      const raw = localStorage.getItem(getStorageKey(userId));
-      if (!raw) {
-        // Backwards compatibility: try old key if user-specific key doesn't exist
-        if (userId) {
-          const oldRaw = localStorage.getItem("preferences_store");
-          if (oldRaw) {
-            try {
-              const oldData = JSON.parse(oldRaw);
-              // Migrate old data to user-specific key
-              localStorage.setItem(getStorageKey(userId), oldRaw);
-              localStorage.removeItem("preferences_store");
-              const data = oldData;
-              this.currentSide = data.currentSide ?? this.currentSide;
-              this.onboardingInitialSide = data.onboardingInitialSide ?? this.onboardingInitialSide;
-              this.preferredPostType = data.preferredPostType ?? this.preferredPostType;
-              this.preferredSubcategory = data.preferredSubcategory ?? this.preferredSubcategory;
-              this.preferredFeedLocation = data.preferredFeedLocation ?? this.preferredFeedLocation;
-              this.lastUsedFeedFilters = data.lastUsedFeedFilters ?? this.lastUsedFeedFilters;
-              return;
-            } catch (e) {
-              // ignore and fall through to safe defaults
-            }
-          }
-        }
+      const data = loadFromStorage(userId);
+      if (!data) {
         // No prefs for this account — reset in-memory state so a previous user's
         // side (e.g. donee) cannot leak into the next login session.
+        // Unowned legacy `preferences_store` is left untouched.
         this.currentSide = "donor";
         this.onboardingInitialSide = "donor";
         this.preferredPostType = null;
@@ -133,7 +96,6 @@ export const usePreferencesStore = defineStore("preferences", {
         return;
       }
       try {
-        const data = JSON.parse(raw);
         this.currentSide = data.currentSide ?? "donor";
         this.onboardingInitialSide = data.onboardingInitialSide ?? "donor";
         this.preferredPostType = data.preferredPostType ?? null;
@@ -330,7 +292,6 @@ export const usePreferencesStore = defineStore("preferences", {
       const userId = authStore.user?.id;
       if (!userId) return;
 
-      const legacyKey = "preferences_store";
       const newKey = getDonorFiltersStorageKey(userId);
 
       // If user-specific key already exists, no migration needed
@@ -338,13 +299,15 @@ export const usePreferencesStore = defineStore("preferences", {
         return;
       }
 
-      // Try to load from legacy key
-      const legacy = localStorage.getItem(legacyKey);
+      const legacy = localStorage.getItem(LEGACY_PREFERENCES_KEY);
       if (!legacy) return;
 
       try {
         const parsed = JSON.parse(legacy);
-        // Extract only donor filters from legacy data
+        // Only adopt when legacy explicitly belongs to this user (no owner → skip).
+        if (!canAdoptLegacyPreferences(parsed, Number(userId))) {
+          return;
+        }
         if (parsed.lastUsedFeedFilters) {
           const donorFiltersPayload = {
             postType: parsed.lastUsedFeedFilters.postType || null,
@@ -356,7 +319,7 @@ export const usePreferencesStore = defineStore("preferences", {
             }
           };
           localStorage.setItem(newKey, JSON.stringify(donorFiltersPayload));
-          // Note: We don't remove the old key here, as it may contain other preferences
+          // Do not remove legacy key — may contain other preferences / unknown owner history.
         }
       } catch (e) {
         if (import.meta.env.DEV) {

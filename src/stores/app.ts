@@ -2,6 +2,7 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "./auth";
 import { usePreferencesStore } from "./preferences";
+import { markAuthSessionSettled, runColdStartAuthProbe } from "src/utils/authSessionReady";
 
 export const useAppStore = defineStore("app", {
   state: () => ({
@@ -22,26 +23,31 @@ export const useAppStore = defineStore("app", {
       const preferencesStore = usePreferencesStore();
 
       try {
+        // TOKEN → AUTH INIT → USER ID → PREFERENCES
+        if (authStore.token) {
+          await runColdStartAuthProbe(async () => {
+            try {
+              await authStore.fetchUser();
+            } catch {
+              if (import.meta.env.DEV) {
+                console.debug("[AppStore] fetchUser failed during init; clearing session silently.");
+              }
+              try {
+                await authStore.logout({ remote: false, silent: true });
+              } catch {
+                // ignore — guest flow must still render
+              }
+            }
+          });
+        } else {
+          markAuthSessionSettled();
+        }
+
         try {
           preferencesStore.hydrateFromStorage();
         } catch (error) {
           if (import.meta.env.DEV) {
             console.debug("[AppStore] hydrateFromStorage failed:", error);
-          }
-        }
-
-        if (authStore.token) {
-          try {
-            await authStore.fetchUser();
-          } catch {
-            if (import.meta.env.DEV) {
-              console.debug("[AppStore] fetchUser failed during init; clearing session silently.");
-            }
-            try {
-              await authStore.logout({ remote: false, silent: true });
-            } catch {
-              // ignore — guest flow must still render
-            }
           }
         }
       } catch (error) {
@@ -50,6 +56,8 @@ export const useAppStore = defineStore("app", {
         }
       } finally {
         this.isInitializingApp = false;
+        // Idempotent if cold-start probe already settled.
+        markAuthSessionSettled();
         if (import.meta.env.DEV) {
           console.debug("[AppStore] initializeApp finished");
         }

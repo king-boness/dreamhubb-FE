@@ -12,13 +12,27 @@ import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
 import { captureShareVisitFromRoute } from "src/utils/shareVisitCapture";
 import { readStoredSidePreferences, resolvePostAuthRedirect } from "src/utils/postAuthRedirect";
+import {
+  waitForAuthSessionSettled,
+  waitForAuthUserId
+} from "src/utils/authSessionReady";
 
-function resolveAuthenticatedHome(piniaStore: unknown) {
+async function resolveAuthenticatedHome(piniaStore: unknown) {
   try {
     let userId: number | null = null;
     if (piniaStore) {
       const authStore = useAuthStore(piniaStore as never);
-      userId = authStore.user?.id ?? null;
+      const hasToken = !!(authStore.token || localStorage.getItem("token"));
+      if (hasToken && authStore.user?.id == null) {
+        await waitForAuthSessionSettled(8000);
+        userId = await waitForAuthUserId(
+          () => authStore.user?.id ?? null,
+          () => authStore.token || localStorage.getItem("token"),
+          5000
+        );
+      } else {
+        userId = authStore.user?.id ?? null;
+      }
       const preferencesStore = usePreferencesStore(piniaStore as never);
       preferencesStore.hydrateFromStorage();
     }
@@ -120,7 +134,7 @@ export default route(function ({ store }) {
 
       // 🚪 guestOnly routes - len pre neprihlásených
       if (to.meta.guestOnly && isAuthenticated) {
-        next(resolveAuthenticatedHome(store));
+        void resolveAuthenticatedHome(store).then((loc) => next(loc));
         return;
       }
 
@@ -133,7 +147,7 @@ export default route(function ({ store }) {
       // 🏠 Root path redirect
       if (to.path === "/" && to.name !== "splash") {
         if (isAuthenticated) {
-          next(resolveAuthenticatedHome(store));
+          void resolveAuthenticatedHome(store).then((loc) => next(loc));
         } else {
           next({ name: "auth-welcome-page" });
         }
@@ -155,7 +169,7 @@ export default route(function ({ store }) {
           to.name === "registration" ||
           to.name === "explainers")
       ) {
-        next(resolveAuthenticatedHome(store));
+        void resolveAuthenticatedHome(store).then((loc) => next(loc));
         return;
       }
 
@@ -167,7 +181,7 @@ export default route(function ({ store }) {
       if (to.meta.requiresAuth && !hasToken) {
         next({ name: "auth-welcome-page" });
       } else if (to.meta.guestOnly && hasToken) {
-        next(resolveAuthenticatedHome(store));
+        void resolveAuthenticatedHome(store).then((loc) => next(loc));
       } else {
         // Vždy zavolaj next() aj v catch bloku
         next();

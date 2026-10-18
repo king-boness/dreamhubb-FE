@@ -12,11 +12,55 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { usePreferencesStore } from "src/stores/preferences";
 import { readStoredSidePreferences, resolvePostAuthRedirect } from "src/utils/postAuthRedirect";
+import {
+  waitForAuthSessionSettled,
+  waitForAuthUserId
+} from "src/utils/authSessionReady";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const preferencesStore = usePreferencesStore();
 let lottieInstance = null;
+
+async function navigateAfterSplash() {
+  // Router bootstrap must not depend on legacy jwtToken store.
+  // Canonical key is "token" (auth store + axios boot).
+  const token = authStore.token || localStorage.getItem("token") || "";
+
+  if (!token) {
+    await router.replace({ name: "auth-welcome-page" });
+    return;
+  }
+
+  // Cold start: animation may finish before /user resolves — wait for boot/init settle,
+  // then for userId without issuing an extra API call.
+  await waitForAuthSessionSettled(8000);
+  const tokenAfter = authStore.token || localStorage.getItem("token") || "";
+  if (!tokenAfter) {
+    await router.replace({ name: "auth-welcome-page" });
+    return;
+  }
+
+  const userId = await waitForAuthUserId(
+    () => authStore.user?.id ?? null,
+    () => authStore.token || localStorage.getItem("token"),
+    5000
+  );
+
+  if (!authStore.token && !localStorage.getItem("token")) {
+    await router.replace({ name: "auth-welcome-page" });
+    return;
+  }
+
+  preferencesStore.hydrateFromStorage();
+  const storedSides = readStoredSidePreferences(userId);
+  await router.replace(
+    resolvePostAuthRedirect({
+      currentSide: storedSides.currentSide,
+      onboardingInitialSide: storedSides.onboardingInitialSide
+    })
+  );
+}
 
 onMounted(() => {
   const animationContainer = document.getElementById("animation-container");
@@ -30,22 +74,7 @@ onMounted(() => {
   });
 
   lottieInstance.addEventListener("complete", () => {
-    // Router bootstrap must not depend on legacy jwtToken store.
-    // Canonical key is "token" (auth store + axios boot).
-    const token = authStore.token || localStorage.getItem("token") || "";
-
-    if (!token) {
-      router.replace({ name: "auth-welcome-page" });
-    } else {
-      preferencesStore.hydrateFromStorage();
-      const storedSides = readStoredSidePreferences(authStore.user?.id ?? null);
-      router.replace(
-        resolvePostAuthRedirect({
-          currentSide: storedSides.currentSide,
-          onboardingInitialSide: storedSides.onboardingInitialSide
-        })
-      );
-    }
+    void navigateAfterSplash();
   });
 });
 
