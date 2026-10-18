@@ -12,11 +12,23 @@ import {
 } from "src/config/apiBase";
 import { resolveAcceptLanguageHeader } from "src/utils/apiLanguage";
 
+import {
+  captureAuthSessionSnapshot,
+  canApplyRefreshedToken,
+  canHandleAuthFailureForSession,
+  canSafeLogoutSession,
+  type AuthSessionSnapshot
+} from "src/utils/authSessionOwnership";
+
 declare module "axios" {
   interface InternalAxiosRequestConfig {
     _diagnosticsStart?: number;
     _diagnosticsUrl?: string;
     _diagnosticsMethod?: string;
+    /** Set by 401 refresh path before re-issuing the request. */
+    _retry?: boolean;
+    /** Session identity captured when the request was sent (AUTH-RACE-003). */
+    _authSession?: AuthSessionSnapshot;
   }
 }
 
@@ -54,10 +66,16 @@ if (import.meta.env.DEV || IS_NATIVE_RUNTIME) {
 }
 
 // ------------------------------------
-//  401 refresh single-flight (queue)
+//  401 refresh single-flight (per session token)
 // ------------------------------------
-let refreshPromise: Promise<string | null> | null = null;
+type RefreshFlight = {
+  token: string;
+  promise: Promise<string | null>;
+};
+
+let activeRefreshFlight: RefreshFlight | null = null;
 let logoutPromise: Promise<void> | null = null;
+let logoutForGeneration: number | null = null;
 let isRedirectingToLogin = false;
 
 const isAuthEndpointUrl = (url: string) => {
@@ -73,69 +91,181 @@ const isAuthEndpointUrl = (url: string) => {
   );
 };
 
+async function readLiveGeneration(): Promise<number> {
+  try {
+    const { useAuthStore } = await import("src/stores/auth");
+    return useAuthStore().sessionGeneration;
+  } catch {
+    return 0;
+  }
+}
+
 const refreshTokenSingleFlight = async (
-  updateTargets?: { api: AxiosInstance; axiosInstance: AxiosInstance }
+  updateTargets?: { api: AxiosInstance; axiosInstance: AxiosInstance },
+  sessionHint?: AuthSessionSnapshot
 ): Promise<string | null> => {
-  if (refreshPromise) return refreshPromise;
+  const snapshot = sessionHint ?? (await captureAuthSessionSnapshot());
+  const tokenAtStart = snapshot.token;
+  if (!tokenAtStart) {
+    return null;
+  }
 
-  refreshPromise = (async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
+  // Join in-flight refresh only for the SAME session token (never reuse A for B).
+  if (activeRefreshFlight && activeRefreshFlight.token === tokenAtStart) {
+    return activeRefreshFlight.promise;
+  }
 
+  const promise = (async (): Promise<string | null> => {
     try {
       const refreshResponse = await axios.post(
         `${BASE}/refresh`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${tokenAtStart}` } }
       );
 
       const newToken =
         refreshResponse.data?.authorization?.token ||
         refreshResponse.data?.token;
 
-      if (typeof newToken === "string" && newToken.length > 0) {
-        localStorage.setItem("token", newToken);
-        // Update auth store + axios defaults so all subsequent requests use new token
-        try {
-          const { useAuthStore } = await import("src/stores/auth");
-          useAuthStore().setToken(newToken);
-        } catch {
-          // ignore (store not ready)
-        }
-        if (updateTargets) {
-          updateTargets.api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          updateTargets.axiosInstance.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-        }
-        if (import.meta.env.DEV) {
-          console.debug("refresh ok, new token head:", newToken.slice(0, 20) + "...");
-        }
-        return newToken;
+      if (typeof newToken !== "string" || newToken.length === 0) {
+        return null;
       }
 
-      return null;
+      const liveGeneration = await readLiveGeneration();
+      const liveToken =
+        typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
+
+      // AUTH-RACE-003: never write if login/logout created a newer session.
+      if (!canApplyRefreshedToken(snapshot, liveToken, liveGeneration)) {
+        // Peer refresh for the same generation already rotated the token.
+        if (
+          liveGeneration === snapshot.generation &&
+          typeof liveToken === "string" &&
+          liveToken.length > 0 &&
+          liveToken !== tokenAtStart
+        ) {
+          return liveToken;
+        }
+        return null;
+      }
+
+      // Final ownership check immediately before mutating auth state.
+      let authStore: { sessionGeneration: number; setToken: (t: string | null) => void } | null =
+        null;
+      try {
+        const mod = await import("src/stores/auth");
+        authStore = mod.useAuthStore();
+      } catch {
+        authStore = null;
+      }
+
+      const genNow = authStore?.sessionGeneration ?? (await readLiveGeneration());
+      const tokenNow =
+        typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
+      if (!canApplyRefreshedToken(snapshot, tokenNow, genNow)) {
+        if (
+          genNow === snapshot.generation &&
+          typeof tokenNow === "string" &&
+          tokenNow.length > 0 &&
+          tokenNow !== tokenAtStart
+        ) {
+          return tokenNow;
+        }
+        return null;
+      }
+
+      // Mutate window: ownership re-check + localStorage/store writes are synchronous.
+      // No await between the final checks and setItem/setToken, so login/logout
+      // cannot interleave under JS single-threading (AUTH-RACE-003).
+      if (authStore && authStore.sessionGeneration !== snapshot.generation) {
+        return null;
+      }
+      if (localStorage.getItem("token") !== tokenAtStart) {
+        const cur = localStorage.getItem("token");
+        return typeof cur === "string" && cur.length > 0 ? cur : null;
+      }
+
+      localStorage.setItem("token", newToken);
+      if (authStore) {
+        authStore.setToken(newToken);
+      }
+
+      if (updateTargets) {
+        // Prefer sync generation when store is available — avoids an await after write.
+        const genHeaders =
+          authStore != null
+            ? authStore.sessionGeneration
+            : await readLiveGeneration();
+        if (genHeaders === snapshot.generation) {
+          updateTargets.api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+          updateTargets.axiosInstance.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+        } else {
+          // Session changed during the rare store-unavailable await — never hand the
+          // caller a live token from a different session (could be user B).
+          return null;
+        }
+      }
+      if (import.meta.env.DEV) {
+        console.debug("refresh ok, new token head:", newToken.slice(0, 20) + "...");
+      }
+      return newToken;
     } catch {
       return null;
     } finally {
-      // Always clear lock (success/fail)
-      refreshPromise = null;
+      if (activeRefreshFlight?.promise === promise) {
+        activeRefreshFlight = null;
+      }
     }
   })();
 
-  return refreshPromise;
+  activeRefreshFlight = { token: tokenAtStart, promise };
+  return promise;
 };
 
-const safeLogoutAndRedirect = async () => {
-  if (logoutPromise) return logoutPromise;
+const safeLogoutAndRedirect = async (sessionHint?: AuthSessionSnapshot) => {
+  const snapshot = sessionHint ?? (await captureAuthSessionSnapshot());
+
+  // Single-flight per generation — never let session A's logout finish as B's.
+  if (logoutPromise && logoutForGeneration === snapshot.generation) {
+    return logoutPromise;
+  }
 
   logoutPromise = (async () => {
+    logoutForGeneration = snapshot.generation;
     try {
-      localStorage.removeItem("token");
+      const liveGeneration = await readLiveGeneration();
+      const liveToken =
+        typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
+
+      if (!canSafeLogoutSession(snapshot, liveToken, liveGeneration)) {
+        return;
+      }
+
       try {
         const { useAuthStore } = await import("src/stores/auth");
         const authStore = useAuthStore();
+        // Re-check after import — AUTH-RACE-002 logout itself is also generation-safe.
+        if (
+          !canSafeLogoutSession(
+            snapshot,
+            localStorage.getItem("token"),
+            authStore.sessionGeneration
+          )
+        ) {
+          return;
+        }
         await authStore.logout({ remote: false, silent: true });
       } catch {
         // ignore
+      }
+
+      // Logout bumps sessionGeneration. A newer login during/after logout will have
+      // written a token — in that case do not toast/redirect the new user away.
+      // If storage is empty, this logout still owns the outcome → notify + redirect.
+      const tokenAfter =
+        typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
+      if (tokenAfter) {
+        return;
       }
 
       notifyError({
@@ -145,13 +275,20 @@ const safeLogoutAndRedirect = async () => {
         retryable: false
       });
 
+      if (typeof localStorage !== "undefined" && localStorage.getItem("token")) {
+        return;
+      }
+
       // Avoid reload loops: if already on login, don't redirect again.
       if (!String(window.location.href).includes("/login") && !isRedirectingToLogin) {
         isRedirectingToLogin = true;
         window.location.href = "/login";
       }
     } finally {
-      logoutPromise = null;
+      if (logoutForGeneration === snapshot.generation) {
+        logoutPromise = null;
+        logoutForGeneration = null;
+      }
     }
   })();
 
@@ -235,11 +372,29 @@ const attachInterceptor = (instance: AxiosInstance) => {
 
   instance.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      // GATE 3C.1P: Authorization and _authSession must bind to the same session.
+      // Auth retries keep the identity set by the 401 refresh path and must not be
+      // rebound to a newer login that completed before the retry is sent.
+      if (config._retry && config._authSession) {
+        const live = await captureAuthSessionSnapshot();
+        if (!canHandleAuthFailureForSession(config._authSession, live.generation)) {
+          return Promise.reject(
+            Object.assign(new Error("Auth session changed before retry"), {
+              config,
+              code: "ERR_AUTH_SESSION_CHANGED"
+            })
+          );
+        }
+        // Keep Authorization + _authSession from the refresh/retry owner.
+      } else {
+        const snapshot = await captureAuthSessionSnapshot();
+        config._authSession = snapshot;
+        if (snapshot.token) {
+          config.headers.Authorization = `Bearer ${snapshot.token}`;
+        }
       }
+
+      const token = config._authSession?.token ?? null;
 
       // Prefer explicit app language over browser language for BE system texts.
       // Resolved per request so Settings language changes apply immediately.
@@ -404,16 +559,38 @@ const attachInterceptor = (instance: AxiosInstance) => {
         return Promise.reject(error);
       }
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
         if (isAuthEndpointUrl(url)) {
+          return Promise.reject(error);
+        }
+
+        const requestSession =
+          originalRequest._authSession ?? (await captureAuthSessionSnapshot());
+        const liveGen = await readLiveGeneration();
+        if (!canHandleAuthFailureForSession(requestSession, liveGen)) {
+          // Stale 401 from a previous account — do not refresh/logout the new session.
           return Promise.reject(error);
         }
 
         originalRequest._retry = true;
 
-        const newToken = await refreshTokenSingleFlight({ api, axiosInstance });
+        const newToken = await refreshTokenSingleFlight(
+          { api, axiosInstance },
+          requestSession
+        );
+
+        const genAfterRefresh = await readLiveGeneration();
+        if (!canHandleAuthFailureForSession(requestSession, genAfterRefresh)) {
+          return Promise.reject(error);
+        }
+
         if (!newToken) {
-          await safeLogoutAndRedirect();
+          await safeLogoutAndRedirect(requestSession);
+          return Promise.reject(error);
+        }
+
+        // Retry only while the original session still owns the app.
+        if (!canHandleAuthFailureForSession(requestSession, await readLiveGeneration())) {
           return Promise.reject(error);
         }
 
@@ -422,14 +599,28 @@ const attachInterceptor = (instance: AxiosInstance) => {
       }
 
       // If we already retried once and still get 401, force a single safe logout + redirect.
-      if (error.response?.status === 401 && originalRequest?._retry && !isAuthEndpointUrl(url)) {
-        await safeLogoutAndRedirect();
+      if (
+        error.response?.status === 401 &&
+        originalRequest?._retry &&
+        !isAuthEndpointUrl(url)
+      ) {
+        const requestSession =
+          originalRequest._authSession ?? (await captureAuthSessionSnapshot());
+        if (!canHandleAuthFailureForSession(requestSession, await readLiveGeneration())) {
+          return Promise.reject(error);
+        }
+        await safeLogoutAndRedirect(requestSession);
         return Promise.reject(error);
       }
 
       // 403 (Forbidden) - also logout (user doesn't have permission)
       if (error.response?.status === 403 && !isAuthEndpointUrl(url)) {
-        await safeLogoutAndRedirect();
+        const requestSession =
+          originalRequest?._authSession ?? (await captureAuthSessionSnapshot());
+        if (!canHandleAuthFailureForSession(requestSession, await readLiveGeneration())) {
+          return Promise.reject(error);
+        }
+        await safeLogoutAndRedirect(requestSession);
         return Promise.reject(error);
       }
 

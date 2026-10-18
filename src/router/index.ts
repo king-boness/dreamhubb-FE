@@ -9,7 +9,42 @@ import {
 
 import routes from "./routes";
 import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore } from "src/stores/preferences";
 import { captureShareVisitFromRoute } from "src/utils/shareVisitCapture";
+import { readStoredSidePreferences, resolvePostAuthRedirect } from "src/utils/postAuthRedirect";
+import {
+  waitForAuthSessionSettled,
+  waitForAuthUserId
+} from "src/utils/authSessionReady";
+
+async function resolveAuthenticatedHome(piniaStore: unknown) {
+  try {
+    let userId: number | null = null;
+    if (piniaStore) {
+      const authStore = useAuthStore(piniaStore as never);
+      const hasToken = !!(authStore.token || localStorage.getItem("token"));
+      if (hasToken && authStore.user?.id == null) {
+        await waitForAuthSessionSettled(8000);
+        userId = await waitForAuthUserId(
+          () => authStore.user?.id ?? null,
+          () => authStore.token || localStorage.getItem("token"),
+          5000
+        );
+      } else {
+        userId = authStore.user?.id ?? null;
+      }
+      const preferencesStore = usePreferencesStore(piniaStore as never);
+      preferencesStore.hydrateFromStorage();
+    }
+    const storedSides = readStoredSidePreferences(userId);
+    return resolvePostAuthRedirect({
+      currentSide: storedSides.currentSide,
+      onboardingInitialSide: storedSides.onboardingInitialSide
+    });
+  } catch {
+    return resolvePostAuthRedirect();
+  }
+}
 
 export default route(function ({ store }) {
   const createHistory = process.env.SERVER
@@ -99,7 +134,7 @@ export default route(function ({ store }) {
 
       // 🚪 guestOnly routes - len pre neprihlásených
       if (to.meta.guestOnly && isAuthenticated) {
-        next({ name: "donor-posts" });
+        void resolveAuthenticatedHome(store).then((loc) => next(loc));
         return;
       }
 
@@ -112,7 +147,7 @@ export default route(function ({ store }) {
       // 🏠 Root path redirect
       if (to.path === "/" && to.name !== "splash") {
         if (isAuthenticated) {
-          next({ name: "donor-posts" });
+          void resolveAuthenticatedHome(store).then((loc) => next(loc));
         } else {
           next({ name: "auth-welcome-page" });
         }
@@ -126,7 +161,7 @@ export default route(function ({ store }) {
         return;
       }
 
-      // 🔁 Legacy: Prihlásený používateľ na login / landing → rovno na feed
+      // 🔁 Legacy: Prihlásený používateľ na login / landing → rovno na feed podľa strany
       if (
         isAuthenticated &&
         (to.name === "login" ||
@@ -134,7 +169,7 @@ export default route(function ({ store }) {
           to.name === "registration" ||
           to.name === "explainers")
       ) {
-        next({ name: "donor-posts" });
+        void resolveAuthenticatedHome(store).then((loc) => next(loc));
         return;
       }
 
@@ -146,7 +181,7 @@ export default route(function ({ store }) {
       if (to.meta.requiresAuth && !hasToken) {
         next({ name: "auth-welcome-page" });
       } else if (to.meta.guestOnly && hasToken) {
-        next({ name: "donor-posts" });
+        void resolveAuthenticatedHome(store).then((loc) => next(loc));
       } else {
         // Vždy zavolaj next() aj v catch bloku
         next();

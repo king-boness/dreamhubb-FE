@@ -1,7 +1,14 @@
 // src/stores/auth.ts
 import { defineStore } from "pinia";
+import axios from "axios";
 import { api } from "boot/axios";
+import { API_BASE_URL } from "src/config/apiBase";
 import { resolveProfileImageSrc } from "src/utils/avatar";
+import {
+  shouldApplyLocalLogoutCleanup,
+  shouldClearAuthorizationHeader,
+  type LogoutSessionSnapshot
+} from "src/utils/authLogoutGuard";
 
 const TOKEN_KEY = "token";
 
@@ -31,7 +38,9 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: (localStorage.getItem(TOKEN_KEY) || null) as string | null,
     user: null as User | null,
-    loading: false
+    loading: false,
+    /** Bumped on login/logout so late /user responses cannot mutate a newer session. */
+    sessionGeneration: 0
   }),
 
   getters: {
@@ -46,6 +55,11 @@ export const useAuthStore = defineStore("auth", {
       if (!("response" in error)) return false;
       const anyErr = error as { response?: { status?: number } };
       return anyErr.response?.status === status;
+    },
+
+    bumpSessionGeneration(): number {
+      this.sessionGeneration += 1;
+      return this.sessionGeneration;
     },
 
     async login(payload: { email: string; password: string }) {
@@ -69,6 +83,8 @@ export const useAuthStore = defineStore("auth", {
         }
 
         if (data && data.status === "success") {
+          // Invalidate any in-flight cold-start /user from a previous session.
+          this.bumpSessionGeneration();
           this.user = data.user || null;
           this.token = data.authorization?.token || null;
 
@@ -120,10 +136,18 @@ export const useAuthStore = defineStore("auth", {
         return;
       }
 
+      const generation = this.sessionGeneration;
+      const tokenAtStart = this.token;
       this.loading = true;
 
       try {
         const { data } = await api.get("/user");
+
+        // Stale response from an older session/token — ignore.
+        if (generation !== this.sessionGeneration || this.token !== tokenAtStart) {
+          this.loading = false;
+          return;
+        }
 
         if (data && data.status === "success") {
           this.user = data.user || null;
@@ -149,6 +173,10 @@ export const useAuthStore = defineStore("auth", {
         this.loading = false;
       } catch (error) {
         this.loading = false;
+        // Stale failure must not log out a newer session.
+        if (generation !== this.sessionGeneration || this.token !== tokenAtStart) {
+          return;
+        }
         // If token is invalid/expired, do local-only logout (avoid /logout spam + loops)
         if (this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403)) {
           await this.logout({ remote: false, silent: true });
@@ -159,53 +187,111 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    /**
+     * Apply local logout cleanup only if this logout still owns the session.
+     * AUTH-RACE-002: a delayed logout must never wipe a newer login.
+     */
+    applyLocalLogoutCleanup(snapshot: LogoutSessionSnapshot): boolean {
+      if (
+        !shouldApplyLocalLogoutCleanup(snapshot, this.token, this.sessionGeneration)
+      ) {
+        return false;
+      }
+
+      const authHeader = api.defaults.headers.common.Authorization;
+      const storageToken = localStorage.getItem(TOKEN_KEY);
+
+      this.user = null;
+      this.token = null;
+      // Only remove storage token if it still matches the revoked session (or is already empty).
+      if (!storageToken || storageToken === snapshot.tokenToRevoke) {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+
+      if (
+        shouldClearAuthorizationHeader(
+          snapshot,
+          authHeader,
+          localStorage.getItem(TOKEN_KEY)
+        )
+      ) {
+        delete api.defaults.headers.common.Authorization;
+      }
+
+      // Clear guest filters to avoid inheriting old location/filters on next registration
+      localStorage.removeItem("dreamhubb_donor_filters_guest");
+      localStorage.removeItem("preferences_store_guest");
+
+      return true;
+    },
+
     async logout(opts?: { remote?: boolean; silent?: boolean }) {
       const remote = opts?.remote ?? true;
       const silent = opts?.silent ?? false;
 
-      try {
-        if (remote) {
-          // Pokúsiť sa zavolať POST /logout (endpoint existuje, ale token sa na BE pravdepodobne reálne neinvaliduje)
-          await api.post("/logout");
-        }
-      } catch (error) {
-        // Ignore errors - we still clear local session.
-        // 401 is expected if token is already expired/invalid.
-        const isExpected = this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403);
-        if (!silent && import.meta.env.DEV && !isExpected) {
-          console.debug("[Auth] Logout API call failed:", error);
-        }
-      } finally {
-        // Bez ohľadu na výsledok:
-        this.user = null;
-        this.token = null;
-        localStorage.removeItem(TOKEN_KEY);
-        delete api.defaults.headers.common.Authorization;
+      // Capture credentials for THIS logout before any await / newer login.
+      const tokenToRevoke = this.token;
+      const logoutGeneration = this.bumpSessionGeneration();
+      const snapshot: LogoutSessionSnapshot = { tokenToRevoke, logoutGeneration };
 
-        // Clear guest filters to avoid inheriting old location/filters on next registration
-        localStorage.removeItem("dreamhubb_donor_filters_guest");
-        localStorage.removeItem("preferences_store_guest");
+      // Immediate local invalidation so UI/session cannot keep using token A.
+      // Remote revoke happens next with the captured token (not ambient interceptor token).
+      const cleared = this.applyLocalLogoutCleanup(snapshot);
 
-        // Reset onboarding store pri logout-e
+      if (cleared) {
         try {
           const { useOnboardingStore } = await import("src/stores/onboarding");
-          const onboardingStore = useOnboardingStore();
-          onboardingStore.reset();
+          // Re-check after await — a newer login must not get onboarding reset.
+          if (shouldApplyLocalLogoutCleanup(snapshot, this.token, this.sessionGeneration)) {
+            useOnboardingStore().reset();
+          }
         } catch (error) {
-          // Ignorovať chyby - onboarding store možno nie je inicializovaný
           if (import.meta.env.DEV) {
             console.debug("[Auth] Failed to reset onboarding store:", error);
           }
         }
-
-        // Reset preferences donor filters in-memory (avoid UI using stale filters after logout)
         try {
           const { usePreferencesStore } = await import("src/stores/preferences");
-          const preferencesStore = usePreferencesStore();
-          preferencesStore.clearLastUsedFeedFilters();
+          if (shouldApplyLocalLogoutCleanup(snapshot, this.token, this.sessionGeneration)) {
+            usePreferencesStore().clearLastUsedFeedFilters();
+          }
         } catch {
           // ignore
         }
+      }
+
+      if (remote && tokenToRevoke) {
+        try {
+          // Use plain axios (no api request interceptor). The interceptor always
+          // injects localStorage token — after a newer login that would be token B,
+          // which must never be sent to /logout for session A.
+          const base = String(API_BASE_URL || "").replace(/\/$/, "");
+          await axios.post(
+            `${base}/logout`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${tokenToRevoke}`,
+                Accept: "application/json",
+                "Content-Type": "application/json"
+              },
+              timeout: 20000
+            }
+          );
+        } catch (error) {
+          // Ignore errors - local session for A was already cleared when we owned it.
+          // 401 is expected if token is already expired/invalid.
+          const isExpected = this.isAxiosStatus(error, 401) || this.isAxiosStatus(error, 403);
+          if (!silent && import.meta.env.DEV && !isExpected) {
+            console.debug("[Auth] Logout API call failed:", error);
+          }
+        }
+      }
+
+      // Idempotent: if no newer session appeared, ensure cleanup still applied
+      // (e.g. remote:false, or first clear was a no-op edge case).
+      if (shouldApplyLocalLogoutCleanup(snapshot, this.token, this.sessionGeneration)) {
+        this.applyLocalLogoutCleanup(snapshot);
       }
     },
 

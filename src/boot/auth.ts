@@ -1,66 +1,52 @@
 import { boot } from "quasar/wrappers";
-import { api } from "./axios";
-import { AxiosError } from "axios";
 import { useAuthStore } from "src/stores/auth";
+import { markAuthSessionSettled, runColdStartAuthProbe } from "src/utils/authSessionReady";
 
 export default boot(({ router }) => {
-  // Non-blocking: do not delay first paint / Capacitor bridge on cold start.
+  // Non-blocking: join single-flight cold-start probe (shared with App.initializeApp).
+  // Do NOT mark settled here on a private /user race — that prematurely unblocked redirects.
   void (async () => {
-    try {
-      const authStore = useAuthStore();
+    const TOKEN_KEY = "token";
+    const LEGACY_TOKEN_KEY = "jwtToken";
 
-      const TOKEN_KEY = "token";
-      const LEGACY_TOKEN_KEY = "jwtToken";
+    const token = localStorage.getItem(TOKEN_KEY);
+    const legacyToken = localStorage.getItem(LEGACY_TOKEN_KEY);
 
-      const token = localStorage.getItem(TOKEN_KEY);
-      const legacyToken = localStorage.getItem(LEGACY_TOKEN_KEY);
-
-      if (!token) {
-        if (legacyToken) {
-          localStorage.removeItem(LEGACY_TOKEN_KEY);
-        }
-        return;
+    if (!token) {
+      if (legacyToken) {
+        localStorage.removeItem(LEGACY_TOKEN_KEY);
       }
+      // No session to verify — safe to settle immediately.
+      markAuthSessionSettled();
+      void router;
+      return;
+    }
 
-      const response = await api.get("/user");
-
-      if (response.data?.status === "success" && response.data?.user) {
-        authStore.user = response.data.user;
+    await runColdStartAuthProbe(async () => {
+      const authStore = useAuthStore();
+      try {
+        await authStore.fetchUser();
+        if (import.meta.env.DEV && authStore.user) {
+          console.debug("[boot/auth] Token valid:", authStore.user?.username);
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          const msg = error instanceof Error ? error.message : "Unknown error";
+          console.debug("[boot/auth] Silent token verify failed; clearing session:", msg);
+        }
         try {
-          const { syncLocaleFromUser } = await import("src/utils/applyLocale");
-          await syncLocaleFromUser(response.data.user?.preferred_locale);
+          await authStore.logout({ remote: false, silent: true });
         } catch {
           // ignore
         }
-        if (import.meta.env.DEV) {
-          console.debug("[boot/auth] Token valid:", response.data.user?.username);
+        try {
+          localStorage.removeItem(LEGACY_TOKEN_KEY);
+        } catch {
+          // ignore
         }
-        return;
       }
+    });
 
-      await authStore.logout({ remote: false, silent: true });
-      localStorage.removeItem(LEGACY_TOKEN_KEY);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-
-      if (import.meta.env.DEV) {
-        const msg = axiosError?.message || "Unknown error";
-        console.debug("[boot/auth] Silent token verify failed; clearing session:", msg);
-      }
-
-      try {
-        const authStore = useAuthStore();
-        await authStore.logout({ remote: false, silent: true });
-      } catch {
-        // ignore
-      }
-      try {
-        localStorage.removeItem("jwtToken");
-      } catch {
-        // ignore
-      }
-
-      void router;
-    }
+    void router;
   })();
 });
