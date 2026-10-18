@@ -9,7 +9,28 @@ import {
 
 import routes from "./routes";
 import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore } from "src/stores/preferences";
 import { captureShareVisitFromRoute } from "src/utils/shareVisitCapture";
+import { readStoredSidePreferences, resolvePostAuthRedirect } from "src/utils/postAuthRedirect";
+
+function resolveAuthenticatedHome(piniaStore: unknown) {
+  try {
+    let userId: number | null = null;
+    if (piniaStore) {
+      const authStore = useAuthStore(piniaStore as never);
+      userId = authStore.user?.id ?? null;
+      const preferencesStore = usePreferencesStore(piniaStore as never);
+      preferencesStore.hydrateFromStorage();
+    }
+    const storedSides = readStoredSidePreferences(userId);
+    return resolvePostAuthRedirect({
+      currentSide: storedSides.currentSide,
+      onboardingInitialSide: storedSides.onboardingInitialSide
+    });
+  } catch {
+    return resolvePostAuthRedirect();
+  }
+}
 
 export default route(function ({ store }) {
   const createHistory = process.env.SERVER
@@ -99,7 +120,7 @@ export default route(function ({ store }) {
 
       // 🚪 guestOnly routes - len pre neprihlásených
       if (to.meta.guestOnly && isAuthenticated) {
-        next({ name: "donor-posts" });
+        next(resolveAuthenticatedHome(store));
         return;
       }
 
@@ -112,7 +133,7 @@ export default route(function ({ store }) {
       // 🏠 Root path redirect
       if (to.path === "/" && to.name !== "splash") {
         if (isAuthenticated) {
-          next({ name: "donor-posts" });
+          next(resolveAuthenticatedHome(store));
         } else {
           next({ name: "auth-welcome-page" });
         }
@@ -126,7 +147,7 @@ export default route(function ({ store }) {
         return;
       }
 
-      // 🔁 Legacy: Prihlásený používateľ na login / landing → rovno na feed
+      // 🔁 Legacy: Prihlásený používateľ na login / landing → rovno na feed podľa strany
       if (
         isAuthenticated &&
         (to.name === "login" ||
@@ -134,7 +155,7 @@ export default route(function ({ store }) {
           to.name === "registration" ||
           to.name === "explainers")
       ) {
-        next({ name: "donor-posts" });
+        next(resolveAuthenticatedHome(store));
         return;
       }
 
@@ -146,7 +167,7 @@ export default route(function ({ store }) {
       if (to.meta.requiresAuth && !hasToken) {
         next({ name: "auth-welcome-page" });
       } else if (to.meta.guestOnly && hasToken) {
-        next({ name: "donor-posts" });
+        next(resolveAuthenticatedHome(store));
       } else {
         // Vždy zavolaj next() aj v catch bloku
         next();

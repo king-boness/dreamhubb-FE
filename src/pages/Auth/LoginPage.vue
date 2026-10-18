@@ -185,9 +185,21 @@ const onSubmit = async () => {
 
     // Success handled by router redirect, no toast needed
 
-    // Redirect na feed (donor-posts) alebo podľa query parametra
-    const redirect = (route.query.redirect as string) || { name: "donor-posts" };
-    router.push(redirect);
+    // Prefer explicit internal ?redirect=, else last chosen side for THIS user.
+    // Read storage by user id so a previous account's in-memory side cannot leak.
+    const { usePreferencesStore } = await import("src/stores/preferences");
+    const { resolvePostAuthRedirect, readStoredSidePreferences } = await import(
+      "src/utils/postAuthRedirect"
+    );
+    const preferencesStore = usePreferencesStore();
+    preferencesStore.hydrateFromStorage();
+    const storedSides = readStoredSidePreferences(auth.user?.id ?? null);
+    const redirect = resolvePostAuthRedirect({
+      explicitRedirect: route.query.redirect,
+      currentSide: storedSides.currentSide,
+      onboardingInitialSide: storedSides.onboardingInitialSide
+    });
+    await router.push(redirect);
   } catch (err: unknown) {
     if (process.env.NODE_ENV === "development") {
       console.debug("Login error:", err);

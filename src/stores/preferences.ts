@@ -116,21 +116,34 @@ export const usePreferencesStore = defineStore("preferences", {
               this.preferredSubcategory = data.preferredSubcategory ?? this.preferredSubcategory;
               this.preferredFeedLocation = data.preferredFeedLocation ?? this.preferredFeedLocation;
               this.lastUsedFeedFilters = data.lastUsedFeedFilters ?? this.lastUsedFeedFilters;
+              return;
             } catch (e) {
-              // ignore
+              // ignore and fall through to safe defaults
             }
           }
         }
+        // No prefs for this account — reset in-memory state so a previous user's
+        // side (e.g. donee) cannot leak into the next login session.
+        this.currentSide = "donor";
+        this.onboardingInitialSide = "donor";
+        this.preferredPostType = null;
+        this.preferredSubcategory = null;
+        this.preferredFeedLocation = { continentId: null, countryId: null, cityId: null };
+        this.lastUsedFeedFilters = null;
         return;
       }
       try {
         const data = JSON.parse(raw);
-        this.currentSide = data.currentSide ?? this.currentSide;
-        this.onboardingInitialSide = data.onboardingInitialSide ?? this.onboardingInitialSide;
-        this.preferredPostType = data.preferredPostType ?? this.preferredPostType;
-        this.preferredSubcategory = data.preferredSubcategory ?? this.preferredSubcategory;
-        this.preferredFeedLocation = data.preferredFeedLocation ?? this.preferredFeedLocation;
-        this.lastUsedFeedFilters = data.lastUsedFeedFilters ?? this.lastUsedFeedFilters;
+        this.currentSide = data.currentSide ?? "donor";
+        this.onboardingInitialSide = data.onboardingInitialSide ?? "donor";
+        this.preferredPostType = data.preferredPostType ?? null;
+        this.preferredSubcategory = data.preferredSubcategory ?? null;
+        this.preferredFeedLocation = data.preferredFeedLocation ?? {
+          continentId: null,
+          countryId: null,
+          cityId: null
+        };
+        this.lastUsedFeedFilters = data.lastUsedFeedFilters ?? null;
       } catch (e) {
         // ignore
       }

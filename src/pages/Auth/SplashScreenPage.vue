@@ -10,9 +10,12 @@ import animationData from "src/assets/Auth/splash-dark.json";
 import { onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
+import { usePreferencesStore } from "src/stores/preferences";
+import { readStoredSidePreferences, resolvePostAuthRedirect } from "src/utils/postAuthRedirect";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const preferencesStore = usePreferencesStore();
 let lottieInstance = null;
 
 onMounted(() => {
@@ -34,7 +37,14 @@ onMounted(() => {
     if (!token) {
       router.replace({ name: "auth-welcome-page" });
     } else {
-      router.replace({ name: "donor-posts" });
+      preferencesStore.hydrateFromStorage();
+      const storedSides = readStoredSidePreferences(authStore.user?.id ?? null);
+      router.replace(
+        resolvePostAuthRedirect({
+          currentSide: storedSides.currentSide,
+          onboardingInitialSide: storedSides.onboardingInitialSide
+        })
+      );
     }
   });
 });
