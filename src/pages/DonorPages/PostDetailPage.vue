@@ -1002,7 +1002,11 @@ const handleClose = () => {
     router.back();
     return;
   }
-  router.push({ name: "donor-posts" });
+  // Direct-open fallback: respect which detail route is active (do not flip side preference).
+  const onDoneeDetail =
+    route.name === "donee-post-detail" ||
+    String(route.path || "").startsWith("/donee/");
+  router.push({ name: onDoneeDetail ? "donee-posts" : "donor-posts" });
 };
 
 const handleEditPost = () => {

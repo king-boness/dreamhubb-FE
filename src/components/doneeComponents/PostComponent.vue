@@ -206,9 +206,11 @@ onBeforeUnmount(() => {
 });
 
 const handlePostClick = (post: Post) => {
-  if (post.post_id) {
-    // Navigate to post detail page (same as Donor feed)
-    router.push({ name: "donor-post-detail", params: { id: post.post_id } });
+  const id = post.post_id;
+  if (id == null || Number.isNaN(Number(id))) {
+    return;
   }
+  // DONEE feed must stay on donee routes (shared PostDetailPage; no side preference flip).
+  router.push({ name: "donee-post-detail", params: { id: String(id) } });
 };
 </script>
