@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>dreamhubb – post edit desktop visual harness</title>
+  <title>dreamhubb – post edit desktop visual harness v2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --panel-min: 26.25rem; /* 420 */
-      --panel-max: 28.75rem; /* 460 */
-      --gap: 2rem; /* 32 */
-      --max: 77.5rem; /* 1240 */
+      --gap: 2.125rem;
+      --max: 85rem; /* ~1360 */
     }
     * { box-sizing: border-box; }
     body {
@@ -35,31 +33,41 @@
     @media (min-width: 1200px) {
       .postEditPage.post-edit-page--editMode {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(var(--panel-min), var(--panel-max));
+        grid-template-columns: minmax(0, 1.65fr) minmax(22.5rem, 0.85fr);
         column-gap: var(--gap);
-        row-gap: 0;
         align-items: start;
-        max-width: min(var(--max), calc(100% - 4rem));
+        max-width: min(var(--max), calc(100% - 3.5rem));
         margin-left: auto;
         margin-right: auto;
-        padding: 1.5rem 2rem 2.5rem;
+        padding: 1.75rem 2rem 2.5rem;
       }
-      .post-edit-desktopMedia { grid-column: 1; min-width: 0; align-self: start; }
+      .post-edit-desktopMedia {
+        grid-column: 1; min-width: 0; align-self: start;
+        display: flex; flex-direction: column; gap: 1.25rem;
+      }
       .post-edit-desktopForm {
         grid-column: 2; min-width: 0; align-self: start;
-        display: flex; flex-direction: column; gap: 0.85rem;
-        background: rgba(18, 18, 24, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 1rem;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-        padding: 1.25rem 1.25rem 1.5rem;
-        backdrop-filter: blur(12px);
+        position: sticky; top: 1.75rem;
       }
+      .inline-save { display: block; }
+      .sticky-save { display: none !important; }
+      .edit-actions {
+        display: grid; grid-template-columns: 1fr 1fr;
+      }
+      .edit-actions .item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: .85rem .65rem; min-height: 2.75rem;
+        border-top: 1px solid rgba(255,255,255,.12); font-weight: 600; font-size: .92rem;
+      }
+      .edit-actions .item:nth-child(odd) {
+        border-right: 1px solid rgba(255,255,255,.1); padding-right: .85rem;
+      }
+      .edit-actions .item:nth-child(-n+2) { border-top: none; }
     }
     .hero {
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: min(28rem, 52vh);
+      max-height: min(32rem, 56vh);
       border-radius: 1rem;
       overflow: hidden;
       position: relative;
@@ -75,16 +83,32 @@
       position: absolute; left: 1rem; top: 1rem;
       background: rgba(0,0,0,.45); border-radius: 999px; padding: 0.35rem 0.7rem; font-size: 0.75rem;
     }
-    .eyebrow { font-size: 0.72rem; letter-spacing: .08em; color: rgba(255,255,255,.65); }
-    .card { background: rgba(255,255,255,.04); border-radius: .75rem; padding: .85rem; }
-    .row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+    .edit-card {
+      border-radius: 1rem;
+      padding: 0.85rem 1.1rem;
+      background: radial-gradient(ellipse at top, rgba(83,24,92,.95) 0%, rgba(38,17,61,.98) 50%, rgba(20,10,30,1) 100%);
+      box-shadow: 0 16px 32px rgba(0,0,0,.45);
+    }
+    .eyebrow { font-size: 0.72rem; letter-spacing: .08em; color: rgba(255,255,255,.65); text-transform: uppercase; }
+    .topup-card {
+      background: rgba(18, 18, 24, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
+      padding: 1rem 1.1rem 1.05rem;
+      backdrop-filter: blur(12px);
+    }
+    .balance-card {
+      background: rgba(0,0,0,.2); border-radius: 1rem; margin: .65rem 0 .75rem;
+    }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .7rem .85rem; }
     input[type=number], input[type=range] { width: 100%; }
-    .funds { margin: .5rem 0; color: rgba(255,255,255,.8); font-size: .9rem; }
+    .funds { margin: .35rem 0 .85rem; color: rgba(255,255,255,.8); font-size: .9rem; }
     .deleteLink {
       display: inline-flex; align-items: center; justify-content: center;
-      min-height: 2.75rem; width: 100%; margin: .25rem 0 .75rem;
-      border: none; background: transparent; color: rgba(255,120,150,.72);
-      font: inherit; font-size: .8rem; text-decoration: underline; cursor: pointer;
+      width: 100%; margin: .85rem 0 0; padding: .25rem .35rem;
+      border: none; background: transparent; color: rgba(255,120,150,.62);
+      font: inherit; font-size: .72rem; text-decoration: underline; cursor: pointer;
     }
     .save {
       width: 100%; height: 3.25rem; border: none; border-radius: .75rem;
@@ -96,10 +120,15 @@
       display: none;
     }
     @media (max-width: 1199px) {
-      .post-edit-desktopForm { padding: 1rem; }
+      .post-edit-desktopMedia, .post-edit-desktopForm { padding: 0 1rem; }
+      .post-edit-desktopMedia { display: flex; flex-direction: column; gap: 1rem; }
       .inline-save { display: none; }
       .sticky-save { display: block; }
       .hero { border-radius: 0 0 24px 24px; max-height: none; aspect-ratio: auto; min-height: 280px; }
+      .edit-actions .item {
+        display: flex; justify-content: space-between; padding: 14px 0;
+        border-top: 1px solid rgba(255,255,255,.12); font-weight: 700;
+      }
     }
     .dialog {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
@@ -129,24 +158,35 @@
     <div class="post-edit-desktopMedia" data-testid="hero-col">
       <div class="hero">
         <div class="chip">Traveling</div>
-        <div class="title">Edit my dream — visual harness</div>
+        <div class="title">Edit my dream — visual harness v2</div>
+      </div>
+      <div class="edit-card" data-testid="edit-rollup">
+        <div class="eyebrow">I WANT TO EDIT...</div>
+        <div class="edit-actions" style="margin-top:.5rem">
+          <div class="item"><span>headline</span><span>›</span></div>
+          <div class="item"><span>description</span><span>›</span></div>
+          <div class="item"><span>category</span><span>›</span></div>
+          <div class="item"><span>subcategory</span><span>›</span></div>
+          <div class="item"><span>deadline</span><span>›</span></div>
+          <div class="item"><span>photos</span><span>›</span></div>
+        </div>
       </div>
     </div>
     <div class="post-edit-desktopForm" data-testid="form-col">
-      <div class="eyebrow">I WANT TO EDIT...</div>
-      <div class="card">headline · category · subcategory · deadline · photos</div>
-      <div class="eyebrow">TOP UP THE POST</div>
-      <div class="card">
-        <div class="row"><span>AVAILABLE FROM donations</span><strong>12</strong></div>
-        <hr style="border-color:rgba(255,255,255,.1)" />
-        <div class="row"><span>YOUR FULL BALANCE</span><strong>100</strong></div>
+      <div class="topup-card">
+        <div class="eyebrow">TOP UP THE POST</div>
+        <div class="balance-card">
+          <div class="row"><span>AVAILABLE FROM donations</span><strong>12</strong></div>
+          <hr style="border-color:rgba(255,255,255,.1); margin:0" />
+          <div class="row"><span>YOUR FULL BALANCE</span><strong>100</strong></div>
+        </div>
+        <label class="eyebrow">TOKENS TO TOP UP</label>
+        <input type="number" min="0" max="100" value="10" />
+        <input type="range" min="0" max="100" value="10" />
+        <div class="funds">Funds: 90 tokens</div>
+        <button class="save inline-save" data-testid="save-inline">SAVE CHANGES</button>
+        <button class="deleteLink" id="deleteBtn" data-testid="delete-link">delete my dream</button>
       </div>
-      <label class="eyebrow">TOKENS TO TOP UP</label>
-      <input type="number" min="0" max="100" value="10" />
-      <input type="range" min="0" max="100" value="10" />
-      <div class="funds">Funds: 90 tokens</div>
-      <button class="deleteLink" id="deleteBtn" data-testid="delete-link">delete my dream</button>
-      <button class="save inline-save" data-testid="save-inline">SAVE CHANGES</button>
     </div>
   </div>
   <div class="sticky-save"><button class="save" style="max-width:390px;margin:0 auto;display:block">SAVE CHANGES</button></div>
@@ -178,12 +218,15 @@
   <script>
     const vp = document.getElementById('vp');
     function paintVp() {
+      const form = document.querySelector('[data-testid=form-col]');
+      const hero = document.querySelector('[data-testid=hero-col]');
+      const card = document.querySelector('.topup-card');
       vp.textContent = window.innerWidth + '×' + window.innerHeight +
-        ' | panel=' + Math.round(document.querySelector('[data-testid=form-col]').getBoundingClientRect().width) + 'px' +
+        ' | sidebar=' + Math.round(form.getBoundingClientRect().width) + 'px' +
         ' | topAlignΔ=' + Math.round(
-          document.querySelector('[data-testid=hero-col]').getBoundingClientRect().top -
-          document.querySelector('[data-testid=form-col]').getBoundingClientRect().top
-        );
+          hero.getBoundingClientRect().top - form.getBoundingClientRect().top
+        ) +
+        ' | cardH=' + Math.round(card.getBoundingClientRect().height) + 'px';
     }
     paintVp();
     window.addEventListener('resize', paintVp);

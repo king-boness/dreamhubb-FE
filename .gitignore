@@ -77,3 +77,6 @@ src-capacitor/index.html
 
 # local visual QA artifacts
 scripts/visual-harness/screenshots/
+
+# generated layout-v2 visual QA artefacts (keep harness HTML versioned)
+scripts/visual-harness/screenshots-v2/
