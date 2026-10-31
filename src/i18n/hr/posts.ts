@@ -54,7 +54,23 @@ export default {
       subcategory: "potkategorija",
       tokens: "Tokeni",
       tokensToTopUp: "TOKENI ZA DOPUNU",
-      yourFullBalance: "TVOJE CJELOKUPNO STANJE"
+      yourFullBalance: "TVOJE CJELOKUPNO STANJE",
+      deleteMyDream: "delete my dream",
+      deleteMyProblem: "delete my problem",
+      deleteMyIdea: "delete my idea",
+      deleteDialogTitle: "Delete this post?",
+      deleteTypeInstruction: "To continue, type the exact phrase below:",
+      deletePhraseDream: "I want to delete this dream",
+      deletePhraseProblem: "I want to delete this problem",
+      deletePhraseIdea: "I want to delete this idea",
+      continueDelete: "Continue",
+      permanentDeleteWarning:
+        "Deleting this {type} is permanent.",
+      tokensNotRefundedWarning:
+        "Tokens that you have already placed into this post will NOT be returned to your token balance.",
+      deletePermanently: "Delete permanently",
+      deletedSuccessfully: "Post deleted successfully.",
+      deleteFailed: "Could not delete this post. Please try again."
     },
     fundsTokens: "Sredstva: {n} token | Sredstva: {n} tokena | Sredstva: {n} tokena",
     giftAlt: "Poklon",

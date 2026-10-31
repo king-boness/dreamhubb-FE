@@ -380,6 +380,40 @@ export const usePostsStore = defineStore("posts", {
     },
 
     // 🟣 Fetch my ideas (posts of logged-in user with category=idea)
+    /**
+     * Soft-delete own post via DELETE /api/post-delete/{id}.
+     * On success, removes the post from local collections immediately (no stale flash).
+     */
+    async deletePost(postId: number): Promise<boolean> {
+      try {
+        const { data } = await api.delete(`/post-delete/${postId}`);
+        if (data?.status !== "success") {
+          return false;
+        }
+        const id = Number(postId);
+        const keep = (p: Record<string, unknown>) => {
+          const pid = Number((p as { post_id?: number; id?: number }).post_id ?? (p as { id?: number }).id);
+          return pid !== id;
+        };
+        this.posts = this.posts.filter(keep);
+        this.myDreams = this.myDreams.filter(keep);
+        this.myProblems = this.myProblems.filter(keep);
+        this.myIdeas = this.myIdeas.filter(keep);
+        if (
+          this.currentPost &&
+          Number(this.currentPost.post_id || this.currentPost.id) === id
+        ) {
+          this.currentPost = null;
+        }
+        return true;
+      } catch (error: unknown) {
+        if (import.meta.env.DEV) {
+          console.debug("[posts] deletePost failed:", error);
+        }
+        throw error;
+      }
+    },
+
     async fetchMyIdeas(params: Record<string, unknown> = {}) {
       this.myIdeasLoading = true;
       this.myIdeasError = null;

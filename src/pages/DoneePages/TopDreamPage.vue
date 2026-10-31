@@ -238,18 +238,30 @@
             class="tokens-slider q-mt-md"
             @update:model-value="onTokensSliderChange"
           />
-          <div class="tokens-funds q-mt-xs q-mb-lg">
+          <div class="tokens-funds q-mt-xs q-mb-md">
             {{ t("posts.fundsTokens", remainingTokens, { n: remainingTokens }) }}
       </div>
+
+          <button
+            v-if="isEditMode"
+            type="button"
+            class="post-edit-deleteLink"
+            data-testid="dh-post-edit-delete"
+            @click="openDeleteStep1"
+          >
+            {{ deleteMyPostLabel }}
+          </button>
     </div>
       </section>
 
-      <!-- CTA "Save Changes" - sticky na spodku -->
+      <!-- CTA "Save Changes": sticky on mobile; inline in desktop right panel -->
       <BottomCtaButton
+        class="post-edit-saveCta"
         :label="t('posts.edit.saveChanges')"
         :loading="isSaving"
         :loading-label="t('posts.edit.saving')"
         :disabled="!hasChanges"
+        :inline="isDesktopEditLayout"
         @click="onSaveChanges"
       />
       </div>
@@ -516,6 +528,102 @@
       :images="lightboxImages"
       :initial-index="lightboxInitialIndex"
     />
+
+    <!-- DELETE CONFIRMATION — STEP 1: type exact phrase -->
+    <q-dialog
+      v-model="deleteDialogs.step1"
+      persistent
+      data-testid="dh-post-delete-step1"
+    >
+      <q-card class="edit-category-dialog post-edit-deleteDialog">
+        <q-card-section class="q-pa-md">
+          <div class="edit-dialog-title">{{ t("posts.edit.deleteDialogTitle") }}</div>
+          <p class="post-edit-deleteDialog-instruction">
+            {{ t("posts.edit.deleteTypeInstruction") }}
+          </p>
+          <p class="post-edit-deleteDialog-phrase" data-testid="dh-post-delete-phrase">
+            {{ requiredDeletePhrase }}
+          </p>
+          <q-input
+            v-model="deleteConfirmInput"
+            outlined
+            dark
+            dense
+            autofocus
+            class="post-edit-deleteDialog-input q-mt-md"
+            data-testid="dh-post-delete-confirm-input"
+            :placeholder="requiredDeletePhrase"
+          />
+        </q-card-section>
+        <q-card-actions align="center" class="q-pa-md category-dialog-actions">
+          <q-btn
+            class="primary-cta category-cancel-btn"
+            color="grey-8"
+            unelevated
+            no-caps
+            padding="14px 24px"
+            :label="cancelLabel"
+            data-testid="dh-post-delete-step1-cancel"
+            @click="cancelDeleteFlow"
+          />
+          <q-btn
+            class="primary-cta category-save-btn"
+            color="primary"
+            unelevated
+            no-caps
+            padding="14px 24px"
+            :label="t('posts.edit.continueDelete')"
+            :disable="!isDeletePhraseExact"
+            data-testid="dh-post-delete-step1-continue"
+            @click="advanceDeleteToStep2"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- DELETE CONFIRMATION — STEP 2: permanent / no refund -->
+    <q-dialog
+      v-model="deleteDialogs.step2"
+      persistent
+      data-testid="dh-post-delete-step2"
+    >
+      <q-card class="edit-category-dialog post-edit-deleteDialog">
+        <q-card-section class="q-pa-md">
+          <div class="edit-dialog-title">{{ t("posts.edit.deleteDialogTitle") }}</div>
+          <p class="post-edit-deleteDialog-warning">
+            {{ permanentDeleteWarningText }}
+          </p>
+          <p class="post-edit-deleteDialog-warning post-edit-deleteDialog-warning--tokens">
+            {{ t("posts.edit.tokensNotRefundedWarning") }}
+          </p>
+        </q-card-section>
+        <q-card-actions align="center" class="q-pa-md category-dialog-actions">
+          <q-btn
+            class="primary-cta category-cancel-btn"
+            color="grey-8"
+            unelevated
+            no-caps
+            padding="14px 24px"
+            :label="cancelLabel"
+            :disable="isDeletingPost"
+            data-testid="dh-post-delete-step2-cancel"
+            @click="cancelDeleteFlow"
+          />
+          <q-btn
+            class="primary-cta category-save-btn post-edit-deletePermanentlyBtn"
+            color="negative"
+            unelevated
+            no-caps
+            padding="14px 24px"
+            :label="t('posts.edit.deletePermanently')"
+            :loading="isDeletingPost"
+            :disable="isDeletingPost"
+            data-testid="dh-post-delete-step2-confirm"
+            @click="confirmDeletePermanently"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 <style scoped lang="scss">
@@ -531,37 +639,136 @@
   @media (min-width: 1200px) {
     &.post-edit-page--editMode {
       display: grid;
-      grid-template-columns: minmax(18rem, 1.05fr) minmax(22rem, 28rem);
-      column-gap: 2rem;
-      row-gap: 1rem;
+      grid-template-columns: minmax(0, 1fr) minmax(26.25rem, 28.75rem); // ~420–460px
+      column-gap: 2rem; // 32px
+      row-gap: 0;
       align-items: start;
-      max-width: min(72rem, calc(100% - 4rem));
+      max-width: min(77.5rem, calc(100% - 4rem)); // ~1240px
       margin-left: auto;
       margin-right: auto;
-      padding-left: 2rem;
-      padding-right: 2rem;
+      padding: 1.5rem 2rem 2.5rem;
       box-sizing: border-box;
 
       .post-edit-desktopMedia {
         display: block;
         grid-column: 1;
         min-width: 0;
+        align-self: start;
+
+        :deep(.post-header),
+        :deep(.postHeader) {
+          border-radius: 1rem;
+          overflow: hidden;
+          aspect-ratio: 16 / 9;
+          max-height: min(28rem, 52vh);
+        }
       }
 
       .post-edit-desktopForm {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.85rem;
         grid-column: 2;
         min-width: 0;
+        align-self: start;
+        background: rgba(18, 18, 24, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        padding: 1.25rem 1.25rem 1.5rem;
+        backdrop-filter: blur(12px);
+      }
+
+      .edit-rollup.q-mt-lg {
+        margin-top: 0 !important;
+      }
+
+      .edit-topup-section {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
       }
 
       .post-edit-hero-placeholder {
+        aspect-ratio: 16 / 9;
         max-height: min(28rem, 52vh);
+        min-height: 0;
         border-radius: 1rem;
         overflow: hidden;
       }
+
+      .post-edit-saveCta {
+        margin-top: 0.25rem;
+      }
     }
+  }
+}
+
+.post-edit-deleteLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  width: 100%;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 120, 150, 0.72);
+  font-family: poppins, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, opacity 0.15s ease;
+
+  &:hover {
+    color: rgba(255, 140, 170, 0.95);
+  }
+
+  &:focus-visible {
+    outline: 1px solid rgba(255, 120, 150, 0.55);
+    outline-offset: 2px;
+    border-radius: 0.35rem;
+  }
+}
+
+.post-edit-deleteDialog {
+  .post-edit-deleteDialog-instruction {
+    margin: 0.75rem 0 0.5rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-family: poppins, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .post-edit-deleteDialog-phrase {
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-family: poppinsSemiBold, poppins, sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    text-align: center;
+    user-select: all;
+  }
+
+  .post-edit-deleteDialog-warning {
+    margin: 0.65rem 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-family: poppins, sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .post-edit-deleteDialog-warning--tokens {
+    color: rgba(255, 180, 190, 0.9);
   }
 }
 
@@ -1785,6 +1992,7 @@ import { formatNumber } from "src/components/partials/FunctionsComponent.vue";
 import { ref, onMounted, onBeforeUnmount, computed, reactive, nextTick, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useQuasar } from "quasar";
 import { usePostsStore } from "src/stores/posts";
 import { useAuthStore } from "src/stores/auth";
 import { getPostTypeIcon } from "src/utils/postIcons";
@@ -1806,9 +2014,17 @@ import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifyNegative, notifySuccess } from "src/utils/notify";
 import { formatLocaleDate } from "src/utils/formatLocaleDate";
+import {
+  deleteMyPostI18nKey,
+  getRequiredDeletePhrase,
+  isExactDeletePhrase,
+  normalizeDeleteCategorySlug,
+  type DeleteCategorySlug
+} from "src/utils/postDeleteConfirm";
 
 const route = useRoute();
 const router = useRouter();
+const $q = useQuasar();
 const postsStore = usePostsStore();
 const authStore = useAuthStore();
 const { t, locale } = useI18n();
@@ -1818,6 +2034,13 @@ const saveLabel = computed(() => t("save").toUpperCase());
 const useNativePhotoPicker = Capacitor?.isNativePlatform?.() === true;
 const DEBUG_PHOTO_PICKER = import.meta.env.DEV;
 const { openImagePickMenu } = useImagePickMenu();
+
+const deleteDialogs = reactive({
+  step1: false,
+  step2: false
+});
+const deleteConfirmInput = ref("");
+const isDeletingPost = ref(false);
 
 type CameraPhotoResult = {
   webPath?: string;
@@ -2147,6 +2370,12 @@ const checkBodyClass = () => {
 
 // Check if we're in edit mode (route name is "donee-post-edit")
 const isEditMode = computed(() => route.name === "donee-post-edit");
+
+/** Desktop edit workspace (>=1200px): inline SAVE in right panel, not sticky footer. */
+const isDesktopEditLayout = computed(
+  () => isEditMode.value && $q.screen.width >= 1200
+);
+
 const postId = computed(() => {
   if (isEditMode.value) {
     return Number(route.params.id);
@@ -2194,6 +2423,95 @@ const postTypeSlug = computed(() => {
   if (type === "problem" || type === "idea") return type;
   return "dream";
 });
+
+/** Normalized category for delete copy / confirmation — never from UI display text. */
+const deleteCategorySlug = computed<DeleteCategorySlug>(() => {
+  const fromDraft = draft.value?.categorySlug;
+  const fromPost =
+    postsStore.currentPost?.category?.slug ||
+    (postsStore.currentPost?.type as string | undefined);
+  return normalizeDeleteCategorySlug(fromDraft || fromPost);
+});
+
+const deleteMyPostLabel = computed(() => t(deleteMyPostI18nKey(deleteCategorySlug.value)));
+
+const requiredDeletePhrase = computed(
+  () => getRequiredDeletePhrase(deleteCategorySlug.value)
+);
+
+const isDeletePhraseExact = computed(() =>
+  isExactDeletePhrase(deleteConfirmInput.value, deleteCategorySlug.value)
+);
+
+const permanentDeleteWarningText = computed(() =>
+  t("posts.edit.permanentDeleteWarning", { type: deleteCategorySlug.value })
+);
+
+const openDeleteStep1 = () => {
+  deleteConfirmInput.value = "";
+  deleteDialogs.step2 = false;
+  deleteDialogs.step1 = true;
+};
+
+const cancelDeleteFlow = () => {
+  if (isDeletingPost.value) return;
+  deleteDialogs.step1 = false;
+  deleteDialogs.step2 = false;
+  deleteConfirmInput.value = "";
+};
+
+const advanceDeleteToStep2 = () => {
+  if (!isDeletePhraseExact.value) return;
+  deleteDialogs.step1 = false;
+  deleteDialogs.step2 = true;
+};
+
+const confirmDeletePermanently = async () => {
+  if (isDeletingPost.value) return;
+  const id = postId.value;
+  if (!id) return;
+
+  isDeletingPost.value = true;
+  try {
+    const ok = await postsStore.deletePost(id);
+    if (!ok) {
+      notifyError({
+        kind: "server",
+        messageKey: "posts.edit.deleteFailed",
+        fallbackMessage: t("posts.edit.deleteFailed"),
+        retryable: true
+      }, { position: "top" });
+      return;
+    }
+
+    deleteDialogs.step1 = false;
+    deleteDialogs.step2 = false;
+    deleteConfirmInput.value = "";
+
+    notifySuccess("posts.edit.deletedSuccessfully", t("posts.edit.deletedSuccessfully"), {
+      position: "top"
+    });
+
+    // Best-effort refresh of My posts buckets (local collections already pruned).
+    void Promise.allSettled([
+      postsStore.fetchMyDreams({ category: "dream" }),
+      postsStore.fetchMyProblems({ category: "problem" }),
+      postsStore.fetchMyIdeas({ category: "idea" })
+    ]);
+
+    router.push({ name: "donee-posts" });
+  } catch (error: unknown) {
+    const mapped = mapAxiosErrorToDhError(error);
+    notifyError({
+      kind: mapped.kind || "server",
+      messageKey: mapped.messageKey || "posts.edit.deleteFailed",
+      fallbackMessage: mapped.fallbackMessage || t("posts.edit.deleteFailed"),
+      retryable: true
+    }, { position: "top" });
+  } finally {
+    isDeletingPost.value = false;
+  }
+};
 
 const postTypeLabel = computed(() => t(`feed.postType.${postTypeSlug.value}`));
 const postTypeLabelLower = computed(() => postTypeLabel.value);
