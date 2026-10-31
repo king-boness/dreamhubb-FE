@@ -1,0 +1,177 @@
+[
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "isDesktop": true,
+    "leftW": 800,
+    "sidebarW": 412,
+    "cardH": 338,
+    "topDelta": 0,
+    "heroH": 430,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "isDesktop": true,
+    "leftW": 833,
+    "sidebarW": 429,
+    "cardH": 377,
+    "topDelta": 0,
+    "heroH": 469,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  },
+  {
+    "viewport": [
+      1512,
+      982
+    ],
+    "isDesktop": true,
+    "leftW": 833,
+    "sidebarW": 429,
+    "cardH": 377,
+    "topDelta": 0,
+    "heroH": 469,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  },
+  {
+    "viewport": [
+      1728,
+      1117
+    ],
+    "isDesktop": true,
+    "leftW": 833,
+    "sidebarW": 429,
+    "cardH": 377,
+    "topDelta": 0,
+    "heroH": 469,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  },
+  {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "isDesktop": true,
+    "leftW": 833,
+    "sidebarW": 429,
+    "cardH": 377,
+    "topDelta": 0,
+    "heroH": 469,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  },
+  {
+    "viewport": [
+      768,
+      1024
+    ],
+    "isDesktop": false,
+    "leftW": 768,
+    "sidebarW": 768,
+    "cardH": 325,
+    "topDelta": -672,
+    "heroH": 280,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "isDesktop": false,
+    "leftW": 390,
+    "sidebarW": 390,
+    "cardH": 325,
+    "topDelta": -672,
+    "heroH": 280,
+    "pass": {
+      "twoCol": true,
+      "editUnderHero": true,
+      "sidebarOnlyTopup": true,
+      "topAlign": true,
+      "saveBeforeDelete": true,
+      "saveMode": true,
+      "noHugeEmpty": true,
+      "compactCard": true,
+      "dialogs": true,
+      "noHOverflow": true
+    },
+    "allPass": true
+  }
+]
