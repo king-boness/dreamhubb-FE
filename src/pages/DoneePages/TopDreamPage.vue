@@ -113,19 +113,14 @@
           </div>
         </div>
       </div>
-      </div>
 
-      <div class="post-edit-desktopForm">
-      <!-- ABOUT YOUR PROBLEM ROLL-UP SECTION — medzera pod hero ako .postDetailContent (24px / q-mt-lg) -->
-      <section class="edit-rollup q-mt-lg">
+      <!-- Edit content lives under hero (desktop left column / mobile after hero) -->
+      <section class="edit-rollup q-mt-lg" data-testid="dh-post-edit-rollup">
         <div class="edit-rollup_card" :class="{ 'edit-rollup_card--open': isEditRollupOpen }">
-          <!-- HLAVIČKA / NEODKLIKNUTÝ STAV -->
           <button type="button" class="edit-rollup_header" @click="isEditRollupOpen = !isEditRollupOpen">
             <span class="edit-rollup_header-eyebrow">{{ t("posts.edit.iWantToEdit") }}</span>
             <div class="edit-rollup_header-right">
-              <!-- vtáčik vpravo -->
               <img src="/icons/birdy.png" alt="" class="edit-rollup_header-bird" />
-              <!-- chevron icon -->
               <q-icon
                 name="keyboard_arrow_down"
                 :class="['edit-rollup_header-chevron', { 'is-open': isEditRollupOpen }]"
@@ -133,7 +128,6 @@
               />
             </div>
           </button>
-          <!-- OBSAH / ODKLIKNUTÝ STAV -->
           <q-slide-transition>
             <div v-show="isEditRollupOpen" class="edit-rollup_body">
               <p class="edit-rollup_eyebrow">{{ aboutYourLabel }}</p>
@@ -154,93 +148,103 @@
                   <q-icon name="chevron_right" size="18px" color="white" />
                 </li>
               </ul>
-        </div>
+            </div>
           </q-slide-transition>
-      </div>
+        </div>
       </section>
-      <!-- Sekcia "Top up the post" -->
-      <section class="edit-topup-section q-px-md q-mt-md">
-        <div class="eyebrow-label">{{ isEditMode ? t("topUpThePost") : t("topUpTheDream") }}</div>
+      </div>
 
-        <!-- Topup card with both rows -->
-        <div class="topup-card q-mt-md">
-          <!-- Available from -->
-          <div class="topup-row">
-            <div class="topup-row-left">
-              <img
-                src="/other_icons/gift.svg"
-                :alt="t('posts.giftAlt')"
-                class="topup-row-icon"
-              />
-              <div class="topup-row-labels">
-                <div class="topup-row-overline">{{ t("posts.edit.availableFrom") }}</div>
-                <div class="topup-row-title">{{ t("posts.edit.donations") }}</div>
-          </div>
-    </div>
-            <div class="topup-row-value with-icon">
-              <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" class="topup-value-icon" />
-              <span>{{ availableFromDonations }}</span>
+      <!-- Right sidebar (desktop): financial / action card only -->
+      <div class="post-edit-desktopForm">
+      <section class="edit-topup-section q-px-md q-mt-md">
+        <div class="post-edit-topupCard">
+          <div class="eyebrow-label">{{ isEditMode ? t("topUpThePost") : t("topUpTheDream") }}</div>
+
+          <div class="topup-card">
+            <div class="topup-row">
+              <div class="topup-row-left">
+                <img
+                  src="/other_icons/gift.svg"
+                  :alt="t('posts.giftAlt')"
+                  class="topup-row-icon"
+                />
+                <div class="topup-row-labels">
+                  <div class="topup-row-overline">{{ t("posts.edit.availableFrom") }}</div>
+                  <div class="topup-row-title">{{ t("posts.edit.donations") }}</div>
+                </div>
+              </div>
+              <div class="topup-row-value with-icon">
+                <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" class="topup-value-icon" />
+                <span>{{ availableFromDonations }}</span>
+              </div>
+            </div>
+            <q-separator dark inset class="q-my-sm" />
+            <div class="topup-row" style="margin-top: 0;">
+              <div class="topup-row-left">
+                <img
+                  src="/other_icons/star.svg"
+                  :alt="t('posts.tokensAlt')"
+                  class="topup-row-icon"
+                />
+                <div class="topup-row-labels">
+                  <div class="topup-row-overline">{{ t("posts.edit.yourFullBalance") }}</div>
+                  <div class="topup-row-title">{{ t("posts.edit.tokens") }}</div>
+                </div>
+              </div>
+              <div class="topup-row-value with-icon">
+                <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" class="topup-value-icon" />
+                <span>{{ fullBalance }}</span>
+              </div>
             </div>
           </div>
-          <!-- Your full balance -->
-          <q-separator dark inset class="q-my-sm" />
-          <div class="topup-row" style="margin-top: 0;">
-            <div class="topup-row-left">
-              <img
-                src="/other_icons/star.svg"
-                :alt="t('posts.tokensAlt')"
-                class="topup-row-icon"
-              />
-              <div class="topup-row-labels">
-                <div class="topup-row-overline">{{ t("posts.edit.yourFullBalance") }}</div>
-                <div class="topup-row-title">{{ t("posts.edit.tokens") }}</div>
-          </div>
-        </div>
-            <div class="topup-row-value with-icon">
-              <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" class="topup-value-icon" />
-              <span>{{ fullBalance }}</span>
-      </div>
-    </div>
-      </div>
 
-        <!-- Tokens to top up -->
-        <div class="tokens-section q-mt-lg">
-          <div class="tokens-header">
-            <span class="tokens-label">{{ t("posts.edit.tokensToTopUp") }}</span>
-            <q-icon name="help_outline" size="16px" />
-    </div>
-          <!-- manuálny input -->
-          <q-input
-            v-model.number="form.tokensToTopUp"
-            type="number"
-            dense
-            outlined
-            rounded
-            class="tokens-input q-mt-sm"
-            :min="0"
-            :max="maxTokens"
-            @update:model-value="onTokensInputChange"
-          >
-            <template #append>
-              <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" />
-            </template>
-          </q-input>
-          <!-- slider naviazaný na rovnakú hodnotu -->
-          <q-slider
-            v-model.number="form.tokensToTopUp"
-            :min="0"
-            :max="maxTokens"
-            :step="1"
-            :disable="maxTokens <= 0"
-            color="primary"
-            track-size="10px"
-            thumb-size="22px"
-            class="tokens-slider q-mt-md"
-            @update:model-value="onTokensSliderChange"
+          <div class="tokens-section">
+            <div class="tokens-header">
+              <span class="tokens-label">{{ t("posts.edit.tokensToTopUp") }}</span>
+              <q-icon name="help_outline" size="16px" />
+            </div>
+            <q-input
+              v-model.number="form.tokensToTopUp"
+              type="number"
+              dense
+              outlined
+              rounded
+              class="tokens-input q-mt-sm"
+              :min="0"
+              :max="maxTokens"
+              @update:model-value="onTokensInputChange"
+            >
+              <template #append>
+                <img src="/other_icons/star.svg" :alt="t('posts.tokensAlt')" />
+              </template>
+            </q-input>
+            <q-slider
+              v-model.number="form.tokensToTopUp"
+              :min="0"
+              :max="maxTokens"
+              :step="1"
+              :disable="maxTokens <= 0"
+              color="primary"
+              track-size="10px"
+              thumb-size="22px"
+              class="tokens-slider q-mt-md"
+              @update:model-value="onTokensSliderChange"
+            />
+            <div class="tokens-funds q-mt-xs">
+              {{ t("posts.fundsTokens", remainingTokens, { n: remainingTokens }) }}
+            </div>
+          </div>
+
+          <!-- CTA: sticky on mobile; inline in desktop sidebar -->
+          <BottomCtaButton
+            class="post-edit-saveCta"
+            :label="t('posts.edit.saveChanges')"
+            :loading="isSaving"
+            :loading-label="t('posts.edit.saving')"
+            :disabled="!hasChanges"
+            :inline="isDesktopEditLayout"
+            @click="onSaveChanges"
           />
-          <div class="tokens-funds q-mt-xs q-mb-md">
-            {{ t("posts.fundsTokens", remainingTokens, { n: remainingTokens }) }}
-      </div>
 
           <button
             v-if="isEditMode"
@@ -251,19 +255,8 @@
           >
             {{ deleteMyPostLabel }}
           </button>
-    </div>
+        </div>
       </section>
-
-      <!-- CTA "Save Changes": sticky on mobile; inline in desktop right panel -->
-      <BottomCtaButton
-        class="post-edit-saveCta"
-        :label="t('posts.edit.saveChanges')"
-        :loading="isSaving"
-        :loading-label="t('posts.edit.saving')"
-        :disabled="!hasChanges"
-        :inline="isDesktopEditLayout"
-        @click="onSaveChanges"
-      />
       </div>
     </template>
 
@@ -639,18 +632,21 @@
   @media (min-width: 1200px) {
     &.post-edit-page--editMode {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(26.25rem, 28.75rem); // ~420–460px
-      column-gap: 2rem; // 32px
+      // ~65% / 35% functional split; sidebar stays compact
+      grid-template-columns: minmax(0, 1.65fr) minmax(22.5rem, 0.85fr); // 360px+
+      column-gap: 2.125rem; // 34px
       row-gap: 0;
       align-items: start;
-      max-width: min(77.5rem, calc(100% - 4rem)); // ~1240px
+      max-width: min(85rem, calc(100% - 3.5rem)); // ~1360px
       margin-left: auto;
       margin-right: auto;
-      padding: 1.5rem 2rem 2.5rem;
+      padding: 1.75rem 2rem 2.5rem;
       box-sizing: border-box;
 
       .post-edit-desktopMedia {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
         grid-column: 1;
         min-width: 0;
         align-self: start;
@@ -660,47 +656,136 @@
           border-radius: 1rem;
           overflow: hidden;
           aspect-ratio: 16 / 9;
-          max-height: min(28rem, 52vh);
+          max-height: min(32rem, 56vh);
+        }
+
+        .edit-rollup {
+          padding: 0;
+          margin-top: 0 !important;
+        }
+
+        .edit-rollup_card {
+          // compact content card under hero — not a giant sidebar block
+          border-radius: 1rem;
+          padding: 0.85rem 1.1rem;
+        }
+
+        .edit-rollup_list {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0;
+          border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .edit-rollup_list-item {
+          justify-content: space-between;
+          padding: 0.85rem 0.65rem;
+          min-height: 2.75rem;
+
+          & + & {
+            border-top: none;
+          }
+
+          &:nth-child(odd) {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding-right: 0.85rem;
+          }
+
+          &:nth-child(even) {
+            padding-left: 0.85rem;
+          }
+
+          &:nth-child(n + 3) {
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+          }
+        }
+
+        .edit-rollup_list-label {
+          font-size: 0.92rem;
+          text-align: left;
         }
       }
 
       .post-edit-desktopForm {
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
+        // No massive outer bordered box — only the compact top-up card
+        display: block;
         grid-column: 2;
         min-width: 0;
         align-self: start;
-        background: rgba(18, 18, 24, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 1rem;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-        padding: 1.25rem 1.25rem 1.5rem;
-        backdrop-filter: blur(12px);
-      }
-
-      .edit-rollup.q-mt-lg {
-        margin-top: 0 !important;
+        position: sticky;
+        top: 1.75rem;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        backdrop-filter: none;
       }
 
       .edit-topup-section {
+        margin-top: 0 !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
       }
 
+      .post-edit-topupCard {
+        background: rgba(18, 18, 24, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
+        padding: 1rem 1.1rem 1.05rem;
+        backdrop-filter: blur(12px);
+      }
+
+      .topup-card {
+        margin-top: 0.65rem;
+        margin-bottom: 0.75rem;
+        box-shadow: none;
+      }
+
+      .topup-row {
+        padding: 0.7rem 0.85rem;
+      }
+
+      .tokens-section {
+        margin: 0;
+      }
+
+      .tokens-slider {
+        margin-top: 0.65rem !important;
+      }
+
+      .tokens-funds {
+        margin-top: 0.35rem;
+        margin-bottom: 0.85rem;
+      }
+
       .post-edit-hero-placeholder {
         aspect-ratio: 16 / 9;
-        max-height: min(28rem, 52vh);
+        max-height: min(32rem, 56vh);
         min-height: 0;
         border-radius: 1rem;
         overflow: hidden;
       }
 
       .post-edit-saveCta {
-        margin-top: 0.25rem;
+        margin-top: 0;
+      }
+
+      .post-edit-deleteLink {
+        margin: 0.85rem 0 0;
+        min-height: auto;
+        padding: 0.25rem 0.35rem;
+        font-size: 0.72rem;
+        opacity: 0.78;
       }
     }
   }
+}
+
+.post-edit-topupCard {
+  display: flex;
+  flex-direction: column;
 }
 
 .post-edit-deleteLink {
@@ -709,13 +794,13 @@
   justify-content: center;
   min-height: 2.75rem;
   width: 100%;
-  margin: 0.25rem 0 0.75rem;
-  padding: 0.5rem 0.75rem;
+  margin: 0.85rem 0 0.5rem;
+  padding: 0.35rem 0.5rem;
   border: none;
   background: transparent;
-  color: rgba(255, 120, 150, 0.72);
+  color: rgba(255, 120, 150, 0.62);
   font-family: poppins, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.01em;
   text-decoration: underline;
   text-underline-offset: 0.2em;
@@ -724,7 +809,7 @@
   transition: color 0.15s ease, opacity 0.15s ease;
 
   &:hover {
-    color: rgba(255, 140, 170, 0.95);
+    color: rgba(255, 140, 170, 0.9);
   }
 
   &:focus-visible {
@@ -1288,7 +1373,11 @@
 }
 
 .tokens-section {
-  margin: 16px 16px 0;
+  margin: 12px 0 0;
+}
+
+.post-edit-topupCard .tokens-section {
+  margin: 0;
 }
 
 .tokens-header {
