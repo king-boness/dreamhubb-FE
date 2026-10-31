@@ -74,3 +74,6 @@ _cursor_chat_backup_*.md
 _cursor_chat_backup_*.txt
 *.bak_safearea
 src-capacitor/index.html
+
+# local visual QA artifacts
+scripts/visual-harness/screenshots/
