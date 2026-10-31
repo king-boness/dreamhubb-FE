@@ -50328,6 +50328,201 @@
       "status": "MACHINE_DRAFT",
       "evidence": "phase_4b3_safe_import_apply",
       "updatedAt": "2026-10-10T16:46:11.328Z"
+    },
+    "bg::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "bg::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "bg::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "cs::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "cs::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "cs::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "de::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "de::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "de::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "es::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "es::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "es::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "fr::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "fr::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "fr::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "hr::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "hr::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "hr::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "hu::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "hu::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "hu::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "it::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "it::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "it::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "nl::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "nl::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "nl::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "pl::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "pl::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "pl::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "pt::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "pt::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "pt::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "ro::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "ro::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "ro::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "uk::posts.edit.deletePhraseDream": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "uk::posts.edit.deletePhraseProblem": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
+    },
+    "uk::posts.edit.deletePhraseIdea": {
+      "status": "INTENTIONALLY_UNCHANGED",
+      "evidence": "exact_match_delete_confirmation_contract_en",
+      "updatedAt": "2026-10-31T11:28:49.278Z"
     }
   }
 }

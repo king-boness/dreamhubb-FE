@@ -1,7 +1,7 @@
 {
   "version": 1,
   "phase": "4E.3",
-  "generatedAt": "2026-10-10T19:48:05.173Z",
+  "generatedAt": "2026-10-31T11:28:51.666Z",
   "methodology": {
     "note": "Statuses are evidence-based. FE 859/859 ≠ LANGUAGE APPROVED ≠ RELEASED.",
     "primaryStatusesExclusive": [
@@ -30,7 +30,7 @@
   "totals": {
     "uiLanguages": 59,
     "messagePacks": 58,
-    "referenceKeys": 859,
+    "referenceKeys": 873,
     "technicallyCompletePacks": 15,
     "incompletePacks": 43,
     "reviewedTotal": 0,
@@ -365,13 +365,13 @@
   },
   "ptExactReviewInventory": {
     "MACHINE_DRAFT": 742,
-    "EXISTING_UNREVIEWED": 78,
-    "INTENTIONALLY_UNCHANGED": 39,
+    "EXISTING_UNREVIEWED": 89,
+    "INTENTIONALLY_UNCHANGED": 42,
     "NEEDS_REVIEW": 0,
     "REVIEWED": 0,
     "APPROVED": 0,
-    "sum": 859,
-    "expected": 859,
+    "sum": 873,
+    "expected": 873,
     "sumOk": true,
     "openQaFindingsCount": 9,
     "regionalDecision": "PRODUCT_DECISION_REQUIRED"
@@ -402,14 +402,14 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 859,
+      "identicalToEn": 873,
       "statusCounts": {
-        "NEEDS_REVIEW": 854,
+        "NEEDS_REVIEW": 868,
         "INTENTIONALLY_UNCHANGED": 5,
         "MACHINE_DRAFT": 0,
         "EXISTING_UNREVIEWED": 0,
@@ -417,7 +417,7 @@
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -453,7 +453,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -559,7 +559,7 @@
       "hasMessagePack": false,
       "isAlias": true,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 0,
       "explicitOwnValues": 0,
       "inheritedSourceValues": 0,
@@ -713,22 +713,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -764,7 +764,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -869,22 +869,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 44,
+      "identicalToEn": 47,
       "statusCounts": {
         "MACHINE_DRAFT": 808,
-        "INTENTIONALLY_UNCHANGED": 44,
-        "EXISTING_UNREVIEWED": 7,
+        "INTENTIONALLY_UNCHANGED": 47,
+        "EXISTING_UNREVIEWED": 18,
         "NEEDS_REVIEW": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 8,
       "openQaFindings": [
@@ -939,8 +939,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -953,12 +953,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=8; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -1022,8 +1022,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=8; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -1038,14 +1038,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -1059,22 +1060,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -1110,7 +1111,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -1215,22 +1216,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -1266,7 +1267,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -1371,22 +1372,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 30,
+      "identicalToEn": 33,
       "statusCounts": {
-        "EXISTING_UNREVIEWED": 829,
+        "EXISTING_UNREVIEWED": 840,
         "INTENTIONALLY_UNCHANGED": 2,
-        "NEEDS_REVIEW": 28,
+        "NEEDS_REVIEW": 31,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -1422,7 +1423,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -1528,22 +1529,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 104,
       "inheritedSourceValues": 210,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 222,
         "EXISTING_UNREVIEWED": 91,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -1579,7 +1580,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=210 explicit=104",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=210 explicit=104",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -1684,22 +1685,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 42,
+      "identicalToEn": 45,
       "statusCounts": {
         "MACHINE_DRAFT": 761,
-        "EXISTING_UNREVIEWED": 74,
+        "EXISTING_UNREVIEWED": 85,
         "NEEDS_REVIEW": 24,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 16,
       "openQaFindings": [
@@ -1794,8 +1795,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -1808,12 +1809,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=16; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -1877,8 +1878,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=16; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -1893,14 +1894,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -1914,22 +1916,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 16,
+      "identicalToEn": 19,
       "statusCounts": {
         "MACHINE_DRAFT": 761,
-        "EXISTING_UNREVIEWED": 85,
+        "EXISTING_UNREVIEWED": 96,
         "NEEDS_REVIEW": 13,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 12,
       "openQaFindings": [
@@ -2001,8 +2003,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -2015,12 +2017,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=12; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -2084,8 +2086,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=12; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -2100,14 +2102,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -2121,22 +2124,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 26,
+      "identicalToEn": 29,
       "statusCounts": {
         "MACHINE_DRAFT": 755,
-        "EXISTING_UNREVIEWED": 91,
+        "EXISTING_UNREVIEWED": 102,
         "NEEDS_REVIEW": 13,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 14,
       "openQaFindings": [
@@ -2221,8 +2224,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -2235,12 +2238,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=14; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -2304,8 +2307,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=14; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -2320,14 +2323,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -2341,22 +2345,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 58,
+      "identicalToEn": 61,
       "statusCounts": {
         "MACHINE_DRAFT": 716,
-        "EXISTING_UNREVIEWED": 85,
-        "INTENTIONALLY_UNCHANGED": 58,
+        "EXISTING_UNREVIEWED": 96,
+        "INTENTIONALLY_UNCHANGED": 61,
         "NEEDS_REVIEW": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 5,
       "openQaFindings": [
@@ -2410,7 +2414,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -2516,22 +2520,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 54,
+      "identicalToEn": 57,
       "statusCounts": {
         "MACHINE_DRAFT": 724,
-        "EXISTING_UNREVIEWED": 82,
-        "INTENTIONALLY_UNCHANGED": 53,
+        "EXISTING_UNREVIEWED": 93,
+        "INTENTIONALLY_UNCHANGED": 56,
         "NEEDS_REVIEW": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 10,
       "openQaFindings": [
@@ -2596,8 +2600,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -2610,12 +2614,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=10; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -2679,8 +2683,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=10; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -2695,14 +2699,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -2716,22 +2721,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 50,
+      "identicalToEn": 53,
       "statusCounts": {
         "MACHINE_DRAFT": 732,
-        "EXISTING_UNREVIEWED": 77,
-        "INTENTIONALLY_UNCHANGED": 50,
+        "EXISTING_UNREVIEWED": 88,
+        "INTENTIONALLY_UNCHANGED": 53,
         "NEEDS_REVIEW": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 8,
       "openQaFindings": [
@@ -2786,8 +2791,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -2800,12 +2805,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=8; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -2869,8 +2874,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=8; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -2885,14 +2890,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -2906,22 +2912,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 38,
+      "identicalToEn": 41,
       "statusCounts": {
         "MACHINE_DRAFT": 735,
-        "EXISTING_UNREVIEWED": 86,
-        "INTENTIONALLY_UNCHANGED": 38,
+        "EXISTING_UNREVIEWED": 97,
+        "INTENTIONALLY_UNCHANGED": 41,
         "NEEDS_REVIEW": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 8,
       "openQaFindings": [
@@ -2976,8 +2982,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -2990,12 +2996,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=8; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -3059,8 +3065,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=8; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -3075,14 +3081,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -3096,22 +3103,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 33,
+      "identicalToEn": 36,
       "statusCounts": {
         "MACHINE_DRAFT": 755,
-        "EXISTING_UNREVIEWED": 83,
+        "EXISTING_UNREVIEWED": 94,
         "NEEDS_REVIEW": 21,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 15,
       "openQaFindings": [
@@ -3201,8 +3208,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -3215,12 +3222,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=15; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -3284,8 +3291,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=15; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -3300,14 +3307,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -3321,22 +3329,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -3372,7 +3380,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -3477,22 +3485,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -3528,7 +3536,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -3633,22 +3641,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 19,
       "statusCounts": {
         "NEEDS_REVIEW": 234,
         "EXISTING_UNREVIEWED": 79,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -3684,7 +3692,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -3789,22 +3797,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -3840,7 +3848,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -3945,22 +3953,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 18,
       "statusCounts": {
         "NEEDS_REVIEW": 233,
         "EXISTING_UNREVIEWED": 80,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -3996,7 +4004,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -4101,22 +4109,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -4152,7 +4160,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -4257,22 +4265,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 22,
+      "identicalToEn": 25,
       "statusCounts": {
         "MACHINE_DRAFT": 761,
-        "EXISTING_UNREVIEWED": 85,
+        "EXISTING_UNREVIEWED": 96,
         "NEEDS_REVIEW": 13,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 10,
       "openQaFindings": [
@@ -4334,8 +4342,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -4348,12 +4356,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=10; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -4417,8 +4425,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=10; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -4433,14 +4441,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -4454,22 +4463,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 33,
+      "identicalToEn": 36,
       "statusCounts": {
         "MACHINE_DRAFT": 761,
-        "EXISTING_UNREVIEWED": 81,
+        "EXISTING_UNREVIEWED": 92,
         "NEEDS_REVIEW": 17,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 10,
       "openQaFindings": [
@@ -4531,8 +4540,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -4545,12 +4554,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=10; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -4614,8 +4623,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=10; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -4630,14 +4639,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -4651,22 +4661,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 20,
       "statusCounts": {
         "NEEDS_REVIEW": 235,
         "EXISTING_UNREVIEWED": 78,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -4702,7 +4712,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -4807,22 +4817,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 24,
       "statusCounts": {
         "NEEDS_REVIEW": 239,
         "EXISTING_UNREVIEWED": 74,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -4858,7 +4868,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -4963,22 +4973,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 22,
       "statusCounts": {
         "NEEDS_REVIEW": 237,
         "EXISTING_UNREVIEWED": 76,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5014,7 +5024,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -5119,22 +5129,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5170,7 +5180,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -5275,22 +5285,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5326,7 +5336,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -5431,22 +5441,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5482,7 +5492,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -5587,22 +5597,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 25,
       "statusCounts": {
         "NEEDS_REVIEW": 240,
         "EXISTING_UNREVIEWED": 73,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5638,7 +5648,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -5743,22 +5753,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5794,7 +5804,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -5899,22 +5909,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 72,
       "inheritedSourceValues": 242,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 0,
       "statusCounts": {
         "NEEDS_REVIEW": 241,
         "EXISTING_UNREVIEWED": 72,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -5950,7 +5960,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=242 explicit=72",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=242 explicit=72",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6055,22 +6065,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 16,
       "statusCounts": {
         "NEEDS_REVIEW": 231,
         "EXISTING_UNREVIEWED": 82,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -6106,7 +6116,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6211,22 +6221,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 16,
       "statusCounts": {
         "NEEDS_REVIEW": 231,
         "EXISTING_UNREVIEWED": 82,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -6262,7 +6272,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6367,22 +6377,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -6418,7 +6428,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6523,22 +6533,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -6574,7 +6584,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6679,22 +6689,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 25,
       "statusCounts": {
         "NEEDS_REVIEW": 240,
         "EXISTING_UNREVIEWED": 73,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -6730,7 +6740,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6835,22 +6845,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -6886,7 +6896,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -6991,22 +7001,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 39,
+      "identicalToEn": 42,
       "statusCounts": {
         "MACHINE_DRAFT": 742,
-        "EXISTING_UNREVIEWED": 78,
-        "INTENTIONALLY_UNCHANGED": 39,
+        "EXISTING_UNREVIEWED": 89,
+        "INTENTIONALLY_UNCHANGED": 42,
         "NEEDS_REVIEW": 0,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 9,
       "openQaFindings": [
@@ -7067,8 +7077,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -7081,12 +7091,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=9; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -7150,8 +7160,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=9; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -7166,14 +7176,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -7187,22 +7198,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -7238,7 +7249,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -7343,22 +7354,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 21,
       "statusCounts": {
         "NEEDS_REVIEW": 236,
         "EXISTING_UNREVIEWED": 77,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -7394,7 +7405,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -7499,22 +7510,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 94,
       "inheritedSourceValues": 220,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 232,
         "EXISTING_UNREVIEWED": 81,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -7550,7 +7561,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=220 explicit=94",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=220 explicit=94",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -7655,22 +7666,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "NEEDS_REVIEW": 229,
         "EXISTING_UNREVIEWED": 84,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -7706,7 +7717,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -7811,22 +7822,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 98,
       "inheritedSourceValues": 216,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 13,
       "statusCounts": {
         "NEEDS_REVIEW": 228,
         "EXISTING_UNREVIEWED": 85,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -7862,7 +7873,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=216 explicit=98",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=216 explicit=98",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -7967,22 +7978,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
-      "availableKeys": 859,
-      "explicitOwnValues": 859,
+      "referenceKeyCount": 873,
+      "availableKeys": 873,
+      "explicitOwnValues": 873,
       "inheritedSourceValues": 0,
       "runtimeMissingValues": 0,
-      "identicalToEn": 58,
+      "identicalToEn": 61,
       "statusCounts": {
         "MACHINE_DRAFT": 761,
-        "EXISTING_UNREVIEWED": 73,
+        "EXISTING_UNREVIEWED": 84,
         "NEEDS_REVIEW": 25,
-        "INTENTIONALLY_UNCHANGED": 0,
+        "INTENTIONALLY_UNCHANGED": 3,
         "REVIEWED": 0,
         "APPROVED": 0,
         "MISSING": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 17,
       "openQaFindings": [
@@ -8082,8 +8093,8 @@
         "note": "AI preflight file present — NOT human APPROVED"
       },
       "humanReviewArtifacts": {
-        "jsonPackage": true,
-        "csvPackage": true,
+        "jsonPackage": false,
+        "csvPackage": false,
         "glossary": true,
         "qaPreflight": true,
         "paths": {
@@ -8096,12 +8107,12 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "READY",
-          "reason": "CATALOG COMPLETE 859/859 explicit own; not language-approved",
+          "reason": "CATALOG COMPLETE 873/873 explicit own; not language-approved",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=17; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "quasarLocale": {
@@ -8165,8 +8176,8 @@
           "confidence": "EXACT"
         },
         "humanLinguisticReview": {
-          "status": "PARTIAL",
-          "reason": "Workpackage ready; REVIEWED=0 APPROVED=0; openQa=17; AI preflight ≠ human approval",
+          "status": "NOT READY",
+          "reason": "No HR workpackage",
           "confidence": "EXACT"
         },
         "authenticatedE2eCoverage": {
@@ -8181,14 +8192,15 @@
         },
         "overallReadiness": {
           "status": "NOT READY",
-          "reason": "FE catalog complete but human review / BE / legal not release-ready",
+          "reason": "Release blocked — see releaseBlockers",
           "confidence": "EXACT"
         },
         "releaseBlockers": [
+          "HUMAN_REVIEW",
           "DEPLOYMENT"
         ]
       },
-      "proposedRolloutStage": "AWAITING_REVIEW",
+      "proposedRolloutStage": "TECHNICALLY_COMPLETE",
       "e2eSmoke": {
         "donorFeed": "PASS",
         "donee": "PASS",
@@ -8202,22 +8214,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 196,
         "NEEDS_REVIEW": 117,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -8253,7 +8265,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -8358,22 +8370,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 196,
         "NEEDS_REVIEW": 117,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -8409,7 +8421,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -8514,22 +8526,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 196,
         "NEEDS_REVIEW": 117,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -8565,7 +8577,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -8670,22 +8682,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 196,
         "NEEDS_REVIEW": 117,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -8721,7 +8733,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -8826,22 +8838,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 212,
       "inheritedSourceValues": 102,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 198,
         "NEEDS_REVIEW": 115,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -8877,7 +8889,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=102 explicit=212",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=102 explicit=212",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -8982,22 +8994,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 62,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 148,
         "NEEDS_REVIEW": 165,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9033,7 +9045,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -9138,22 +9150,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 212,
       "inheritedSourceValues": 102,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 198,
         "NEEDS_REVIEW": 115,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9189,7 +9201,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=102 explicit=212",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=102 explicit=212",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -9294,22 +9306,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 16,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 194,
         "NEEDS_REVIEW": 119,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9345,7 +9357,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -9450,22 +9462,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 212,
       "inheritedSourceValues": 102,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 198,
         "NEEDS_REVIEW": 115,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9501,7 +9513,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=102 explicit=212",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=102 explicit=212",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -9606,22 +9618,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 212,
       "inheritedSourceValues": 102,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 198,
         "NEEDS_REVIEW": 115,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9657,7 +9669,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=102 explicit=212",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=102 explicit=212",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -9762,22 +9774,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 26,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 184,
         "NEEDS_REVIEW": 129,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9813,7 +9825,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -9918,22 +9930,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 196,
         "NEEDS_REVIEW": 117,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -9969,7 +9981,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
@@ -10074,22 +10086,22 @@
       "hasMessagePack": true,
       "isAlias": false,
       "confidence": "EXACT",
-      "referenceKeyCount": 859,
+      "referenceKeyCount": 873,
       "availableKeys": 314,
       "explicitOwnValues": 210,
       "inheritedSourceValues": 104,
-      "runtimeMissingValues": 545,
+      "runtimeMissingValues": 559,
       "identicalToEn": 14,
       "statusCounts": {
         "EXISTING_UNREVIEWED": 196,
         "NEEDS_REVIEW": 117,
         "INTENTIONALLY_UNCHANGED": 1,
-        "MISSING": 545,
+        "MISSING": 559,
         "MACHINE_DRAFT": 0,
         "REVIEWED": 0,
         "APPROVED": 0
       },
-      "statusSum": 859,
+      "statusSum": 873,
       "statusSumOk": true,
       "openQaFindingsCount": 2,
       "openQaFindings": [
@@ -10125,7 +10137,7 @@
       "dimensions": {
         "feCatalogCoverage": {
           "status": "NOT READY",
-          "reason": "CATALOG INCOMPLETE missing=545 inherited=104 explicit=210",
+          "reason": "CATALOG INCOMPLETE missing=559 inherited=104 explicit=210",
           "confidence": "EXACT"
         },
         "feReviewCoverage": {
