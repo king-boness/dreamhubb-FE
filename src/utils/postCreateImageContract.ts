@@ -54,3 +54,16 @@ export function alignImageFilesAndPreviews(
     previews: previews.slice(0, n)
   };
 }
+
+/**
+ * After removing a preview, sync remote URL store:
+ * - File[] mode → always []
+ * - URL-only mode → https URLs only (never blob/data)
+ */
+export function storeImagesAfterLocalDelete(
+  remainingFiles: File[],
+  remainingPreviews: string[]
+): string[] {
+  if (remainingFiles.length > 0) return [];
+  return remainingPreviews.filter((u) => isRemoteImageUrl(u));
+}

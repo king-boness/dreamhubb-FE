@@ -118,6 +118,32 @@ describe("create image XOR contract", () => {
     ]);
     assert.equal(mixedAttempt.mode, "files");
   });
+
+  it("middle delete in File[] mode keeps remote store empty (no blob/data in payload state)", () => {
+    const f = files(3);
+    const previews = ["blob:a", "blob:b", "blob:c"];
+    f.splice(1, 1);
+    previews.splice(1, 1);
+    const aligned = imageContract.alignImageFilesAndPreviews(f, previews);
+    const store = imageContract.storeImagesAfterLocalDelete(
+      aligned.files,
+      aligned.previews
+    );
+    assert.deepEqual(store, []);
+    assert.equal(aligned.files.length, 2);
+    assert.deepEqual(aligned.previews, ["blob:a", "blob:c"]);
+    const payload = imageContract.resolveCreateImagePayload(aligned.files, store);
+    assert.equal(payload.mode, "files");
+    assert.equal(payload.files.length, 2);
+  });
+
+  it("URL-only delete never keeps blob/data in remote store", () => {
+    const store = imageContract.storeImagesAfterLocalDelete(
+      [],
+      ["https://res.cloudinary.com/x/1.jpg", "blob:local"]
+    );
+    assert.deepEqual(store, ["https://res.cloudinary.com/x/1.jpg"]);
+  });
 });
 
 describe("create submit semantics (dual toast bug)", () => {
