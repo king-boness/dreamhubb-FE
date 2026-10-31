@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>dreamhubb – post edit desktop visual harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --panel-min: 26.25rem; /* 420 */
+      --panel-max: 28.75rem; /* 460 */
+      --gap: 2rem; /* 32 */
+      --max: 77.5rem; /* 1240 */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Poppins, sans-serif;
+      color: #fff;
+      background: radial-gradient(1200px 600px at 20% 0%, #2a1030 0%, #0a0a12 55%, #050509 100%);
+      min-height: 100vh;
+    }
+    .badge {
+      position: fixed; top: 8px; left: 8px; z-index: 50;
+      background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.2);
+      padding: 6px 10px; border-radius: 8px; font-size: 12px;
+    }
+    .postEditPage {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 4rem;
+    }
+    @media (min-width: 1200px) {
+      .postEditPage.post-edit-page--editMode {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(var(--panel-min), var(--panel-max));
+        column-gap: var(--gap);
+        row-gap: 0;
+        align-items: start;
+        max-width: min(var(--max), calc(100% - 4rem));
+        margin-left: auto;
+        margin-right: auto;
+        padding: 1.5rem 2rem 2.5rem;
+      }
+      .post-edit-desktopMedia { grid-column: 1; min-width: 0; align-self: start; }
+      .post-edit-desktopForm {
+        grid-column: 2; min-width: 0; align-self: start;
+        display: flex; flex-direction: column; gap: 0.85rem;
+        background: rgba(18, 18, 24, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        padding: 1.25rem 1.25rem 1.5rem;
+        backdrop-filter: blur(12px);
+      }
+    }
+    .hero {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: min(28rem, 52vh);
+      border-radius: 1rem;
+      overflow: hidden;
+      position: relative;
+      background:
+        linear-gradient(to top, rgba(1,3,16,.95), transparent 45%),
+        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1400&q=60") center/cover;
+    }
+    .hero .title {
+      position: absolute; left: 1rem; right: 1rem; bottom: 1rem;
+      font-weight: 600; font-size: 1.35rem;
+    }
+    .hero .chip {
+      position: absolute; left: 1rem; top: 1rem;
+      background: rgba(0,0,0,.45); border-radius: 999px; padding: 0.35rem 0.7rem; font-size: 0.75rem;
+    }
+    .eyebrow { font-size: 0.72rem; letter-spacing: .08em; color: rgba(255,255,255,.65); }
+    .card { background: rgba(255,255,255,.04); border-radius: .75rem; padding: .85rem; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+    input[type=number], input[type=range] { width: 100%; }
+    .funds { margin: .5rem 0; color: rgba(255,255,255,.8); font-size: .9rem; }
+    .deleteLink {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 2.75rem; width: 100%; margin: .25rem 0 .75rem;
+      border: none; background: transparent; color: rgba(255,120,150,.72);
+      font: inherit; font-size: .8rem; text-decoration: underline; cursor: pointer;
+    }
+    .save {
+      width: 100%; height: 3.25rem; border: none; border-radius: .75rem;
+      background: #e91e8c; color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer;
+    }
+    .sticky-save {
+      position: fixed; left: 0; right: 0; bottom: 0; padding: 1rem 20px;
+      background: linear-gradient(to top, rgba(2,3,7,.98), rgba(2,3,7,.85));
+      display: none;
+    }
+    @media (max-width: 1199px) {
+      .post-edit-desktopForm { padding: 1rem; }
+      .inline-save { display: none; }
+      .sticky-save { display: block; }
+      .hero { border-radius: 0 0 24px 24px; max-height: none; aspect-ratio: auto; min-height: 280px; }
+    }
+    .dialog {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      align-items: center; justify-content: center; padding: 1rem; z-index: 40;
+    }
+    .dialog.open { display: flex; }
+    .dialog-card {
+      width: min(420px, 100%); background: #16161f; border-radius: 1rem; padding: 1.25rem;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .phrase {
+      margin: .75rem 0; padding: .75rem; border-radius: .65rem;
+      background: rgba(255,255,255,.06); text-align: center; font-weight: 600;
+    }
+    .warn { color: rgba(255,180,190,.9); font-size: .92rem; line-height: 1.45; text-align: center; }
+    .actions { display: flex; gap: .75rem; justify-content: center; margin-top: 1rem; }
+    .actions button { flex: 1; height: 3rem; border: none; border-radius: .5rem; font-weight: 600; cursor: pointer; }
+    .cancel { background: #3a3a45; color: #fff; }
+    .go { background: #e91e8c; color: #fff; }
+    .go:disabled { opacity: .4; cursor: not-allowed; }
+    .danger { background: #c62828; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="badge" id="vp">viewport</div>
+  <div class="postEditPage post-edit-page--editMode" data-testid="edit-harness">
+    <div class="post-edit-desktopMedia" data-testid="hero-col">
+      <div class="hero">
+        <div class="chip">Traveling</div>
+        <div class="title">Edit my dream — visual harness</div>
+      </div>
+    </div>
+    <div class="post-edit-desktopForm" data-testid="form-col">
+      <div class="eyebrow">I WANT TO EDIT...</div>
+      <div class="card">headline · category · subcategory · deadline · photos</div>
+      <div class="eyebrow">TOP UP THE POST</div>
+      <div class="card">
+        <div class="row"><span>AVAILABLE FROM donations</span><strong>12</strong></div>
+        <hr style="border-color:rgba(255,255,255,.1)" />
+        <div class="row"><span>YOUR FULL BALANCE</span><strong>100</strong></div>
+      </div>
+      <label class="eyebrow">TOKENS TO TOP UP</label>
+      <input type="number" min="0" max="100" value="10" />
+      <input type="range" min="0" max="100" value="10" />
+      <div class="funds">Funds: 90 tokens</div>
+      <button class="deleteLink" id="deleteBtn" data-testid="delete-link">delete my dream</button>
+      <button class="save inline-save" data-testid="save-inline">SAVE CHANGES</button>
+    </div>
+  </div>
+  <div class="sticky-save"><button class="save" style="max-width:390px;margin:0 auto;display:block">SAVE CHANGES</button></div>
+
+  <div class="dialog" id="step1" data-testid="step1">
+    <div class="dialog-card">
+      <div class="eyebrow" style="text-align:center">Delete this post?</div>
+      <p style="text-align:center;opacity:.75">To continue, type the exact phrase below:</p>
+      <div class="phrase" id="phrase">I want to delete this dream</div>
+      <input id="confirmInput" style="width:100%;padding:.7rem;border-radius:.5rem;border:1px solid #444;background:#0f0f16;color:#fff" />
+      <div class="actions">
+        <button class="cancel" id="cancel1">CANCEL</button>
+        <button class="go" id="continue1" disabled>Continue</button>
+      </div>
+    </div>
+  </div>
+  <div class="dialog" id="step2" data-testid="step2">
+    <div class="dialog-card">
+      <div class="eyebrow" style="text-align:center">Delete this post?</div>
+      <p class="warn">Deleting this dream is permanent.</p>
+      <p class="warn">Tokens that you have already placed into this post will NOT be returned to your token balance.</p>
+      <div class="actions">
+        <button class="cancel" id="cancel2">CANCEL</button>
+        <button class="danger" id="deletePerm">Delete permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const vp = document.getElementById('vp');
+    function paintVp() {
+      vp.textContent = window.innerWidth + '×' + window.innerHeight +
+        ' | panel=' + Math.round(document.querySelector('[data-testid=form-col]').getBoundingClientRect().width) + 'px' +
+        ' | topAlignΔ=' + Math.round(
+          document.querySelector('[data-testid=hero-col]').getBoundingClientRect().top -
+          document.querySelector('[data-testid=form-col]').getBoundingClientRect().top
+        );
+    }
+    paintVp();
+    window.addEventListener('resize', paintVp);
+
+    const phrase = 'I want to delete this dream';
+    const input = document.getElementById('confirmInput');
+    const cont = document.getElementById('continue1');
+    document.getElementById('deleteBtn').onclick = () => {
+      input.value = ''; cont.disabled = true;
+      document.getElementById('step1').classList.add('open');
+    };
+    input.oninput = () => { cont.disabled = input.value.trim() !== phrase; };
+    cont.onclick = () => {
+      document.getElementById('step1').classList.remove('open');
+      document.getElementById('step2').classList.add('open');
+    };
+    document.getElementById('cancel1').onclick = () => document.getElementById('step1').classList.remove('open');
+    document.getElementById('cancel2').onclick = () => document.getElementById('step2').classList.remove('open');
+    document.getElementById('deletePerm').onclick = () => document.getElementById('step2').classList.remove('open');
+  </script>
+</body>
+</html>
+EOF
