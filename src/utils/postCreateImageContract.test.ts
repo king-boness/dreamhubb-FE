@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   alignImageFilesAndPreviews,
   isRemoteImageUrl,
-  resolveCreateImagePayload
+  resolveCreateImagePayload,
+  storeImagesAfterLocalDelete
 } from "./postCreateImageContract";
 
 describe("postCreateImageContract", () => {
@@ -53,5 +54,11 @@ describe("postCreateImageContract", () => {
       files: [f1, f2],
       previews: ["a", "b"]
     });
+  });
+
+  it("after middle delete in File[] mode, remote store stays empty", () => {
+    const f1 = new File(["1"], "1.jpg", { type: "image/jpeg" });
+    const f2 = new File(["2"], "2.jpg", { type: "image/jpeg" });
+    expect(storeImagesAfterLocalDelete([f1, f2], ["blob:a", "blob:c"])).toEqual([]);
   });
 });

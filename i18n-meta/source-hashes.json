@@ -1,8 +1,8 @@
 {
   "version": 1,
   "referenceLocale": "en-US",
-  "generatedAt": "2026-10-10T10:54:12.939Z",
-  "keyCount": 859,
+  "generatedAt": "2026-10-31T11:28:49.774Z",
+  "keyCount": 873,
   "keys": {
     "signIn": {
       "hash": "bcc0bcc9140b0c97",
@@ -2651,6 +2651,62 @@
     "posts.edit.deadline": {
       "hash": "dfc8aeb39828e31c",
       "length": 8
+    },
+    "posts.edit.deleteMyDream": {
+      "hash": "47d240a62a86a44c",
+      "length": 15
+    },
+    "posts.edit.deleteMyProblem": {
+      "hash": "34be673bb9bb1003",
+      "length": 17
+    },
+    "posts.edit.deleteMyIdea": {
+      "hash": "b2d941c96cab2184",
+      "length": 14
+    },
+    "posts.edit.deleteDialogTitle": {
+      "hash": "0aaf3b939d245488",
+      "length": 17
+    },
+    "posts.edit.deleteTypeInstruction": {
+      "hash": "73dfea9fa17d6d08",
+      "length": 41
+    },
+    "posts.edit.deletePhraseDream": {
+      "hash": "b114a6133c7db14b",
+      "length": 27
+    },
+    "posts.edit.deletePhraseProblem": {
+      "hash": "83bc5890931d675d",
+      "length": 29
+    },
+    "posts.edit.deletePhraseIdea": {
+      "hash": "eeab7517e772e2ff",
+      "length": 26
+    },
+    "posts.edit.continueDelete": {
+      "hash": "31fbef162594de01",
+      "length": 8
+    },
+    "posts.edit.permanentDeleteWarning": {
+      "hash": "291754248d1c4cbd",
+      "length": 34
+    },
+    "posts.edit.tokensNotRefundedWarning": {
+      "hash": "da513bc651a21703",
+      "length": 94
+    },
+    "posts.edit.deletePermanently": {
+      "hash": "280b10c89cc41d57",
+      "length": 18
+    },
+    "posts.edit.deletedSuccessfully": {
+      "hash": "fe2cf51f01dfd435",
+      "length": 26
+    },
+    "posts.edit.deleteFailed": {
+      "hash": "cabd095cb105f556",
+      "length": 45
     },
     "posts.upload.addImage": {
       "hash": "04136060b40fb36a",

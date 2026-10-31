@@ -70,7 +70,7 @@ function findingKey(locale, keyPath) {
 }
 
 /**
- * Build / refresh the human-review work package (all 859 keys).
+ * Build / refresh the human-review work package (all reference keys).
  */
 function buildHumanReviewPackage(opts = {}) {
   const locale = opts.locale || "de";

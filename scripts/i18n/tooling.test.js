@@ -684,7 +684,7 @@ describe("phase 4C.1 linguistic QA guards", () => {
     assert.equal(flat.events, flat["subcategories.events"]);
   });
 
-  it("4C.1 glossary + human review package exist and cover 859 keys", () => {
+  it("4C.1 glossary + human review package exist and cover 873 keys", () => {
     const glossaryPath = path.join(ROOT, "i18n-meta", "glossary.de.json");
     const hrPath = path.join(
       ROOT,
@@ -698,7 +698,7 @@ describe("phase 4C.1 linguistic QA guards", () => {
     assert.ok(Array.isArray(glossary.terms) && glossary.terms.length >= 15);
     assert.equal(glossary.addressStyle.decision.includes("du"), true);
     const hr = JSON.parse(fs.readFileSync(hrPath, "utf8"));
-    assert.equal(hr.entryCount, 859);
+    assert.equal(hr.entryCount, 873);
     assert.ok(hr.entries.every((e) => e.sourceHash && e.keyPath && e.currentDe != null));
     assert.ok(!hr.entries.some((e) => e.reviewStatus === "APPROVED"));
   });
@@ -880,17 +880,17 @@ describe("phase 4C.2 human review workflow", () => {
     REVIEWER_DECISIONS
   } = require("./lib/humanReview");
 
-  it("exports 859 DE keys with empty reviewer decisions and priority buckets", () => {
+  it("exports 873 DE keys with empty reviewer decisions and priority buckets", () => {
     const pkg = buildHumanReviewPackage({ locale: "de", deterministic: true });
-    assert.equal(pkg.entryCount, 859);
-    assert.equal(pkg.uniqueKeyCount, 859);
+    assert.equal(pkg.entryCount, 873);
+    assert.equal(pkg.uniqueKeyCount, 873);
     assert.ok(pkg.entries.every((e) => e.reviewerDecision === "NOT_REVIEWED"));
     assert.ok(pkg.entries.every((e) => e.sourceHash && e.keyPath));
     assert.ok(pkg.priorityCounts.P0_FIXED_4C1 >= 1);
     assert.ok(pkg.priorityCounts.P1_TERMINOLOGY >= 1);
     assert.ok(pkg.priorityCounts.P1_IDENTICAL_EN >= 1);
     const sumPri = Object.values(pkg.priorityCounts).reduce((a, b) => a + b, 0);
-    assert.equal(sumPri, 859);
+    assert.equal(sumPri, 873);
     assert.ok([...REVIEWER_DECISIONS].includes("ACCEPT"));
   });
 
@@ -1200,11 +1200,11 @@ describe("phase 4E.3 release readiness reporting", () => {
     PRIMARY_STATUSES
   } = require("./lib/releaseReadiness");
 
-  it("builds report for 59 UI locales with exclusive PT status sum 859", () => {
+  it("builds report for 59 UI locales with exclusive PT status sum 873", () => {
     const report = buildReleaseReadinessReport();
     assert.equal(report.totals.uiLanguages, 59);
     assert.equal(report.totals.messagePacks, 58);
-    assert.equal(report.totals.referenceKeys, 859);
+    assert.equal(report.totals.referenceKeys, 873);
     // 4E.6: UK complete → 15 technically complete / 43 incomplete
     assert.equal(report.totals.technicallyCompletePacks, 15);
     assert.equal(report.totals.incompletePacks, 43);
@@ -1212,7 +1212,7 @@ describe("phase 4E.3 release readiness reporting", () => {
 
     const pt = report.ptExactReviewInventory;
     assert.ok(pt);
-    assert.equal(pt.sum, 859);
+    assert.equal(pt.sum, 873);
     assert.equal(pt.sumOk, true);
     assert.equal(pt.REVIEWED, 0);
     assert.equal(pt.APPROVED, 0);
@@ -1223,7 +1223,7 @@ describe("phase 4E.3 release readiness reporting", () => {
         pt.NEEDS_REVIEW +
         pt.REVIEWED +
         pt.APPROVED,
-      859
+      873
     );
     assert.equal(pt.regionalDecision, "PRODUCT_DECISION_REQUIRED");
   });
@@ -1242,7 +1242,7 @@ describe("phase 4E.3 release readiness reporting", () => {
         (a, k) => a + (row.statusCounts[k] || 0),
         0
       );
-      assert.equal(sum, 859);
+      assert.equal(sum, 873);
     }
     assert.ok(report.productDecisionsOpen.length >= 1);
     assert.ok(

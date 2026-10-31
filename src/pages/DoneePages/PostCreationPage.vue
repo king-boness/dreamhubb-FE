@@ -281,6 +281,7 @@ import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import { Capacitor } from "@capacitor/core";
 import { resolvePickAnchorEl, useImagePickMenu } from "src/composables/useImagePickMenu";
+import { storeImagesAfterLocalDelete } from "src/utils/postCreateImageContract";
 
 const { t } = useI18n();
 
@@ -711,7 +712,10 @@ const deleteImg = () => {
   }
   uploadedImages.value.images.splice(idx, 1);
   imageFilesRef.value.splice(idx, 1);
-  postCreationStore.setImages(uploadedImages.value.images);
+  // File[] mode → remote store []; URL-only → https only (never blob/data).
+  postCreationStore.setImages(
+    storeImagesAfterLocalDelete(imageFilesRef.value, uploadedImages.value.images)
+  );
 };
 const handleImagesFromChild = async (imgs: UploadedImage[]) => {
   // Canonical create contract: File[] + local preview URLs in parallel (same index order).

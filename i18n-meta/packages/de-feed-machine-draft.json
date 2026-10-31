@@ -1,0 +1,261 @@
+{
+  "targetLocale": "de",
+  "filters": {
+    "namespace": "feed"
+  },
+  "entryCount": 36,
+  "entries": [
+    {
+      "keyPath": "feed.addKeywords",
+      "namespace": "feed",
+      "translation": "Stichwörter hinzufügen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "ad20ce32ac005bb0"
+    },
+    {
+      "keyPath": "feed.applyFilters",
+      "namespace": "feed",
+      "translation": "Filter anwenden",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "d80ab19b7edb8272"
+    },
+    {
+      "keyPath": "feed.chooseCountry",
+      "namespace": "feed",
+      "translation": "Land wählen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "90095a585379c31b"
+    },
+    {
+      "keyPath": "feed.clearFilters",
+      "namespace": "feed",
+      "translation": "Filter löschen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "7179ea0035fca783"
+    },
+    {
+      "keyPath": "feed.failedLoadInspirations",
+      "namespace": "feed",
+      "translation": "Inspirationen konnten nicht geladen werden.",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "ccad73232e5295be"
+    },
+    {
+      "keyPath": "feed.filterAlsoCategory",
+      "namespace": "feed",
+      "translation": "auch Kategorie wählen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "48e0667449d223ef"
+    },
+    {
+      "keyPath": "feed.filterAlsoPlace",
+      "namespace": "feed",
+      "translation": "auch Ort ändern",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "38b5e337355bd6c5"
+    },
+    {
+      "keyPath": "feed.filterSearchCta",
+      "namespace": "feed",
+      "translation": "suchen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "2419329067823cab"
+    },
+    {
+      "keyPath": "feed.filterStepCategory",
+      "namespace": "feed",
+      "translation": "Kategorie wählen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "ea912925f09efb2b"
+    },
+    {
+      "keyPath": "feed.filterStepPlace",
+      "namespace": "feed",
+      "translation": "Ort wählen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "98280796a838ef30"
+    },
+    {
+      "keyPath": "feed.filterStepPosts",
+      "namespace": "feed",
+      "translation": "Beiträge wählen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "a85becfee3bd8921"
+    },
+    {
+      "keyPath": "feed.firstPostHint",
+      "namespace": "feed",
+      "translation": "Erstelle deinen ersten Traum, dein erstes Problem oder deine erste Idee und teile sie mit der Welt.",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "4bcca2ee9ae2f2f1"
+    },
+    {
+      "keyPath": "feed.firstPostTitle",
+      "namespace": "feed",
+      "translation": "Starte deine Reise!",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "d9133335d2827aae"
+    },
+    {
+      "keyPath": "feed.myDreamsTitle",
+      "namespace": "feed",
+      "translation": "Meine Träume",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "dbf9741b0f37ac06"
+    },
+    {
+      "keyPath": "feed.noResults",
+      "namespace": "feed",
+      "translation": "Keine Ergebnisse",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "a43619f321175f57"
+    },
+    {
+      "keyPath": "feed.postImageAlt",
+      "namespace": "feed",
+      "translation": "Beitragsbild",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "60232c175e022cb9"
+    },
+    {
+      "keyPath": "feed.postType.dream",
+      "namespace": "feed",
+      "translation": "traum",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "30fde358b34772de"
+    },
+    {
+      "keyPath": "feed.postType.idea",
+      "namespace": "feed",
+      "translation": "idee",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "ae0a9ad3227c5420"
+    },
+    {
+      "keyPath": "feed.postType.problem",
+      "namespace": "feed",
+      "translation": "problem",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "47a49356720831b6"
+    },
+    {
+      "keyPath": "feed.quote1",
+      "namespace": "feed",
+      "translation": "„Wenn du nicht träumst, stirbst du nicht, aber ohne Träume bist auch du nicht lebendig.“",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "d45cdc7e9e56b394"
+    },
+    {
+      "keyPath": "feed.quote2",
+      "namespace": "feed",
+      "translation": "„Wir können Probleme nicht mit derselben Denkweise lösen, mit der wir sie geschaffen haben.“",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "9bf20a14a85121cc"
+    },
+    {
+      "keyPath": "feed.quote3",
+      "namespace": "feed",
+      "translation": "„Lerne, als würdest du ewig leben, lebe, als würdest du morgen sterben.“",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "65e5f32ce01c3fa4"
+    },
+    {
+      "keyPath": "feed.quote4",
+      "namespace": "feed",
+      "translation": "„Ich habe nie vom Erfolg geträumt. Ich habe daran gearbeitet.“",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "a45c9ffa2f0002b9"
+    },
+    {
+      "keyPath": "feed.quoteOfTheDay",
+      "namespace": "feed",
+      "translation": "Zitat des Tages",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "eabd00ee50b32193"
+    },
+    {
+      "keyPath": "feed.resultsCount",
+      "namespace": "feed",
+      "translation": "Keine Ergebnisse | {n} Ergebnis | {n} Ergebnisse",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "4f2c93c43f77bf08"
+    },
+    {
+      "keyPath": "feed.searchEmpty",
+      "namespace": "feed",
+      "translation": "Keine Beiträge entsprechen deiner Suche.",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "dbc529d7a94bf25d"
+    },
+    {
+      "keyPath": "feed.searchEmptyMine",
+      "namespace": "feed",
+      "translation": "Keine Träume entsprechen deiner Suche.",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "806b859e36c579ba"
+    },
+    {
+      "keyPath": "feed.searchEmptyMineNone",
+      "namespace": "feed",
+      "translation": "Noch keine Träume.",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "550c836940ba9f54"
+    },
+    {
+      "keyPath": "feed.searchHint",
+      "namespace": "feed",
+      "translation": "Gib ein Stichwort ein, um Beiträge zu suchen.",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "dac53cc714fb9750"
+    },
+    {
+      "keyPath": "feed.searchMyDreams",
+      "namespace": "feed",
+      "translation": "Meine Träume suchen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "cf6a766d0a935827"
+    },
+    {
+      "keyPath": "feed.searchPlaceholder",
+      "namespace": "feed",
+      "translation": "Alles durchsuchen",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "0e8f421d73a75788"
+    },
+    {
+      "keyPath": "feed.sortNewest",
+      "namespace": "feed",
+      "translation": "Neueste",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "d15efa178cf65ae1"
+    },
+    {
+      "keyPath": "feed.sortOldest",
+      "namespace": "feed",
+      "translation": "Älteste",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "505dc450753e546e"
+    },
+    {
+      "keyPath": "feed.unknownUser",
+      "namespace": "feed",
+      "translation": "Unbekannter Nutzer",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "bd47bcdbf1373ed1"
+    },
+    {
+      "keyPath": "feed.untitled",
+      "namespace": "feed",
+      "translation": "Ohne Titel",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "f59ab8d1331b7b16"
+    },
+    {
+      "keyPath": "feed.userBadge",
+      "namespace": "feed",
+      "translation": "Nutzer",
+      "status": "MACHINE_DRAFT",
+      "sourceHash": "b512d97e7cbf97c2"
+    }
+  ]
+}
