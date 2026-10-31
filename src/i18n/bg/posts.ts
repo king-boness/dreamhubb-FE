@@ -54,7 +54,23 @@ export default {
       subcategory: "подкатегория",
       tokens: "Tokens",
       tokensToTopUp: "TOKENS ЗА ЗАРЕЖДАНЕ",
-      yourFullBalance: "ЦЯЛАТА ТИ НАЛИЧНОСТ"
+      yourFullBalance: "ЦЯЛАТА ТИ НАЛИЧНОСТ",
+      deleteMyDream: "delete my dream",
+      deleteMyProblem: "delete my problem",
+      deleteMyIdea: "delete my idea",
+      deleteDialogTitle: "Delete this post?",
+      deleteTypeInstruction: "To continue, type the exact phrase below:",
+      deletePhraseDream: "I want to delete this dream",
+      deletePhraseProblem: "I want to delete this problem",
+      deletePhraseIdea: "I want to delete this idea",
+      continueDelete: "Continue",
+      permanentDeleteWarning:
+        "Deleting this {type} is permanent.",
+      tokensNotRefundedWarning:
+        "Tokens that you have already placed into this post will NOT be returned to your token balance.",
+      deletePermanently: "Delete permanently",
+      deletedSuccessfully: "Post deleted successfully.",
+      deleteFailed: "Could not delete this post. Please try again."
     },
     fundsTokens: "Средства: {n} Token | Средства: {n} Tokens",
     giftAlt: "Подарък",

@@ -203,14 +203,21 @@ import { useImagePickMenu } from "src/composables/useImagePickMenu";
 
 const { t } = useI18n();
 
-const props = defineProps<{
-  max?: number;
-  uploadMsg?: string;
-  maxError?: string;
-  fileError?: string;
-  clearAll?: string;
-  folder?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    max?: number;
+    uploadMsg?: string;
+    maxError?: string;
+    fileError?: string;
+    clearAll?: string;
+    folder?: string;
+    /** When true, keep File[] locally (blob previews) — no Cloudinary pre-upload. */
+    localOnly?: boolean;
+  }>(),
+  {
+    localOnly: false
+  }
+);
 
 const emit = defineEmits<{
   changed: [files: File[]];
@@ -228,6 +235,7 @@ const error = ref("");
 const uploadedImages = ref<UploadedImage[]>([]);
 const isUploading = ref(false);
 const uploadingStates = ref<boolean[]>([]);
+const localObjectUrls = ref<string[]>([]);
 
 const onAddImageTap = () => {
   const now = Date.now();
@@ -267,6 +275,14 @@ const drop = async (e: DragEvent) => {
   dropped.value = 0;
 };
 
+const emitCurrent = () => {
+  const allFiles = uploadedImages.value
+    .map((img) => img.file)
+    .filter((f): f is File => f !== undefined);
+  emit("changed", allFiles);
+  emit("imagesUpdated", uploadedImages.value);
+};
+
 const handleUpload = async (files: File[]) => {
   if (props.max && uploadedImages.value.length + files.length > props.max) {
     error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
@@ -277,14 +293,25 @@ const handleUpload = async (files: File[]) => {
   error.value = "";
 
   try {
-    const folder = props.folder || "uploads";
-    const uploaded = await uploadMultipleImages(files, folder);
-
-    uploadedImages.value.push(...uploaded);
-
-    const allFiles = uploaded.map((img) => img.file).filter((f): f is File => f !== undefined);
-    emit("changed", allFiles);
-    emit("imagesUpdated", uploadedImages.value);
+    if (props.localOnly) {
+      // Canonical post-create contract: File[] + local preview URLs (BE uploads on create).
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        const previewUrl = URL.createObjectURL(file);
+        localObjectUrls.value.push(previewUrl);
+        uploadedImages.value.push({
+          secure_url: previewUrl,
+          public_id: "",
+          file
+        });
+      }
+      emitCurrent();
+    } else {
+      const folder = props.folder || "uploads";
+      const uploaded = await uploadMultipleImages(files, folder);
+      uploadedImages.value.push(...uploaded);
+      emitCurrent();
+    }
   } catch (err) {
     if (import.meta.env.DEV) {
       console.debug("[UploadPostImg] Upload failed:", err);
@@ -318,26 +345,17 @@ const handleDelete = async (index: number) => {
     const success = await deleteImage(image.public_id);
     uploadingStates.value[index] = false;
 
-    if (success) {
-      uploadedImages.value.splice(index, 1);
-      uploadingStates.value.splice(index, 1);
-
-      const allFiles = uploadedImages.value
-        .map((img) => img.file)
-        .filter((f): f is File => f !== undefined);
-      emit("changed", allFiles);
-      emit("imagesUpdated", uploadedImages.value);
-    }
-  } else {
-    uploadedImages.value.splice(index, 1);
-    uploadingStates.value.splice(index, 1);
-
-    const allFiles = uploadedImages.value
-      .map((img) => img.file)
-      .filter((f): f is File => f !== undefined);
-    emit("changed", allFiles);
-    emit("imagesUpdated", uploadedImages.value);
+    if (!success) return;
   }
+
+  if (image.secure_url?.startsWith("blob:")) {
+    URL.revokeObjectURL(image.secure_url);
+    localObjectUrls.value = localObjectUrls.value.filter((u) => u !== image.secure_url);
+  }
+
+  uploadedImages.value.splice(index, 1);
+  uploadingStates.value.splice(index, 1);
+  emitCurrent();
 
   if (uploadInput.value) {
     uploadInput.value.value = "";
@@ -348,6 +366,8 @@ const reset = () => {
   if (uploadInput.value) {
     uploadInput.value.value = "";
   }
+  localObjectUrls.value.forEach((u) => URL.revokeObjectURL(u));
+  localObjectUrls.value = [];
   uploadedImages.value = [];
   uploadingStates.value = [];
   error.value = "";

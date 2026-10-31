@@ -25,6 +25,8 @@
         ></ImageIndexSlider>
         <UploadPostImgComponent
           v-else
+          local-only
+          :max="5"
           @images-updated="handleImagesFromChild"
           key="upload-component"
         />
@@ -578,27 +580,31 @@ const handleSubmitPost = async () => {
       console.debug("[PostCreation] createPost() result:", result);
     }
 
-    // Update user tokens if returned from BE
-    if (result?.user?.tokens !== undefined) {
-      authStore.updateTokens(result.user.tokens);
-      if (import.meta.env.DEV) {
-        console.debug("[PostCreation] Updated user tokens from response");
-      }
-    } else {
-      // If BE doesn't return tokens, refresh from API
-      // This ensures UI always shows correct balance
-      try {
-        await authStore.refreshTokenBalance();
-      } catch (error) {
-        // Don't block UX if refresh fails
-        if (import.meta.env.DEV) {
-          console.debug("Failed to refresh token balance after post creation:", error);
-        }
-      }
+    // createPost() returns null on validation/API failure (sets store.error; form retained).
+    if (!result?.post_id) {
+      notifyError({
+        kind: "validation",
+        messageKey: "common.errors.validation",
+        fallbackMessage:
+          postCreationStore.error || "Please check your input and try again.",
+        retryable: true
+      }, { position: "top" });
+      return;
     }
 
-    // Show success message
+    // --- Confirmed create success: one success toast; never treat feed refresh as create failure ---
     notifySuccess("common.success.postCreated", "Post created successfully!", { position: "top" });
+
+    // Update user tokens if returned from BE
+    if (result.user?.tokens !== undefined) {
+      authStore.updateTokens(result.user.tokens);
+    } else {
+      try {
+        await authStore.refreshTokenBalance();
+      } catch {
+        // Don't block UX if balance refresh fails after successful create
+      }
+    }
 
     uploadedImages.value.images.forEach((url) => {
       if (url.startsWith("blob:")) URL.revokeObjectURL(url);
@@ -607,54 +613,39 @@ const handleSubmitPost = async () => {
     imageFilesRef.value = [];
 
     // Save registration preferences to preferences store before clearing localStorage
-    // This ensures they can be used when switching to donor side
     const registrationGoal = localStorage.getItem("donee_postCreation_goal");
     const registrationCategory = localStorage.getItem("donee_postCreation_category");
     if (registrationGoal && registrationCategory) {
-      // Category (goal) is dream/problem/idea
       const category = registrationGoal as "dream" | "problem" | "idea";
-      // Subcategory is traveling/health/etc.
       const subcategory = registrationCategory;
-
-      // Always save to preferences store (registration preferences take priority)
       preferencesStore.setPreferredPostType(category);
       preferencesStore.setPreferredSubcategory(subcategory);
     }
 
-    // Clear localStorage
     localStorage.removeItem("donee_postCreation_goal");
     localStorage.removeItem("donee_postCreation_category");
 
-    // Refresh posts feed and my posts (for Donee home) - using new API
-    await Promise.all([
+    // Navigate first so success UX is not blocked by feed refresh
+    router.push({ name: "donee-posts" });
+
+    // Best-effort feed refresh — failures must NOT show "create failed"
+    void Promise.allSettled([
       postsStore.fetchPosts({}),
       postsStore.fetchMyDreams({ category: "dream" }),
       postsStore.fetchMyProblems({ category: "problem" }),
       postsStore.fetchMyIdeas({ category: "idea" })
     ]);
-
-    // Navigate to donee posts page (Donee home)
-    router.push({ name: "donee-posts" });
   } catch (error: unknown) {
     if (import.meta.env.DEV) {
       console.debug("[PostCreation] submitPost() threw:", error);
     }
-    // Error je už nastavený v store
-    if (postCreationStore.error) {
-      notifyError({
-        kind: "server",
-        messageKey: "common.errors.server",
-        fallbackMessage: postCreationStore.error,
-        retryable: true
-      }, { position: "top" });
-    } else {
-      notifyError({
-        kind: "server",
-        messageKey: "common.errors.server",
-        fallbackMessage: "Failed to create post. Please try again.",
-        retryable: true
-      }, { position: "top" });
-    }
+    notifyError({
+      kind: "server",
+      messageKey: "common.errors.server",
+      fallbackMessage:
+        postCreationStore.error || "Failed to create post. Please try again.",
+      retryable: true
+    }, { position: "top" });
   }
 };
 
@@ -723,16 +714,36 @@ const deleteImg = () => {
   postCreationStore.setImages(uploadedImages.value.images);
 };
 const handleImagesFromChild = async (imgs: UploadedImage[]) => {
-  const imageUrls = imgs
-    .map((img) => img.secure_url)
-    .filter((u): u is string => typeof u === "string" && u.length > 0);
-  imageFilesRef.value = [];
-  // Revoke only blob URLs we are replacing (not in new list) to avoid revoking too early
-  uploadedImages.value.images.forEach((url) => {
-    if (url.startsWith("blob:") && !imageUrls.includes(url)) URL.revokeObjectURL(url);
-  });
-  uploadedImages.value.images = [...imageUrls];
-  postCreationStore.setImages(imageUrls);
+  // Canonical create contract: File[] + local preview URLs in parallel (same index order).
+  const nextFiles: File[] = [];
+  const nextPreviews: string[] = [];
+  for (const img of imgs) {
+    const url = typeof img.secure_url === "string" ? img.secure_url : "";
+    if (!url) continue;
+    nextPreviews.push(url);
+    if (img.file) nextFiles.push(img.file);
+  }
+  // Keep indices aligned: only keep previews that have a matching File when using local-only.
+  if (nextFiles.length > 0 && nextFiles.length === nextPreviews.length) {
+    imageFilesRef.value = nextFiles;
+    uploadedImages.value.images = nextPreviews;
+    postCreationStore.setImages([]); // never mix URL payload with File[]
+  } else if (nextFiles.length === 0) {
+    // Legacy Cloudinary URL-only path (no local files)
+    imageFilesRef.value = [];
+    uploadedImages.value.images.forEach((url) => {
+      if (url.startsWith("blob:") && !nextPreviews.includes(url)) URL.revokeObjectURL(url);
+    });
+    uploadedImages.value.images = [...nextPreviews];
+    postCreationStore.setImages(
+      nextPreviews.filter((u) => /^https?:\/\//i.test(u))
+    );
+  } else {
+    // Mismatched lengths — prefer Files and drop orphan previews
+    imageFilesRef.value = nextFiles;
+    uploadedImages.value.images = nextPreviews.slice(0, nextFiles.length);
+    postCreationStore.setImages([]);
+  }
   await nextTick();
 };
 const handleIndex = (index: number) => {

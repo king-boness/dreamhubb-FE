@@ -1,8 +1,12 @@
 <template>
-  <q-page-sticky position="bottom" expand class="dhBottomCta">
-    <div class="dhBottomCta-bar">
+  <component
+    :is="inline ? 'div' : 'q-page-sticky'"
+    v-bind="inline ? { class: 'dhBottomCta dhBottomCta--inline' } : { position: 'bottom', expand: true, class: 'dhBottomCta' }"
+  >
+    <div class="dhBottomCta-bar" :class="{ 'dhBottomCta-bar--inline': inline }">
       <q-btn
         class="dhBottomCta-btn"
+        :class="{ 'dhBottomCta-btn--inline': inline }"
         color="primary"
         unelevated
         no-caps
@@ -14,7 +18,7 @@
         <span>{{ loading ? (loadingLabel || label) : label }}</span>
       </q-btn>
     </div>
-  </q-page-sticky>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -24,11 +28,14 @@ withDefaults(defineProps<{
   loadingLabel?: string;
   disabled?: boolean;
   iconSrc?: string;
+  /** When true, render full-width in-flow CTA (desktop edit panel) instead of sticky footer. */
+  inline?: boolean;
 }>(), {
   loading: false,
   loadingLabel: "",
   disabled: false,
-  iconSrc: ""
+  iconSrc: "",
+  inline: false
 });
 
 const emit = defineEmits<{
@@ -39,6 +46,13 @@ const emit = defineEmits<{
 <style scoped lang="scss">
 .dhBottomCta {
   z-index: 2000;
+}
+
+.dhBottomCta--inline {
+  position: static;
+  z-index: auto;
+  width: 100%;
+  margin-top: 0.5rem;
 }
 
 /* Matches existing HELP TO FULFILL sticky footer styling */
@@ -60,6 +74,17 @@ const emit = defineEmits<{
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.dhBottomCta-bar--inline {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  border-top: none;
+}
+
 .dhBottomCta-btn {
   background-color: $primary;
   color: white;
@@ -75,6 +100,15 @@ const emit = defineEmits<{
   gap: 0.5rem;
   max-width: 390px;
   margin: 0 auto;
+}
+
+.dhBottomCta-btn--inline {
+  max-width: none;
+  margin: 0;
+  font-family: poppinsSemiBold, poppins, sans-serif;
+  font-size: 1rem;
+  height: 3.25rem;
+  border-radius: 0.75rem !important;
 }
 
 .dhBottomCta-icon {
