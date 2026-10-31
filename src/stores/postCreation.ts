@@ -5,6 +5,7 @@ import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { tGlobal } from "src/utils/i18nGlobal";
 import type { CategorySlug, SubcategorySlug } from "src/domain/categories";
 import { CATEGORY_SLUGS, SUBCATEGORY_SLUGS } from "src/domain/categories";
+import { resolveCreateImagePayload } from "src/utils/postCreateImageContract";
 
 /** BE očakáva category: dream|problem|idea, subcategory: traveling|health|... (slug string). Nikdy neposielať index. */
 const CATEGORY_TO_BACKEND: Record<string, CategorySlug> = {
@@ -137,7 +138,9 @@ export const usePostCreationStore = defineStore("postCreation", {
 
     // Create post - vždy používa FormData (multipart/form-data) pre jednotnú logiku
     // imageFiles: voliteľné File[] - ak sú prítomné, prvý sa posiela ako 'file', ostatné ako 'images[]'
-    async createPost(imageFiles?: File[]): Promise<{ post_id: number } | null> {
+    async createPost(
+      imageFiles?: File[]
+    ): Promise<{ post_id: number; user?: { tokens: number } } | null> {
       const MIN_SUBMIT_TOKENS = 3;
 
       // Frontend guard (extra safety): reward must be at least 3 before hitting BE
@@ -179,32 +182,18 @@ export const usePostCreationStore = defineStore("postCreation", {
           fd.append("date_deadline", this.dateDeadline);
         }
 
-        // Ak sú súbory, pridaj prvý ako 'file', ostatné ako 'images[]'
-        if (Array.isArray(imageFiles) && imageFiles.length > 0) {
-          imageFiles.forEach((file, i) => {
+        // Canonical create image contract: XOR files vs Cloudinary URLs (never mixed).
+        const imagePayload = resolveCreateImagePayload(imageFiles, this.images);
+        if (imagePayload.mode === "files") {
+          imagePayload.files.forEach((file, i) => {
             if (i === 0) {
               fd.append("file", file, file.name || "image");
             } else {
               fd.append("images[]", file, file.name || "image");
             }
           });
-        }
-
-        // Ak sú obrázky ako URL (Cloudinary), pridaj ako pole URL-ov
-        let safeImages: string[] = [];
-        if (Array.isArray(this.images)) {
-          safeImages = this.images
-            .map((img) => {
-              if (typeof img === "string") return img.trim() || null;
-              if (img && typeof img === "object" && "url" in img && typeof img.url === "string") {
-                return img.url.trim() || null;
-              }
-              return null;
-            })
-            .filter((img): img is string => Boolean(img) && img.length > 0);
-        }
-        if (safeImages.length > 0) {
-          safeImages.forEach((url) => {
+        } else if (imagePayload.mode === "urls") {
+          imagePayload.urls.forEach((url) => {
             fd.append("images[]", url);
           });
         }

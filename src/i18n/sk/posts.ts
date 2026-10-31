@@ -77,7 +77,23 @@ export default {
       category: "kategória",
       subcategory: "podkategória",
       headlineAction: "nadpis",
-      deadline: "termín"
+      deadline: "termín",
+      deleteMyDream: "vymazať môj sen",
+      deleteMyProblem: "vymazať môj problém",
+      deleteMyIdea: "vymazať môj nápad",
+      deleteDialogTitle: "Vymazať tento príspevok?",
+      deleteTypeInstruction: "Ak chcete pokračovať, prepíšte presnú frázu nižšie:",
+      deletePhraseDream: "I want to delete this dream",
+      deletePhraseProblem: "I want to delete this problem",
+      deletePhraseIdea: "I want to delete this idea",
+      continueDelete: "Pokračovať",
+      permanentDeleteWarning:
+        "Vymazanie tohto {type} je trvalé.",
+      tokensNotRefundedWarning:
+        "Tokeny, ktoré ste už vložili do tohto príspevku, sa NEVRÁTIA na váš zostatok tokenov.",
+      deletePermanently: "Vymazať natrvalo",
+      deletedSuccessfully: "Príspevok bol úspešne vymazaný.",
+      deleteFailed: "Príspevok sa nepodarilo vymazať. Skúste to znova."
     },
     upload: {
       addImage: "Pridať obrázok",
