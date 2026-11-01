@@ -29,6 +29,11 @@ declare module "axios" {
     _retry?: boolean;
     /** Session identity captured when the request was sent (AUTH-RACE-003). */
     _authSession?: AuthSessionSnapshot;
+    /**
+     * When true, response interceptor skips global error toasts.
+     * Use for flows that own their UX (e.g. post-create).
+     */
+    skipGlobalErrorToast?: boolean;
   }
 }
 
@@ -629,6 +634,11 @@ const attachInterceptor = (instance: AxiosInstance) => {
       const status = error?.response?.status;
       // IMPORTANT: let Auth pages handle their own validation UX (avoid double toasts)
       if (isAuthEndpointUrl(url)) {
+        return Promise.reject(error);
+      }
+
+      // Post-create (and similar) own their error toast — skip global notify.
+      if (originalRequest?.skipGlobalErrorToast) {
         return Promise.reject(error);
       }
 

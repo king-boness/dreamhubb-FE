@@ -25,7 +25,7 @@
       <input
         ref="uploadInput"
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp"
         class="uploadImg-hiddenInput"
         aria-hidden="true"
         tabindex="-1"

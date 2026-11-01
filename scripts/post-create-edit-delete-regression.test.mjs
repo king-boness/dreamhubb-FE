@@ -30,6 +30,8 @@ function loadUtil(name) {
 const deleteConfirm = loadUtil("postDeleteConfirm");
 const imageContract = loadUtil("postCreateImageContract");
 const submitSemantics = loadUtil("postCreateSubmitSemantics");
+const errorMapping = loadUtil("postCreateErrorMapping");
+const httpError = loadUtil("httpError");
 const carouselIndex = loadUtil("carouselIndex");
 
 function files(n) {
@@ -181,6 +183,83 @@ describe("create submit semantics (dual toast bug)", () => {
     assert.equal(o.showSuccess, true);
     assert.equal(o.showError, false);
     assert.equal(o.treatRefreshFailureAsCreateFailure, false);
+  });
+});
+
+describe("pick-time image validation", () => {
+  it("UNSUPPORTED FILE AT PICK → rejected, concrete error", () => {
+    const heic = new File([new Uint8Array([0, 1, 2])], "x.heic", { type: "image/heic" });
+    const r = imageContract.filterValidImageFilesAtPick([heic], 0);
+    assert.equal(r.accepted.length, 0);
+    assert.equal(r.rejected.length, 1);
+    assert.equal(r.error?.ok, false);
+    assert.equal(r.error?.messageKey, "posts.errors.unsupportedImageFormat");
+  });
+
+  it("TOO LARGE FILE → concrete 1× error", () => {
+    const big = new File([new Uint8Array(11 * 1024 * 1024)], "big.jpg", {
+      type: "image/jpeg"
+    });
+    const r = imageContract.filterValidImageFilesAtPick([big], 0);
+    assert.equal(r.accepted.length, 0);
+    assert.equal(r.error?.messageKey, "posts.errors.imageTooLarge");
+  });
+
+  it("valid jpeg accepted", () => {
+    const ok = new File([new Uint8Array([1, 2, 3])], "ok.jpg", { type: "image/jpeg" });
+    const r = imageContract.filterValidImageFilesAtPick([ok], 0);
+    assert.equal(r.accepted.length, 1);
+    assert.equal(r.error, null);
+  });
+});
+
+describe("422 error mapping (no generic loss for images.1)", () => {
+  it("BACKEND 422 images.1 → image-specific message key", () => {
+    const safe = errorMapping.mapPostCreateValidationToSafeMessage({
+      "images.1": ["The images.1 field must be an image."]
+    });
+    assert.equal(safe?.messageKey, "posts.errors.unsupportedImageFormat");
+  });
+
+  it("BACKEND token validation → tokens error", () => {
+    const safe = errorMapping.mapPostCreateValidationToSafeMessage({
+      tokens: ["The tokens must be at least 3."]
+    });
+    assert.equal(safe?.messageKey, "posts.errors.invalidTokens");
+  });
+
+  it("UNKNOWN 422 → null → generic fallback via mapAxiosErrorToDhError", () => {
+    const safe = errorMapping.mapPostCreateValidationToSafeMessage({
+      weird_field: ["Something obscure"]
+    });
+    assert.equal(safe, null);
+
+    const mapped = httpError.mapAxiosErrorToDhError({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: { message: "Validation failed.", errors: { weird_field: ["Something obscure"] } }
+      },
+      message: "Request failed"
+    });
+    assert.equal(mapped.messageKey, "common.errors.validation");
+    assert.equal(mapped.fallbackMessage, "Please check your input and try again.");
+  });
+
+  it("mapAxiosError images.1 uses concrete key (not only generic)", () => {
+    const mapped = httpError.mapAxiosErrorToDhError({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: {
+          message: "Validation failed.",
+          errors: { "images.1": ["The images.1 field must be an image."] }
+        }
+      },
+      message: "Request failed"
+    });
+    assert.equal(mapped.messageKey, "posts.errors.unsupportedImageFormat");
+    assert.match(mapped.fallbackMessage, /JPG|PNG|WebP/i);
   });
 });
 
