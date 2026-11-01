@@ -4,6 +4,7 @@
       v-if="hasCoverImage"
       class="dhPostCover-media"
       :images="images"
+      :active-index="activeIndex"
       :auto-slide="autoSlide"
       :show-progress="showProgress"
       :show-arrows="showArrows"
@@ -12,6 +13,7 @@
       :progress-context="progressContext"
       :image-style="imageStyle"
       @image-click="$emit('image-click', $event)"
+      @update:active-index="$emit('update:activeIndex', $event)"
     />
 
     <div v-else class="dhPostCover-fallback">
@@ -38,6 +40,7 @@ interface Props {
   iconUrl?: string | null;
   iconPlacement?: "corner" | "center";
   fill?: boolean;
+  activeIndex?: number | null;
   autoSlide?: boolean;
   showProgress?: boolean;
   showArrows?: boolean;
@@ -53,6 +56,7 @@ const props = withDefaults(defineProps<Props>(), {
   iconUrl: null,
   iconPlacement: "corner",
   fill: true,
+  activeIndex: null,
   autoSlide: true,
   showProgress: true,
   showArrows: true,
@@ -63,6 +67,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineEmits<{
   "image-click": [index: number];
+  "update:activeIndex": [index: number];
 }>();
 
 const { t } = useI18n();

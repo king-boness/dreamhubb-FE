@@ -7,6 +7,7 @@
           :post-type="postType"
           :icon-url="iconUrl"
           :icon-placement="iconPlacement"
+          :active-index="activeIndex"
           :auto-slide="autoSlide"
           :show-progress="showProgress"
           :show-arrows="showArrows"
@@ -15,6 +16,7 @@
           :alt="t('feed.postImageAlt')"
           :image-style="imageStyle"
           @image-click="$emit('image-click', $event)"
+          @update:active-index="$emit('update:activeIndex', $event)"
         />
       </div>
 
@@ -117,6 +119,7 @@ interface Props {
   iconUrl?: string | null;
   iconPlacement?: "corner" | "center";
   // Carousel options
+  activeIndex?: number | null;
   autoSlide?: boolean;
   showProgress?: boolean;
   showArrows?: boolean;
@@ -146,6 +149,7 @@ const props = withDefaults(defineProps<Props>(), {
   postType: null,
   iconUrl: null,
   iconPlacement: "corner",
+  activeIndex: null,
   autoSlide: true,
   showProgress: true,
   showArrows: true,
@@ -165,6 +169,7 @@ defineEmits<{
   share: [];
   like: [];
   "image-click": [index: number];
+  "update:activeIndex": [index: number];
 }>();
 
 const headerImages = computed(() => {

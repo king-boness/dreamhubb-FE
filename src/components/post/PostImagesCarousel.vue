@@ -72,10 +72,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
+import { normalizeCarouselIndex } from "src/utils/carouselIndex";
 
 interface Props {
   images: string[] | null | undefined;
   initialIndex?: number;
+  /** Optional controlled active index (v-model:active-index). */
+  activeIndex?: number | null;
   autoSlide?: boolean;
   showProgress?: boolean;
   showArrows?: boolean;
@@ -90,6 +93,7 @@ const { t } = useI18n();
 
 const props = withDefaults(defineProps<Props>(), {
   initialIndex: 0,
+  activeIndex: null,
   autoSlide: true,
   showProgress: true,
   showArrows: true,
@@ -104,6 +108,7 @@ const resolvedAlt = computed(() => props.alt || t("feed.postImageAlt"));
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
   (e: "image-click", index: number): void;
+  (e: "update:activeIndex", index: number): void;
 }>();
 
 // Auto-slide constants and state
@@ -112,7 +117,9 @@ let autoSlideTimer: ReturnType<typeof setInterval> | null = null;
 const touchStartX = ref<number | null>(null);
 const animationKey = ref(0);
 const slideDirection = ref<"next" | "prev">("next");
-const currentImageIndex = ref(props.initialIndex);
+const currentImageIndex = ref(
+  typeof props.activeIndex === "number" ? props.activeIndex : props.initialIndex
+);
 
 // Filter and validate images
 const safeImages = computed(() => {
@@ -147,9 +154,12 @@ const restartProgressAnimation = () => {
 const goToImage = (index: number, direction: "next" | "prev" = "next") => {
   if (!safeImages.value || safeImages.value.length === 0) return;
   const length = safeImages.value.length;
+  const next = normalizeCarouselIndex(index, length);
+  if (next === currentImageIndex.value) return;
   slideDirection.value = direction;
-  currentImageIndex.value = ((index % length) + length) % length;
+  currentImageIndex.value = next;
   restartProgressAnimation();
+  emit("update:activeIndex", next);
 };
 
 const showPrevImage = () => {
@@ -227,22 +237,44 @@ watch(
   () => {
     currentImageIndex.value = 0;
     restartProgressAnimation();
+    emit("update:activeIndex", 0);
     startAutoSlide();
   }
 );
 
-// Watch for initialIndex changes
+// Watch for initialIndex changes (uncontrolled mode)
 watch(
   () => props.initialIndex,
   (newIndex) => {
+    if (typeof props.activeIndex === "number") return;
     currentImageIndex.value = newIndex;
     restartProgressAnimation();
   }
 );
 
+// Controlled activeIndex from parent (thumbnail strip / external sync)
+watch(
+  () => props.activeIndex,
+  (newIndex) => {
+    if (typeof newIndex !== "number") return;
+    const length = safeImages.value.length;
+    if (!length) return;
+    const next = normalizeCarouselIndex(newIndex, length);
+    if (next === currentImageIndex.value) return;
+    const direction = next > currentImageIndex.value ? "next" : "prev";
+    slideDirection.value = direction;
+    currentImageIndex.value = next;
+    restartProgressAnimation();
+    startAutoSlide();
+  }
+);
+
 // Lifecycle hooks
 onMounted(() => {
-  currentImageIndex.value = props.initialIndex;
+  const start =
+    typeof props.activeIndex === "number" ? props.activeIndex : props.initialIndex;
+  currentImageIndex.value = start;
+  emit("update:activeIndex", currentImageIndex.value);
   startAutoSlide();
 });
 

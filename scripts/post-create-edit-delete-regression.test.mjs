@@ -30,6 +30,7 @@ function loadUtil(name) {
 const deleteConfirm = loadUtil("postDeleteConfirm");
 const imageContract = loadUtil("postCreateImageContract");
 const submitSemantics = loadUtil("postCreateSubmitSemantics");
+const carouselIndex = loadUtil("carouselIndex");
 
 function files(n) {
   return Array.from({ length: n }, (_, i) =>
@@ -143,6 +144,19 @@ describe("create image XOR contract", () => {
       ["https://res.cloudinary.com/x/1.jpg", "blob:local"]
     );
     assert.deepEqual(store, ["https://res.cloudinary.com/x/1.jpg"]);
+  });
+});
+
+describe("carousel index normalize (hero/thumb sync)", () => {
+  it("wraps negative and overflow indices", () => {
+    assert.equal(carouselIndex.normalizeCarouselIndex(-1, 3), 2);
+    assert.equal(carouselIndex.normalizeCarouselIndex(3, 3), 0);
+    assert.equal(carouselIndex.normalizeCarouselIndex(1, 3), 1);
+  });
+
+  it("safe on empty length / non-finite", () => {
+    assert.equal(carouselIndex.normalizeCarouselIndex(2, 0), 0);
+    assert.equal(carouselIndex.normalizeCarouselIndex(NaN, 4), 0);
   });
 });
 

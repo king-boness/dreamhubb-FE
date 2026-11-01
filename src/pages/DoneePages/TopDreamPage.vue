@@ -21,6 +21,7 @@
       <!-- HERO + SLIDER (rovnaký komponent ako na detaile) -->
       <PostHeader
         v-if="heroImages.length > 0"
+        v-model:active-index="heroImageIndex"
         :images="heroImages"
         :auto-slide="true"
         :show-progress="true"
@@ -112,6 +113,28 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Desktop-only thumbnail strip (2+ images); syncs with hero carousel index -->
+      <div
+        v-if="heroImages.length > 1"
+        class="post-edit-thumbStrip"
+        data-testid="dh-post-edit-thumbs"
+        role="listbox"
+        :aria-label="t('posts.edit.photos')"
+      >
+        <button
+          v-for="(img, index) in heroImages"
+          :key="`thumb-${index}-${img}`"
+          type="button"
+          class="post-edit-thumb"
+          :class="{ 'post-edit-thumb--active': index === heroImageIndex }"
+          role="option"
+          :aria-selected="index === heroImageIndex"
+          @click="onHeroThumbClick(index)"
+        >
+          <img :src="img" alt="" loading="lazy" />
+        </button>
       </div>
       </div>
 
@@ -235,26 +258,28 @@
             </div>
           </div>
 
-          <!-- CTA: sticky on mobile; inline in desktop top-up card -->
-          <BottomCtaButton
-            class="post-edit-saveCta"
-            :label="t('posts.edit.saveChanges')"
-            :loading="isSaving"
-            :loading-label="t('posts.edit.saving')"
-            :disabled="!hasChanges"
-            :inline="isDesktopEditLayout"
-            @click="onSaveChanges"
-          />
+          <!-- CTA cluster pinned to bottom of stretched top-up card on desktop -->
+          <div class="post-edit-topupActions">
+            <BottomCtaButton
+              class="post-edit-saveCta"
+              :label="t('posts.edit.saveChanges')"
+              :loading="isSaving"
+              :loading-label="t('posts.edit.saving')"
+              :disabled="!hasChanges"
+              :inline="isDesktopEditLayout"
+              @click="onSaveChanges"
+            />
 
-          <button
-            v-if="isEditMode"
-            type="button"
-            class="post-edit-deleteLink"
-            data-testid="dh-post-edit-delete"
-            @click="openDeleteStep1"
-          >
-            {{ deleteMyPostLabel }}
-          </button>
+            <button
+              v-if="isEditMode"
+              type="button"
+              class="post-edit-deleteLink"
+              data-testid="dh-post-edit-delete"
+              @click="openDeleteStep1"
+            >
+              {{ deleteMyPostLabel }}
+            </button>
+          </div>
         </div>
       </section>
       </div>
@@ -631,7 +656,7 @@
 
   @media (min-width: 1200px) {
     &.post-edit-page--editMode {
-      // V3: top dashboard (hero | top-up) + full-width edit row
+      // V4: balanced top dashboard (hero+thumbs | stretched top-up) + full-width edit
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(23.75rem, 26.875rem); // ~380–430px
       grid-template-areas:
@@ -639,7 +664,7 @@
         "edit edit";
       column-gap: 1.875rem; // 30px
       row-gap: 1.375rem; // 22px
-      align-items: start;
+      align-items: stretch; // top-up matches hero+gallery height
       max-width: min(85rem, calc(100% - 3.5rem)); // ~1360px
       margin-left: auto;
       margin-right: auto;
@@ -648,9 +673,11 @@
 
       .post-edit-desktopMedia {
         grid-area: hero;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem; // ~12px hero → thumbs
         min-width: 0;
-        align-self: start;
+        min-height: 0;
 
         :deep(.post-header),
         :deep(.postHeader) {
@@ -658,6 +685,58 @@
           overflow: hidden;
           aspect-ratio: 16 / 9;
           max-height: min(32rem, 56vh);
+          flex: 0 0 auto;
+        }
+      }
+
+      .post-edit-thumbStrip {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.55rem; // ~9px
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-width: 100%;
+        padding-bottom: 0.15rem;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+
+        &::-webkit-scrollbar {
+          height: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.22);
+          border-radius: 999px;
+        }
+      }
+
+      .post-edit-thumb {
+        flex: 0 0 auto;
+        width: 5.5rem; // ~88px
+        height: 3.85rem; // ~62px
+        padding: 0;
+        border: 2px solid transparent;
+        border-radius: 0.55rem;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.35);
+        opacity: 0.62;
+        cursor: pointer;
+        transition: opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        &:hover {
+          opacity: 1;
+        }
+
+        &--active {
+          opacity: 1;
+          border-color: rgba(233, 30, 140, 0.85);
+          box-shadow: 0 0 0 1px rgba(180, 80, 220, 0.35);
         }
       }
 
@@ -679,7 +758,7 @@
         justify-content: center;
 
         &.edit-rollup_card--open {
-          padding: 0.85rem 1.25rem 1rem;
+          padding: 0.65rem 1.25rem 0.9rem; // bottom ~14px — no dead purple space
           justify-content: flex-start;
         }
       }
@@ -690,6 +769,23 @@
 
       .edit-rollup_card--open .edit-rollup_header {
         min-height: auto;
+        padding-bottom: 0;
+      }
+
+      .edit-rollup_card--open .edit-rollup_body {
+        margin-top: 0.5rem; // 8px — header → ABOUT YOUR DREAM
+      }
+
+      .edit-rollup_card--open .edit-rollup_eyebrow {
+        margin-bottom: 0.15rem;
+      }
+
+      .edit-rollup_card--open .edit-rollup_title {
+        margin-bottom: 0.35rem;
+      }
+
+      .edit-rollup_card--open .edit-rollup_text {
+        margin-bottom: 0.65rem;
       }
 
       .edit-rollup_list {
@@ -701,20 +797,18 @@
 
       .edit-rollup_list-item {
         justify-content: space-between;
-        padding: 0.95rem 0.85rem;
-        min-height: 3rem;
+        padding: 0.85rem 0.85rem;
+        min-height: 2.85rem;
         border-top: none;
 
         & + & {
           border-top: none;
         }
 
-        // vertical separators between columns 1|2 and 2|3
         &:not(:nth-child(3n)) {
           border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        // horizontal separators for row 2+
         &:nth-child(n + 4) {
           border-top: 1px solid rgba(255, 255, 255, 0.12);
         }
@@ -727,10 +821,13 @@
 
       .post-edit-desktopForm {
         grid-area: topup;
-        display: block;
+        display: flex;
+        flex-direction: column;
         min-width: 0;
-        align-self: start;
-        position: static; // V3: no sticky — top row is one dashboard
+        min-height: 0;
+        height: 100%;
+        align-self: stretch;
+        position: static;
         background: transparent;
         border: none;
         border-radius: 0;
@@ -743,9 +840,19 @@
         margin-top: 0 !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
       }
 
       .post-edit-topupCard {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
         background: rgba(18, 18, 24, 0.72);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 1rem;
@@ -758,6 +865,7 @@
         margin-top: 0.55rem;
         margin-bottom: 0.65rem;
         box-shadow: none;
+        flex: 0 0 auto;
       }
 
       .topup-row {
@@ -766,6 +874,7 @@
 
       .tokens-section {
         margin: 0;
+        flex: 0 0 auto;
       }
 
       .tokens-slider {
@@ -774,7 +883,13 @@
 
       .tokens-funds {
         margin-top: 0.3rem;
-        margin-bottom: 0.7rem;
+        margin-bottom: 0;
+      }
+
+      .post-edit-topupActions {
+        margin-top: auto; // pin SAVE+DELETE to bottom of stretched card
+        padding-top: 1rem;
+        flex: 0 0 auto;
       }
 
       .post-edit-hero-placeholder {
@@ -783,6 +898,7 @@
         min-height: 0;
         border-radius: 1rem;
         overflow: hidden;
+        flex: 0 0 auto;
       }
 
       .post-edit-saveCta {
@@ -790,7 +906,7 @@
       }
 
       .post-edit-deleteLink {
-        margin: 0.75rem 0 0;
+        margin: 0.85rem 0 0; // ~14px under SAVE
         min-height: auto;
         padding: 0.25rem 0.35rem;
         font-size: 0.72rem;
@@ -798,6 +914,11 @@
       }
     }
   }
+}
+
+// Hide desktop thumb strip below desktop breakpoint
+.post-edit-thumbStrip {
+  display: none;
 }
 
 .post-edit-topupCard {
@@ -2120,6 +2241,7 @@ import { useRemainingFunds } from "src/composables/useRemainingFunds";
 import { mapAxiosErrorToDhError } from "src/utils/httpError";
 import { notifyError, notifyNegative, notifySuccess } from "src/utils/notify";
 import { formatLocaleDate } from "src/utils/formatLocaleDate";
+import { normalizeCarouselIndex } from "src/utils/carouselIndex";
 import {
   deleteMyPostI18nKey,
   getRequiredDeletePhrase,
@@ -2778,6 +2900,20 @@ const heroImages = computed(() => {
   }
   return (postDetail.value?.images ?? []).filter(Boolean);
 });
+
+/** Shared hero/thumbnail carousel index (single source of truth with PostHeader). */
+const heroImageIndex = ref(0);
+
+watch(
+  () => heroImages.value.length,
+  (len) => {
+    heroImageIndex.value = normalizeCarouselIndex(heroImageIndex.value, len);
+  }
+);
+
+const onHeroThumbClick = (index: number) => {
+  heroImageIndex.value = normalizeCarouselIndex(index, heroImages.value.length);
+};
 
 // Open lightbox for hero image click (from PostHeader)
 const onHeroImageClick = (index: number) => {
