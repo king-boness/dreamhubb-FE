@@ -97,6 +97,18 @@ export default {
     tokensAlt: "Tokenek",
     tryAgain: "Próbáld újra",
     unableToLoadPost: "A bejegyzés nem tölthető be",
+    errors: {
+      unsupportedImageFormat:
+        "Unsupported image format. Please use JPG, PNG, GIF or WebP.",
+      imageTooLarge: "This image is too large. Maximum size is 10 MB.",
+      imageUploadFailed: "Image upload failed. Please choose another image.",
+      invalidTokens: "Please choose a valid token amount (minimum 3).",
+      insufficientTokens: "You don't have enough tokens for this reward.",
+      invalidTitle: "Please check the title and try again.",
+      invalidDescription: "Please check the description and try again.",
+      invalidCategory: "Please choose a valid category.",
+      invalidSubcategory: "Please choose a valid subcategory."
+    },
     upload: {
       addImage: "Kép hozzáadása",
       maxFiles: "A fájlok maximális száma: {n}"

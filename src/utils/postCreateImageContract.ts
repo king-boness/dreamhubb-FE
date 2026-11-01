@@ -1,7 +1,137 @@
 /**
  * Canonical post-create image contract helpers.
  * Create payload must be XOR: File[] multipart OR https Cloudinary URLs — never mixed.
+ *
+ * Field map for N files:
+ *   files[0] → FormData `file`
+ *   files[1] → FormData `images[]` → Laravel `images.0`
+ *   files[2] → FormData `images[]` → Laravel `images.1`
+ *   …
+ *
+ * End-to-end supported formats (aligned with BE ImageUploadService::ALLOWED_MIMES):
+ *   JPEG/JPG, PNG, GIF, WebP
+ * Not supported (reject at pick + BE mimes):
+ *   AVIF, HEIC, HEIF
  */
+
+/** Max image size (10 MB) — matches BE max:10240 KB. */
+export const POST_CREATE_MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
+/** Max photos per post. */
+export const POST_CREATE_MAX_IMAGES = 5;
+
+/** MIME types accepted end-to-end (browser → Laravel mimes → local/Cloudinary store). */
+export const POST_CREATE_ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp"
+]);
+
+const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
+
+/** `<input accept>` value — explicit list (not image/*) so pickers hide HEIC/AVIF when possible. */
+export const POST_CREATE_ACCEPT =
+  "image/jpeg,image/jpg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp";
+
+export type ImagePickValidation =
+  | { ok: true }
+  | { ok: false; messageKey: string; fallbackMessage: string };
+
+function extensionOf(filename: string): string {
+  const base = filename.split(/[/\\]/).pop() || "";
+  const dot = base.lastIndexOf(".");
+  if (dot < 0) return "";
+  return base.slice(dot + 1).toLowerCase();
+}
+
+export function isAllowedPostCreateImageType(mime: string, filename = ""): boolean {
+  const type = (mime || "").toLowerCase().trim();
+  if (type && POST_CREATE_ALLOWED_MIME_TYPES.has(type)) return true;
+  // Empty MIME (some Android/WebView): allow only by known safe extension.
+  if (!type) {
+    return ALLOWED_EXTENSIONS.has(extensionOf(filename));
+  }
+  return false;
+}
+
+/**
+ * Validate a File at pick-time (MIME + size). Does not trust extension alone when MIME is present.
+ */
+export function validateSelectedImageFile(file: File): ImagePickValidation {
+  if (!file || typeof file !== "object") {
+    return {
+      ok: false,
+      messageKey: "posts.errors.unsupportedImageFormat",
+      fallbackMessage: "Unsupported image format. Please use JPG, PNG, GIF or WebP."
+    };
+  }
+  if (!isAllowedPostCreateImageType(file.type || "", file.name || "")) {
+    return {
+      ok: false,
+      messageKey: "posts.errors.unsupportedImageFormat",
+      fallbackMessage: "Unsupported image format. Please use JPG, PNG, GIF or WebP."
+    };
+  }
+  if (typeof file.size === "number" && file.size > POST_CREATE_MAX_IMAGE_BYTES) {
+    return {
+      ok: false,
+      messageKey: "posts.errors.imageTooLarge",
+      fallbackMessage: "This image is too large. Maximum size is 10 MB."
+    };
+  }
+  return { ok: true };
+}
+
+/**
+ * Filter a FileList/File[] at pick-time. Invalid files are omitted; first error is returned.
+ */
+export function filterValidImageFilesAtPick(
+  incoming: File[],
+  alreadyCount: number,
+  maxImages = POST_CREATE_MAX_IMAGES
+): { accepted: File[]; rejected: File[]; error: ImagePickValidation & { ok: false } | null } {
+  const remaining = Math.max(0, maxImages - alreadyCount);
+  if (remaining <= 0) {
+    return {
+      accepted: [],
+      rejected: incoming,
+      error: {
+        ok: false,
+        messageKey: "posts.maxPhotos",
+        fallbackMessage: `Maximum ${maxImages} photos.`
+      }
+    };
+  }
+
+  const accepted: File[] = [];
+  const rejected: File[] = [];
+  let error: (ImagePickValidation & { ok: false }) | null = null;
+
+  for (const file of incoming) {
+    if (accepted.length >= remaining) {
+      rejected.push(file);
+      if (!error) {
+        error = {
+          ok: false,
+          messageKey: "posts.maxPhotos",
+          fallbackMessage: `Maximum ${maxImages} photos.`
+        };
+      }
+      continue;
+    }
+    const v = validateSelectedImageFile(file);
+    if (!v.ok) {
+      rejected.push(file);
+      if (!error) error = v;
+      continue;
+    }
+    accepted.push(file);
+  }
+
+  return { accepted, rejected, error };
+}
 
 export function isRemoteImageUrl(url: string): boolean {
   return /^https?:\/\//i.test(url.trim());

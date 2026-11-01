@@ -17,6 +17,11 @@ declare module "axios" {
     _diagnosticsStart?: number;
     _diagnosticsUrl?: string;
     _diagnosticsMethod?: string;
+    /**
+     * When true, response interceptor skips global error toasts.
+     * Use for flows that own their UX (e.g. post-create).
+     */
+    skipGlobalErrorToast?: boolean;
   }
 }
 
@@ -397,8 +402,10 @@ const attachInterceptor = (instance: AxiosInstance) => {
         } else if (isNetworkError(error)) {
           // Requirement: show offline banner also on ERR_NETWORK (even if navigator.onLine is true).
           void setOnlineSafe(false);
-          notifyError(mapAxiosErrorToDhError(error));
-        } else {
+          if (!originalRequest?.skipGlobalErrorToast) {
+            notifyError(mapAxiosErrorToDhError(error));
+          }
+        } else if (!originalRequest?.skipGlobalErrorToast) {
           notifyError(mapAxiosErrorToDhError(error));
         }
         return Promise.reject(error);
@@ -438,6 +445,11 @@ const attachInterceptor = (instance: AxiosInstance) => {
       const status = error?.response?.status;
       // IMPORTANT: let Auth pages handle their own validation UX (avoid double toasts)
       if (isAuthEndpointUrl(url)) {
+        return Promise.reject(error);
+      }
+
+      // Post-create (and similar) own their error toast — skip global notify.
+      if (originalRequest?.skipGlobalErrorToast) {
         return Promise.reject(error);
       }
 

@@ -49,6 +49,8 @@ interface PostCreationState {
   images: string[];
   loading: boolean;
   error: string | null;
+  /** i18n key for last create error (concrete posts.errors.* preferred). */
+  errorKey: string | null;
 }
 
 export const usePostCreationStore = defineStore("postCreation", {
@@ -61,7 +63,8 @@ export const usePostCreationStore = defineStore("postCreation", {
     subcategory: null,
     images: [],
     loading: false,
-    error: null
+    error: null,
+    errorKey: null
   }),
 
   getters: {
@@ -134,6 +137,7 @@ export const usePostCreationStore = defineStore("postCreation", {
       this.subcategory = null;
       this.images = [];
       this.error = null;
+      this.errorKey = null;
     },
 
     // Create post - vždy používa FormData (multipart/form-data) pre jednotnú logiku
@@ -145,17 +149,23 @@ export const usePostCreationStore = defineStore("postCreation", {
 
       // Frontend guard (extra safety): reward must be at least 3 before hitting BE
       if ((this.tokens ?? 0) < MIN_SUBMIT_TOKENS) {
-        this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
+        this.errorKey = "posts.errors.invalidTokens";
+        this.error = tGlobal(
+          this.errorKey,
+          "Please choose a valid token amount (minimum 3)."
+        );
         return null;
       }
 
       if (!this.isValid || !this.category || !this.subcategory) {
-        this.error = tGlobal("common.errors.validation", "Please check your input and try again.");
+        this.errorKey = "common.errors.validation";
+        this.error = tGlobal(this.errorKey, "Please check your input and try again.");
         return null;
       }
 
       this.loading = true;
       this.error = null;
+      this.errorKey = null;
 
       try {
         const categorySlug = toCategorySlug(this.category);
@@ -199,8 +209,10 @@ export const usePostCreationStore = defineStore("postCreation", {
         }
 
         // Axios automaticky nastaví Content-Type: multipart/form-data s boundary
-        // Authorization header pridá interceptor
-        const { data } = await api.post("/post-create", fd);
+        // skipGlobalErrorToast: PostCreationPage owns the single error toast
+        const { data } = await api.post("/post-create", fd, {
+          skipGlobalErrorToast: true
+        });
 
         if (data.status === "success") {
           this.reset();
@@ -214,6 +226,7 @@ export const usePostCreationStore = defineStore("postCreation", {
           console.debug("Post creation failed:", error);
         }
         const mapped = mapAxiosErrorToDhError(error);
+        this.errorKey = mapped.messageKey;
         this.error = tGlobal(mapped.messageKey, mapped.fallbackMessage);
         return null;
       } finally {

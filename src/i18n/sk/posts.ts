@@ -99,6 +99,18 @@ export default {
       addImage: "Pridať obrázok",
       maxFiles: "Maximum súborov je {n}"
     },
+    errors: {
+      unsupportedImageFormat:
+        "Nepodporovaný formát obrázka. Použite JPG, PNG, GIF alebo WebP.",
+      imageTooLarge: "Obrázok je príliš veľký. Maximálna veľkosť je 10 MB.",
+      imageUploadFailed: "Nahratie obrázka zlyhalo. Vyberte iný obrázok.",
+      invalidTokens: "Zvoľte platný počet tokenov (minimum 3).",
+      insufficientTokens: "Nemáte dostatok tokenov na túto odmenu.",
+      invalidTitle: "Skontrolujte názov a skúste znova.",
+      invalidDescription: "Skontrolujte popis a skúste znova.",
+      invalidCategory: "Zvoľte platnú kategóriu.",
+      invalidSubcategory: "Zvoľte platnú podkategóriu."
+    },
     carousel: {
       previousImage: "Predchádzajúci obrázok",
       nextImage: "Ďalší obrázok"

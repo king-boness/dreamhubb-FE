@@ -1,4 +1,5 @@
 import type { AxiosError } from "axios";
+import { mapPostCreateValidationToSafeMessage } from "./postCreateErrorMapping";
 
 export type DhErrorKind =
   | "offline"
@@ -141,12 +142,25 @@ export function mapAxiosErrorToDhError(err: unknown): DhError {
   }
   if (status === 422) {
     const fieldErrors = extractLaravelValidationErrors(err);
-    const firstMsg = firstValidationMessage(fieldErrors);
+    const safe = mapPostCreateValidationToSafeMessage(fieldErrors, rawMessage);
+    if (safe) {
+      return {
+        kind: "validation",
+        status,
+        messageKey: safe.messageKey,
+        fallbackMessage: safe.fallbackMessage,
+        fieldErrors,
+        rawMessage,
+        retryable: false
+      };
+    }
+    // Do NOT use raw Laravel firstMsg as the displayed string via tGlobal fallback —
+    // common.errors.validation exists and would still win; keep generic as last resort.
     return {
       kind: "validation",
       status,
       messageKey: "common.errors.validation",
-      fallbackMessage: firstMsg || "Please check your input and try again.",
+      fallbackMessage: "Please check your input and try again.",
       fieldErrors,
       rawMessage,
       retryable: false

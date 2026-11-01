@@ -72,6 +72,18 @@ export default {
       deletedSuccessfully: "Beitrag erfolgreich gelöscht.",
       deleteFailed: "Dieser Beitrag konnte nicht gelöscht werden. Bitte versuche es erneut."
     },
+    errors: {
+      unsupportedImageFormat:
+        "Nicht unterstütztes Bildformat. Bitte JPG, PNG, GIF oder WebP verwenden.",
+      imageTooLarge: "Dieses Bild ist zu groß. Maximale Größe ist 10 MB.",
+      imageUploadFailed: "Bild-Upload fehlgeschlagen. Bitte wähle ein anderes Bild.",
+      invalidTokens: "Bitte wähle einen gültigen Token-Betrag (mindestens 3).",
+      insufficientTokens: "Du hast nicht genug Token für diese Belohnung.",
+      invalidTitle: "Bitte überprüfe den Titel und versuche es erneut.",
+      invalidDescription: "Bitte überprüfe die Beschreibung und versuche es erneut.",
+      invalidCategory: "Bitte wähle eine gültige Kategorie.",
+      invalidSubcategory: "Bitte wähle eine gültige Unterkategorie."
+    },
     fundsTokens: "Mittel: {n} Token | Mittel: {n} Token",
     giftAlt: "Geschenk",
     goBack: "Zurück",

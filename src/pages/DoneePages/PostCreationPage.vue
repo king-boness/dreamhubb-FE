@@ -59,7 +59,7 @@
             @change="handleFileChange"
             style="display: none"
             multiple
-            accept="image/*"
+            :accept="postCreateAccept"
             :disabled="isUploadingAdditional"
             data-testid="dh-post-creation-upload"
           />
@@ -281,7 +281,14 @@ import CloseOverlayButton from "src/components/common/CloseOverlayButton.vue";
 import HintBubble from "src/components/ui/HintBubble.vue";
 import { Capacitor } from "@capacitor/core";
 import { resolvePickAnchorEl, useImagePickMenu } from "src/composables/useImagePickMenu";
-import { storeImagesAfterLocalDelete } from "src/utils/postCreateImageContract";
+import {
+  filterValidImageFilesAtPick,
+  POST_CREATE_ACCEPT,
+  POST_CREATE_MAX_IMAGES,
+  storeImagesAfterLocalDelete
+} from "src/utils/postCreateImageContract";
+
+const postCreateAccept = POST_CREATE_ACCEPT;
 
 const { t } = useI18n();
 
@@ -582,13 +589,15 @@ const handleSubmitPost = async () => {
     }
 
     // createPost() returns null on validation/API failure (sets store.error; form retained).
+    // Single toast ownership: axios skipGlobalErrorToast + this notify only.
     if (!result?.post_id) {
       notifyError({
         kind: "validation",
-        messageKey: "common.errors.validation",
+        status: 422,
+        messageKey: postCreationStore.errorKey || "common.errors.validation",
         fallbackMessage:
           postCreationStore.error || "Please check your input and try again.",
-        retryable: true
+        retryable: false
       }, { position: "top" });
       return;
     }
@@ -775,24 +784,38 @@ const handleFileChange = async (event: Event) => {
   const files = target.files;
   if (!files || files.length === 0) return;
 
-  const maxImages = 5;
   const currentCount = uploadedImages.value.images.length;
-  const remainingSlots = maxImages - currentCount;
-  if (remainingSlots <= 0) {
-    notifyError({
-      kind: "validation",
-      messageKey: "common.errors.validation",
-      fallbackMessage: t("posts.maxPhotos", { n: maxImages }),
-      retryable: false
-    }, { position: "top" });
+  const { accepted, error } = filterValidImageFilesAtPick(
+    Array.from(files),
+    currentCount,
+    POST_CREATE_MAX_IMAGES
+  );
+
+  if (error) {
+    const fallback =
+      error.messageKey === "posts.maxPhotos"
+        ? t("posts.maxPhotos", { n: POST_CREATE_MAX_IMAGES })
+        : error.fallbackMessage;
+    notifyError(
+      {
+        kind: "validation",
+        messageKey: error.messageKey,
+        fallbackMessage: fallback,
+        retryable: false
+      },
+      { position: "top" }
+    );
+  }
+
+  if (accepted.length === 0) {
+    if (fileInput.value) fileInput.value.value = "";
     return;
   }
 
-  const filesToAdd = Array.from(files).slice(0, remainingSlots);
   const useDataUrlForPreview = Capacitor?.isNativePlatform?.() === true;
 
   if (useDataUrlForPreview) {
-    for (const file of filesToAdd) {
+    for (const file of accepted) {
       const dataUrl = await new Promise<string | null>((resolve) => {
         const reader = new FileReader();
         reader.onload = () => resolve((reader.result as string) || null);
@@ -806,7 +829,7 @@ const handleFileChange = async (event: Event) => {
     }
     postCreationStore.setImages([]);
   } else {
-    filesToAdd.forEach((file) => {
+    accepted.forEach((file) => {
       imageFilesRef.value.push(file);
       uploadedImages.value.images.push(URL.createObjectURL(file));
     });
