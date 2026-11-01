@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>dreamhubb – post edit desktop visual harness v2</title>
+  <title>dreamhubb – post edit desktop visual harness v3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --gap: 2.125rem;
+      --gap-col: 1.875rem; /* 30px */
+      --gap-row: 1.375rem; /* 22px */
       --max: 85rem; /* ~1360 */
     }
     * { box-sizing: border-box; }
@@ -29,40 +30,57 @@
       display: flex;
       flex-direction: column;
       padding: 0 0 4rem;
+      gap: 1rem;
     }
     @media (min-width: 1200px) {
       .postEditPage.post-edit-page--editMode {
         display: grid;
-        grid-template-columns: minmax(0, 1.65fr) minmax(22.5rem, 0.85fr);
-        column-gap: var(--gap);
+        grid-template-columns: minmax(0, 1fr) minmax(23.75rem, 26.875rem);
+        grid-template-areas:
+          "hero topup"
+          "edit edit";
+        column-gap: var(--gap-col);
+        row-gap: var(--gap-row);
         align-items: start;
         max-width: min(var(--max), calc(100% - 3.5rem));
         margin-left: auto;
         margin-right: auto;
         padding: 1.75rem 2rem 2.5rem;
       }
-      .post-edit-desktopMedia {
-        grid-column: 1; min-width: 0; align-self: start;
-        display: flex; flex-direction: column; gap: 1.25rem;
+      .post-edit-desktopMedia { grid-area: hero; min-width: 0; align-self: start; }
+      .edit-card {
+        grid-area: edit;
+        grid-column: 1 / -1;
+        min-height: 4.25rem;
+        padding: 0 1.25rem;
+        display: flex; flex-direction: column; justify-content: center;
       }
+      .edit-card.open { padding: .85rem 1.25rem 1rem; justify-content: flex-start; }
       .post-edit-desktopForm {
-        grid-column: 2; min-width: 0; align-self: start;
-        position: sticky; top: 1.75rem;
+        grid-area: topup; min-width: 0; align-self: start;
+        position: static;
       }
       .inline-save { display: block; }
       .sticky-save { display: none !important; }
       .edit-actions {
-        display: grid; grid-template-columns: 1fr 1fr;
+        display: none;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-top: 1px solid rgba(255,255,255,.18);
+        margin-top: .5rem;
       }
+      .edit-card.open .edit-actions { display: grid; }
       .edit-actions .item {
         display: flex; justify-content: space-between; align-items: center;
-        padding: .85rem .65rem; min-height: 2.75rem;
-        border-top: 1px solid rgba(255,255,255,.12); font-weight: 600; font-size: .92rem;
+        padding: .95rem .85rem; min-height: 3rem; font-weight: 600; font-size: .95rem;
       }
-      .edit-actions .item:nth-child(odd) {
-        border-right: 1px solid rgba(255,255,255,.1); padding-right: .85rem;
+      .edit-actions .item:not(:nth-child(3n)) {
+        border-right: 1px solid rgba(255,255,255,.1);
       }
-      .edit-actions .item:nth-child(-n+2) { border-top: none; }
+      .edit-actions .item:nth-child(n+4) {
+        border-top: 1px solid rgba(255,255,255,.12);
+      }
+      .edit-header { min-height: 4.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+      .edit-card.open .edit-header { min-height: auto; }
     }
     .hero {
       width: 100%;
@@ -73,7 +91,7 @@
       position: relative;
       background:
         linear-gradient(to top, rgba(1,3,16,.95), transparent 45%),
-        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1400&q=60") center/cover;
+        url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=60") center/cover;
     }
     .hero .title {
       position: absolute; left: 1rem; right: 1rem; bottom: 1rem;
@@ -85,7 +103,6 @@
     }
     .edit-card {
       border-radius: 1rem;
-      padding: 0.85rem 1.1rem;
       background: radial-gradient(ellipse at top, rgba(83,24,92,.95) 0%, rgba(38,17,61,.98) 50%, rgba(20,10,30,1) 100%);
       box-shadow: 0 16px 32px rgba(0,0,0,.45);
     }
@@ -95,18 +112,18 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 1rem;
       box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
-      padding: 1rem 1.1rem 1.05rem;
+      padding: .9rem 1rem .95rem;
       backdrop-filter: blur(12px);
     }
     .balance-card {
-      background: rgba(0,0,0,.2); border-radius: 1rem; margin: .65rem 0 .75rem;
+      background: rgba(0,0,0,.2); border-radius: 1rem; margin: .55rem 0 .65rem;
     }
-    .row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .7rem .85rem; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .65rem .8rem; }
     input[type=number], input[type=range] { width: 100%; }
-    .funds { margin: .35rem 0 .85rem; color: rgba(255,255,255,.8); font-size: .9rem; }
+    .funds { margin: .3rem 0 .7rem; color: rgba(255,255,255,.8); font-size: .9rem; }
     .deleteLink {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 100%; margin: .85rem 0 0; padding: .25rem .35rem;
+      width: 100%; margin: .75rem 0 0; padding: .25rem .35rem;
       border: none; background: transparent; color: rgba(255,120,150,.62);
       font: inherit; font-size: .72rem; text-decoration: underline; cursor: pointer;
     }
@@ -120,11 +137,14 @@
       display: none;
     }
     @media (max-width: 1199px) {
-      .post-edit-desktopMedia, .post-edit-desktopForm { padding: 0 1rem; }
-      .post-edit-desktopMedia { display: flex; flex-direction: column; gap: 1rem; }
+      .post-edit-desktopMedia, .edit-card, .post-edit-desktopForm { margin: 0 1rem; }
       .inline-save { display: none; }
       .sticky-save { display: block; }
       .hero { border-radius: 0 0 24px 24px; max-height: none; aspect-ratio: auto; min-height: 280px; }
+      .edit-card { padding: .85rem 1.1rem; }
+      .edit-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+      .edit-actions { display: none; }
+      .edit-card.open .edit-actions { display: block; }
       .edit-actions .item {
         display: flex; justify-content: space-between; padding: 14px 0;
         border-top: 1px solid rgba(255,255,255,.12); font-weight: 700;
@@ -158,18 +178,21 @@
     <div class="post-edit-desktopMedia" data-testid="hero-col">
       <div class="hero">
         <div class="chip">Traveling</div>
-        <div class="title">Edit my dream — visual harness v2</div>
+        <div class="title">Edit my dream — visual harness v3</div>
       </div>
-      <div class="edit-card" data-testid="edit-rollup">
+    </div>
+    <div class="edit-card open" data-testid="edit-rollup" id="editCard">
+      <div class="edit-header" id="editToggle">
         <div class="eyebrow">I WANT TO EDIT...</div>
-        <div class="edit-actions" style="margin-top:.5rem">
-          <div class="item"><span>headline</span><span>›</span></div>
-          <div class="item"><span>description</span><span>›</span></div>
-          <div class="item"><span>category</span><span>›</span></div>
-          <div class="item"><span>subcategory</span><span>›</span></div>
-          <div class="item"><span>deadline</span><span>›</span></div>
-          <div class="item"><span>photos</span><span>›</span></div>
-        </div>
+        <span>⌃</span>
+      </div>
+      <div class="edit-actions">
+        <div class="item"><span>headline</span><span>›</span></div>
+        <div class="item"><span>description</span><span>›</span></div>
+        <div class="item"><span>category</span><span>›</span></div>
+        <div class="item"><span>subcategory</span><span>›</span></div>
+        <div class="item"><span>deadline</span><span>›</span></div>
+        <div class="item"><span>photos</span><span>›</span></div>
       </div>
     </div>
     <div class="post-edit-desktopForm" data-testid="form-col">
@@ -220,16 +243,25 @@
     function paintVp() {
       const form = document.querySelector('[data-testid=form-col]');
       const hero = document.querySelector('[data-testid=hero-col]');
+      const edit = document.querySelector('[data-testid=edit-rollup]');
       const card = document.querySelector('.topup-card');
+      const page = document.querySelector('[data-testid=edit-harness]');
+      const areas = getComputedStyle(page).gridTemplateAreas;
       vp.textContent = window.innerWidth + '×' + window.innerHeight +
         ' | sidebar=' + Math.round(form.getBoundingClientRect().width) + 'px' +
         ' | topAlignΔ=' + Math.round(
           hero.getBoundingClientRect().top - form.getBoundingClientRect().top
         ) +
-        ' | cardH=' + Math.round(card.getBoundingClientRect().height) + 'px';
+        ' | editW=' + Math.round(edit.getBoundingClientRect().width) + 'px' +
+        ' | cardH=' + Math.round(card.getBoundingClientRect().height) + 'px' +
+        (areas && areas !== 'none' ? ' | areas=ok' : '');
     }
     paintVp();
     window.addEventListener('resize', paintVp);
+    document.getElementById('editToggle').onclick = () => {
+      document.getElementById('editCard').classList.toggle('open');
+      paintVp();
+    };
 
     const phrase = 'I want to delete this dream';
     const input = document.getElementById('confirmInput');

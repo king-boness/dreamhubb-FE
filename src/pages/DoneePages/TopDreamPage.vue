@@ -113,8 +113,9 @@
           </div>
         </div>
       </div>
+      </div>
 
-      <!-- Edit content lives under hero (desktop left column / mobile after hero) -->
+      <!-- Full-width edit layer (desktop row 2); after hero on mobile -->
       <section class="edit-rollup q-mt-lg" data-testid="dh-post-edit-rollup">
         <div class="edit-rollup_card" :class="{ 'edit-rollup_card--open': isEditRollupOpen }">
           <button type="button" class="edit-rollup_header" @click="isEditRollupOpen = !isEditRollupOpen">
@@ -152,9 +153,8 @@
           </q-slide-transition>
         </div>
       </section>
-      </div>
 
-      <!-- Right sidebar (desktop): financial / action card only -->
+      <!-- Top-up / actions (desktop top-right; after edit on mobile) -->
       <div class="post-edit-desktopForm">
       <section class="edit-topup-section q-px-md q-mt-md">
         <div class="post-edit-topupCard">
@@ -235,7 +235,7 @@
             </div>
           </div>
 
-          <!-- CTA: sticky on mobile; inline in desktop sidebar -->
+          <!-- CTA: sticky on mobile; inline in desktop top-up card -->
           <BottomCtaButton
             class="post-edit-saveCta"
             :label="t('posts.edit.saveChanges')"
@@ -631,11 +631,14 @@
 
   @media (min-width: 1200px) {
     &.post-edit-page--editMode {
+      // V3: top dashboard (hero | top-up) + full-width edit row
       display: grid;
-      // ~65% / 35% functional split; sidebar stays compact
-      grid-template-columns: minmax(0, 1.65fr) minmax(22.5rem, 0.85fr); // 360px+
-      column-gap: 2.125rem; // 34px
-      row-gap: 0;
+      grid-template-columns: minmax(0, 1fr) minmax(23.75rem, 26.875rem); // ~380–430px
+      grid-template-areas:
+        "hero topup"
+        "edit edit";
+      column-gap: 1.875rem; // 30px
+      row-gap: 1.375rem; // 22px
       align-items: start;
       max-width: min(85rem, calc(100% - 3.5rem)); // ~1360px
       margin-left: auto;
@@ -644,10 +647,8 @@
       box-sizing: border-box;
 
       .post-edit-desktopMedia {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        grid-column: 1;
+        grid-area: hero;
+        display: block;
         min-width: 0;
         align-self: start;
 
@@ -658,62 +659,78 @@
           aspect-ratio: 16 / 9;
           max-height: min(32rem, 56vh);
         }
+      }
 
-        .edit-rollup {
-          padding: 0;
-          margin-top: 0 !important;
-        }
+      .edit-rollup {
+        grid-area: edit;
+        grid-column: 1 / -1;
+        padding: 0;
+        margin-top: 0 !important;
+        min-width: 0;
+      }
 
-        .edit-rollup_card {
-          // compact content card under hero — not a giant sidebar block
-          border-radius: 1rem;
-          padding: 0.85rem 1.1rem;
-        }
+      .edit-rollup_card {
+        border-radius: 1rem;
+        padding: 0 1.25rem;
+        // collapsed: compact full-width bar (~64–72px)
+        min-height: 4.25rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
 
-        .edit-rollup_list {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 0;
-          border-top: 1px solid rgba(255, 255, 255, 0.18);
-        }
-
-        .edit-rollup_list-item {
-          justify-content: space-between;
-          padding: 0.85rem 0.65rem;
-          min-height: 2.75rem;
-
-          & + & {
-            border-top: none;
-          }
-
-          &:nth-child(odd) {
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding-right: 0.85rem;
-          }
-
-          &:nth-child(even) {
-            padding-left: 0.85rem;
-          }
-
-          &:nth-child(n + 3) {
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-          }
-        }
-
-        .edit-rollup_list-label {
-          font-size: 0.92rem;
-          text-align: left;
+        &.edit-rollup_card--open {
+          padding: 0.85rem 1.25rem 1rem;
+          justify-content: flex-start;
         }
       }
 
+      .edit-rollup_header {
+        min-height: 4.25rem;
+      }
+
+      .edit-rollup_card--open .edit-rollup_header {
+        min-height: auto;
+      }
+
+      .edit-rollup_list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .edit-rollup_list-item {
+        justify-content: space-between;
+        padding: 0.95rem 0.85rem;
+        min-height: 3rem;
+        border-top: none;
+
+        & + & {
+          border-top: none;
+        }
+
+        // vertical separators between columns 1|2 and 2|3
+        &:not(:nth-child(3n)) {
+          border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        // horizontal separators for row 2+
+        &:nth-child(n + 4) {
+          border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+      }
+
+      .edit-rollup_list-label {
+        font-size: 0.95rem;
+        text-align: left;
+      }
+
       .post-edit-desktopForm {
-        // No massive outer bordered box — only the compact top-up card
+        grid-area: topup;
         display: block;
-        grid-column: 2;
         min-width: 0;
         align-self: start;
-        position: sticky;
-        top: 1.75rem;
+        position: static; // V3: no sticky — top row is one dashboard
         background: transparent;
         border: none;
         border-radius: 0;
@@ -733,18 +750,18 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 1rem;
         box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
-        padding: 1rem 1.1rem 1.05rem;
+        padding: 0.9rem 1rem 0.95rem;
         backdrop-filter: blur(12px);
       }
 
       .topup-card {
-        margin-top: 0.65rem;
-        margin-bottom: 0.75rem;
+        margin-top: 0.55rem;
+        margin-bottom: 0.65rem;
         box-shadow: none;
       }
 
       .topup-row {
-        padding: 0.7rem 0.85rem;
+        padding: 0.65rem 0.8rem;
       }
 
       .tokens-section {
@@ -752,12 +769,12 @@
       }
 
       .tokens-slider {
-        margin-top: 0.65rem !important;
+        margin-top: 0.55rem !important;
       }
 
       .tokens-funds {
-        margin-top: 0.35rem;
-        margin-bottom: 0.85rem;
+        margin-top: 0.3rem;
+        margin-bottom: 0.7rem;
       }
 
       .post-edit-hero-placeholder {
@@ -773,7 +790,7 @@
       }
 
       .post-edit-deleteLink {
-        margin: 0.85rem 0 0;
+        margin: 0.75rem 0 0;
         min-height: auto;
         padding: 0.25rem 0.35rem;
         font-size: 0.72rem;
