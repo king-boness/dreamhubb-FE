@@ -25,7 +25,7 @@
       <input
         ref="uploadInput"
         type="file"
-        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp"
+        :accept="fileAccept"
         class="uploadImg-hiddenInput"
         aria-hidden="true"
         tabindex="-1"
@@ -196,10 +196,16 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUpload, type UploadedImage } from "src/composables/useUpload";
 import { useImagePickMenu } from "src/composables/useImagePickMenu";
+import { notifyError } from "src/utils/notify";
+import {
+  POST_CREATE_ACCEPT,
+  POST_CREATE_MAX_IMAGES,
+  filterValidImageFilesAtPick
+} from "src/utils/postCreateImageContract";
 
 const { t } = useI18n();
 
@@ -217,6 +223,11 @@ const props = withDefaults(
   {
     localOnly: false
   }
+);
+
+/** Post-create local picks use the canonical accept list (rejects HEIC/AVIF in picker when possible). */
+const fileAccept = computed(() =>
+  props.localOnly ? POST_CREATE_ACCEPT : "image/jpeg,image/jpg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp"
 );
 
 const emit = defineEmits<{
@@ -256,23 +267,32 @@ const dragOver = () => {
 };
 
 const drop = async (e: DragEvent) => {
-  let status = true;
   const files = Array.from(e.dataTransfer?.files || []);
-  if (e && files) {
-    files.forEach((file) => {
-      if (file.type.startsWith("image") === false) status = false;
-    });
-    if (status === true) {
-      if (props.max && files.length + uploadedImages.value.length > props.max) {
-        error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
-      } else {
-        await handleUpload(files);
-      }
-    } else {
-      error.value = props.fileError || t("common.errors.uploadInvalidType");
-    }
+  if (files.length > 0) {
+    await handleUpload(files);
   }
   dropped.value = 0;
+};
+
+const rejectPickError = (err: {
+  messageKey: string;
+  fallbackMessage: string;
+}) => {
+  const maxN = props.max ?? POST_CREATE_MAX_IMAGES;
+  const fallback =
+    err.messageKey === "posts.maxPhotos"
+      ? props.maxError || t("posts.upload.maxFiles", { n: maxN }) || t("posts.maxPhotos", { n: maxN })
+      : props.fileError || err.fallbackMessage;
+  error.value = fallback;
+  notifyError(
+    {
+      kind: "validation",
+      messageKey: err.messageKey,
+      fallbackMessage: fallback,
+      retryable: false
+    },
+    { position: "top" }
+  );
 };
 
 const emitCurrent = () => {
@@ -284,8 +304,19 @@ const emitCurrent = () => {
 };
 
 const handleUpload = async (files: File[]) => {
-  if (props.max && uploadedImages.value.length + files.length > props.max) {
-    error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
+  const maxImages = props.max ?? POST_CREATE_MAX_IMAGES;
+  const { accepted, error: pickError } = filterValidImageFilesAtPick(
+    files,
+    uploadedImages.value.length,
+    maxImages
+  );
+
+  if (pickError) {
+    rejectPickError(pickError);
+  }
+
+  if (accepted.length === 0) {
+    if (uploadInput.value) uploadInput.value.value = "";
     return;
   }
 
@@ -295,8 +326,7 @@ const handleUpload = async (files: File[]) => {
   try {
     if (props.localOnly) {
       // Canonical post-create contract: File[] + local preview URLs (BE uploads on create).
-      for (const file of files) {
-        if (!file.type.startsWith("image/")) continue;
+      for (const file of accepted) {
         const previewUrl = URL.createObjectURL(file);
         localObjectUrls.value.push(previewUrl);
         uploadedImages.value.push({
@@ -308,7 +338,7 @@ const handleUpload = async (files: File[]) => {
       emitCurrent();
     } else {
       const folder = props.folder || "uploads";
-      const uploaded = await uploadMultipleImages(files, folder);
+      const uploaded = await uploadMultipleImages(accepted, folder);
       uploadedImages.value.push(...uploaded);
       emitCurrent();
     }
@@ -327,12 +357,6 @@ const handleUpload = async (files: File[]) => {
 const previewImgs = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = Array.from(target.files || []);
-
-  if (props.max && files.length + uploadedImages.value.length > props.max) {
-    error.value = props.maxError || t("posts.upload.maxFiles", { n: props.max });
-    return;
-  }
-
   await handleUpload(files);
 };
 
